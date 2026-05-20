@@ -1,4 +1,4 @@
-import { runConciergeGemini } from "./lib/concierge-gemini";
+import { normalizeGeminiApiKey, runConciergeGemini } from "./lib/concierge-gemini";
 import {
   assertAllowedOrigin,
   corsHeadersFor,
@@ -40,7 +40,7 @@ export default async function handler(request: Request): Promise<Response> {
     const { mode, message, history, signal, market } = validateConciergeRequest(raw);
 
     const result = await runConciergeGemini({
-      apiKey: process.env.GEMINI_API_KEY,
+      apiKey: normalizeGeminiApiKey(process.env.GEMINI_API_KEY),
       mode,
       message,
       history,
