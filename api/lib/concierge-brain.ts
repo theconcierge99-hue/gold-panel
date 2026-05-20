@@ -184,7 +184,53 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "scalp",
     "breakout trade",
   ],
-  general: [],
+  general: [
+    "general",
+    "umum",
+    "pengetahuan",
+    "knowledge",
+    "history",
+    "sejarah",
+    "science",
+    "sains",
+    "geography",
+    "geografi",
+    "who is",
+    "what is",
+    "apa itu",
+    "siapa",
+    "explain",
+    "jelaskan",
+    "define",
+    "definisi",
+    "meaning",
+    "arti",
+    "culture",
+    "budaya",
+    "politics",
+    "politik",
+    "health",
+    "kesehatan",
+    "climate",
+    "iklim",
+    "education",
+    "pendidikan",
+    "philosophy",
+    "filosofi",
+    "law",
+    "hukum",
+    "religion",
+    "agama",
+    "sport",
+    "olahraga",
+    "art",
+    "seni",
+    "music",
+    "musik",
+    "film",
+    "book",
+    "novel",
+  ],
 };
 
 const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
@@ -238,8 +284,12 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Deliver a complete trade framework anchored to MULTI-SOURCE live prices (Binance mark, indices, headlines).
 - Always specify: timeframe, bias (long/short/neutral), conviction (low/med/high).`,
 
-  general: `GENERAL INTELLIGENCE:
-- Classify question, pick 1–2 primary lenses, answer with structured bullets in prose paragraphs.`,
+  general: `GENERAL KNOWLEDGE PLAYBOOK:
+- Answer any topic: history, science, culture, geography, society, technology trends, law, health basics, sports, arts — not only markets.
+- Lead with a direct answer; use GENERAL KNOWLEDGE INTELLIGENCE (Wikipedia, DuckDuckGo, world news) when provided — cite sources.
+- Separate facts from interpretation; say when data is thin or disputed.
+- If the question also touches markets, bridge to the market intelligence block briefly.
+- For "how/why" questions: mechanism first, then examples, then implications.`,
 };
 
 /** Core trading-plan methodology — applied when user asks for trades or analysis implies actionable setup */
@@ -286,10 +336,17 @@ export function detectTopics(message: string): ConciergeTopic[] {
   const t = message.toLowerCase();
   const hits: ConciergeTopic[] = [];
   for (const topic of Object.keys(TOPIC_KEYWORDS) as ConciergeTopic[]) {
-    if (topic === "general") continue;
     if (TOPIC_KEYWORDS[topic].some((kw) => t.includes(kw))) hits.push(topic);
   }
-  return hits.length ? [...new Set(hits)].slice(0, 3) : ["general"];
+  const marketTopics: ConciergeTopic[] = [
+    "macro", "micro", "technical", "liquidation", "technology",
+    "geopolitics", "equities", "crypto", "defi", "strategy",
+  ];
+  const hasMarket = hits.some((h) => marketTopics.includes(h));
+  if (!hits.length || (!hasMarket && hits.length <= 2)) {
+    if (!hits.includes("general")) hits.unshift("general");
+  }
+  return [...new Set(hits)].slice(0, 3);
 }
 
 export function wantsImage(message: string): boolean {
@@ -338,7 +395,7 @@ export function buildConciergeSystemPrompt(options: {
 
   return `You are Concierge — Chief Market Strategist of Executive Lounge (private terminal). You combine research desk rigor with actionable trade construction.
 
-MISSION: Understand every question in any language; answer precisely what was asked with institutional rigor and trading plans when markets are discussed.
+MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). Answer precisely in the user's language.
 
 ${LANGUAGE_AND_INTENT_RULES}
 
@@ -354,7 +411,7 @@ ${RESPONSE_STRUCTURE}
 RULES:
 1. Language: follow LANGUAGE & QUESTION FIDELITY above — never ignore the user's language or question scope.
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
-3. MULTI-SOURCE MARKET INTELLIGENCE below is authoritative — cite figures with source names; anchor levels to Binance mark ± structure.
+3. MULTI-SOURCE MARKET INTELLIGENCE + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Wikipedia, BBC, NPR, etc.); anchor trade levels to Binance mark ± structure.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
 5. Trading plans are illustrative frameworks, not personalized financial advice.
 6. Think step-by-step internally: parse question → language → direct answer → data → plan → risks.

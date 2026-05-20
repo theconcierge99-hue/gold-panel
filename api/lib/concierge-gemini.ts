@@ -7,6 +7,10 @@ import {
   type MarketTick,
 } from "./concierge-brain";
 import {
+  fetchGeneralKnowledgeSnapshot,
+  formatGeneralKnowledgeForPrompt,
+} from "./general-knowledge";
+import {
   fetchLiveMarketSnapshot,
   formatLiveMarketForPrompt,
   type LiveMarketSnapshot,
@@ -164,14 +168,21 @@ function wrapHtmlParagraphs(reply: string): string {
   return `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
 }
 
-async function resolveLiveContext(
+async function resolveIntelligenceContext(
   market: MarketTick[],
+  userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
-): Promise<{ liveBlock: string; ticks: MarketTick[]; snapshot: LiveMarketSnapshot }> {
-  const snapshot = liveSnapshot ?? (await fetchLiveMarketSnapshot());
-  const liveBlock = formatLiveMarketForPrompt(snapshot);
+): Promise<{ intelBlock: string; ticks: MarketTick[]; snapshot: LiveMarketSnapshot }> {
+  const [snapshot, general] = await Promise.all([
+    liveSnapshot ? Promise.resolve(liveSnapshot) : fetchLiveMarketSnapshot(),
+    fetchGeneralKnowledgeSnapshot(userMessage),
+  ]);
+  const intelBlock = [
+    formatLiveMarketForPrompt(snapshot),
+    formatGeneralKnowledgeForPrompt(general),
+  ].join("\n\n");
   const ticks = snapshot.ticks.length ? snapshot.ticks : market;
-  return { liveBlock, ticks, snapshot };
+  return { intelBlock, ticks, snapshot };
 }
 
 export async function runConciergeGemini(options: {
@@ -196,7 +207,11 @@ export async function runConciergeGemini(options: {
   const { message, history = [], signal, market = [] } = options;
   const topics = detectTopics(message);
   const requireTradingPlan = wantsTradingPlan(message, topics);
-  const { liveBlock, ticks, snapshot } = await resolveLiveContext(market, options.liveSnapshot);
+  const { intelBlock, ticks, snapshot } = await resolveIntelligenceContext(
+    market,
+    message,
+    options.liveSnapshot,
+  );
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
   const mode =
     options.mode === "image" || (options.mode === "chat" && wantsImage(message))
@@ -239,7 +254,7 @@ export async function runConciergeGemini(options: {
     const systemPrompt = buildConciergeSystemPrompt({
       topics,
       market: ticks,
-      liveMarketBlock: liveBlock,
+      liveMarketBlock: intelBlock,
       imageMode: true,
       requireTradingPlan,
     });
@@ -277,7 +292,7 @@ export async function runConciergeGemini(options: {
   const systemPrompt = buildConciergeSystemPrompt({
     topics,
     market: ticks,
-    liveMarketBlock: liveBlock,
+    liveMarketBlock: intelBlock,
     requireTradingPlan,
   });
   let reply = await geminiGenerateText(apiKey, {
