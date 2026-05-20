@@ -235,7 +235,7 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Compare AMM vs orderbook, restaking risks, stablecoin depeg vectors.`,
 
   strategy: `TRADING STRATEGY PLAYBOOK:
-- Deliver a complete trade framework anchored to LIVE MARKET DATA prices (not round fictions).
+- Deliver a complete trade framework anchored to MULTI-SOURCE live prices (Binance mark, indices, headlines).
 - Always specify: timeframe, bias (long/short/neutral), conviction (low/med/high).`,
 
   general: `GENERAL INTELLIGENCE:
@@ -268,7 +268,7 @@ Rules for plans:
 
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (every market answer):
 1. <p>Executive summary — direct answer in 2–3 sentences.</p>
-2. <p>Evidence — cite live data (price, 24h change, funding, OI, L/S, taker flow).</p>
+2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, DeFi TVL, headlines from CoinDesk/Bloomberg/Reuters when relevant).</p>
 3. <p>Implications — what it means for positioning and next 24–72h regime.</p>
 4. <p>Trading plan block — use TRADING PLAN format above (required for strategy/technical/crypto/liquidation topics, or when user asks price direction).</p>
 5. <p>Optional: one clarifying question if timeframe or asset unclear.</p>`;
@@ -343,7 +343,7 @@ ${RESPONSE_STRUCTURE}
 RULES:
 1. Match the user's language (Indonesian or English).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
-3. LIVE MARKET DATA below is authoritative — anchor every level in the plan to mark price ± structure.
+3. MULTI-SOURCE MARKET INTELLIGENCE below is authoritative — cite figures with source names; anchor levels to Binance mark ± structure.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
 5. Trading plans are illustrative frameworks, not personalized financial advice.
 6. Think step-by-step internally: regime → positioning → levels → plan → risks.

@@ -1,4 +1,16 @@
 import type { MarketTick } from "./concierge-brain";
+import {
+  fetchBtcNetwork,
+  fetchCoinGeckoGlobal,
+  fetchDefiLlama,
+  fetchFearGreed,
+  fetchMarketHeadlines,
+  type BtcNetworkContext,
+  type DefiContext,
+  type GlobalCryptoContext,
+  type NewsHeadline,
+  type SentimentContext,
+} from "./market-sources";
 
 const FETCH_MS = 4_500;
 
@@ -23,6 +35,11 @@ export type LiveMarketSnapshot = {
   ticks: MarketTick[];
   derivatives: DerivativeSnap[];
   positioning: PositioningSnap[];
+  globalCrypto?: GlobalCryptoContext | null;
+  sentiment?: SentimentContext | null;
+  defi?: DefiContext | null;
+  btcNetwork?: BtcNetworkContext | null;
+  headlines: NewsHeadline[];
   sources: string[];
 };
 
@@ -194,69 +211,151 @@ async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTic
   if (!Number.isFinite(price) || !Number.isFinite(prev) || prev === 0) return null;
 
   const chg = ((price! - prev!) / prev!) * 100;
-  const decimals = label === "DXY" ? 2 : 0;
+  const pointLabels = new Set(["DXY", "VIX"]);
+  const decimals = pointLabels.has(label) ? 2 : 0;
   return {
     symbol: label,
-    price: label === "DXY" ? price!.toFixed(2) : fmtUsd(price!, decimals),
+    price: pointLabels.has(label) ? price!.toFixed(2) : fmtUsd(price!, decimals),
     change: fmtPct(chg),
   };
 }
 
-/** Server-side live feed — Binance (crypto + perps) + Yahoo (SPX, DXY proxy) */
+/** Multi-source live intelligence — exchange, macro, DeFi, sentiment, institutional headlines */
 export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
-  const [spot, derivs, positioning, spx, dxy] = await Promise.all([
+  const [
+    spot,
+    derivs,
+    positioning,
+    spx,
+    dxy,
+    vix,
+    ndx,
+    gold,
+    oil,
+    globalCrypto,
+    sentiment,
+    defi,
+    btcNetwork,
+    headlines,
+  ] = await Promise.all([
     binanceSpot(),
     binanceFutures(),
     binancePositioningAll(),
     yahooQuote("^GSPC", "SPX"),
     yahooQuote("DX-Y.NYB", "DXY"),
+    yahooQuote("^VIX", "VIX"),
+    yahooQuote("^IXIC", "NDX"),
+    yahooQuote("GC=F", "GOLD"),
+    yahooQuote("CL=F", "OIL"),
+    fetchCoinGeckoGlobal(),
+    fetchFearGreed(),
+    fetchDefiLlama(),
+    fetchBtcNetwork(),
+    fetchMarketHeadlines(2),
   ]);
 
   const ticks: MarketTick[] = [...spot];
-  if (spx) ticks.push(spx);
-  if (dxy) ticks.push(dxy);
+  for (const t of [spx, dxy, vix, ndx, gold, oil]) {
+    if (t) ticks.push(t);
+  }
 
   const sources: string[] = [];
-  if (spot.length) sources.push("Binance spot");
+  if (spot.length) sources.push("Binance");
   if (derivs.length) sources.push("Binance futures");
-  if (positioning.length) sources.push("Binance positioning (L/S, taker flow)");
-  if (spx || dxy) sources.push("Yahoo Finance");
+  if (positioning.length) sources.push("Binance positioning");
+  if (spx || dxy || vix || ndx || gold || oil) sources.push("Yahoo Finance");
+  if (globalCrypto) sources.push("CoinGecko");
+  if (sentiment) sources.push("Alternative.me Fear & Greed");
+  if (defi) sources.push("DeFi Llama");
+  if (btcNetwork) sources.push("Mempool.space");
+  if (headlines.length) {
+    const pubs = [...new Set(headlines.map((h) => h.source))];
+    sources.push(`Headlines (${pubs.join(", ")})`);
+  }
 
   return {
     fetchedAt: new Date().toISOString(),
     ticks,
     derivatives: derivs,
     positioning,
+    globalCrypto,
+    sentiment,
+    defi,
+    btcNetwork,
+    headlines,
     sources,
   };
 }
 
 export function formatLiveMarketForPrompt(snapshot: LiveMarketSnapshot): string {
   const lines: string[] = [
-    `LIVE MARKET DATA (real-time feed, fetched ${snapshot.fetchedAt}, sources: ${snapshot.sources.join(", ")}):`,
-    "Use these figures as authoritative for price, 24h change, funding, and OI. Do not invent alternate spot prices.",
+    `MULTI-SOURCE MARKET INTELLIGENCE (fetched ${snapshot.fetchedAt}):`,
+    `Sources: ${snapshot.sources.join(" · ")}`,
+    "Rules: Quote numbers from this block. Attribute headlines by publisher (CoinDesk, Bloomberg, Reuters, etc.). Bloomberg/Reuters here = public RSS headlines, not Bloomberg Terminal. Cross-check crypto spot with Binance; macro with Yahoo.",
   ];
 
+  lines.push("\n[PRICES & INDICES]");
   for (const t of snapshot.ticks) {
-    lines.push(`- ${t.symbol} spot/index: ${t.price} (${t.change} 24h)`);
+    lines.push(`- ${t.symbol}: ${t.price} (${t.change} 24h)`);
   }
 
-  for (const d of snapshot.derivatives) {
+  if (snapshot.globalCrypto) {
+    const g = snapshot.globalCrypto;
     lines.push(
-      `- ${d.symbol} perps: mark ${d.markPrice}, funding ${d.fundingRate}, open interest ≈ ${d.openInterest}`,
+      "\n[CRYPTO MARKET — CoinGecko]",
+      `- Total market cap: ${g.totalMarketCapUsd} (${g.marketCapChange24h} 24h)`,
+      `- 24h volume: ${g.volume24hUsd} | BTC dominance: ${g.btcDominance}`,
     );
   }
 
-  for (const p of snapshot.positioning) {
+  if (snapshot.sentiment) {
     lines.push(
-      `- ${p.symbol} positioning (1h, top traders): long accounts ${p.topTraderLongPct}, short ${p.topTraderShortPct}, L/S ratio ${p.longShortRatio}, taker buy/sell ${p.takerBuySellRatio}`,
+      "\n[SENTIMENT — Crypto Fear & Greed]",
+      `- Index: ${snapshot.sentiment.index}/100 (${snapshot.sentiment.label})`,
     );
   }
 
-  if (snapshot.positioning.length || snapshot.derivatives.length) {
+  if (snapshot.defi) {
+    lines.push("\n[DEFI — DeFi Llama]", `- Total TVL: ${snapshot.defi.totalTvlUsd}`);
+    for (const p of snapshot.defi.topProtocols) {
+      lines.push(`- ${p.name}: TVL ${p.tvlUsd}`);
+    }
+  }
+
+  if (snapshot.btcNetwork) {
     lines.push(
-      "- Liquidation cluster framework (free data, not Coinglass): combine funding sign, OI size, top-trader L/S ratio, and taker flow. Positive funding + high long% = long liquidation risk below; negative funding + crowded shorts = short squeeze risk above. Give approximate zones as % from current mark.",
+      "\n[BTC NETWORK — Mempool.space]",
+      `- Recommended fees: fast ${snapshot.btcNetwork.fastFeeSatVb}, ~1h ${snapshot.btcNetwork.hourFeeSatVb}`,
     );
+  }
+
+  if (snapshot.derivatives.length) {
+    lines.push("\n[DERIVATIVES — Binance perps]");
+    for (const d of snapshot.derivatives) {
+      lines.push(
+        `- ${d.symbol}: mark ${d.markPrice}, funding ${d.fundingRate}, OI ≈ ${d.openInterest}`,
+      );
+    }
+  }
+
+  if (snapshot.positioning.length) {
+    lines.push("\n[POSITIONING — Binance top traders, 1h]");
+    for (const p of snapshot.positioning) {
+      lines.push(
+        `- ${p.symbol}: long ${p.topTraderLongPct}, short ${p.topTraderShortPct}, L/S ${p.longShortRatio}, taker ${p.takerBuySellRatio}`,
+      );
+    }
+    lines.push(
+      "- Liq framework: funding + OI + L/S + taker → approximate liq zones as % from mark (not Coinglass).",
+    );
+  }
+
+  if (snapshot.headlines.length) {
+    lines.push("\n[LATEST HEADLINES — narrative context]");
+    for (const h of snapshot.headlines) {
+      const when = h.published ? ` (${h.published})` : "";
+      lines.push(`- [${h.source}]${when}: ${h.title}`);
+    }
   }
 
   return lines.join("\n");

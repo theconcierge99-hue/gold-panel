@@ -28,6 +28,11 @@ export default async function handler(request: Request): Promise<Response> {
         ticks: ticksForUi(snapshot),
         derivatives: snapshot.derivatives,
         positioning: snapshot.positioning,
+        globalCrypto: snapshot.globalCrypto,
+        sentiment: snapshot.sentiment,
+        defi: snapshot.defi,
+        btcNetwork: snapshot.btcNetwork,
+        headlines: snapshot.headlines,
         sources: snapshot.sources,
       }),
       {
