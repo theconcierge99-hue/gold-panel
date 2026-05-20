@@ -23,6 +23,10 @@
   ],
   "rewrites": [
     {
+      "source": "/favicon.ico",
+      "destination": "/images/the-concierge-logo.png"
+    },
+    {
       "source": "/",
       "destination": "/executive-lounge.html"
     }
