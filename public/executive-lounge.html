@@ -367,12 +367,13 @@
         <div class="chat" id="chat"></div>
         <div class="composer">
           <div class="composer-row">
-            <textarea id="chatInput" placeholder="Ask about regimes, narratives, positioning…"></textarea>
+            <textarea id="chatInput" placeholder="Ask regimes, levels, trading plan, positioning…"></textarea>
             <button class="btn gold" onclick="sendMessage()">Send</button>
           </div>
           <div class="pills">
             <button class="pill" onclick="askPreset('Brief macro regime: DXY, rates, and impact on BTC/ETH')">Macro</button>
             <button class="pill" onclick="askPreset('Technical analysis BTC: key levels, RSI, invalidation')">Teknikal</button>
+            <button class="pill" onclick="askPreset('Trading plan BTC 48h: bias, entry, stop, targets, R:R, size — use live data')">Trading plan</button>
             <button class="pill" onclick="askPreset('Explain liquidation clusters for BTC perps and cascade risk')">Liq clusters</button>
             <button class="pill" onclick="askPreset('Geopolitics scenario: impact on oil, USD, and risk assets')">Geopolitik</button>
             <button class="pill" onclick="askPreset('Global equities vs crypto correlation this regime')">Saham global</button>
@@ -551,7 +552,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I am trained across <strong>macro/micro economics</strong>, <strong>technical analysis</strong>, <strong>liquidation clusters</strong>, <strong>geopolitics</strong>, <strong>global equities</strong>, <strong>crypto/DeFi</strong>, and <strong>technology</strong> — with data-aware framing tied to your terminal tape.</p><p>Ask in English or Indonesian. Request a <strong>chart visual</strong> anytime (e.g. "generate liquidation heatmap for BTC"). I structure answers: direct read → evidence → implication → what to watch.</p>`;
+    return `<p><strong>Good evening.</strong> I cover <strong>macro/micro</strong>, <strong>technical analysis</strong>, <strong>liquidation clusters</strong>, <strong>geopolitics</strong>, <strong>equities</strong>, <strong>crypto/DeFi</strong>, and <strong>technology</strong> — anchored to live tape and positioning data.</p><p>Every market answer can include a structured <strong>trading plan</strong> (bias, entry, stop, targets, R:R, size, catalysts). Ask in English or Indonesian, or tap <strong>Trading plan</strong> for a BTC setup. Chart visuals on request.</p>`;
   }
   function getMarketContext(){
     return Array.from(document.querySelectorAll('#ticker .tk')).map(el=>{

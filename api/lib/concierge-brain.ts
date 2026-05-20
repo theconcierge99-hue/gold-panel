@@ -8,6 +8,7 @@ export type ConciergeTopic =
   | "equities"
   | "crypto"
   | "defi"
+  | "strategy"
   | "general";
 
 export type MarketTick = { symbol: string; price: string; change: string };
@@ -157,6 +158,32 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "lst",
     "amm",
   ],
+  strategy: [
+    "trading plan",
+    "trade plan",
+    "rencana trading",
+    "strategi",
+    "strategy",
+    "entry",
+    "exit",
+    "stop loss",
+    "stop-loss",
+    "take profit",
+    "tp ",
+    "sl ",
+    "target",
+    "invalidation",
+    "position size",
+    "risk reward",
+    "r:r",
+    "risk/reward",
+    "setup",
+    "long ",
+    "short ",
+    "swing trade",
+    "scalp",
+    "breakout trade",
+  ],
   general: [],
 };
 
@@ -207,9 +234,44 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Protocol economics: TVL quality, fee revenue, token accrual, utilization, bad debt risk.
 - Compare AMM vs orderbook, restaking risks, stablecoin depeg vectors.`,
 
+  strategy: `TRADING STRATEGY PLAYBOOK:
+- Deliver a complete trade framework anchored to LIVE MARKET DATA prices (not round fictions).
+- Always specify: timeframe, bias (long/short/neutral), conviction (low/med/high).`,
+
   general: `GENERAL INTELLIGENCE:
 - Classify question, pick 1–2 primary lenses, answer with structured bullets in prose paragraphs.`,
 };
+
+/** Core trading-plan methodology — applied when user asks for trades or analysis implies actionable setup */
+const TRADING_PLAN_FRAMEWORK = `TRADING PLAN INTELLIGENCE (embed when user asks for direction, outlook, levels, or explicit trading plan):
+
+When the question is market-related OR topics include technical/crypto/liquidation/strategy, append a dedicated block titled "Trading plan" in the user's language.
+
+Use this exact structure inside one or two <p> tags (use <br/> for line breaks inside a paragraph):
+
+<strong>Trading plan — [ASSET] [TIMEFRAME]</strong><br/>
+• Bias: [long / short / neutral] — conviction [low/medium/high]<br/>
+• Thesis: [1 sentence linking macro/tech/positioning data]<br/>
+• Entry: [zone or trigger, e.g. retest of level X or break above Y]<br/>
+• Stop / invalidation: [price — what proves thesis wrong]<br/>
+• Targets: TP1 [price] (R:R ~1:X) | TP2 [price] optional<br/>
+• Risk: size [0.25–1% NAV illustrative] | leverage [conservative/moderate — avoid high lev if funding against you]<br/>
+• Positioning context: [funding, OI, L/S ratio from live data]<br/>
+• Catalysts to watch: [2–3 events or levels in next 24–72h]
+
+Rules for plans:
+- Derive entry/stop/targets as specific prices from current mark ± logical % or structure (prior swing, liq cluster zone).
+- If funding positive and long bias, note crowded-long risk; if negative funding and short bias, note squeeze risk.
+- Offer Plan B (alternate scenario) in one short clause if regime shifts.
+- Label clearly: "illustrative framework, not financial advice."
+- For neutral bias: describe range trade or wait-for-breakout plan instead of forcing direction.`;
+
+const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (every market answer):
+1. <p>Executive summary — direct answer in 2–3 sentences.</p>
+2. <p>Evidence — cite live data (price, 24h change, funding, OI, L/S, taker flow).</p>
+3. <p>Implications — what it means for positioning and next 24–72h regime.</p>
+4. <p>Trading plan block — use TRADING PLAN format above (required for strategy/technical/crypto/liquidation topics, or when user asks price direction).</p>
+5. <p>Optional: one clarifying question if timeframe or asset unclear.</p>`;
 
 export function detectTopics(message: string): ConciergeTopic[] {
   const t = message.toLowerCase();
@@ -228,14 +290,34 @@ export function wantsImage(message: string): boolean {
   );
 }
 
+export function wantsTradingPlan(message: string, topics: ConciergeTopic[]): boolean {
+  const t = message.toLowerCase();
+  if (
+    /\b(trading plan|trade plan|rencana trading|strategi trading|entry|stop loss|take profit|tp\/sl|setup trade|buka posisi|target harga|invalidasi)\b/.test(
+      t,
+    )
+  ) {
+    return true;
+  }
+  const planTopics: ConciergeTopic[] = [
+    "strategy",
+    "technical",
+    "crypto",
+    "liquidation",
+  ];
+  return topics.some((x) => planTopics.includes(x));
+}
+
 export function buildConciergeSystemPrompt(options: {
   topics: ConciergeTopic[];
   market?: MarketTick[];
   liveMarketBlock?: string;
   imageMode?: boolean;
+  requireTradingPlan?: boolean;
 }): string {
-  const { topics, market = [], liveMarketBlock = "", imageMode } = options;
+  const { topics, market = [], liveMarketBlock = "", imageMode, requireTradingPlan } = options;
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
+  const tradingBlock = requireTradingPlan ? `\n${TRADING_PLAN_FRAMEWORK}\n` : "";
 
   const marketBlock = liveMarketBlock
     ? `\n${liveMarketBlock}\n`
@@ -245,29 +327,31 @@ export function buildConciergeSystemPrompt(options: {
           .join("\n")}\n`
       : "";
 
-  return `You are Concierge — the intelligence officer of Executive Lounge (private terminal for macro, micro, markets, crypto, geopolitics, technology).
+  return `You are Concierge — Chief Market Strategist of Executive Lounge (private terminal). You combine research desk rigor with actionable trade construction.
 
-MISSION: Understand the user's question precisely. Answer with institutional rigor, data-aware reasoning, and actionable framing. You are trained across:
-- Macroeconomics & microeconomics
-- Technical analysis (all timeframes)
-- Liquidation clusters & derivatives positioning
-- Technology & AI × markets
-- Geopolitics & policy shocks
-- Global equities & crypto/DeFi
+MISSION: Precise answers + institutional analysis + concrete trading plans when markets are discussed.
 
-RESPONSE RULES:
+CORE COMPETENCIES:
+- Macroeconomics & microeconomics → regime and cross-asset implications
+- Technical analysis (all timeframes) → levels, momentum, structure
+- Liquidation clusters & derivatives → funding, OI, positioning skew
+- Trading plan design → entry, stop, targets, R:R, size, catalysts
+- Geopolitics, global equities, crypto/DeFi, technology themes
+
+${RESPONSE_STRUCTURE}
+
+RULES:
 1. Match the user's language (Indonesian or English).
-2. Output 3–5 HTML paragraphs in <p> tags only. Use <strong> for tickers, levels, metrics. Optional <em> for caveats.
-3. Structure every answer: (a) Direct answer, (b) Data/framework evidence, (c) Market implication, (d) What to watch next / invalidation.
-4. When LIVE MARKET DATA is provided below, quote those prices, funding rates, and OI in your answer.
-5. Only use illustrative ranges when live data is missing — label them "scenario framework".
-6. For 24h ahead crypto views: combine live price, funding, OI, and technical structure; give invalidation levels tied to live price.
-7. Not financial advice — scenario analysis for sophisticated participants.
-8. If question is vague, ask one sharp clarifying question at the end (single sentence).
+2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
+3. LIVE MARKET DATA below is authoritative — anchor every level in the plan to mark price ± structure.
+4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
+5. Trading plans are illustrative frameworks, not personalized financial advice.
+6. Think step-by-step internally: regime → positioning → levels → plan → risks.
+${tradingBlock}
 ${marketBlock}
-ACTIVE DOMAINS FOR THIS MESSAGE:
+ACTIVE DOMAINS:
 ${playbooks}
-${imageMode ? "\nIMAGE MODE: User also wants a visual. After your text analysis, you may describe the chart they need; image will be generated separately.\n" : ""}`;
+${imageMode ? "\nIMAGE MODE: Include analysis + trading plan in text; visual generated separately.\n" : ""}`;
 }
 
 export function buildImagePrompt(message: string, topics: ConciergeTopic[]): string {

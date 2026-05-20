@@ -3,6 +3,7 @@ import {
   buildImagePrompt,
   detectTopics,
   wantsImage,
+  wantsTradingPlan,
   type MarketTick,
 } from "./concierge-brain";
 import {
@@ -194,6 +195,7 @@ export async function runConciergeGemini(options: {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
   const { message, history = [], signal, market = [] } = options;
   const topics = detectTopics(message);
+  const requireTradingPlan = wantsTradingPlan(message, topics);
   const { liveBlock, ticks, snapshot } = await resolveLiveContext(market, options.liveSnapshot);
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
   const mode =
@@ -239,6 +241,7 @@ export async function runConciergeGemini(options: {
       market: ticks,
       liveMarketBlock: liveBlock,
       imageMode: true,
+      requireTradingPlan,
     });
     const analysis = await geminiGenerateText(apiKey, {
       systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -249,7 +252,10 @@ export async function runConciergeGemini(options: {
         })),
         message,
       ),
-      generationConfig: { temperature: 0.55, maxOutputTokens: 1200 },
+      generationConfig: {
+        temperature: 0.55,
+        maxOutputTokens: requireTradingPlan ? 2048 : 1200,
+      },
     });
 
     let images: string[] = [];
@@ -272,6 +278,7 @@ export async function runConciergeGemini(options: {
     topics,
     market: ticks,
     liveMarketBlock: liveBlock,
+    requireTradingPlan,
   });
   let reply = await geminiGenerateText(apiKey, {
     systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -282,7 +289,10 @@ export async function runConciergeGemini(options: {
       })),
       message,
     ),
-    generationConfig: { temperature: 0.55, maxOutputTokens: 1536 },
+    generationConfig: {
+      temperature: 0.55,
+      maxOutputTokens: requireTradingPlan ? 2048 : 1536,
+    },
   });
 
   return { reply: wrapHtmlParagraphs(reply), topics, ...meta };
