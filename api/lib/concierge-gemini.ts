@@ -1,22 +1,28 @@
+import {
+  buildConciergeSystemPrompt,
+  buildImagePrompt,
+  detectTopics,
+  wantsImage,
+  type MarketTick,
+} from "./concierge-brain";
+
 export type ChatTurn = { role: "user" | "model"; text: string };
 
-export type ConciergeMode = "chat" | "enhance";
-
-const SYSTEM_PROMPT = `You are Concierge, the onchain intelligence partner for Executive Lounge — a private intelligence terminal for macro, crypto, DeFi, Solana, and equities.
-
-Tone: institutional, analytical, calm. No hype or emojis.
-Use 2–4 short HTML paragraphs wrapped in <p> tags. Use <strong> for tickers and key levels (BTC, ETH, DXY, SOL, SPX).
-You may use <em> sparingly. Do not use markdown, code fences, or headings.
-Do not invent live prices unless the user provides them; speak in regimes and positioning language.
-If asked for financial advice, frame as scenario analysis, not personal advice.`;
+export type ConciergeMode = "chat" | "enhance" | "image";
 
 const ENHANCE_PROMPT = `Rewrite the signal copy for Executive Lounge. Return JSON only: {"title":"...","summary":"...","implication":"..."}.
 Keep institutional tone. Title under 120 chars. Summary 2–3 sentences. Implication 2 sentences on market impact.`;
 
-/** Stable Gemini models (see https://ai.google.dev/gemini-api/docs/models) */
-const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+const TEXT_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+const IMAGE_MODELS = [
+  "gemini-2.5-flash-image",
+  "gemini-3.1-flash-image-preview",
+  "gemini-2.0-flash-preview-image-generation",
+];
 
 type GeminiContent = { role: string; parts: { text: string }[] };
+
+type GeminiPart = { text?: string; inlineData?: { mimeType: string; data: string } };
 
 export function normalizeGeminiApiKey(raw: string | undefined): string {
   const key = (raw ?? "").trim();
@@ -41,7 +47,7 @@ export function normalizeGeminiApiKey(raw: string | undefined): string {
 }
 
 function buildContents(history: ChatTurn[], message: string): GeminiContent[] {
-  const contents: GeminiContent[] = history.slice(-8).map((t) => ({
+  const contents: GeminiContent[] = history.slice(-10).map((t) => ({
     role: t.role === "user" ? "user" : "model",
     parts: [{ text: t.text }],
   }));
@@ -63,41 +69,95 @@ function parseGeminiError(status: number, errText: string, model: string): strin
   return `Gemini ${model} (${status}): ${errText.slice(0, 160)}`;
 }
 
-async function geminiGenerate(
+function parseParts(parts: GeminiPart[] | undefined): { text: string; images: string[] } {
+  let text = "";
+  const images: string[] = [];
+  for (const p of parts ?? []) {
+    if (p.text) text += p.text;
+    if (p.inlineData?.data) {
+      const mime = p.inlineData.mimeType || "image/png";
+      images.push(`data:${mime};base64,${p.inlineData.data}`);
+    }
+  }
+  return { text: text.trim(), images };
+}
+
+async function geminiCall(
+  apiKey: string,
+  model: string,
+  payload: Record<string, unknown>,
+): Promise<{ text: string; images: string[] }> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    const fatal = parseGeminiError(res.status, errText, model);
+    if (fatal) throw new Error(fatal);
+    throw new Error(`${model}: ${res.status}`);
+  }
+
+  const data = (await res.json()) as {
+    candidates?: { content?: { parts?: GeminiPart[] } }[];
+  };
+  const parsed = parseParts(data.candidates?.[0]?.content?.parts);
+  if (!parsed.text && parsed.images.length === 0) {
+    throw new Error(`${model}: empty response`);
+  }
+  return parsed;
+}
+
+async function geminiGenerateText(
   apiKey: string,
   payload: Record<string, unknown>,
 ): Promise<string> {
   const errors: string[] = [];
-
-  for (const model of MODELS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      const fatal = parseGeminiError(res.status, errText, model);
-      if (fatal) throw new Error(fatal);
-      errors.push(`${model}: ${res.status}`);
-      continue;
+  for (const model of TEXT_MODELS) {
+    try {
+      const { text } = await geminiCall(apiKey, model, payload);
+      if (text) return text;
+      errors.push(`${model}: empty`);
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
     }
-
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
-    if (text) return text;
-    errors.push(`${model}: empty response`);
   }
-
   throw new Error(
-    errors.length
-      ? `No Gemini model available (${errors.join("; ")}). Check API key and billing at Google AI Studio.`
-      : "Gemini request failed",
+    errors.length ? `No text model available (${errors.join("; ")})` : "Gemini request failed",
   );
+}
+
+async function geminiGenerateImage(
+  apiKey: string,
+  prompt: string,
+): Promise<{ images: string[]; caption: string }> {
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+  };
+  const errors: string[] = [];
+  for (const model of IMAGE_MODELS) {
+    try {
+      const result = await geminiCall(apiKey, model, payload);
+      if (result.images.length) {
+        return { images: result.images, caption: result.text || "Generated visual" };
+      }
+      errors.push(`${model}: no image in response`);
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  throw new Error(
+    `Image generation unavailable (${errors.join("; ")}). Your API key may need image-enabled models in Google AI Studio.`,
+  );
+}
+
+function wrapHtmlParagraphs(reply: string): string {
+  if (reply.includes("<p>")) return reply;
+  return `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
 }
 
 export async function runConciergeGemini(options: {
@@ -106,9 +166,20 @@ export async function runConciergeGemini(options: {
   message: string;
   history?: ChatTurn[];
   signal?: { title?: string; summary?: string };
-}): Promise<{ reply: string } | { title: string; summary: string; implication: string }> {
+  market?: MarketTick[];
+}): Promise<
+  | { reply: string; images?: string[]; topics?: string[] }
+  | { title: string; summary: string; implication: string }
+> {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
-  const { mode, message, history = [], signal } = options;
+  const { message, history = [], signal, market = [] } = options;
+  const topics = detectTopics(message);
+  const mode =
+    options.mode === "image" || (options.mode === "chat" && wantsImage(message))
+      ? "image"
+      : options.mode === "enhance"
+        ? "enhance"
+        : "chat";
 
   if (mode === "enhance") {
     const userText = [
@@ -120,7 +191,7 @@ export async function runConciergeGemini(options: {
       .filter(Boolean)
       .join("\n");
 
-    const raw = await geminiGenerate(apiKey, {
+    const raw = await geminiGenerateText(apiKey, {
       systemInstruction: { parts: [{ text: ENHANCE_PROMPT }] },
       contents: [{ role: "user", parts: [{ text: userText }] }],
       generationConfig: { temperature: 0.5, maxOutputTokens: 800 },
@@ -140,8 +211,42 @@ export async function runConciergeGemini(options: {
     };
   }
 
-  let reply = await geminiGenerate(apiKey, {
-    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+  if (mode === "image") {
+    const systemPrompt = buildConciergeSystemPrompt({
+      topics,
+      market,
+      imageMode: true,
+    });
+    const analysis = await geminiGenerateText(apiKey, {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: buildContents(
+        history.map((h) => ({
+          role: h.role,
+          text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
+        })),
+        message,
+      ),
+      generationConfig: { temperature: 0.55, maxOutputTokens: 1200 },
+    });
+
+    let images: string[] = [];
+    try {
+      const img = await geminiGenerateImage(apiKey, buildImagePrompt(message, topics));
+      images = img.images;
+    } catch {
+      /* image optional — analysis still returned */
+    }
+
+    return {
+      reply: wrapHtmlParagraphs(analysis),
+      images,
+      topics,
+    };
+  }
+
+  const systemPrompt = buildConciergeSystemPrompt({ topics, market });
+  let reply = await geminiGenerateText(apiKey, {
+    systemInstruction: { parts: [{ text: systemPrompt }] },
     contents: buildContents(
       history.map((h) => ({
         role: h.role,
@@ -149,14 +254,10 @@ export async function runConciergeGemini(options: {
       })),
       message,
     ),
-    generationConfig: { temperature: 0.65, maxOutputTokens: 1024 },
+    generationConfig: { temperature: 0.55, maxOutputTokens: 1536 },
   });
 
-  if (!reply.includes("<p>")) {
-    reply = `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
-  }
-
-  return { reply };
+  return { reply: wrapHtmlParagraphs(reply), topics };
 }
 
 export function parseConciergeBody(body: unknown): {
@@ -164,6 +265,7 @@ export function parseConciergeBody(body: unknown): {
   message?: string;
   history?: ChatTurn[];
   signal?: { title?: string; summary?: string };
+  market?: MarketTick[];
 } {
   if (body && typeof body === "object" && !Array.isArray(body)) {
     return body as ReturnType<typeof parseConciergeBody>;

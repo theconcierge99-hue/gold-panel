@@ -32,13 +32,15 @@ async function handleConcierge(
     const message = (parsed.message ?? "").trim();
     if (!message) return { status: 400, json: { error: "message is required" } };
 
-    const mode: ConciergeMode = parsed.mode === "enhance" ? "enhance" : "chat";
+    const mode: ConciergeMode =
+      parsed.mode === "enhance" ? "enhance" : parsed.mode === "image" ? "image" : "chat";
     const result = await runConciergeGemini({
       apiKey: apiKey!,
       mode,
       message,
       history: parsed.history ?? [],
       signal: parsed.signal,
+      market: parsed.market ?? [],
     });
     return { status: 200, json: result };
   } catch (e) {

@@ -37,13 +37,15 @@ export default async function handler(request: Request): Promise<Response> {
       return jsonResponse({ error: "message is required" }, 400);
     }
 
-    const mode: ConciergeMode = body.mode === "enhance" ? "enhance" : "chat";
+    const mode: ConciergeMode =
+      body.mode === "enhance" ? "enhance" : body.mode === "image" ? "image" : "chat";
     const result = await runConciergeGemini({
       apiKey: process.env.GEMINI_API_KEY,
       mode,
       message,
       history: body.history ?? [],
       signal: body.signal,
+      market: body.market ?? [],
     });
 
     return jsonResponse(result, 200);

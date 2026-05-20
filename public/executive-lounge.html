@@ -139,6 +139,8 @@
   .bubble{background:rgba(20,27,45,.7);border:1px solid var(--border);border-top:1px solid rgba(59,125,216,.4);padding:14px 16px;font-size:12.5px;line-height:1.65;color:var(--text-primary)}
   .bubble p{margin-bottom:9px} .bubble p:last-child{margin-bottom:0}
   .bubble strong{color:var(--gold);font-weight:400}
+  .bubble .conc-img{margin-top:12px;border:1px solid var(--border);max-width:100%;border-radius:4px;display:block}
+  .bubble .topic-tag{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-top:10px;display:block}
   .typing{display:flex;gap:5px;padding:6px 0}
   .typing span{width:5px;height:5px;border-radius:50%;background:var(--chrome);animation:tp 1.2s infinite}
   .typing span:nth-child(2){animation-delay:.18s}
@@ -369,10 +371,12 @@
             <button class="btn gold" onclick="sendMessage()">Send</button>
           </div>
           <div class="pills">
-            <button class="pill" onclick="askPreset('macro regime')">Macro regime</button>
-            <button class="pill" onclick="askPreset('defi narratives')">DeFi narratives</button>
-            <button class="pill" onclick="askPreset('create signal')">Create signal</button>
-            <button class="pill" onclick="askPreset('ai sector')">AI sector</button>
+            <button class="pill" onclick="askPreset('Brief macro regime: DXY, rates, and impact on BTC/ETH')">Macro</button>
+            <button class="pill" onclick="askPreset('Technical analysis BTC: key levels, RSI, invalidation')">Teknikal</button>
+            <button class="pill" onclick="askPreset('Explain liquidation clusters for BTC perps and cascade risk')">Liq clusters</button>
+            <button class="pill" onclick="askPreset('Geopolitics scenario: impact on oil, USD, and risk assets')">Geopolitik</button>
+            <button class="pill" onclick="askPreset('Global equities vs crypto correlation this regime')">Saham global</button>
+            <button class="pill" onclick="askPreset('Generate chart visual: BTC liquidation heatmap concept')">📊 Visual</button>
           </div>
         </div>
       </div>
@@ -547,12 +551,30 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> The tape is constructive but quiet. <strong>DXY</strong> trades 99.42 — its third consecutive close below 100, a level last sustained pre-2024. <strong>BTC</strong> holds above $104k with dealer gamma flat; <strong>ETH/BTC</strong> is grinding off its lows.</p><p>Three narratives are running in parallel: (1) dollar weakness rewriting the duration trade, (2) autonomous agent wallets now ~8% of DEX flow, (3) SOL validator yield compression. I can brief you on any of them, or build a signal off your current positioning.</p>`;
+    return `<p><strong>Good evening.</strong> I am trained across <strong>macro/micro economics</strong>, <strong>technical analysis</strong>, <strong>liquidation clusters</strong>, <strong>geopolitics</strong>, <strong>global equities</strong>, <strong>crypto/DeFi</strong>, and <strong>technology</strong> — with data-aware framing tied to your terminal tape.</p><p>Ask in English or Indonesian. Request a <strong>chart visual</strong> anytime (e.g. "generate liquidation heatmap for BTC"). I structure answers: direct read → evidence → implication → what to watch.</p>`;
   }
-  function addAi(html){
+  function getMarketContext(){
+    return Array.from(document.querySelectorAll('#ticker .tk')).map(el=>{
+      const sym=el.querySelector('.sym')?.textContent?.trim()||'';
+      const val=el.querySelector('.val')?.textContent?.trim()||'';
+      const chg=el.querySelector('.chg')?.textContent?.trim()||'';
+      return { symbol:sym, price:val, change:chg };
+    }).filter(m=>m.symbol);
+  }
+
+  function addAi(html, extra){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
-    wrap.innerHTML=`<div class="av">C</div><div class="bubble">${html}</div>`;
+    let inner=html;
+    if(extra?.topics?.length){
+      inner+=`<span class="topic-tag">Domains: ${extra.topics.join(' · ')}</span>`;
+    }
+    if(extra?.images?.length){
+      extra.images.forEach(src=>{
+        inner+=`<img class="conc-img" src="${src}" alt="Concierge visual" />`;
+      });
+    }
+    wrap.innerHTML=`<div class="av">C</div><div class="bubble">${inner}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
   }
   function addUser(text){
@@ -580,15 +602,24 @@
       return `<p><strong>AI × crypto convergence.</strong> The interesting datapoint is no longer adoption — it is reflexivity. Autonomous agent wallets now drive ~8% of DEX volume on Base and Arbitrum, with repeating, rule-driven signatures that the market is beginning to front-run. The marginal buyer is increasingly non-human, which compresses the timeline between thesis and price.</p><p>Two derivatives worth tracking: (1) compute-bound L2s capturing agent inference workloads, and (2) yield-bearing stablecoins becoming the default agent settlement asset. Both are early. Neither is priced in.</p>`;
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;
   }
-  async function sendMessage(){
+  function conciergePayload(message, mode){
+    return {
+      mode: mode || 'chat',
+      message,
+      history: window._chatHistory,
+      market: getMarketContext(),
+    };
+  }
+
+  async function sendMessage(forceMode){
     const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;
     addUser(v);inp.value='';addTyping();
     try{
-      const data=await callConcierge({ mode:'chat', message:v, history:window._chatHistory });
+      const data=await callConcierge(conciergePayload(v, forceMode));
       removeTyping();
-      addAi(data.reply);
+      addAi(data.reply, { topics:data.topics, images:data.images });
       window._chatHistory.push({ role:'user', text:v });
-      window._chatHistory.push({ role:'model', text:data.reply });
+      window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
       removeTyping();
       addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
@@ -602,16 +633,18 @@
 
   async function askPreset(q){
     showView('concierge');
+    const imageMode=/visual|gambar|grafik|chart/i.test(q);
     setTimeout(async ()=>{
       addUser(q);addTyping();
       try{
-        const data=await callConcierge({ mode:'chat', message:q, history:window._chatHistory });
+        const data=await callConcierge(conciergePayload(q, imageMode?'image':'chat'));
         removeTyping();
-        addAi(data.reply);
+        addAi(data.reply, { topics:data.topics, images:data.images });
         window._chatHistory.push({ role:'user', text:q });
-        window._chatHistory.push({ role:'model', text:data.reply });
+        window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){
         removeTyping();
+        addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
         addAi(respond(q));
       }
     },120);
