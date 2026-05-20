@@ -175,32 +175,63 @@
   .gmeta .who{flex:1;color:var(--chrome)}
   .gbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
 
-  /* CONCIERGE */
-  .concierge-wrap{display:flex;flex-direction:column;height:calc(100vh - 60px - 52px)}
-  .conc-head{padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:18px}
-  .conc-head .brand-text h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:26px;color:var(--text-primary)}
-  .conc-head .sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin-top:6px}
-  .chat{flex:1;overflow-y:auto;padding:6px 4px 18px;display:flex;flex-direction:column;gap:18px}
-  .msg{display:flex;gap:12px;max-width:78%;animation:fadeUp .25s ease-out}
-  .msg.ai .av{background:var(--ai-av-bg);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:14px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--gold-dim)}
-  .msg.user{align-self:flex-end;max-width:62%}
-  .msg.user .bubble{background:var(--user-bubble-bg);border:1px solid var(--user-bubble-border);color:var(--text-primary)}
-  .bubble{background:var(--bubble-bg);border:1px solid var(--border);border-top:1px solid var(--bubble-accent);padding:14px 16px;font-size:12.5px;line-height:1.65;color:var(--text-primary)}
-  .bubble p{margin-bottom:9px} .bubble p:last-child{margin-bottom:0}
-  .bubble strong{color:var(--gold);font-weight:400}
-  .bubble .conc-img{margin-top:12px;border:1px solid var(--border);max-width:100%;border-radius:4px;display:block}
-  .typing{display:flex;gap:5px;padding:6px 0}
-  .typing span{width:5px;height:5px;border-radius:50%;background:var(--chrome);animation:tp 1.2s infinite}
+  /* CONCIERGE — ChatGPT-style layout */
+  .app.concierge-mode{grid-template-columns:200px 1fr}
+  .app.concierge-mode aside.right{display:none}
+  main:has(#view-concierge.show){padding:0;overflow:hidden}
+
+  .concierge-shell{display:flex;flex-direction:column;height:calc(100vh - 60px);background:var(--bg);position:relative}
+  .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:flex-start;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
+  .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:default;text-align:left}
+  .conc-model img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.4);box-shadow:var(--logo-shadow);flex-shrink:0}
+  .conc-model-text{display:flex;flex-direction:column;gap:5px;line-height:1}
+  .conc-model-title{display:inline-flex;align-items:center;gap:8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text-primary);letter-spacing:.02em}
+  .conc-model .chev{font-size:11px;color:var(--text-muted);font-family:'Outfit',sans-serif}
+  .conc-model-sub{font-family:'Outfit',sans-serif;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
+
+  .conc-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .conc-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .25s}
+  .concierge-shell.has-chat .conc-hero{display:none}
+  .conc-greeting{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(28px,4vw,36px);color:var(--text-primary);letter-spacing:.01em;line-height:1.2;max-width:520px}
+  .conc-hero-hint{margin-top:12px;font-size:12.5px;color:var(--text-muted);max-width:400px;line-height:1.5}
+
+  .chat{display:none;flex:1;flex-direction:column;gap:24px;overflow-y:auto;padding:28px 24px 12px;max-width:768px;width:100%;margin:0 auto;scroll-behavior:smooth}
+  .concierge-shell.has-chat .chat{display:flex}
+  .msg{display:flex;flex-direction:column;gap:6px;animation:fadeUp .25s ease-out;width:100%}
+  .msg.ai{align-items:flex-start}
+  .msg.user{align-items:flex-end}
+  .msg .bubble{max-width:100%;font-size:14px;line-height:1.65}
+  .msg.ai .bubble{background:transparent;border:none;padding:0;color:var(--text-primary)}
+  .msg.user .bubble{background:var(--user-bubble-bg);border:1px solid var(--user-bubble-border);padding:12px 16px;border-radius:20px 20px 4px 20px;color:var(--text-primary)}
+  .msg.ai .bubble p{margin-bottom:10px}
+  .msg.ai .bubble p:last-child{margin-bottom:0}
+  .msg.ai .bubble strong{color:var(--gold);font-weight:400}
+  .msg.ai .bubble .conc-img{margin-top:12px;border:1px solid var(--border);max-width:100%;border-radius:8px;display:block}
+  .typing{display:flex;gap:5px;padding:4px 0}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--chrome);animation:tp 1.2s infinite}
   .typing span:nth-child(2){animation-delay:.18s}
   .typing span:nth-child(3){animation-delay:.36s}
   @keyframes tp{0%,80%,100%{opacity:.25}40%{opacity:1}}
-  .composer{border-top:1px solid var(--border);padding-top:16px;margin-top:8px}
-  .composer-row{display:flex;gap:10px}
-  .composer textarea{flex:1;background:var(--input-bg);border:1px solid var(--border);color:var(--text-primary);padding:11px 14px;font-family:'Outfit',sans-serif;font-size:12.5px;resize:none;height:46px;outline:none;transition:border-color .15s,background .25s}
-  .composer textarea:focus{border-color:var(--chrome)}
-  .pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .pill{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;padding:6px 11px;border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all .15s;background:transparent}
-  .pill:hover{border-color:var(--gold-dim);color:var(--gold)}
+
+  .conc-footer{flex-shrink:0;padding:0 24px 28px;max-width:768px;width:100%;margin:0 auto}
+  .conc-input-wrap{display:flex;align-items:flex-end;gap:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:26px;padding:8px 10px 8px 6px;box-shadow:0 8px 32px rgba(0,0,0,.18);transition:border-color .15s,box-shadow .15s}
+  html[data-theme="light"] .conc-input-wrap{box-shadow:0 4px 20px rgba(0,0,0,.06)}
+  .conc-input-wrap:focus-within{border-color:var(--chrome);box-shadow:0 8px 36px rgba(0,0,0,.22)}
+  .conc-icon-btn{flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--text-secondary);cursor:pointer;border-radius:50%;transition:background .15s,color .15s}
+  .conc-icon-btn:hover{background:var(--nav-active-bg);color:var(--text-primary)}
+  .conc-icon-btn:disabled{opacity:.35;cursor:not-allowed}
+  .conc-icon-btn svg{width:18px;height:18px}
+  #chatInput{flex:1;border:none;background:transparent;color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.45;padding:8px 4px;resize:none;min-height:24px;max-height:140px;outline:none}
+  #chatInput::placeholder{color:var(--text-muted)}
+  .conc-send-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;background:var(--text-primary);color:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s,transform .1s}
+  .conc-send-btn:hover{opacity:.88}
+  .conc-send-btn:active{transform:scale(.96)}
+  .conc-send-btn svg{width:18px;height:18px}
+
+  .conc-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+  .conc-chip{display:inline-flex;align-items:center;gap:6px;font-family:'Outfit',sans-serif;font-size:12.5px;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--gcard-bg);color:var(--text-secondary);cursor:pointer;transition:all .15s}
+  .conc-chip:hover{border-color:var(--gold-dim);color:var(--text-primary);background:var(--nav-active-bg)}
+  .conc-chip .ico{font-size:14px;line-height:1}
 
   /* PROFILE */
   .pcard{display:flex;gap:22px;align-items:center;border:1px solid var(--border);background:var(--gcard-bg);padding:24px;position:relative;overflow:hidden}
@@ -437,28 +468,41 @@
 
     <!-- CONCIERGE -->
     <section class="view" id="view-concierge">
-      <div class="concierge-wrap">
-        <div class="conc-head brand-mark">
-          <img class="brand-logo brand-logo--lg" src="/images/the-concierge-logo.png" alt="The Concierge" width="44" height="44" />
-          <div class="brand-text">
-            <h1>Concierge</h1>
-            <div class="sub">Your onchain intelligence partner</div>
+      <div class="concierge-shell" id="conciergeShell">
+        <div class="conc-topbar">
+          <div class="conc-model" aria-label="Concierge AI">
+            <img src="/images/the-concierge-logo.png" alt="The Concierge" width="44" height="44" />
+            <div class="conc-model-text">
+              <div class="conc-model-title">Concierge <span class="chev">▾</span></div>
+              <div class="conc-model-sub">Your Intelligence Partner</div>
+            </div>
           </div>
         </div>
-        <div class="chat" id="chat"></div>
-        <div class="composer">
-          <div class="composer-row">
-            <textarea id="chatInput" placeholder="Ask in any language — regimes, levels, trading plan…"></textarea>
-            <button class="btn gold" onclick="sendMessage()">Send</button>
+        <div class="conc-body">
+          <div class="conc-hero" id="concHero">
+            <h2 class="conc-greeting">What's on the agenda today?</h2>
+            <p class="conc-hero-hint">Markets, general knowledge, any language — live intelligence on demand.</p>
           </div>
-          <div class="pills">
-            <button class="pill" onclick="askPreset('Brief macro regime: DXY, rates, and impact on BTC/ETH')">Macro</button>
-            <button class="pill" onclick="askPreset('Technical analysis BTC: key levels, RSI, invalidation')">Teknikal</button>
-            <button class="pill" onclick="askPreset('Trading plan BTC 48h: bias, entry, stop, targets, R:R, size — use live data')">Trading plan</button>
-            <button class="pill" onclick="askPreset('Explain liquidation clusters for BTC perps and cascade risk')">Liq clusters</button>
-            <button class="pill" onclick="askPreset('Geopolitics scenario: impact on oil, USD, and risk assets')">Geopolitik</button>
-            <button class="pill" onclick="askPreset('Global equities vs crypto correlation this regime')">Saham global</button>
-            <button class="pill" onclick="askPreset('Generate chart visual: BTC liquidation heatmap concept')">📊 Visual</button>
+          <div class="chat" id="chat"></div>
+        </div>
+        <div class="conc-footer">
+          <div class="conc-input-wrap">
+            <button type="button" class="conc-icon-btn" title="Quick prompts" onclick="document.querySelector('.conc-suggestions')?.scrollIntoView({behavior:'smooth',block:'nearest'})" aria-label="Suggestions">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <textarea id="chatInput" rows="1" placeholder="Ask anything"></textarea>
+            <button type="button" class="conc-icon-btn" disabled title="Voice (coming soon)" aria-label="Voice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+            </button>
+            <button type="button" class="conc-send-btn" onclick="sendMessage()" aria-label="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
+          </div>
+          <div class="conc-suggestions">
+            <button type="button" class="conc-chip" onclick="askPreset('Trading plan BTC 48h: bias, entry, stop, targets, R:R — use live data')"><span class="ico">📊</span> Trading plan</button>
+            <button type="button" class="conc-chip" onclick="askPreset('Brief macro regime: DXY, rates, and impact on BTC/ETH')"><span class="ico">◇</span> Macro regime</button>
+            <button type="button" class="conc-chip" onclick="askPreset('Explain liquidation clusters for BTC perps and cascade risk')"><span class="ico">◎</span> Liq clusters</button>
+            <button type="button" class="conc-chip" onclick="askPreset('Generate chart visual: BTC liquidation heatmap concept')"><span class="ico">🖼</span> Create visual</button>
           </div>
         </div>
       </div>
@@ -789,13 +833,30 @@
   window.closeWalletModal = closeWalletModal;
   renderWalletUI();
 
+  function syncConciergeLayout(){
+    const shell=document.getElementById('conciergeShell');
+    const chat=document.getElementById('chat');
+    if(shell && chat) shell.classList.toggle('has-chat', chat.children.length > 0);
+  }
+  function autoResizeChatInput(){
+    const inp=document.getElementById('chatInput');
+    if(!inp) return;
+    inp.style.height='auto';
+    inp.style.height=Math.min(inp.scrollHeight,140)+'px';
+  }
+
   // VIEW SWITCHING
   function showView(v){
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
     const el=document.getElementById('view-'+v); if(el)el.classList.add('show');
     document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('active'));
     document.querySelectorAll('[data-nav="'+v+'"]').forEach(n=>n.classList.add('active'));
-    if(v==='concierge' && !window._chatInit){ window._chatInit=true; addAi(openingMessage()); }
+    document.querySelector('.app')?.classList.toggle('concierge-mode', v==='concierge');
+    if(v==='concierge'){
+      if(!window._chatInit){ window._chatInit=true; }
+      syncConciergeLayout();
+      setTimeout(()=>document.getElementById('chatInput')?.focus(), 80);
+    }
   }
 
   // TICKER PULSE
@@ -901,20 +962,23 @@
         inner+=`<img class="conc-img" src="${src}" alt="Concierge visual" />`;
       });
     }
-    wrap.innerHTML=`<div class="av">C</div><div class="bubble">${inner}</div>`;
+    wrap.innerHTML=`<div class="bubble">${inner}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
+    syncConciergeLayout();
   }
   function addUser(text){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg user';
     wrap.innerHTML=`<div class="bubble">${escapeHtml(text)}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
+    syncConciergeLayout();
   }
   function addTyping(){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';wrap.id='typing';
-    wrap.innerHTML=`<div class="av">C</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    wrap.innerHTML=`<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
+    syncConciergeLayout();
   }
   function removeTyping(){const e=document.getElementById('typing');if(e)e.remove()}
   function respond(q){
@@ -940,7 +1004,7 @@
 
   async function sendMessage(forceMode){
     const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;
-    addUser(v);inp.value='';addTyping();
+    addUser(v);inp.value='';autoResizeChatInput();addTyping();
     try{
       const data=await callConcierge(conciergePayload(v, forceMode));
       removeTyping();
@@ -997,9 +1061,11 @@
       updateImplication();
     }
   }
-  document.getElementById('chatInput').addEventListener('keydown',e=>{
+  const chatInp=document.getElementById('chatInput');
+  chatInp.addEventListener('keydown',e=>{
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}
   });
+  chatInp.addEventListener('input',autoResizeChatInput);
 </script>
 </body>
 </html>
