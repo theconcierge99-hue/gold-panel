@@ -176,9 +176,21 @@
   .gbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
 
   /* CONCIERGE — ChatGPT-style layout */
-  .app.concierge-mode{grid-template-columns:200px 1fr}
+  .app.concierge-mode{grid-template-columns:200px 1fr 260px}
   .app.concierge-mode aside.right{display:none}
   main:has(#view-concierge.show){padding:0;overflow:hidden}
+
+  aside.conc-sidebar{display:none;flex-direction:column;border-left:1px solid var(--border);background:var(--sidebar-bg);overflow:hidden;min-height:0}
+  .app.concierge-mode aside.conc-sidebar{display:flex}
+  .conc-new-chat{display:flex;align-items:center;gap:10px;margin:14px 14px 10px;padding:10px 14px;width:calc(100% - 28px);border:1px solid var(--border);border-radius:10px;background:var(--gcard-bg);color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+  .conc-new-chat:hover{border-color:var(--gold-dim);background:var(--nav-active-bg)}
+  .conc-new-chat svg{width:16px;height:16px;flex-shrink:0;color:var(--text-secondary)}
+  .conc-hist-h{font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--text-muted);padding:8px 16px 6px}
+  .conc-hist-list{flex:1;overflow-y:auto;padding:4px 8px 16px}
+  .conc-hist-item{display:block;width:100%;text-align:left;padding:10px 12px;border:none;border-radius:8px;background:transparent;color:var(--text-secondary);font-family:'Outfit',sans-serif;font-size:13px;line-height:1.35;cursor:pointer;transition:background .12s,color .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conc-hist-item:hover{background:var(--nav-active-bg);color:var(--text-primary)}
+  .conc-hist-item.active{background:var(--nav-active-bg);color:var(--text-primary)}
+  .conc-hist-empty{padding:12px 16px;font-size:12px;color:var(--text-muted);line-height:1.5}
 
   .concierge-shell{display:flex;flex-direction:column;height:calc(100vh - 60px);background:var(--bg);position:relative}
   .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:flex-start;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
@@ -193,7 +205,6 @@
   .conc-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .25s}
   .concierge-shell.has-chat .conc-hero{display:none}
   .conc-greeting{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(28px,4vw,36px);color:var(--text-primary);letter-spacing:.01em;line-height:1.2;max-width:520px}
-  .conc-hero-hint{margin-top:12px;font-size:12.5px;color:var(--text-muted);max-width:400px;line-height:1.5}
 
   .chat{display:none;flex:1;flex-direction:column;gap:24px;overflow-y:auto;padding:28px 24px 12px;max-width:768px;width:100%;margin:0 auto;scroll-behavior:smooth}
   .concierge-shell.has-chat .chat{display:flex}
@@ -481,7 +492,6 @@
         <div class="conc-body">
           <div class="conc-hero" id="concHero">
             <h2 class="conc-greeting">What's on the agenda today?</h2>
-            <p class="conc-hero-hint">Markets, general knowledge, any language — live intelligence on demand.</p>
           </div>
           <div class="chat" id="chat"></div>
         </div>
@@ -540,6 +550,15 @@
       <div class="guest"><div class="av av-g5">IY</div><span class="who">I. Yamamoto</span><span class="act">published</span><span class="ts">26m</span></div>
     </div>
 
+  </aside>
+
+  <aside class="conc-sidebar" id="concSidebar" aria-label="Chat history">
+    <button type="button" class="conc-new-chat" onclick="startNewChat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      New chat
+    </button>
+    <div class="conc-hist-h">Recents</div>
+    <div class="conc-hist-list" id="concHistList"></div>
   </aside>
 </div>
 
@@ -853,7 +872,8 @@
     document.querySelectorAll('[data-nav="'+v+'"]').forEach(n=>n.classList.add('active'));
     document.querySelector('.app')?.classList.toggle('concierge-mode', v==='concierge');
     if(v==='concierge'){
-      if(!window._chatInit){ window._chatInit=true; }
+      if(!window._chatInit){ window._chatInit=true; ensureConciergeSession(); }
+      else { renderConciergeHistory(); }
       syncConciergeLayout();
       setTimeout(()=>document.getElementById('chatInput')?.focus(), 80);
     }
@@ -896,7 +916,131 @@
   }
 
   // CHAT (Gemini via /api/concierge — Vercel Hobby serverless + local dev middleware)
+  const CONC_SESSIONS_KEY = 'el-concierge-sessions';
+  const CONC_CURRENT_KEY = 'el-concierge-current';
+  const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];
+  window._sessionMessages = [];
+  window._currentSessionId = null;
+
+  function genSessionId(){ return 's_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7); }
+  function loadAllSessions(){
+    try{
+      const raw = localStorage.getItem(CONC_SESSIONS_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    }catch{ return []; }
+  }
+  function saveAllSessions(list){
+    localStorage.setItem(CONC_SESSIONS_KEY, JSON.stringify(list.slice(0, CONC_MAX_SESSIONS)));
+  }
+  function sessionTitleFromText(text){
+    const t = text.replace(/\s+/g,' ').trim();
+    return t.length > 48 ? t.slice(0,48)+'…' : (t || 'New chat');
+  }
+  function persistCurrentSession(){
+    if(!window._currentSessionId) return;
+    const list = loadAllSessions();
+    const idx = list.findIndex(s=>s.id===window._currentSessionId);
+    const firstUser = window._sessionMessages.find(m=>m.role==='user');
+    const payload = {
+      id: window._currentSessionId,
+      title: firstUser ? sessionTitleFromText(firstUser.text) : 'New chat',
+      updatedAt: Date.now(),
+      messages: window._sessionMessages,
+    };
+    if(idx>=0) list[idx]=payload; else list.unshift(payload);
+    list.sort((a,b)=>b.updatedAt-a.updatedAt);
+    saveAllSessions(list);
+    renderConciergeHistory();
+  }
+  function renderConciergeHistory(){
+    const el = document.getElementById('concHistList');
+    if(!el) return;
+    const list = loadAllSessions().sort((a,b)=>b.updatedAt-a.updatedAt);
+    if(!list.length){
+      el.innerHTML='<div class="conc-hist-empty">No chats yet. Start a conversation or click New chat.</div>';
+      return;
+    }
+    el.innerHTML = list.map(s=>{
+      const active = s.id===window._currentSessionId ? ' active' : '';
+      const title = escapeHtml(s.title || 'New chat');
+      return `<button type="button" class="conc-hist-item${active}" data-id="${escapeHtml(s.id)}" title="${title}">${title}</button>`;
+    }).join('');
+    el.querySelectorAll('.conc-hist-item').forEach(btn=>{
+      btn.addEventListener('click', ()=>loadChatSession(btn.dataset.id));
+    });
+  }
+  function clearChatUI(){
+    const chat = document.getElementById('chat');
+    if(chat) chat.innerHTML = '';
+    window._chatHistory = [];
+    window._sessionMessages = [];
+    syncConciergeLayout();
+  }
+  function replaySessionMessages(messages){
+    const copy = JSON.parse(JSON.stringify(messages || []));
+    const chat = document.getElementById('chat');
+    if(chat) chat.innerHTML = '';
+    window._chatHistory = [];
+    window._sessionMessages = copy;
+    copy.forEach(m=>{
+      if(m.role==='user') addUser(m.text, false);
+      else if(m.role==='model') addAi(m.html || '<p>'+escapeHtml(m.text)+'</p>', { images: m.images }, false);
+    });
+    syncConciergeLayout();
+  }
+  function ensureConciergeSession(){
+    if(!window._currentSessionId){
+      window._currentSessionId = localStorage.getItem(CONC_CURRENT_KEY) || genSessionId();
+      localStorage.setItem(CONC_CURRENT_KEY, window._currentSessionId);
+    }
+    const list = loadAllSessions();
+    if(!list.find(s=>s.id===window._currentSessionId)){
+      list.unshift({ id: window._currentSessionId, title:'New chat', updatedAt: Date.now(), messages:[] });
+      saveAllSessions(list);
+    }
+    const cur = list.find(s=>s.id===window._currentSessionId);
+    if(cur?.messages?.length){
+      window._sessionMessages = JSON.parse(JSON.stringify(cur.messages));
+      replaySessionMessages(window._sessionMessages);
+      window._chatHistory = window._sessionMessages.map(m=>({
+        role: m.role==='user' ? 'user' : 'model',
+        text: m.role==='user' ? m.text : (m.text || stripTags(m.html||'')),
+      }));
+    }
+    renderConciergeHistory();
+  }
+  function startNewChat(){
+    persistCurrentSession();
+    window._currentSessionId = genSessionId();
+    localStorage.setItem(CONC_CURRENT_KEY, window._currentSessionId);
+    const list = loadAllSessions();
+    list.unshift({ id: window._currentSessionId, title:'New chat', updatedAt: Date.now(), messages:[] });
+    saveAllSessions(list);
+    clearChatUI();
+    renderConciergeHistory();
+    document.getElementById('chatInput')?.focus();
+  }
+  function loadChatSession(id){
+    if(id===window._currentSessionId) return;
+    persistCurrentSession();
+    const list = loadAllSessions();
+    const session = list.find(s=>s.id===id);
+    if(!session) return;
+    window._currentSessionId = id;
+    localStorage.setItem(CONC_CURRENT_KEY, id);
+    window._sessionMessages = JSON.parse(JSON.stringify(session.messages||[]));
+    replaySessionMessages(window._sessionMessages);
+    window._chatHistory = window._sessionMessages.map(m=>({
+      role: m.role==='user' ? 'user' : 'model',
+      text: m.role==='user' ? m.text : (m.text || stripTags(m.html||'')),
+    }));
+    renderConciergeHistory();
+    document.getElementById('chatInput')?.focus();
+  }
+  window.startNewChat = startNewChat;
+  window.loadChatSession = loadChatSession;
 
   async function callConcierge(payload){
     const res = await fetch('/api/concierge', {
@@ -953,24 +1097,31 @@
   refreshTicker();
   setInterval(refreshTicker, 45000);
 
-  function addAi(html, extra){
+  function addAi(html, extra, trackSession){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
     let inner=html;
-    if(extra?.images?.length){
-      extra.images.forEach(src=>{
+    const imgs = extra?.images||[];
+    if(imgs.length){
+      imgs.forEach(src=>{
         inner+=`<img class="conc-img" src="${src}" alt="Concierge visual" />`;
       });
     }
     wrap.innerHTML=`<div class="bubble">${inner}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
+    if(trackSession!==false){
+      window._sessionMessages.push({ role:'model', html:inner, text:stripTags(html), images:imgs.length?imgs:undefined });
+    }
     syncConciergeLayout();
   }
-  function addUser(text){
+  function addUser(text, trackSession){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg user';
     wrap.innerHTML=`<div class="bubble">${escapeHtml(text)}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
+    if(trackSession!==false){
+      window._sessionMessages.push({ role:'user', text });
+    }
     syncConciergeLayout();
   }
   function addTyping(){
@@ -1004,6 +1155,7 @@
 
   async function sendMessage(forceMode){
     const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;
+    if(!window._currentSessionId) ensureConciergeSession();
     addUser(v);inp.value='';autoResizeChatInput();addTyping();
     try{
       const data=await callConcierge(conciergePayload(v, forceMode));
@@ -1019,11 +1171,13 @@
       window._chatHistory.push({ role:'user', text:v });
       window._chatHistory.push({ role:'model', text:stripTags(fallback) });
     }
+    persistCurrentSession();
   }
   function stripTags(html){ return html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
 
   async function askPreset(q){
     showView('concierge');
+    if(!window._currentSessionId) ensureConciergeSession();
     const imageMode=/visual|gambar|grafik|chart/i.test(q);
     setTimeout(async ()=>{
       addUser(q);addTyping();
@@ -1038,6 +1192,7 @@
         addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
         addAi(respond(q));
       }
+      persistCurrentSession();
     },120);
   }
 
