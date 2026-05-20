@@ -366,7 +366,7 @@
         <div class="chat" id="chat"></div>
         <div class="composer">
           <div class="composer-row">
-            <textarea id="chatInput" placeholder="Ask regimes, levels, trading plan, positioning…"></textarea>
+            <textarea id="chatInput" placeholder="Ask in any language — regimes, levels, trading plan…"></textarea>
             <button class="btn gold" onclick="sendMessage()">Send</button>
           </div>
           <div class="pills">
@@ -551,7 +551,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> Intelligence is fed from <strong>Binance</strong>, <strong>Yahoo</strong>, <strong>CoinGecko</strong>, <strong>DeFi Llama</strong>, <strong>Fear &amp; Greed</strong>, and headlines (<strong>CoinDesk</strong>, <strong>Bloomberg</strong>, <strong>Reuters</strong>, <strong>CoinTelegraph</strong>, <strong>The Block</strong>) — plus structured <strong>trading plans</strong>.</p><p>Ask macro, teknikal, DeFi, geopolitik, or crypto in English or Indonesian. Tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> I answer in <strong>whatever language you use</strong> — and focus on exactly what you ask. Live intelligence from Binance, Yahoo, CoinGecko, DeFi Llama, Fear &amp; Greed, and headlines (CoinDesk, Bloomberg, Reuters, and more), with structured <strong>trading plans</strong> when relevant.</p><p>Macro, teknikal, DeFi, geopolitik, crypto — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function getMarketContext(){
     return Array.from(document.querySelectorAll('#ticker .tk')).map(el=>{
