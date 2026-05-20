@@ -9,10 +9,20 @@ export type DerivativeSnap = {
   markPrice: string;
 };
 
+/** Free Binance positioning proxy (replaces paid Coinglass heatmap for Hobby tier) */
+export type PositioningSnap = {
+  symbol: string;
+  topTraderLongPct: string;
+  topTraderShortPct: string;
+  longShortRatio: string;
+  takerBuySellRatio: string;
+};
+
 export type LiveMarketSnapshot = {
   fetchedAt: string;
   ticks: MarketTick[];
   derivatives: DerivativeSnap[];
+  positioning: PositioningSnap[];
   sources: string[];
 };
 
@@ -112,6 +122,61 @@ async function binanceFutures(): Promise<DerivativeSnap[]> {
   return rows.filter((r): r is DerivativeSnap => r !== null);
 }
 
+type RatioRow = {
+  longAccount?: string;
+  shortAccount?: string;
+  longShortRatio?: string;
+  buySellRatio?: string;
+};
+
+async function binancePositioning(symbol: string, label: string): Promise<PositioningSnap | null> {
+  const period = "1h";
+  const limit = 1;
+  const base = "https://fapi.binance.com/futures/data";
+
+  const [accounts, positions, taker] = await Promise.all([
+    fetchJson<RatioRow[]>(
+      `${base}/topLongShortAccountRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+    ),
+    fetchJson<RatioRow[]>(
+      `${base}/topLongShortPositionRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+    ),
+    fetchJson<RatioRow[]>(
+      `${base}/takerlongshortRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+    ),
+  ]);
+
+  const acc = accounts?.[0];
+  const pos = positions?.[0];
+  const tak = taker?.[0];
+  if (!acc && !pos && !tak) return null;
+
+  const longPct = Number(acc?.longAccount ?? pos?.longAccount);
+  const shortPct = Number(acc?.shortAccount ?? pos?.shortAccount);
+  const lsRatio = Number(acc?.longShortRatio ?? pos?.longShortRatio);
+  const takerRatio = Number(tak?.buySellRatio ?? tak?.longShortRatio);
+
+  return {
+    symbol: label,
+    topTraderLongPct: Number.isFinite(longPct) ? `${longPct.toFixed(1)}%` : "—",
+    topTraderShortPct: Number.isFinite(shortPct) ? `${shortPct.toFixed(1)}%` : "—",
+    longShortRatio: Number.isFinite(lsRatio) ? lsRatio.toFixed(2) : "—",
+    takerBuySellRatio: Number.isFinite(takerRatio) ? takerRatio.toFixed(2) : "—",
+  };
+}
+
+async function binancePositioningAll(): Promise<PositioningSnap[]> {
+  const pairs = [
+    ["BTCUSDT", "BTC"],
+    ["ETHUSDT", "ETH"],
+    ["SOLUSDT", "SOL"],
+  ] as const;
+  const rows = await Promise.all(
+    pairs.map(([sym, label]) => binancePositioning(sym, label)),
+  );
+  return rows.filter((r): r is PositioningSnap => r !== null);
+}
+
 async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTick | null> {
   const data = await fetchJson<{
     chart?: {
@@ -139,9 +204,10 @@ async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTic
 
 /** Server-side live feed — Binance (crypto + perps) + Yahoo (SPX, DXY proxy) */
 export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
-  const [spot, derivs, spx, dxy] = await Promise.all([
+  const [spot, derivs, positioning, spx, dxy] = await Promise.all([
     binanceSpot(),
     binanceFutures(),
+    binancePositioningAll(),
     yahooQuote("^GSPC", "SPX"),
     yahooQuote("DX-Y.NYB", "DXY"),
   ]);
@@ -153,12 +219,14 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
   const sources: string[] = [];
   if (spot.length) sources.push("Binance spot");
   if (derivs.length) sources.push("Binance futures");
+  if (positioning.length) sources.push("Binance positioning (L/S, taker flow)");
   if (spx || dxy) sources.push("Yahoo Finance");
 
   return {
     fetchedAt: new Date().toISOString(),
     ticks,
     derivatives: derivs,
+    positioning,
     sources,
   };
 }
@@ -179,9 +247,15 @@ export function formatLiveMarketForPrompt(snapshot: LiveMarketSnapshot): string 
     );
   }
 
-  if (snapshot.derivatives.length) {
+  for (const p of snapshot.positioning) {
     lines.push(
-      "- Liquidation cluster read: infer from funding sign (positive = longs pay, crowded long risk) and OI level vs recent regime; state uncertainty bands if exact heatmap unavailable.",
+      `- ${p.symbol} positioning (1h, top traders): long accounts ${p.topTraderLongPct}, short ${p.topTraderShortPct}, L/S ratio ${p.longShortRatio}, taker buy/sell ${p.takerBuySellRatio}`,
+    );
+  }
+
+  if (snapshot.positioning.length || snapshot.derivatives.length) {
+    lines.push(
+      "- Liquidation cluster framework (free data, not Coinglass): combine funding sign, OI size, top-trader L/S ratio, and taker flow. Positive funding + high long% = long liquidation risk below; negative funding + crowded shorts = short squeeze risk above. Give approximate zones as % from current mark.",
     );
   }
 

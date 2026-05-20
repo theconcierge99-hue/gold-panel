@@ -27,6 +27,7 @@ export default async function handler(request: Request): Promise<Response> {
         fetchedAt: snapshot.fetchedAt,
         ticks: ticksForUi(snapshot),
         derivatives: snapshot.derivatives,
+        positioning: snapshot.positioning,
         sources: snapshot.sources,
       }),
       {

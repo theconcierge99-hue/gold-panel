@@ -23,6 +23,7 @@ async function handleMarket(): Promise<{ status: number; json: unknown }> {
         fetchedAt: snapshot.fetchedAt,
         ticks: ticksForUi(snapshot),
         derivatives: snapshot.derivatives,
+        positioning: snapshot.positioning,
         sources: snapshot.sources,
       },
     };
