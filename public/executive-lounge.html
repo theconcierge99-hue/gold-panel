@@ -178,6 +178,12 @@
   .gmeta{display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-secondary)}
   .gmeta .who{flex:1;color:var(--chrome)}
   .gbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
+  .intel-loading,.intel-empty{padding:28px 20px;border:1px dashed var(--border);color:var(--text-muted);font-size:12px;letter-spacing:.12em;text-align:center}
+  .fcard.is-live,.gcard.is-live{text-decoration:none;color:inherit;display:block}
+  .fcard.is-live:focus-visible,.gcard.is-live:focus-visible{outline:1px solid var(--gold-dim);outline-offset:2px}
+  .fcard .src-badge,.gcard .src-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--chrome);letter-spacing:.06em}
+  .pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--signal-green);margin-right:6px;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
 
   /* CONCIERGE — ChatGPT-style layout */
   .app.concierge-mode{grid-template-columns:200px 1fr 260px}
@@ -379,7 +385,7 @@
     </div>
     <div class="nav-group">
       <div class="nav-h">Intelligence</div>
-      <div class="nav-i" onclick="showView('lounge')">Featured Signals <span class="badge">12</span></div>
+      <div class="nav-i" onclick="showView('lounge')">Featured Signals <span class="badge" id="signalBadge">—</span></div>
       <div class="nav-i" onclick="showView('lounge')">Market Intel</div>
       <div class="nav-i" onclick="showView('concierge')">AI Summaries</div>
       <div class="nav-i" onclick="showView('lounge')">Narratives</div>
@@ -411,78 +417,18 @@
     <section class="view show" id="view-lounge">
       <div class="section-h">
         <h2>Featured Signals</h2>
-        <div class="meta">Curated · Editor selected</div>
+        <div class="meta" id="featuredMeta"><span class="pulse-dot"></span>Syncing feeds…</div>
       </div>
-      <div class="featured">
-        <div class="fcard">
-          <div class="tag">Macro · FX <span class="sep">/</span> Editor's Brief</div>
-          <h3>The Dollar's Quiet Retreat: Why a Weaker DXY Rewrites the Onchain Playbook</h3>
-          <p>DXY's slow decay below 100 is not a headline event — it is a regime shift. We map the flows from reserve rebalancing into long-duration crypto duration, with specific implications for ETH, SOL and emerging L2 liquidity.</p>
-          <div class="meta-row">
-            <div class="avatar av-g2">RK</div>
-            <span>R. Kovacs</span>
-            <span class="score">◆ 94.2</span>
-            <span class="price">0.0012 ETH</span>
-            <span class="chain">⛓ onchain</span>
-            <div class="spacer"><span>4,182 views</span><span>312 unlocks</span><span>2h</span></div>
-          </div>
-        </div>
-        <div class="fcard">
-          <div class="tag">AI × Crypto <span class="sep">/</span> Thesis</div>
-          <h3>Agentic Capital: When AI Wallets Become the Marginal Buyer</h3>
-          <p>Autonomous agents are no longer hypothetical. On-chain telemetry shows recurring, rule-driven wallet behavior now accounts for ~8% of DEX volume. The marginal buyer is changing — and so is the reflexivity function.</p>
-          <div class="meta-row">
-            <div class="avatar av-g1">NL</div>
-            <span>N. Laurent</span>
-            <span class="score">◆ 91.7</span>
-            <span class="price">0.0008 ETH</span>
-            <span class="chain">⛓ onchain</span>
-            <div class="spacer"><span>3,221 views</span><span>248 unlocks</span><span>5h</span></div>
-          </div>
-        </div>
+      <div class="featured" id="featuredSignals">
+        <div class="intel-loading">Loading headlines from CoinDesk, Bloomberg, Reuters, BBC, CNBC…</div>
       </div>
 
       <div class="section-h">
         <h2>Market Intelligence</h2>
-        <div class="meta">Live · 6 active signals</div>
+        <div class="meta" id="intelMeta">Live wire</div>
       </div>
-      <div class="grid">
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#22c87a"></span>Solana · DeFi</div>
-          <h4>Jupiter aggregator volume divergence signals stealth accumulation in mid-cap SPL tokens</h4>
-          <div class="gmeta"><span class="who">A. Mirza</span><span class="price">0.0006 ETH</span><span>1,840 views</span><span class="score">◆ 88.4</span></div>
-          <div class="gbar" style="width:88.4%"></div>
-        </div>
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#8899bb"></span>Equities · Options</div>
-          <h4>S&amp;P 500 options skew prints at ATH — dealer gamma positioning suggests vol expansion ahead</h4>
-          <div class="gmeta"><span class="who">E. Thornton</span><span class="price">0.0009 ETH</span><span>2,104 views</span><span class="score">◆ 92.1</span></div>
-          <div class="gbar" style="width:92.1%"></div>
-        </div>
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#3b7dd8"></span>AI · Infrastructure</div>
-          <h4>AI infrastructure compute thesis: why hyperscaler capex is the cleanest macro signal of 2026</h4>
-          <div class="gmeta"><span class="who">I. Yamamoto</span><span class="price">0.0011 ETH</span><span>2,890 views</span><span class="score">◆ 95.3</span></div>
-          <div class="gbar" style="width:95.3%"></div>
-        </div>
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#e85d4a"></span>Energy · Commodities</div>
-          <h4>Brent–WTI spread compression below $3 hints at structural shift in global crude logistics</h4>
-          <div class="gmeta"><span class="who">C. Petrov</span><span class="price">0.0005 ETH</span><span>1,212 views</span><span class="score">◆ 85.9</span></div>
-          <div class="gbar" style="width:85.9%"></div>
-        </div>
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#c9a84c"></span>Macro · FX</div>
-          <h4>JPY carry unwind risk re-emerges as BoJ guidance hardens — implications for risk parity books</h4>
-          <div class="gmeta"><span class="who">S. Winters</span><span class="price">0.0008 ETH</span><span>1,964 views</span><span class="score">◆ 90.6</span></div>
-          <div class="gbar" style="width:90.6%"></div>
-        </div>
-        <div class="gcard">
-          <div class="gcat"><span class="cat-dot" style="background:#1d8f7a"></span>DeFi · Microstructure</div>
-          <h4>Uniswap v4 hooks reshape MEV redistribution — what it means for searcher economics and LP yield</h4>
-          <div class="gmeta"><span class="who">O. Brennan</span><span class="price">0.0007 ETH</span><span>1,558 views</span><span class="score">◆ 87.2</span></div>
-          <div class="gbar" style="width:87.2%"></div>
-        </div>
+      <div class="grid" id="marketIntelGrid">
+        <div class="intel-loading">Fetching market intelligence…</div>
       </div>
     </section>
 
@@ -545,18 +491,16 @@
   <aside class="right">
     <div class="r-section">
       <div class="r-h">Trending Narratives</div>
-      <div class="narr"><div class="ctg" style="color:#c9a84c">Macro · Rising</div><div class="ttl">DXY breakdown unlocks EM capital rotation</div><div class="bot"><span class="strong">9.1 / 10</span><span>14m</span></div></div>
-      <div class="narr"><div class="ctg" style="color:#3b7dd8">AI × Crypto</div><div class="ttl">Autonomous agent wallets driving DeFi volume</div><div class="bot"><span class="strong">8.7 / 10</span><span>32m</span></div></div>
-      <div class="narr"><div class="ctg" style="color:#22c87a">Solana</div><div class="ttl">SOL staking yield compression accelerates</div><div class="bot"><span class="moderate">7.4 / 10</span><span>1h</span></div></div>
-      <div class="narr"><div class="ctg" style="color:#8899bb">Equities</div><div class="ttl">Options skew regime shift across index</div><div class="bot"><span class="moderate">7.1 / 10</span><span>2h</span></div></div>
+      <div id="trendingNarratives">
+        <div class="intel-loading" style="padding:12px 0;border:none">Analyzing narrative clusters…</div>
+      </div>
     </div>
 
     <div class="r-section">
-      <div class="r-h">Active Guests</div>
-      <div class="guest"><div class="av av-g1">NL</div><span class="who">N. Laurent</span><span class="act">published</span><span class="ts">2m</span></div>
-      <div class="guest"><div class="av av-g3">AM</div><span class="who">A. Mirza</span><span class="act">unlocked</span><span class="ts">8m</span></div>
-      <div class="guest"><div class="av av-g4">ET</div><span class="who">E. Thornton</span><span class="act">opened</span><span class="ts">15m</span></div>
-      <div class="guest"><div class="av av-g5">IY</div><span class="who">I. Yamamoto</span><span class="act">published</span><span class="ts">26m</span></div>
+      <div class="r-h">Feed Activity</div>
+      <div id="feedActivity">
+        <div class="intel-loading" style="padding:12px 0;border:none">Syncing publishers…</div>
+      </div>
     </div>
 
   </aside>
@@ -1076,11 +1020,112 @@
     }).filter(m=>m.symbol);
   }
 
-  async function refreshTicker(){
+  function sourceInitials(source){
+    const parts=(source||'').split(/\s+/).filter(Boolean);
+    if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
+    return (source||'??').slice(0,2).toUpperCase();
+  }
+  function avatarClass(i){ return 'av-g'+((i%5)+1); }
+
+  function renderFeaturedHeadlines(items){
+    const el=document.getElementById('featuredSignals');
+    if(!el) return;
+    if(!items.length){
+      el.innerHTML='<div class="intel-empty">No headlines available — retry shortly.</div>';
+      return;
+    }
+    el.innerHTML=items.slice(0,2).map((h,i)=>{
+      const summary=h.summary?escapeHtml(h.summary):'Live headline from '+escapeHtml(h.source)+'. Open for full story.';
+      const tag=escapeHtml(h.category)+' <span class="sep">/</span> '+escapeHtml(h.source);
+      const href=h.url?escapeHtml(h.url):'#';
+      const ext=h.url?' target="_blank" rel="noopener noreferrer"':'';
+      return `<a class="fcard is-live" href="${href}"${ext}>
+        <div class="tag">${tag}</div>
+        <h3>${escapeHtml(h.title)}</h3>
+        <p>${summary}</p>
+        <div class="meta-row">
+          <div class="avatar ${avatarClass(i)}">${sourceInitials(h.source)}</div>
+          <span class="src-badge">${escapeHtml(h.source)}</span>
+          <span class="score">◆ ${h.score}</span>
+          <span class="chain">↗ read</span>
+          <div class="spacer"><span>${escapeHtml(h.ageLabel)}</span></div>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  function renderIntelGrid(items){
+    const el=document.getElementById('marketIntelGrid');
+    if(!el) return;
+    const grid=items.slice(2,8);
+    if(!grid.length){
+      el.innerHTML='<div class="intel-empty">Waiting for additional wire stories…</div>';
+      return;
+    }
+    el.innerHTML=grid.map((h,i)=>{
+      const href=h.url?escapeHtml(h.url):'#';
+      const ext=h.url?' target="_blank" rel="noopener noreferrer"':'';
+      return `<a class="gcard is-live" href="${href}"${ext}>
+        <div class="gcat"><span class="cat-dot" style="background:${h.categoryColor}"></span>${escapeHtml(h.category)}</div>
+        <h4>${escapeHtml(h.title)}</h4>
+        <div class="gmeta"><span class="who">${escapeHtml(h.source)}</span><span>${escapeHtml(h.ageLabel)}</span><span class="score">◆ ${h.score}</span></div>
+        <div class="gbar" style="width:${Math.min(98,h.score)}%"></div>
+      </a>`;
+    }).join('');
+  }
+
+  function renderNarratives(rows){
+    const el=document.getElementById('trendingNarratives');
+    if(!el) return;
+    if(!rows.length){
+      el.innerHTML='<div class="intel-empty" style="border:none">No narrative clusters yet.</div>';
+      return;
+    }
+    el.innerHTML=rows.map(n=>`
+      <div class="narr">
+        <div class="ctg" style="color:${n.categoryColor}">${escapeHtml(n.category)}</div>
+        <div class="ttl">${escapeHtml(n.title)}</div>
+        <div class="bot"><span class="${n.strength}">${escapeHtml(n.scoreLabel)}</span><span>${escapeHtml(n.ageLabel)}</span></div>
+      </div>
+    `).join('');
+  }
+
+  function renderFeedActivity(headlines){
+    const el=document.getElementById('feedActivity');
+    if(!el) return;
+    const recent=headlines.slice(0,5);
+    if(!recent.length){
+      el.innerHTML='<div class="intel-empty" style="border:none">No publisher activity.</div>';
+      return;
+    }
+    el.innerHTML=recent.map((h,i)=>`
+      <div class="guest">
+        <div class="av ${avatarClass(i)}">${sourceInitials(h.source)}</div>
+        <span class="who">${escapeHtml(h.source)}</span>
+        <span class="act">syndicated</span>
+        <span class="ts">${escapeHtml(h.ageLabel)}</span>
+      </div>
+    `).join('');
+  }
+
+  function updateLoungeMeta(data){
+    const headlines=data.headlines||[];
+    const pubs=[...new Set(headlines.map(h=>h.source))].slice(0,4);
+    const time=data.fetchedAt?new Date(data.fetchedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    const feat=document.getElementById('featuredMeta');
+    const intel=document.getElementById('intelMeta');
+    const badge=document.getElementById('signalBadge');
+    if(feat) feat.innerHTML='<span class="pulse-dot"></span>Live · '+escapeHtml(pubs.join(', ')||'RSS')+(time?' · '+time:'');
+    if(intel) intel.textContent='Live · '+headlines.length+' headlines';
+    if(badge) badge.textContent=String(Math.min(99,headlines.length||0));
+  }
+
+  async function refreshMarket(){
     try{
       const res=await fetch('/api/market');
       const data=await res.json();
-      if(!res.ok) return;
+      if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
+
       const bySym={};
       (data.ticks||[]).forEach(t=>{ bySym[t.symbol]=t; });
       document.querySelectorAll('#ticker .tk').forEach(el=>{
@@ -1096,15 +1141,29 @@
           chgEl.classList.add(row.change.includes('-')?'down':'up');
         }
       });
+
+      const headlines=data.headlines||[];
+      renderFeaturedHeadlines(headlines);
+      renderIntelGrid(headlines);
+      renderNarratives(data.narratives||[]);
+      renderFeedActivity(headlines);
+      updateLoungeMeta(data);
+
       const lbl=document.getElementById('liveLabel');
       if(lbl && data.fetchedAt){
         const t=new Date(data.fetchedAt);
         lbl.textContent='Live · '+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
       }
-    }catch(e){ console.warn('ticker refresh', e); }
+    }catch(e){
+      console.warn('market refresh', e);
+      const feat=document.getElementById('featuredSignals');
+      const grid=document.getElementById('marketIntelGrid');
+      if(feat && feat.querySelector('.intel-loading')) feat.innerHTML='<div class="intel-empty">Feed unavailable — check API / ALLOWED_ORIGINS.</div>';
+      if(grid && grid.querySelector('.intel-loading')) grid.innerHTML='<div class="intel-empty">Could not load intelligence wire.</div>';
+    }
   }
-  refreshTicker();
-  setInterval(refreshTicker, 45000);
+  refreshMarket();
+  setInterval(refreshMarket, 60000);
 
   function addAi(html, extra, trackSession){
     const c=document.getElementById('chat');

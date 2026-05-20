@@ -6,6 +6,7 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "../api/lib/concierge-security";
+import { enrichHeadlinesForUi, buildTrendingNarratives } from "../api/lib/headline-ui";
 import { fetchLiveMarketSnapshot, ticksForUi } from "../api/lib/market-data";
 
 const jsonHeaders = {
@@ -17,6 +18,7 @@ const jsonHeaders = {
 async function handleMarket(): Promise<{ status: number; json: unknown }> {
   try {
     const snapshot = await fetchLiveMarketSnapshot();
+    const headlines = enrichHeadlinesForUi(snapshot.headlines);
     return {
       status: 200,
       json: {
@@ -24,6 +26,12 @@ async function handleMarket(): Promise<{ status: number; json: unknown }> {
         ticks: ticksForUi(snapshot),
         derivatives: snapshot.derivatives,
         positioning: snapshot.positioning,
+        globalCrypto: snapshot.globalCrypto,
+        sentiment: snapshot.sentiment,
+        defi: snapshot.defi,
+        btcNetwork: snapshot.btcNetwork,
+        headlines,
+        narratives: buildTrendingNarratives(headlines),
         sources: snapshot.sources,
       },
     };

@@ -1,3 +1,4 @@
+import { enrichHeadlinesForUi, buildTrendingNarratives } from "./lib/headline-ui";
 import { fetchLiveMarketSnapshot, ticksForUi } from "./lib/market-data";
 import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
 
@@ -22,6 +23,7 @@ export default async function handler(request: Request): Promise<Response> {
   try {
     assertAllowedOrigin(request);
     const snapshot = await fetchLiveMarketSnapshot();
+    const headlines = enrichHeadlinesForUi(snapshot.headlines);
     return new Response(
       JSON.stringify({
         fetchedAt: snapshot.fetchedAt,
@@ -32,7 +34,8 @@ export default async function handler(request: Request): Promise<Response> {
         sentiment: snapshot.sentiment,
         defi: snapshot.defi,
         btcNetwork: snapshot.btcNetwork,
-        headlines: snapshot.headlines,
+        headlines,
+        narratives: buildTrendingNarratives(headlines),
         sources: snapshot.sources,
       }),
       {

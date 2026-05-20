@@ -6,6 +6,8 @@ export type NewsHeadline = {
   source: string;
   title: string;
   published?: string;
+  url?: string;
+  summary?: string;
 };
 
 export type GlobalCryptoContext = {
@@ -89,6 +91,28 @@ function decodeXml(s: string): string {
     .trim();
 }
 
+function extractRssLink(block: string): string | undefined {
+  const atom = block.match(/<link[^>]*href=["']([^"']+)["'][^>]*\/?>/i);
+  if (atom?.[1]?.startsWith("http")) return atom[1].trim();
+  const plain = block.match(/<link[^>]*>([^<]+)<\/link>/i);
+  const url = plain?.[1]?.trim();
+  if (url?.startsWith("http")) return url;
+  const guid = block.match(/<guid[^>]*>([^<]+)<\/guid>/i);
+  const g = guid?.[1]?.trim();
+  if (g?.startsWith("http")) return g;
+  return undefined;
+}
+
+function extractRssSummary(block: string): string | undefined {
+  const descM =
+    block.match(/<description[^>]*>([\s\S]*?)<\/description>/i) ||
+    block.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
+  if (!descM) return undefined;
+  const text = decodeXml(descM[1]).replace(/\s+/g, " ").trim();
+  if (!text || text.length < 12) return undefined;
+  return text.slice(0, 320);
+}
+
 function parseRssHeadlines(xml: string, source: string, max = 3): NewsHeadline[] {
   const out: NewsHeadline[] = [];
   const itemRe = /<item[\s>]([\s\S]*?)<\/item>/gi;
@@ -100,21 +124,32 @@ function parseRssHeadlines(xml: string, source: string, max = 3): NewsHeadline[]
     const title = decodeXml(titleM[1]).slice(0, 220);
     if (!title) continue;
     const pubM = block.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i);
+    const published = pubM ? decodeXml(pubM[1]).slice(0, 48) : undefined;
+    const url = extractRssLink(block);
+    const summary = extractRssSummary(block);
     out.push({
       source,
       title,
-      published: pubM ? decodeXml(pubM[1]).slice(0, 40) : undefined,
+      published,
+      url,
+      summary,
     });
   }
   return out;
 }
 
+/** Free credible RSS — markets, crypto, macro, world business */
 const RSS_FEEDS: { url: string; source: string }[] = [
   { url: "https://www.coindesk.com/arc/outboundfeeds/rss/", source: "CoinDesk" },
   { url: "https://feeds.bloomberg.com/markets/news.rss", source: "Bloomberg" },
   { url: "https://feeds.reuters.com/reuters/businessNews", source: "Reuters" },
   { url: "https://cointelegraph.com/rss", source: "CoinTelegraph" },
   { url: "https://www.theblock.co/rss.xml", source: "The Block" },
+  { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business" },
+  { url: "https://feeds.npr.org/1001/rss.xml", source: "NPR" },
+  { url: "https://www.theguardian.com/business/rss", source: "Guardian" },
+  { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664", source: "CNBC" },
+  { url: "https://feeds.marketwatch.com/marketwatch/topstories/", source: "MarketWatch" },
 ];
 
 export async function fetchCoinGeckoGlobal(): Promise<GlobalCryptoContext | null> {
@@ -184,7 +219,7 @@ export async function fetchBtcNetwork(): Promise<BtcNetworkContext | null> {
   };
 }
 
-export async function fetchMarketHeadlines(maxPerFeed = 2): Promise<NewsHeadline[]> {
+export async function fetchMarketHeadlines(maxPerFeed = 3): Promise<NewsHeadline[]> {
   const results = await Promise.all(
     RSS_FEEDS.map(async ({ url, source }) => {
       const xml = await fetchText(url);
@@ -192,5 +227,13 @@ export async function fetchMarketHeadlines(maxPerFeed = 2): Promise<NewsHeadline
       return parseRssHeadlines(xml, source, maxPerFeed);
     }),
   );
-  return results.flat().slice(0, 12);
+  const seen = new Set<string>();
+  const merged: NewsHeadline[] = [];
+  for (const h of results.flat()) {
+    const key = h.title.toLowerCase().slice(0, 80);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(h);
+  }
+  return merged.slice(0, 30);
 }
