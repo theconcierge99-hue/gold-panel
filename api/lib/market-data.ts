@@ -82,27 +82,48 @@ function fmtFunding(rate: number): string {
   return `${(rate * 100).toFixed(4)}%`;
 }
 
+const BINANCE_SPOT_MAP: Record<string, string> = {
+  BTCUSDT: "BTC",
+  ETHUSDT: "ETH",
+  SOLUSDT: "SOL",
+  BNBUSDT: "BNB",
+  XRPUSDT: "XRP",
+  ADAUSDT: "ADA",
+  AVAXUSDT: "AVAX",
+  LINKUSDT: "LINK",
+  DOGEUSDT: "DOGE",
+};
+
+const BLUECHIP_STOCKS: { yahoo: string; label: string }[] = [
+  { yahoo: "AAPL", label: "AAPL" },
+  { yahoo: "MSFT", label: "MSFT" },
+  { yahoo: "GOOGL", label: "GOOGL" },
+  { yahoo: "NVDA", label: "NVDA" },
+  { yahoo: "AMZN", label: "AMZN" },
+  { yahoo: "META", label: "META" },
+  { yahoo: "TSLA", label: "TSLA" },
+  { yahoo: "JPM", label: "JPM" },
+];
+
 async function binanceSpot(): Promise<MarketTick[]> {
+  const symbols = Object.keys(BINANCE_SPOT_MAP);
   const data = await fetchJson<
     { symbol: string; lastPrice: string; priceChangePercent: string }[]
   >(
-    'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT","SOLUSDT"]',
+    `https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(symbols)}`,
   );
   if (!data) return [];
 
-  const map: Record<string, string> = {
-    BTCUSDT: "BTC",
-    ETHUSDT: "ETH",
-    SOLUSDT: "SOL",
-  };
-
   return data
-    .filter((r) => map[r.symbol])
-    .map((r) => ({
-      symbol: map[r.symbol],
-      price: fmtUsd(Number(r.lastPrice), r.symbol === "BTC" ? 0 : 2),
-      change: fmtPct(Number(r.priceChangePercent)),
-    }));
+    .filter((r) => BINANCE_SPOT_MAP[r.symbol])
+    .map((r) => {
+      const label = BINANCE_SPOT_MAP[r.symbol];
+      return {
+        symbol: label,
+        price: fmtUsd(Number(r.lastPrice), label === "BTC" ? 0 : 2),
+        change: fmtPct(Number(r.priceChangePercent)),
+      };
+    });
 }
 
 async function binanceFutures(): Promise<DerivativeSnap[]> {
@@ -211,11 +232,19 @@ async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTic
   if (!Number.isFinite(price) || !Number.isFinite(prev) || prev === 0) return null;
 
   const chg = ((price! - prev!) / prev!) * 100;
-  const pointLabels = new Set(["DXY", "VIX"]);
-  const decimals = pointLabels.has(label) ? 2 : 0;
+  const fxLabels = new Set(["DXY", "VIX"]);
+  const indexLabels = new Set(["SPX", "NDX"]);
+  const stockLabels = new Set(BLUECHIP_STOCKS.map((s) => s.label));
+  let priceDisplay: string;
+  if (fxLabels.has(label)) priceDisplay = price!.toFixed(2);
+  else if (indexLabels.has(label)) priceDisplay = fmtUsd(price!, 0);
+  else if (stockLabels.has(label) || label === "GOLD" || label === "OIL")
+    priceDisplay = fmtUsd(price!, 2);
+  else priceDisplay = fmtUsd(price!, 0);
+
   return {
     symbol: label,
-    price: pointLabels.has(label) ? price!.toFixed(2) : fmtUsd(price!, decimals),
+    price: priceDisplay,
     change: fmtPct(chg),
   };
 }
@@ -232,6 +261,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     ndx,
     gold,
     oil,
+    stockTicks,
     globalCrypto,
     sentiment,
     defi,
@@ -247,6 +277,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     yahooQuote("^IXIC", "NDX"),
     yahooQuote("GC=F", "GOLD"),
     yahooQuote("CL=F", "OIL"),
+    Promise.all(BLUECHIP_STOCKS.map((s) => yahooQuote(s.yahoo, s.label))),
     fetchCoinGeckoGlobal(),
     fetchFearGreed(),
     fetchDefiLlama(),
@@ -258,12 +289,16 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
   for (const t of [spx, dxy, vix, ndx, gold, oil]) {
     if (t) ticks.push(t);
   }
+  for (const t of stockTicks) {
+    if (t) ticks.push(t);
+  }
 
   const sources: string[] = [];
   if (spot.length) sources.push("Binance");
   if (derivs.length) sources.push("Binance futures");
   if (positioning.length) sources.push("Binance positioning");
-  if (spx || dxy || vix || ndx || gold || oil) sources.push("Yahoo Finance");
+  if (spx || dxy || vix || ndx || gold || oil || stockTicks.some(Boolean))
+    sources.push("Yahoo Finance");
   if (globalCrypto) sources.push("CoinGecko");
   if (sentiment) sources.push("Alternative.me Fear & Greed");
   if (defi) sources.push("DeFi Llama");
@@ -361,6 +396,38 @@ export function formatLiveMarketForPrompt(snapshot: LiveMarketSnapshot): string 
   return lines.join("\n");
 }
 
+const TICKER_UI_ORDER = [
+  "BTC",
+  "ETH",
+  "SOL",
+  "BNB",
+  "XRP",
+  "ADA",
+  "AVAX",
+  "LINK",
+  "DOGE",
+  "SPX",
+  "NDX",
+  "DXY",
+  "VIX",
+  "GOLD",
+  "OIL",
+  "AAPL",
+  "MSFT",
+  "GOOGL",
+  "NVDA",
+  "AMZN",
+  "META",
+  "TSLA",
+  "JPM",
+] as const;
+
 export function ticksForUi(snapshot: LiveMarketSnapshot): MarketTick[] {
-  return snapshot.ticks;
+  const bySym = new Map(snapshot.ticks.map((t) => [t.symbol, t]));
+  const ordered = TICKER_UI_ORDER.map((s) => bySym.get(s)).filter(
+    (t): t is MarketTick => t !== undefined,
+  );
+  const seen = new Set(TICKER_UI_ORDER);
+  const rest = snapshot.ticks.filter((t) => !seen.has(t.symbol as (typeof TICKER_UI_ORDER)[number]));
+  return [...ordered, ...rest];
 }
