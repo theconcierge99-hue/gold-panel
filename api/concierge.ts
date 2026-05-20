@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import {
   parseConciergeBody,
   runConciergeGemini,
@@ -6,35 +5,47 @@ import {
 } from "./lib/concierge-gemini";
 
 export const config = {
-  maxDuration: 10,
+  runtime: "edge",
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
+function jsonResponse(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+export default async function handler(request: Request): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(503).json({
-      error:
-        "GEMINI_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.",
-    });
+    return jsonResponse(
+      {
+        error:
+          "GEMINI_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.",
+      },
+      503,
+    );
   }
 
   try {
-    const body = parseConciergeBody(req.body);
+    const body = parseConciergeBody(await request.json());
     const message = (body.message ?? "").trim();
     if (!message) {
-      return res.status(400).json({ error: "message is required" });
+      return jsonResponse({ error: "message is required" }, 400);
     }
 
     const mode: ConciergeMode = body.mode === "enhance" ? "enhance" : "chat";
@@ -46,10 +57,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       signal: body.signal,
     });
 
-    return res.status(200).json(result);
+    return jsonResponse(result, 200);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     console.error("[api/concierge]", msg);
-    return res.status(500).json({ error: msg });
+    return jsonResponse({ error: msg }, 500);
   }
 }

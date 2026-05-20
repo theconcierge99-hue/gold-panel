@@ -13,7 +13,7 @@ If asked for financial advice, frame as scenario analysis, not personal advice.`
 const ENHANCE_PROMPT = `Rewrite the signal copy for Executive Lounge. Return JSON only: {"title":"...","summary":"...","implication":"..."}.
 Keep institutional tone. Title under 120 chars. Summary 2–3 sentences. Implication 2 sentences on market impact.`;
 
-const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
 type GeminiContent = { role: string; parts: { text: string }[] };
 
@@ -45,7 +45,13 @@ async function geminiGenerate(
     });
 
     if (!res.ok) {
-      lastError = `Gemini ${model} (${res.status}): ${(await res.text()).slice(0, 200)}`;
+      const errText = await res.text();
+      lastError = `Gemini ${model} (${res.status}): ${errText.slice(0, 200)}`;
+      if (errText.includes("API_KEY_INVALID") || errText.includes("API key not valid")) {
+        throw new Error(
+          "Invalid GEMINI_API_KEY. Create a new key at https://aistudio.google.com/apikey and update .env.local or Vercel env vars.",
+        );
+      }
       continue;
     }
 

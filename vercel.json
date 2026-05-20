@@ -4,8 +4,8 @@
   "installCommand": "npm install",
   "outputDirectory": "dist/client",
   "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 10
+    "api/concierge.ts": {
+      "runtime": "edge"
     }
   },
   "rewrites": [
