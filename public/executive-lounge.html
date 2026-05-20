@@ -140,7 +140,6 @@
   .bubble p{margin-bottom:9px} .bubble p:last-child{margin-bottom:0}
   .bubble strong{color:var(--gold);font-weight:400}
   .bubble .conc-img{margin-top:12px;border:1px solid var(--border);max-width:100%;border-radius:4px;display:block}
-  .bubble .topic-tag{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-top:10px;display:block}
   .typing{display:flex;gap:5px;padding:6px 0}
   .typing span{width:5px;height:5px;border-radius:50%;background:var(--chrome);animation:tp 1.2s infinite}
   .typing span:nth-child(2){animation-delay:.18s}
@@ -597,13 +596,6 @@
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
     let inner=html;
-    if(extra?.topics?.length){
-      inner+=`<span class="topic-tag">Domains: ${extra.topics.join(' · ')}</span>`;
-    }
-    if(extra?.dataAsOf){
-      const t=new Date(extra.dataAsOf);
-      inner+=`<span class="topic-tag">Data as of ${t.toLocaleString()} · Binance + Yahoo (free feeds)</span>`;
-    }
     if(extra?.images?.length){
       extra.images.forEach(src=>{
         inner+=`<img class="conc-img" src="${src}" alt="Concierge visual" />`;
@@ -652,7 +644,7 @@
     try{
       const data=await callConcierge(conciergePayload(v, forceMode));
       removeTyping();
-      addAi(data.reply, { topics:data.topics, images:data.images, dataAsOf:data.dataAsOf });
+      addAi(data.reply, { images:data.images });
       window._chatHistory.push({ role:'user', text:v });
       window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
@@ -674,7 +666,7 @@
       try{
         const data=await callConcierge(conciergePayload(q, imageMode?'image':'chat'));
         removeTyping();
-        addAi(data.reply, { topics:data.topics, images:data.images, dataAsOf:data.dataAsOf });
+        addAi(data.reply, { images:data.images });
         window._chatHistory.push({ role:'user', text:q });
         window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){
