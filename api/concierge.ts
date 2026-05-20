@@ -30,17 +30,6 @@ export default async function handler(request: Request): Promise<Response> {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return jsonResponse(
-      {
-        error:
-          "GEMINI_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.",
-      },
-      503,
-    );
-  }
-
   try {
     const body = parseConciergeBody(await request.json());
     const message = (body.message ?? "").trim();
@@ -50,7 +39,7 @@ export default async function handler(request: Request): Promise<Response> {
 
     const mode: ConciergeMode = body.mode === "enhance" ? "enhance" : "chat";
     const result = await runConciergeGemini({
-      apiKey,
+      apiKey: process.env.GEMINI_API_KEY,
       mode,
       message,
       history: body.history ?? [],

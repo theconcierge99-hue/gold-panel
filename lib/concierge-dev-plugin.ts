@@ -1,6 +1,7 @@
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
 import {
+  normalizeGeminiApiKey,
   parseConciergeBody,
   runConciergeGemini,
   type ConciergeMode,
@@ -13,14 +14,11 @@ async function handleConcierge(
 ): Promise<{ status: number; json: unknown }> {
   if (method === "OPTIONS") return { status: 204, json: null };
   if (method !== "POST") return { status: 405, json: { error: "Method not allowed" } };
-  if (!apiKey) {
-    return {
-      status: 503,
-      json: {
-        error:
-          "GEMINI_API_KEY missing. Copy .env.example to .env.local, paste your key, restart npm run dev.",
-      },
-    };
+  try {
+    normalizeGeminiApiKey(apiKey);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "GEMINI_API_KEY missing";
+    return { status: 503, json: { error: msg } };
   }
 
   try {
@@ -36,7 +34,7 @@ async function handleConcierge(
 
     const mode: ConciergeMode = parsed.mode === "enhance" ? "enhance" : "chat";
     const result = await runConciergeGemini({
-      apiKey,
+      apiKey: apiKey!,
       mode,
       message,
       history: parsed.history ?? [],
