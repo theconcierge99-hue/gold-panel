@@ -231,14 +231,16 @@ export function wantsImage(message: string): boolean {
 export function buildConciergeSystemPrompt(options: {
   topics: ConciergeTopic[];
   market?: MarketTick[];
+  liveMarketBlock?: string;
   imageMode?: boolean;
 }): string {
-  const { topics, market = [], imageMode } = options;
+  const { topics, market = [], liveMarketBlock = "", imageMode } = options;
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
 
-  const marketBlock =
-    market.length > 0
-      ? `\nTERMINAL TAPE (user's dashboard — treat as contextual anchor, do not invent other live prices):\n${market
+  const marketBlock = liveMarketBlock
+    ? `\n${liveMarketBlock}\n`
+    : market.length > 0
+      ? `\nTERMINAL TAPE (dashboard snapshot):\n${market
           .map((m) => `- ${m.symbol}: ${m.price} (${m.change})`)
           .join("\n")}\n`
       : "";
@@ -257,10 +259,11 @@ RESPONSE RULES:
 1. Match the user's language (Indonesian or English).
 2. Output 3–5 HTML paragraphs in <p> tags only. Use <strong> for tickers, levels, metrics. Optional <em> for caveats.
 3. Structure every answer: (a) Direct answer, (b) Data/framework evidence, (c) Market implication, (d) What to watch next / invalidation.
-4. Use numbers as ranges or scenario tables when live data is unavailable — label clearly: "illustrative framework" vs "from terminal tape".
-5. Never fabricate precise live prices except from TERMINAL TAPE below.
-6. Not financial advice — scenario analysis for sophisticated participants.
-7. If question is vague, ask one sharp clarifying question at the end (single sentence).
+4. When LIVE MARKET DATA is provided below, quote those prices, funding rates, and OI in your answer.
+5. Only use illustrative ranges when live data is missing — label them "scenario framework".
+6. For 24h ahead crypto views: combine live price, funding, OI, and technical structure; give invalidation levels tied to live price.
+7. Not financial advice — scenario analysis for sophisticated participants.
+8. If question is vague, ask one sharp clarifying question at the end (single sentence).
 ${marketBlock}
 ACTIVE DOMAINS FOR THIS MESSAGE:
 ${playbooks}

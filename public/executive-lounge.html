@@ -245,7 +245,7 @@
       <div class="tk"><span class="sym">DXY</span><span class="val">99.42</span><span class="chg down">-0.34%</span></div>
     </div>
     <div class="hright">
-      <div class="live"><span class="dot"></span> Live</div>
+      <div class="live" id="liveBadge" title="Market data source"><span class="dot"></span> <span id="liveLabel">Live</span></div>
       <button class="btn" onclick="showView('concierge')">Concierge</button>
       <button class="btn gold" onclick="openModal()">+ Create Signal</button>
       <button class="btn" onclick="showView('profile')">Profile</button>
@@ -562,12 +562,46 @@
     }).filter(m=>m.symbol);
   }
 
+  async function refreshTicker(){
+    try{
+      const res=await fetch('/api/market');
+      const data=await res.json();
+      if(!res.ok) return;
+      const bySym={};
+      (data.ticks||[]).forEach(t=>{ bySym[t.symbol]=t; });
+      document.querySelectorAll('#ticker .tk').forEach(el=>{
+        const sym=el.querySelector('.sym')?.textContent?.trim();
+        const row=bySym[sym];
+        if(!row) return;
+        const valEl=el.querySelector('.val');
+        const chgEl=el.querySelector('.chg');
+        if(valEl) valEl.textContent=row.price.replace(/^\$\s?/,'');
+        if(chgEl){
+          chgEl.textContent=row.change;
+          chgEl.classList.remove('up','down');
+          chgEl.classList.add(row.change.includes('-')?'down':'up');
+        }
+      });
+      const lbl=document.getElementById('liveLabel');
+      if(lbl && data.fetchedAt){
+        const t=new Date(data.fetchedAt);
+        lbl.textContent='Live · '+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      }
+    }catch(e){ console.warn('ticker refresh', e); }
+  }
+  refreshTicker();
+  setInterval(refreshTicker, 45000);
+
   function addAi(html, extra){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
     let inner=html;
     if(extra?.topics?.length){
       inner+=`<span class="topic-tag">Domains: ${extra.topics.join(' · ')}</span>`;
+    }
+    if(extra?.dataAsOf){
+      const t=new Date(extra.dataAsOf);
+      inner+=`<span class="topic-tag">Data as of ${t.toLocaleString()} · Binance + Yahoo</span>`;
     }
     if(extra?.images?.length){
       extra.images.forEach(src=>{
@@ -617,7 +651,7 @@
     try{
       const data=await callConcierge(conciergePayload(v, forceMode));
       removeTyping();
-      addAi(data.reply, { topics:data.topics, images:data.images });
+      addAi(data.reply, { topics:data.topics, images:data.images, dataAsOf:data.dataAsOf });
       window._chatHistory.push({ role:'user', text:v });
       window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
@@ -639,7 +673,7 @@
       try{
         const data=await callConcierge(conciergePayload(q, imageMode?'image':'chat'));
         removeTyping();
-        addAi(data.reply, { topics:data.topics, images:data.images });
+        addAi(data.reply, { topics:data.topics, images:data.images, dataAsOf:data.dataAsOf });
         window._chatHistory.push({ role:'user', text:q });
         window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){

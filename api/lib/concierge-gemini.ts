@@ -5,6 +5,11 @@ import {
   wantsImage,
   type MarketTick,
 } from "./concierge-brain";
+import {
+  fetchLiveMarketSnapshot,
+  formatLiveMarketForPrompt,
+  type LiveMarketSnapshot,
+} from "./market-data";
 
 export type ChatTurn = { role: "user" | "model"; text: string };
 
@@ -158,6 +163,16 @@ function wrapHtmlParagraphs(reply: string): string {
   return `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
 }
 
+async function resolveLiveContext(
+  market: MarketTick[],
+  liveSnapshot?: LiveMarketSnapshot | null,
+): Promise<{ liveBlock: string; ticks: MarketTick[]; snapshot: LiveMarketSnapshot }> {
+  const snapshot = liveSnapshot ?? (await fetchLiveMarketSnapshot());
+  const liveBlock = formatLiveMarketForPrompt(snapshot);
+  const ticks = snapshot.ticks.length ? snapshot.ticks : market;
+  return { liveBlock, ticks, snapshot };
+}
+
 export async function runConciergeGemini(options: {
   apiKey: string;
   mode: ConciergeMode;
@@ -165,13 +180,22 @@ export async function runConciergeGemini(options: {
   history?: ChatTurn[];
   signal?: { title?: string; summary?: string };
   market?: MarketTick[];
+  liveSnapshot?: LiveMarketSnapshot | null;
 }): Promise<
-  | { reply: string; images?: string[]; topics?: string[] }
+  | {
+      reply: string;
+      images?: string[];
+      topics?: string[];
+      marketLive?: MarketTick[];
+      dataAsOf?: string;
+    }
   | { title: string; summary: string; implication: string }
 > {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
   const { message, history = [], signal, market = [] } = options;
   const topics = detectTopics(message);
+  const { liveBlock, ticks, snapshot } = await resolveLiveContext(market, options.liveSnapshot);
+  const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
   const mode =
     options.mode === "image" || (options.mode === "chat" && wantsImage(message))
       ? "image"
@@ -212,7 +236,8 @@ export async function runConciergeGemini(options: {
   if (mode === "image") {
     const systemPrompt = buildConciergeSystemPrompt({
       topics,
-      market,
+      market: ticks,
+      liveMarketBlock: liveBlock,
       imageMode: true,
     });
     const analysis = await geminiGenerateText(apiKey, {
@@ -239,10 +264,15 @@ export async function runConciergeGemini(options: {
       reply: wrapHtmlParagraphs(analysis),
       images,
       topics,
+      ...meta,
     };
   }
 
-  const systemPrompt = buildConciergeSystemPrompt({ topics, market });
+  const systemPrompt = buildConciergeSystemPrompt({
+    topics,
+    market: ticks,
+    liveMarketBlock: liveBlock,
+  });
   let reply = await geminiGenerateText(apiKey, {
     systemInstruction: { parts: [{ text: systemPrompt }] },
     contents: buildContents(
@@ -255,6 +285,6 @@ export async function runConciergeGemini(options: {
     generationConfig: { temperature: 0.55, maxOutputTokens: 1536 },
   });
 
-  return { reply: wrapHtmlParagraphs(reply), topics };
+  return { reply: wrapHtmlParagraphs(reply), topics, ...meta };
 }
 

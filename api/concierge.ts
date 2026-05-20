@@ -1,4 +1,5 @@
 import { normalizeGeminiApiKey, runConciergeGemini } from "./lib/concierge-gemini";
+import { fetchLiveMarketSnapshot } from "./lib/market-data";
 import {
   assertAllowedOrigin,
   corsHeadersFor,
@@ -39,6 +40,8 @@ export default async function handler(request: Request): Promise<Response> {
     const raw = await readBodyWithLimit(request);
     const { mode, message, history, signal, market } = validateConciergeRequest(raw);
 
+    const liveSnapshot = await fetchLiveMarketSnapshot();
+
     const result = await runConciergeGemini({
       apiKey: normalizeGeminiApiKey(process.env.GEMINI_API_KEY),
       mode,
@@ -46,6 +49,7 @@ export default async function handler(request: Request): Promise<Response> {
       history,
       signal,
       market,
+      liveSnapshot,
     });
 
     return jsonResponse(request, result, 200);
