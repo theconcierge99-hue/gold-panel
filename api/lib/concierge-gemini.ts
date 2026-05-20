@@ -98,7 +98,7 @@ async function geminiCall(
     const errText = await res.text();
     const fatal = parseGeminiError(res.status, errText, model);
     if (fatal) throw new Error(fatal);
-    throw new Error(`${model}: ${res.status}`);
+    throw new Error(`Gemini request failed (${res.status})`);
   }
 
   const data = (await res.json()) as {
@@ -126,7 +126,7 @@ async function geminiGenerateText(
     }
   }
   throw new Error(
-    errors.length ? `No text model available (${errors.join("; ")})` : "Gemini request failed",
+    errors.length ? "No Gemini text model available" : "Gemini request failed",
   );
 }
 
@@ -150,9 +150,7 @@ async function geminiGenerateImage(
       errors.push(e instanceof Error ? e.message : String(e));
     }
   }
-  throw new Error(
-    `Image generation unavailable (${errors.join("; ")}). Your API key may need image-enabled models in Google AI Studio.`,
-  );
+  throw new Error("Image generation unavailable for this API key");
 }
 
 function wrapHtmlParagraphs(reply: string): string {
@@ -260,18 +258,3 @@ export async function runConciergeGemini(options: {
   return { reply: wrapHtmlParagraphs(reply), topics };
 }
 
-export function parseConciergeBody(body: unknown): {
-  mode?: ConciergeMode;
-  message?: string;
-  history?: ChatTurn[];
-  signal?: { title?: string; summary?: string };
-  market?: MarketTick[];
-} {
-  if (body && typeof body === "object" && !Array.isArray(body)) {
-    return body as ReturnType<typeof parseConciergeBody>;
-  }
-  if (typeof body === "string" && body.trim()) {
-    return JSON.parse(body) as ReturnType<typeof parseConciergeBody>;
-  }
-  return {};
-}

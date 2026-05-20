@@ -1,51 +1,51 @@
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
+import { normalizeGeminiApiKey, runConciergeGemini } from "../api/lib/concierge-gemini";
 import {
-  normalizeGeminiApiKey,
-  parseConciergeBody,
-  runConciergeGemini,
-  type ConciergeMode,
-} from "../api/lib/concierge-gemini";
+  readBodyWithLimit,
+  sanitizePublicError,
+  validateConciergeRequest,
+} from "../api/lib/concierge-security";
 
 async function handleConcierge(
   method: string | undefined,
-  rawBody: string,
+  request: Request,
   apiKey: string | undefined,
-): Promise<{ status: number; json: unknown }> {
-  if (method === "OPTIONS") return { status: 204, json: null };
-  if (method !== "POST") return { status: 405, json: { error: "Method not allowed" } };
+): Promise<{ status: number; json: unknown; headers: Record<string, string> }> {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Cache-Control": "no-store",
+  };
+
+  if (method === "OPTIONS") return { status: 204, json: null, headers };
+  if (method !== "POST") {
+    return { status: 405, json: { error: "Method not allowed" }, headers };
+  }
+
   try {
     normalizeGeminiApiKey(apiKey);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "GEMINI_API_KEY missing";
-    return { status: 503, json: { error: msg } };
+    return { status: 503, json: { error: msg }, headers };
   }
 
   try {
-    let parsed: ReturnType<typeof parseConciergeBody>;
-    try {
-      parsed = parseConciergeBody(rawBody ? JSON.parse(rawBody) : {});
-    } catch {
-      return { status: 400, json: { error: "Invalid JSON body" } };
-    }
-
-    const message = (parsed.message ?? "").trim();
-    if (!message) return { status: 400, json: { error: "message is required" } };
-
-    const mode: ConciergeMode =
-      parsed.mode === "enhance" ? "enhance" : parsed.mode === "image" ? "image" : "chat";
+    const raw = await readBodyWithLimit(request);
+    const { mode, message, history, signal, market } = validateConciergeRequest(raw);
     const result = await runConciergeGemini({
       apiKey: apiKey!,
       mode,
       message,
-      history: parsed.history ?? [],
-      signal: parsed.signal,
-      market: parsed.market ?? [],
+      history,
+      signal,
+      market,
     });
-    return { status: 200, json: result };
+    return { status: 200, json: result, headers };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Unknown error";
-    return { status: 500, json: { error: msg } };
+    const msg = sanitizePublicError(e);
+    return { status: 500, json: { error: msg }, headers };
   }
 }
 
@@ -61,24 +61,30 @@ export function conciergeDevPlugin(): Plugin {
         const chunks: Buffer[] = [];
         req.on("data", (c) => chunks.push(c));
         req.on("end", async () => {
-          const body = Buffer.concat(chunks).toString("utf8");
-          const { status, json } = await handleConcierge(
+          const bodyText = Buffer.concat(chunks).toString("utf8");
+          const fakeRequest = new Request("http://localhost/api/concierge", {
+            method: req.method,
+            headers: {
+              "content-type": req.headers["content-type"] ?? "application/json",
+              "content-length": String(Buffer.byteLength(bodyText)),
+            },
+            body: bodyText,
+          });
+
+          const { status, json, headers } = await handleConcierge(
             req.method,
-            body,
+            fakeRequest,
             env.GEMINI_API_KEY,
           );
 
-          res.setHeader("Access-Control-Allow-Origin", "*");
-          res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-          res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
+          for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
           if (status === 204) {
             res.statusCode = 204;
             res.end();
             return;
           }
-          res.setHeader("Content-Type", "application/json");
           res.statusCode = status;
+          res.setHeader("Content-Type", "application/json");
           res.end(JSON.stringify(json));
         });
       });
