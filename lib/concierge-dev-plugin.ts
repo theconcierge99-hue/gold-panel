@@ -1,10 +1,14 @@
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
-import { readJsonBody, runConciergeGemini, type ChatTurn, type ConciergeMode } from "./concierge-gemini";
+import {
+  parseConciergeBody,
+  runConciergeGemini,
+  type ConciergeMode,
+} from "../api/lib/concierge-gemini";
 
 async function handleConcierge(
   method: string | undefined,
-  body: string,
+  rawBody: string,
   apiKey: string | undefined,
 ): Promise<{ status: number; json: unknown }> {
   if (method === "OPTIONS") return { status: 204, json: null };
@@ -13,24 +17,27 @@ async function handleConcierge(
     return {
       status: 503,
       json: {
-        error: "GEMINI_API_KEY missing. Copy .env.example to .env.local and add your key.",
+        error:
+          "GEMINI_API_KEY missing. Copy .env.example to .env.local, paste your key, restart npm run dev.",
       },
     };
   }
 
   try {
-    const parsed = await readJsonBody<{
-      mode?: ConciergeMode;
-      message?: string;
-      history?: ChatTurn[];
-      signal?: { title?: string; summary?: string };
-    }>(body);
+    let parsed: ReturnType<typeof parseConciergeBody>;
+    try {
+      parsed = parseConciergeBody(rawBody ? JSON.parse(rawBody) : {});
+    } catch {
+      return { status: 400, json: { error: "Invalid JSON body" } };
+    }
+
     const message = (parsed.message ?? "").trim();
     if (!message) return { status: 400, json: { error: "message is required" } };
 
+    const mode: ConciergeMode = parsed.mode === "enhance" ? "enhance" : "chat";
     const result = await runConciergeGemini({
       apiKey,
-      mode: parsed.mode === "enhance" ? "enhance" : "chat",
+      mode,
       message,
       history: parsed.history ?? [],
       signal: parsed.signal,

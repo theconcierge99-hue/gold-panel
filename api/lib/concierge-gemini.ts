@@ -13,7 +13,7 @@ If asked for financial advice, frame as scenario analysis, not personal advice.`
 const ENHANCE_PROMPT = `Rewrite the signal copy for Executive Lounge. Return JSON only: {"title":"...","summary":"...","implication":"..."}.
 Keep institutional tone. Title under 120 chars. Summary 2–3 sentences. Implication 2 sentences on market impact.`;
 
-const MODEL = "gemini-2.0-flash";
+const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
 
 type GeminiContent = { role: string; parts: { text: string }[] };
 
@@ -30,6 +30,36 @@ function stripHtmlToText(html: string): string {
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+async function geminiGenerate(
+  apiKey: string,
+  payload: Record<string, unknown>,
+): Promise<string> {
+  let lastError = "Gemini request failed";
+
+  for (const model of MODELS) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      lastError = `Gemini ${model} (${res.status}): ${(await res.text()).slice(0, 200)}`;
+      continue;
+    }
+
+    const data = (await res.json()) as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    };
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+    if (text) return text;
+    lastError = `Gemini ${model}: empty response`;
+  }
+
+  throw new Error(lastError);
+}
+
 export async function runConciergeGemini(options: {
   apiKey: string;
   mode: ConciergeMode;
@@ -43,8 +73,6 @@ export async function runConciergeGemini(options: {
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
   if (mode === "enhance") {
     const userText = [
       "Enhance this signal draft.",
@@ -55,25 +83,12 @@ export async function runConciergeGemini(options: {
       .filter(Boolean)
       .join("\n");
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: ENHANCE_PROMPT }] },
-        contents: [{ role: "user", parts: [{ text: userText }] }],
-        generationConfig: { temperature: 0.5, maxOutputTokens: 800 },
-      }),
+    const raw = await geminiGenerate(apiKey, {
+      systemInstruction: { parts: [{ text: ENHANCE_PROMPT }] },
+      contents: [{ role: "user", parts: [{ text: userText }] }],
+      generationConfig: { temperature: 0.5, maxOutputTokens: 800 },
     });
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Gemini error (${res.status}): ${err.slice(0, 200)}`);
-    }
-
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Enhance: invalid model response");
     const parsed = JSON.parse(jsonMatch[0]) as {
@@ -88,32 +103,17 @@ export async function runConciergeGemini(options: {
     };
   }
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: buildContents(
-        history.map((h) => ({
-          role: h.role,
-          text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
-        })),
-        message,
-      ),
-      generationConfig: { temperature: 0.65, maxOutputTokens: 1024 },
-    }),
+  let reply = await geminiGenerate(apiKey, {
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: buildContents(
+      history.map((h) => ({
+        role: h.role,
+        text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
+      })),
+      message,
+    ),
+    generationConfig: { temperature: 0.65, maxOutputTokens: 1024 },
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini error (${res.status}): ${err.slice(0, 200)}`);
-  }
-
-  const data = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
-  let reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
-  if (!reply) throw new Error("Empty response from Gemini");
 
   if (!reply.includes("<p>")) {
     reply = `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
@@ -122,10 +122,17 @@ export async function runConciergeGemini(options: {
   return { reply };
 }
 
-export async function readJsonBody<T>(body: string): Promise<T> {
-  try {
-    return JSON.parse(body) as T;
-  } catch {
-    throw new Error("Invalid JSON body");
+export function parseConciergeBody(body: unknown): {
+  mode?: ConciergeMode;
+  message?: string;
+  history?: ChatTurn[];
+  signal?: { title?: string; summary?: string };
+} {
+  if (body && typeof body === "object" && !Array.isArray(body)) {
+    return body as ReturnType<typeof parseConciergeBody>;
   }
+  if (typeof body === "string" && body.trim()) {
+    return JSON.parse(body) as ReturnType<typeof parseConciergeBody>;
+  }
+  return {};
 }

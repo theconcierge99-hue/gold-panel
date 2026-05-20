@@ -1,15 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { readJsonBody, runConciergeGemini, type ChatTurn, type ConciergeMode } from "../lib/concierge-gemini";
+import {
+  parseConciergeBody,
+  runConciergeGemini,
+  type ConciergeMode,
+} from "./lib/concierge-gemini";
 
 export const config = {
   maxDuration: 10,
-};
-
-type Body = {
-  mode?: ConciergeMode;
-  message?: string;
-  history?: ChatTurn[];
-  signal?: { title?: string; summary?: string };
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -28,19 +25,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({
-      error: "GEMINI_API_KEY is not set. Add it in Vercel → Project → Settings → Environment Variables.",
+      error:
+        "GEMINI_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.",
     });
   }
 
   try {
-    const raw = typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
-    const body = await readJsonBody<Body>(raw);
+    const body = parseConciergeBody(req.body);
     const message = (body.message ?? "").trim();
     if (!message) {
       return res.status(400).json({ error: "message is required" });
     }
 
-    const mode = body.mode === "enhance" ? "enhance" : "chat";
+    const mode: ConciergeMode = body.mode === "enhance" ? "enhance" : "chat";
     const result = await runConciergeGemini({
       apiKey,
       mode,
