@@ -3,6 +3,11 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "outputDirectory": "dist/client",
+  "functions": {
+    "api/concierge.ts": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
       "source": "/",

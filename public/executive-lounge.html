@@ -472,7 +472,7 @@
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn" onclick="toast('Concierge enhanced the signal copy ⬡')">⬡ AI Enhance</button>
+      <button class="btn" onclick="enhanceSignal()">⬡ AI Enhance</button>
       <button class="btn gold" onclick="publishSignal()">Mint &amp; Publish →</button>
     </div>
   </div>
@@ -526,7 +526,24 @@
     setTimeout(()=>t.remove(),3200);
   }
 
-  // CHAT
+  // CHAT (Gemini via /api/concierge — Vercel Hobby serverless + local dev middleware)
+  window._chatHistory = [];
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  async function callConcierge(payload){
+    const res = await fetch('/api/concierge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    return data;
+  }
+
   function openingMessage(){
     return `<p><strong>Good evening.</strong> The tape is constructive but quiet. <strong>DXY</strong> trades 99.42 — its third consecutive close below 100, a level last sustained pre-2024. <strong>BTC</strong> holds above $104k with dealer gamma flat; <strong>ETH/BTC</strong> is grinding off its lows.</p><p>Three narratives are running in parallel: (1) dollar weakness rewriting the duration trade, (2) autonomous agent wallets now ~8% of DEX flow, (3) SOL validator yield compression. I can brief you on any of them, or build a signal off your current positioning.</p>`;
   }
@@ -539,7 +556,7 @@
   function addUser(text){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg user';
-    wrap.innerHTML=`<div class="bubble">${text}</div>`;
+    wrap.innerHTML=`<div class="bubble">${escapeHtml(text)}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
   }
   function addTyping(){
@@ -561,14 +578,62 @@
       return `<p><strong>AI × crypto convergence.</strong> The interesting datapoint is no longer adoption — it is reflexivity. Autonomous agent wallets now drive ~8% of DEX volume on Base and Arbitrum, with repeating, rule-driven signatures that the market is beginning to front-run. The marginal buyer is increasingly non-human, which compresses the timeline between thesis and price.</p><p>Two derivatives worth tracking: (1) compute-bound L2s capturing agent inference workloads, and (2) yield-bearing stablecoins becoming the default agent settlement asset. Both are early. Neither is priced in.</p>`;
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;
   }
-  function sendMessage(){
+  async function sendMessage(){
     const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;
     addUser(v);inp.value='';addTyping();
-    setTimeout(()=>{removeTyping();addAi(respond(v))},800+Math.random()*500);
+    try{
+      const data=await callConcierge({ mode:'chat', message:v, history:window._chatHistory });
+      removeTyping();
+      addAi(data.reply);
+      window._chatHistory.push({ role:'user', text:v });
+      window._chatHistory.push({ role:'model', text:data.reply });
+    }catch(err){
+      removeTyping();
+      addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
+      const fallback=respond(v);
+      addAi(fallback);
+      window._chatHistory.push({ role:'user', text:v });
+      window._chatHistory.push({ role:'model', text:stripTags(fallback) });
+    }
   }
-  function askPreset(q){
+  function stripTags(html){ return html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
+
+  async function askPreset(q){
     showView('concierge');
-    setTimeout(()=>{addUser(q);addTyping();setTimeout(()=>{removeTyping();addAi(respond(q))},800)},120);
+    setTimeout(async ()=>{
+      addUser(q);addTyping();
+      try{
+        const data=await callConcierge({ mode:'chat', message:q, history:window._chatHistory });
+        removeTyping();
+        addAi(data.reply);
+        window._chatHistory.push({ role:'user', text:q });
+        window._chatHistory.push({ role:'model', text:data.reply });
+      }catch(err){
+        removeTyping();
+        addAi(respond(q));
+      }
+    },120);
+  }
+
+  async function enhanceSignal(){
+    const title=document.getElementById('sigTitle').value.trim();
+    const summary=document.getElementById('sigSummary').value.trim();
+    if(!title && !summary){ toast('Add a title or summary first'); return; }
+    toast('Concierge is enhancing…');
+    try{
+      const data=await callConcierge({
+        mode:'enhance',
+        message:'Polish for Executive Lounge publication',
+        signal:{ title, summary }
+      });
+      if(data.title) document.getElementById('sigTitle').value=data.title;
+      if(data.summary) document.getElementById('sigSummary').value=data.summary;
+      if(data.implication) document.getElementById('imp').textContent=data.implication;
+      toast('Concierge enhanced the signal copy ⬡');
+    }catch(err){
+      toast('Enhance failed — check GEMINI_API_KEY');
+      updateImplication();
+    }
   }
   document.getElementById('chatInput').addEventListener('keydown',e=>{
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}
