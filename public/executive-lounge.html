@@ -118,7 +118,13 @@
   .theme-btn.active{background:var(--nav-active-bg);color:var(--gold)}
 
   /* SIDEBAR */
-  aside.left{border-right:1px solid var(--border);padding:18px 0;overflow-y:auto;background:var(--sidebar-bg);transition:background .25s}
+  aside.left{border-right:1px solid var(--border);background:var(--sidebar-bg);transition:background .25s;display:flex;flex-direction:column;overflow:hidden}
+  .sidebar-body{flex:1;overflow-y:auto;padding:18px 0 12px}
+  .sidebar-footer{flex-shrink:0;padding:14px 18px 18px;border-top:1px solid var(--border)}
+  .sidebar-x{display:flex;align-items:center;justify-content:center;width:36px;height:36px;margin:0 auto;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+  .sidebar-x:hover{border-color:var(--chrome);background:var(--nav-active-bg)}
+  .sidebar-x img{width:18px;height:18px;object-fit:contain;opacity:.85;transition:opacity .15s}
+  .sidebar-x:hover img{opacity:1}
   .nav-group{margin-bottom:22px}
   .nav-h{font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--text-muted);padding:0 18px;margin-bottom:8px}
   .nav-i{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;cursor:pointer;font-size:12.5px;color:var(--text-secondary);border-left:2px solid transparent;transition:all .15s}
@@ -264,6 +270,27 @@
   .toast{background:var(--graphite);border:1px solid var(--border);border-left:2px solid var(--signal-green);padding:12px 18px;font-size:12px;color:var(--text-primary);min-width:280px;animation:slideIn .3s ease-out;transition:opacity .4s}
   @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
   .toast.fade{opacity:0}
+
+  /* WALLET */
+  .wallet-modal{width:440px;max-width:94vw}
+  .wallet-modal .wallet-grid{margin-top:16px}
+  .wallet-intro{font-size:12.5px;line-height:1.55;color:var(--text-secondary);margin-bottom:18px}
+  .wallet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .wallet-opt{border:1px solid var(--border);padding:16px 12px;cursor:pointer;text-align:center;transition:all .15s;background:var(--gcard-bg);display:flex;flex-direction:column;align-items:center;gap:10px}
+  .wallet-opt:hover{border-color:var(--gold-dim)}
+  .wallet-opt.sel{border-color:var(--gold);background:var(--nav-active-bg)}
+  .wallet-opt .wlogo{width:44px;height:44px;border-radius:10px;object-fit:contain;display:block}
+  .wallet-opt .wname{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-primary)}
+  .wallet-status{font-size:11px;color:var(--text-secondary);min-height:18px;margin-bottom:12px}
+  .wallet-status.err{color:var(--signal-red)}
+  .wallet-connected{display:none}
+  .wallet-connected.show{display:block}
+  .wallet-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--border);margin-bottom:8px;background:var(--gcard-bg)}
+  .wallet-row .wlbl{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
+  .wallet-row .waddr{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:4px}
+  .wallet-row .wmeta{font-size:10px;color:var(--text-secondary);margin-top:2px}
+  .btn.sm{padding:5px 10px;font-size:9px}
+  #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
 </style>
 </head>
 <body>
@@ -292,16 +319,17 @@
       </div>
       <div class="live" id="liveBadge" title="Market data source"><span class="dot"></span> <span id="liveLabel">Live</span></div>
       <button class="btn gold" onclick="openModal()">+ Create Signal</button>
-      <button class="btn" onclick="showView('profile')">Profile</button>
+      <button class="btn" id="loginBtn" onclick="openWalletModal()">Login</button>
     </div>
   </header>
 
   <aside class="left">
+    <div class="sidebar-body">
     <div class="nav-group">
       <div class="nav-h">Navigate</div>
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
-      <div class="nav-i" data-nav="profile" onclick="showView('profile')">My Profile</div>
+      <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Intelligence</div>
@@ -318,6 +346,12 @@
       <div class="nav-i"><span><span class="cat-dot" style="background:#22c87a"></span>Solana</span></div>
       <div class="nav-i"><span><span class="cat-dot" style="background:#8899bb"></span>Equities</span></div>
       <div class="nav-i"><span><span class="cat-dot" style="background:#e85d4a"></span>Energy</span></div>
+    </div>
+    </div>
+    <div class="sidebar-footer">
+      <a class="sidebar-x" href="https://x.com/Th3concierge_" target="_blank" rel="noopener noreferrer" aria-label="Follow on X @Th3concierge_">
+        <img src="/images/x-social.png" alt="" width="18" height="18" />
+      </a>
     </div>
   </aside>
 
@@ -430,31 +464,18 @@
       </div>
     </section>
 
-    <!-- PROFILE -->
+    <!-- WALLET / LOGIN -->
     <section class="view" id="view-profile">
-      <div class="pcard">
-        <div class="pav">AK</div>
+      <div class="section-h"><h2>Wallet</h2><div class="meta">Phantom &amp; OKX · SOL &amp; EVM</div></div>
+      <div class="pcard" style="margin-bottom:22px">
+        <div class="pav" id="walletAvatar">◇</div>
         <div>
-          <div class="pname">Alexander Kim</div>
-          <div class="ptier">◆ Platinum Analyst</div>
+          <div class="pname" id="walletTitle">Not connected</div>
+          <div class="ptier" id="walletSubtitle">Connect to access Executive Lounge onchain</div>
         </div>
+        <button class="btn gold" style="margin-left:auto" onclick="openWalletModal()">Connect wallet</button>
       </div>
-      <div class="stats">
-        <div class="stat"><div class="lbl">Reputation Score</div><div class="val">94.2</div></div>
-        <div class="stat"><div class="lbl">Signals Published</div><div class="val">38</div></div>
-        <div class="stat"><div class="lbl">Total Unlocks</div><div class="val">4.7k</div></div>
-      </div>
-      <div class="accbar">
-        <div class="row"><span>Signal Accuracy</span><span class="pct">83.4%</span></div>
-        <div class="bar"><div class="fill"></div></div>
-      </div>
-      <div class="section-h"><h2>Published Signals</h2><div class="meta">Most recent</div></div>
-      <div class="plist">
-        <div class="pitem"><span class="ttl">DXY breakdown reframes EM equity vs. ETH duration trade</span><span class="sc">◆ 93.1</span><span class="un">412 unlocks</span><span class="ts">2d</span></div>
-        <div class="pitem"><span class="ttl">Stablecoin float inflows lead spot BTC by ~36 hours</span><span class="sc">◆ 89.7</span><span class="un">298 unlocks</span><span class="ts">5d</span></div>
-        <div class="pitem"><span class="ttl">SOL staking yield compression signals validator consolidation</span><span class="sc">◆ 87.4</span><span class="un">221 unlocks</span><span class="ts">1w</span></div>
-        <div class="pitem"><span class="ttl">Onchain treasury rotation: corporates quietly accumulating ETH</span><span class="sc">◆ 91.6</span><span class="un">386 unlocks</span><span class="ts">2w</span></div>
-      </div>
+      <div id="walletAccountList"></div>
     </section>
   </main>
 
@@ -476,6 +497,39 @@
     </div>
 
   </aside>
+</div>
+
+<!-- WALLET MODAL -->
+<div class="overlay" id="walletOverlay" onclick="if(event.target===this)closeWalletModal()">
+  <div class="modal wallet-modal" onclick="event.stopPropagation()">
+    <button class="close" onclick="closeWalletModal()">×</button>
+    <h2>Connect wallet</h2>
+    <div id="walletConnectForm">
+      <div class="wallet-grid" id="walletChoices">
+        <div class="wallet-opt" data-wallet="phantom">
+          <img class="wlogo" src="/images/phantom-wallet.png" alt="Phantom" width="44" height="44" />
+          <div class="wname">Phantom</div>
+        </div>
+        <div class="wallet-opt" data-wallet="okx">
+          <img class="wlogo" src="/images/okx-wallet.png" alt="OKX Wallet" width="44" height="44" />
+          <div class="wname">OKX</div>
+        </div>
+      </div>
+      <div class="wallet-status" id="walletStatus"></div>
+      <div class="modal-foot" style="margin-top:0;padding-top:0;border-top:none">
+        <button class="btn" onclick="closeWalletModal()">Cancel</button>
+        <button class="btn gold" id="walletConnectBtn" onclick="connectSelectedWallet()">Connect</button>
+      </div>
+    </div>
+    <div class="wallet-connected" id="walletConnectedPanel">
+      <p class="wallet-intro">Active connections</p>
+      <div id="walletModalList"></div>
+      <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border)">
+        <button class="btn" onclick="disconnectAllWallets()">Disconnect all</button>
+        <button class="btn gold" onclick="closeWalletModal()">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -539,6 +593,202 @@
   });
   applyTheme(localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark');
 
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // WALLET (Phantom & OKX — SOL & EVM)
+  const WALLET_KEY = 'el-wallet';
+  let walletPick = 'phantom';
+
+  const WALLET_PROVIDERS = {
+    phantom: {
+      label: 'Phantom',
+      sol: () => window.phantom?.solana,
+      evm: () => window.phantom?.ethereum,
+      install: 'https://phantom.app/',
+    },
+    okx: {
+      label: 'OKX Wallet',
+      sol: () => window.okxwallet?.solana,
+      evm: () => window.okxwallet?.ethereum,
+      install: 'https://www.okx.com/web3',
+    },
+  };
+
+  function loadWalletSession(){
+    try { return JSON.parse(localStorage.getItem(WALLET_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function saveWalletSession(s){ localStorage.setItem(WALLET_KEY, JSON.stringify(s)); }
+
+  function shortAddr(addr, chain){
+    if(!addr) return '';
+    if(chain === 'sol') return addr.slice(0,4)+'…'+addr.slice(-4);
+    const a = addr.startsWith('0x') ? addr : '0x'+addr;
+    return a.slice(0,6)+'…'+a.slice(-4);
+  }
+
+  function getWalletSession(){
+    const s = loadWalletSession();
+    return { sol: s.sol || null, evm: s.evm || null };
+  }
+
+  function renderWalletUI(){
+    const session = getWalletSession();
+    const hasAny = session.sol || session.evm;
+    const btn = document.getElementById('loginBtn');
+    if(hasAny){
+      const label = [session.sol && 'SOL', session.evm && 'EVM'].filter(Boolean).join(' · ');
+      const addr = session.sol?.address || session.evm?.address;
+      const chain = session.sol ? 'sol' : 'evm';
+      btn.textContent = shortAddr(addr, chain) + ' · ' + label;
+      btn.classList.add('connected');
+    } else {
+      btn.textContent = 'Login';
+      btn.classList.remove('connected');
+    }
+
+    const title = document.getElementById('walletTitle');
+    const sub = document.getElementById('walletSubtitle');
+    const av = document.getElementById('walletAvatar');
+    if(hasAny){
+      const primary = session.sol || session.evm;
+      title.textContent = shortAddr(primary.address, session.sol ? 'sol' : 'evm');
+      sub.textContent = [session.sol && 'Solana via '+WALLET_PROVIDERS[session.sol.wallet].label, session.evm && 'EVM via '+WALLET_PROVIDERS[session.evm.wallet].label].filter(Boolean).join(' · ');
+      av.textContent = (primary.address || '?').slice(0,2).toUpperCase();
+    } else {
+      title.textContent = 'Not connected';
+      sub.textContent = 'Connect to access Executive Lounge onchain';
+      av.textContent = '◇';
+    }
+
+    const rowHtml = (key, data)=>{
+      if(!data) return '';
+      const prov = WALLET_PROVIDERS[data.wallet]?.label || data.wallet;
+      return `<div class="wallet-row">
+        <div><div class="wlbl">${key === 'sol' ? 'Solana' : 'EVM'}</div>
+        <div class="waddr">${escapeHtml(data.address)}</div>
+        <div class="wmeta">${escapeHtml(prov)}</div></div>
+        <button class="btn sm" onclick="disconnectWallet('${key}')">Disconnect</button>
+      </div>`;
+    };
+    const list = rowHtml('sol', session.sol) + rowHtml('evm', session.evm);
+    document.getElementById('walletAccountList').innerHTML = list;
+    document.getElementById('walletModalList').innerHTML = list;
+
+    const form = document.getElementById('walletConnectForm');
+    const panel = document.getElementById('walletConnectedPanel');
+    if(hasAny){
+      form.style.display = 'none';
+      panel.classList.add('show');
+    } else {
+      form.style.display = '';
+      panel.classList.remove('show');
+    }
+  }
+
+  function openWalletModal(){
+    document.getElementById('walletStatus').textContent = '';
+    document.getElementById('walletStatus').classList.remove('err');
+    renderWalletUI();
+    document.getElementById('walletOverlay').classList.add('show');
+  }
+  function closeWalletModal(){ document.getElementById('walletOverlay').classList.remove('show'); }
+
+  document.querySelectorAll('#walletChoices .wallet-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('#walletChoices .wallet-opt').forEach(o=>o.classList.remove('sel'));
+      el.classList.add('sel');
+      walletPick = el.dataset.wallet;
+    });
+  });
+  document.querySelector('#walletChoices .wallet-opt')?.classList.add('sel');
+
+  async function connectChain(cfg, wallet, chainKey){
+    if(chainKey === 'sol'){
+      const provider = cfg.sol();
+      if(!provider?.connect) throw new Error('Solana not available in '+cfg.label);
+      const res = await provider.connect();
+      const pk = res?.publicKey || provider.publicKey;
+      if(!pk) throw new Error('Solana connection cancelled');
+      return typeof pk === 'string' ? pk : pk.toString();
+    }
+    const provider = cfg.evm();
+    if(!provider?.request) throw new Error('EVM not available in '+cfg.label);
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    if(!accounts?.[0]) throw new Error('EVM connection cancelled');
+    return accounts[0];
+  }
+
+  async function connectSelectedWallet(){
+    const st = document.getElementById('walletStatus');
+    st.classList.remove('err');
+    st.textContent = 'Connecting…';
+    try {
+      const wallet = walletPick;
+      const cfg = WALLET_PROVIDERS[wallet];
+      if(!cfg) throw new Error('Unknown wallet');
+
+      const session = loadWalletSession();
+      const errors = [];
+      const now = Date.now();
+
+      st.textContent = 'Connecting Solana…';
+      try {
+        session.sol = { wallet, address: await connectChain(cfg, wallet, 'sol'), connectedAt: now };
+      } catch(e){ errors.push('SOL: '+e.message); }
+
+      st.textContent = 'Connecting EVM…';
+      try {
+        session.evm = { wallet, address: await connectChain(cfg, wallet, 'evm'), connectedAt: now };
+      } catch(e){ errors.push('EVM: '+e.message); }
+
+      if(!session.sol && !session.evm){
+        throw new Error(errors.join(' · ') || cfg.label+' not found. Install the browser extension.');
+      }
+
+      saveWalletSession(session);
+      st.textContent = errors.length ? 'Connected with warnings: '+errors.join(' · ') : 'Connected · Solana & EVM';
+      renderWalletUI();
+      toast('Connected via '+cfg.label);
+    } catch(e){
+      st.textContent = e?.message || 'Connection failed';
+      st.classList.add('err');
+    }
+  }
+
+  async function disconnectWallet(chainKey){
+    const session = loadWalletSession();
+    const entry = session[chainKey];
+    if(entry){
+      const cfg = WALLET_PROVIDERS[entry.wallet];
+      try {
+        if(chainKey === 'sol'){
+          const p = cfg?.sol();
+          if(p?.disconnect) await p.disconnect();
+        }
+      } catch(e){ console.warn('wallet disconnect', e); }
+      delete session[chainKey];
+      saveWalletSession(session);
+    }
+    renderWalletUI();
+    toast('Disconnected');
+  }
+
+  async function disconnectAllWallets(){
+    for(const k of ['sol','evm']){
+      if(loadWalletSession()[k]) await disconnectWallet(k);
+    }
+  }
+
+  window.connectSelectedWallet = connectSelectedWallet;
+  window.disconnectWallet = disconnectWallet;
+  window.disconnectAllWallets = disconnectAllWallets;
+  window.openWalletModal = openWalletModal;
+  window.closeWalletModal = closeWalletModal;
+  renderWalletUI();
+
   // VIEW SWITCHING
   function showView(v){
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
@@ -586,10 +836,6 @@
 
   // CHAT (Gemini via /api/concierge — Vercel Hobby serverless + local dev middleware)
   window._chatHistory = [];
-
-  function escapeHtml(s){
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
 
   async function callConcierge(payload){
     const res = await fetch('/api/concierge', {
