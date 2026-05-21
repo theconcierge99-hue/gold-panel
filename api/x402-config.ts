@@ -1,5 +1,5 @@
 import { corsHeadersFor } from "./lib/concierge-security";
-import { getPublicX402Config } from "./lib/x402-server";
+import { getPublicX402Config } from "./lib/x402-config";
 
 export const config = {
   runtime: "edge",

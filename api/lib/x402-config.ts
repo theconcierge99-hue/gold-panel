@@ -44,3 +44,22 @@ export function isX402Enabled(): boolean {
   const { evm, sol } = getMerchantAddresses();
   return !!(evm || sol);
 }
+
+/** Public config for /api/x402-config — no @x402 SDK imports (Edge-safe). */
+export function getPublicX402Config() {
+  const nets = getX402NetworkProfile();
+  const { evm, sol } = getMerchantAddresses();
+  return {
+    enabled: isX402Enabled(),
+    facilitator: "PayAI",
+    facilitatorUrl: "https://facilitator.payai.network",
+    priceUsdc: X402_PRICE_USDC,
+    priceLabel: X402_PRICE_LABEL,
+    networks: nets,
+    acceptsEvm: !!evm,
+    acceptsSol: !!sol,
+    newsPerArticle: true,
+    marketFeedFree: true,
+    conciergePerChat: true,
+  };
+}

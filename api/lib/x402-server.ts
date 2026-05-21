@@ -244,21 +244,3 @@ export async function requireX402Payment(
     paymentResponseHeader,
   };
 }
-
-export function getPublicX402Config() {
-  const nets = getX402NetworkProfile();
-  const { evm, sol } = getMerchantAddresses();
-  return {
-    enabled: isX402Enabled(),
-    facilitator: "PayAI",
-    facilitatorUrl: "https://facilitator.payai.network",
-    priceUsdc: X402_PRICE_USDC,
-    priceLabel: X402_PRICE_LABEL,
-    networks: nets,
-    acceptsEvm: !!evm,
-    acceptsSol: !!sol,
-    newsPerArticle: true,
-    marketFeedFree: true,
-    conciergePerChat: true,
-  };
-}
