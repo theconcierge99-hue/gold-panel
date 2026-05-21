@@ -365,6 +365,23 @@
   .wallet-row .wlbl{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
   .wallet-row .waddr{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:4px}
   .wallet-row .wmeta{font-size:10px;color:var(--text-secondary);margin-top:2px}
+
+  .pay-modal{width:480px;max-width:94vw}
+  .pay-story{font-size:13px;line-height:1.5;color:var(--text-secondary);margin:12px 0 16px;max-height:4.5em;overflow:hidden}
+  .pay-amount{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:18px}
+  .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
+  .pay-chains{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+  .pay-chain-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);background:var(--gcard-bg);cursor:pointer;transition:all .15s;text-align:left}
+  .pay-chain-opt:hover:not(.disabled){border-color:var(--gold-dim)}
+  .pay-chain-opt.sel{border-color:var(--gold);background:var(--nav-active-bg)}
+  .pay-chain-opt.disabled{opacity:.45;cursor:not-allowed}
+  .pay-chain-opt input{margin-top:3px;accent-color:var(--gold)}
+  .pay-chain-opt .pc-body{flex:1;min-width:0}
+  .pay-chain-opt .pc-title{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .pay-chain-opt .pc-meta{font-size:11px;color:var(--text-secondary);margin-top:2px}
+  .pay-chain-opt .pc-bal{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:6px}
+  .pay-chain-opt .pc-warn{font-size:10px;color:var(--signal-red);margin-top:4px}
+  .pay-loading{font-size:12px;color:var(--text-muted);padding:20px 0;text-align:center}
   .btn.sm{padding:5px 10px;font-size:9px}
   #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
 
@@ -714,6 +731,22 @@
         <button class="btn" onclick="disconnectAllWallets()">Disconnect all</button>
         <button class="btn gold" onclick="closeWalletModal()">Done</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT CONFIRM -->
+<div class="overlay" id="payOverlay" onclick="if(event.target===this)closePayModal(false)">
+  <div class="modal pay-modal" onclick="event.stopPropagation()">
+    <button class="close" onclick="closePayModal(false)">×</button>
+    <h2 id="payModalTitle">Confirm payment</h2>
+    <div class="sub" id="payModalSub">Choose chain · 0.1 USDC</div>
+    <p class="pay-story" id="payModalStory"></p>
+    <div class="pay-amount"><span>Amount</span>0.1 USDC</div>
+    <div class="pay-chains" id="payChainList"><div class="pay-loading">Loading balances…</div></div>
+    <div class="modal-foot">
+      <button type="button" class="btn" onclick="closePayModal(false)">Cancel</button>
+      <button type="button" class="btn gold" id="payConfirmBtn" disabled onclick="confirmPayModal()">Pay &amp; continue</button>
     </div>
   </div>
 </div>
@@ -1269,7 +1302,7 @@
     if(hint){
       if(_x402Config.enabled){
         if(_x402Config.configWarning){
-          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Payments misconfigured on server</span>';
+          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">'+escapeHtml(_x402Config.configWarning)+'</span>';
         } else if(_x402Config.enabled && !_x402Config.evmPayToReady && !_x402Config.solPayToReady){
           hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Set X402_EVM_PAY_TO and/or X402_SOL_PAY_TO in Vercel</span>';
         } else {
@@ -1284,9 +1317,8 @@
 
   function assertX402PaymentsReady(cfg){
     if(!cfg?.enabled) return;
-    if(cfg.configWarning) throw new Error(cfg.configWarning);
     if(!cfg.evmPayToReady && !cfg.solPayToReady){
-      throw new Error('No valid merchant receive address on server. Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel.');
+      throw new Error(cfg.configWarning || 'No valid merchant receive address on server. Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel.');
     }
   }
 
@@ -1338,7 +1370,99 @@
     }
   }
 
-  async function paidApiFetch(url, options){
+  let _payModalDeferred = null;
+  let _selectedPayChain = null;
+
+  function closePayModal(confirmed){
+    document.getElementById('payOverlay').classList.remove('show');
+    if(_payModalDeferred){
+      const d = _payModalDeferred;
+      _payModalDeferred = null;
+      if(confirmed && _selectedPayChain) d.resolve(_selectedPayChain);
+      else d.reject(new Error('Payment cancelled'));
+    }
+    _selectedPayChain = null;
+  }
+
+  function selectPayChain(chain){
+    _selectedPayChain = chain;
+    document.querySelectorAll('.pay-chain-opt').forEach(el=>{
+      const on = el.dataset.chain === chain && !el.classList.contains('disabled');
+      el.classList.toggle('sel', on);
+      const inp = el.querySelector('input[type=radio]');
+      if(inp) inp.checked = on;
+    });
+    const btn = document.getElementById('payConfirmBtn');
+    const opt = document.querySelector('.pay-chain-opt[data-chain="'+chain+'"]');
+    const ok = opt && !opt.classList.contains('disabled');
+    btn.disabled = !ok;
+  }
+
+  function confirmPayModal(){
+    if(!_selectedPayChain) return;
+    closePayModal(true);
+  }
+
+  async function showPaymentConfirm(opts){
+    const cfg = await loadX402Config();
+    assertX402PaymentsReady(cfg);
+    ensureWalletForX402(cfg);
+    if(typeof window.getX402PaymentOptions !== 'function'){
+      throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
+    }
+
+    document.getElementById('payModalTitle').textContent = opts.title || 'Confirm payment';
+    document.getElementById('payModalSub').textContent = opts.subtitle || 'Choose how to pay · 0.1 USDC';
+    document.getElementById('payModalStory').textContent = opts.story || '';
+    document.getElementById('payConfirmBtn').textContent = opts.confirmLabel || 'Pay & continue';
+    document.getElementById('payConfirmBtn').disabled = true;
+    document.getElementById('payChainList').innerHTML = '<div class="pay-loading">Loading USDC balances…</div>';
+    _selectedPayChain = null;
+    document.getElementById('payOverlay').classList.add('show');
+
+    const chainOpts = await window.getX402PaymentOptions(
+      getWalletSession(),
+      x402NetworkMode(cfg),
+      x402ServerPayConfig(cfg),
+    );
+
+    if(!chainOpts.length){
+      closePayModal(false);
+      throw new Error('No payment chains available on the server.');
+    }
+
+    const list = document.getElementById('payChainList');
+    list.innerHTML = chainOpts.map(o=>{
+      const dis = !o.available || !o.sufficient;
+      const warn = o.disabledReason ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
+      return `<label class="pay-chain-opt${dis?' disabled':''}" data-chain="${o.chain}">
+        <input type="radio" name="payChain" value="${o.chain}" ${dis?'disabled':''} />
+        <div class="pc-body">
+          <div class="pc-title">${escapeHtml(o.label)}</div>
+          <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
+          <div class="pc-bal">Balance: ${escapeHtml(o.balanceUsdc)}</div>
+          ${warn}
+        </div>
+      </label>`;
+    }).join('');
+
+    list.querySelectorAll('.pay-chain-opt').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        if(el.classList.contains('disabled')) return;
+        selectPayChain(el.dataset.chain);
+      });
+    });
+
+    const defaultOpt = chainOpts.find(o=>o.available && o.sufficient)
+      || chainOpts.find(o=>o.available);
+    if(defaultOpt) selectPayChain(defaultOpt.chain);
+
+    return new Promise((resolve, reject)=>{
+      _payModalDeferred = { resolve, reject };
+    });
+  }
+
+  async function paidApiFetch(url, options, payOpts){
     const cfg = await loadX402Config();
     if(!cfg.enabled) return fetch(url, options || {});
     assertX402PaymentsReady(cfg);
@@ -1346,16 +1470,17 @@
     if(typeof window.createX402PaidFetch !== 'function'){
       throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
     }
+    const preferredChain = payOpts?.preferredChain;
     const paidFetch = await window.createX402PaidFetch(
       getWalletSession(),
       x402NetworkMode(cfg),
       x402ServerPayConfig(cfg),
+      { preferredChain },
     );
+    const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
-    const s = getWalletSession();
-    const chainHint = (cfg.solPayToReady && s.sol && (!cfg.evmPayToReady || !s.evm)) ? 'Solana' : (cfg.evmPayToReady && s.evm) ? 'Base' : 'wallet';
-    if(u.includes('/api/news-open')) toast('Approve 0.1 USDC on '+chainHint+' to open this article…');
-    else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' for Concierge…');
+    if(u.includes('/api/news-open')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
+    else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
     return paidFetch(url, options || {});
   }
 
@@ -1384,18 +1509,24 @@
       return;
     }
     try{
-      ensureWalletForX402(cfg);
+      const chain = await showPaymentConfirm({
+        title: 'Open article',
+        subtitle: 'One-time unlock · headlines are free to browse',
+        story: title,
+        confirmLabel: 'Pay & open article',
+      });
       const res = await paidApiFetch('/api/news-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, title, source }),
-      });
+      }, { preferredChain: chain });
       const data = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
       const target = data.url || url;
       window.open(target, '_blank', 'noopener,noreferrer');
       toast('Article unlocked ✓');
     }catch(e){
+      if(e?.message === 'Payment cancelled') return;
       console.warn('news-open', e);
       toast(formatPaymentError(e)||'Could not open article');
     }
@@ -1404,11 +1535,22 @@
   window.newsCardKey = newsCardKey;
 
   async function callConcierge(payload){
+    const cfg = await loadX402Config();
+    let preferredChain;
+    if(cfg.enabled){
+      const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
+      preferredChain = await showPaymentConfirm({
+        title: payload.mode === 'enhance' ? 'AI enhance signal' : 'Concierge chat',
+        subtitle: '0.1 USDC per message · choose payment chain',
+        story: preview,
+        confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
+      });
+    }
     const res = await paidApiFetch('/api/concierge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
+    }, { preferredChain });
     const text = await res.text();
     let data = {};
     try { data = JSON.parse(text); } catch { /* non-JSON e.g. Vercel crash page */ }
@@ -1417,7 +1559,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I reply in <strong>English by default</strong> — ask in your language when you want an answer in that language. <strong>Lounge headlines are free to browse</strong>; opening a story costs <strong>0.1 USDC</strong>. Each Concierge chat costs <strong>0.1 USDC</strong> — connect an <strong>EVM wallet</strong> on Base.</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> I reply in <strong>English by default</strong> — ask in your language when you want an answer in that language. <strong>Headlines are free to browse</strong>; opening a story or each Concierge message costs <strong>0.1 USDC</strong> — you choose <strong>Solana or Base</strong> at checkout.</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function tickerItemHtml(t){
     const up=!String(t.change).includes('-');
@@ -1669,6 +1811,7 @@
       window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
       removeTyping();
+      if(err?.message === 'Payment cancelled') return;
       addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
       const fallback=respond(v);
       addAi(fallback);
@@ -1713,6 +1856,7 @@
         window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){
         removeTyping();
+        if(err?.message === 'Payment cancelled') return;
         addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
         addAi(respond(q));
       }
@@ -1736,6 +1880,7 @@
       if(data.implication) document.getElementById('imp').textContent=data.implication;
       toast('Concierge enhanced the signal copy ⬡');
     }catch(err){
+      if(err?.message === 'Payment cancelled') return;
       toast('Enhance failed — check GEMINI_API_KEY');
       updateImplication();
     }

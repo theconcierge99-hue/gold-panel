@@ -1,6 +1,5 @@
 /**
  * Browser x402 client — EVM (Base) + Solana USDC via connected Phantom/OKX wallets.
- * Picks the chain where the user has enough USDC (≥ 0.1) when both are available.
  */
 import { x402Client } from "@x402/core/client";
 import type { PaymentRequirements } from "@x402/core/types";
@@ -20,7 +19,8 @@ import {
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
 
-const PRICE_ATOMIC = 100_000n;
+export const PRICE_ATOMIC = 100_000n;
+const PRICE_USDC = 0.1;
 
 const USDC = {
   mainnet: {
@@ -61,6 +61,23 @@ export type X402ServerPayConfig = {
   solPayToReady?: boolean;
 };
 
+export type PayChain = "evm" | "sol";
+
+export type ChainPayOption = {
+  chain: PayChain;
+  label: string;
+  sublabel: string;
+  balanceUsdc: string;
+  balanceAtomic: bigint;
+  sufficient: boolean;
+  available: boolean;
+  disabledReason?: string;
+};
+
+export type X402PaidFetchOptions = {
+  preferredChain?: PayChain;
+};
+
 type PhantomSolanaProvider = {
   signTransaction: (tx: Uint8Array) => Promise<Uint8Array | { serializedTransaction?: Uint8Array }>;
 };
@@ -70,12 +87,25 @@ declare global {
     ethereum?: EIP1193Provider;
     phantom?: { solana?: PhantomSolanaProvider };
     okxwallet?: { solana?: PhantomSolanaProvider };
+    getX402PaymentOptions?: (
+      session: WalletSession,
+      networkMode?: "mainnet" | "testnet",
+      serverConfig?: X402ServerPayConfig,
+    ) => Promise<ChainPayOption[]>;
     createX402PaidFetch?: (
       session: WalletSession,
       networkMode?: "mainnet" | "testnet",
       serverConfig?: X402ServerPayConfig,
+      options?: X402PaidFetchOptions,
     ) => Promise<typeof fetch>;
   }
+}
+
+function formatUsdc(atomic: bigint): string {
+  const whole = atomic / 1_000_000n;
+  const frac = atomic % 1_000_000n;
+  if (frac === 0n) return `${whole} USDC`;
+  return `${whole}.${frac.toString().padStart(6, "0").replace(/0+$/, "")} USDC`;
 }
 
 function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
@@ -94,16 +124,13 @@ function createPhantomSolanaSigner(
 
   return {
     address: addr,
-    async modifyAndSignTransactions(transactions, config = {}) {
-      config;
+    async modifyAndSignTransactions(transactions) {
       const results = [];
       for (const transaction of transactions) {
         const wire = transactionCodec.encode(transaction);
         const signed = await provider.signTransaction(wire);
         const bytes =
-          signed instanceof Uint8Array
-            ? signed
-            : (signed.serializedTransaction ?? wire);
+          signed instanceof Uint8Array ? signed : (signed.serializedTransaction ?? wire);
         const decoded = transactionCodec.decode(bytes);
         assertIsTransactionWithinSizeLimit(decoded);
         results.push(decoded);
@@ -164,41 +191,71 @@ async function solUsdcBalance(
   }
 }
 
-type PayChain = "evm" | "sol";
-
-async function resolvePaymentChain(
+/** Lists chains the user can pay on, with live USDC balances. */
+export async function getPaymentChainOptions(
   session: WalletSession,
-  networkMode: "mainnet" | "testnet",
-  server: X402ServerPayConfig,
-  provider?: EIP1193Provider,
-): Promise<PayChain> {
-  const canEvm = !!(server.acceptsEvm && server.evmPayToReady && session.evm?.address && provider);
-  const solProv = solanaProvider(session);
-  const canSol = !!(server.acceptsSol && server.solPayToReady && session.sol?.address && solProv);
+  networkMode: "mainnet" | "testnet" = "mainnet",
+  serverConfig: X402ServerPayConfig = {},
+): Promise<ChainPayOption[]> {
+  const provider = window.ethereum;
+  const options: ChainPayOption[] = [];
 
-  if (!canEvm && !canSol) {
-    throw new Error(
-      "Connect Solana and/or EVM (Ethereum on Base) in your wallet, and configure merchant receive addresses on the server.",
-    );
+  if (serverConfig.acceptsEvm && serverConfig.evmPayToReady) {
+    const hasWallet = !!session.evm?.address;
+    let bal = 0n;
+    let disabledReason: string | undefined;
+    if (!hasWallet) {
+      disabledReason = "Connect EVM (Ethereum on Base) in your wallet";
+    } else if (!provider) {
+      disabledReason = "EVM provider not found — reopen Phantom/OKX";
+    } else {
+      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, provider);
+    }
+    const sufficient = bal >= PRICE_ATOMIC;
+    options.push({
+      chain: "evm",
+      label: "Base (EVM)",
+      sublabel: hasWallet ? shortAddr(session.evm!.address, "evm") : "Not connected",
+      balanceUsdc: hasWallet && provider ? formatUsdc(bal) : "—",
+      balanceAtomic: bal,
+      sufficient,
+      available: hasWallet && !!provider,
+      disabledReason: disabledReason ?? (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on Base` : undefined),
+    });
   }
-  if (canEvm && !canSol) return "evm";
-  if (canSol && !canEvm) return "sol";
 
-  const evmBal =
-    canEvm && session.evm
-      ? await evmUsdcBalance(session.evm.address as `0x${string}`, networkMode, provider!)
-      : 0n;
-  const solBal = canSol && session.sol ? await solUsdcBalance(session.sol.address, networkMode) : 0n;
+  if (serverConfig.acceptsSol && serverConfig.solPayToReady) {
+    const hasWallet = !!session.sol?.address;
+    const solProv = solanaProvider(session);
+    let bal = 0n;
+    let disabledReason: string | undefined;
+    if (!hasWallet) {
+      disabledReason = "Connect Solana in your wallet";
+    } else if (!solProv) {
+      disabledReason = "Solana provider not found — reopen Phantom/OKX";
+    } else {
+      bal = await solUsdcBalance(session.sol!.address, networkMode);
+    }
+    const sufficient = bal >= PRICE_ATOMIC;
+    options.push({
+      chain: "sol",
+      label: "Solana",
+      sublabel: hasWallet ? shortAddr(session.sol!.address, "sol") : "Not connected",
+      balanceUsdc: hasWallet && solProv ? formatUsdc(bal) : "—",
+      balanceAtomic: bal,
+      sufficient,
+      available: hasWallet && !!solProv,
+      disabledReason: disabledReason ?? (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on Solana` : undefined),
+    });
+  }
 
-  const evmOk = evmBal >= PRICE_ATOMIC;
-  const solOk = solBal >= PRICE_ATOMIC;
+  return options;
+}
 
-  if (solOk && !evmOk) return "sol";
-  if (evmOk && !solOk) return "evm";
-  if (solOk && evmOk) return solBal >= evmBal ? "sol" : "evm";
-
-  if (canSol) return "sol";
-  return "evm";
+function shortAddr(addr: string, chain: "evm" | "sol"): string {
+  if (chain === "sol") return `${addr.slice(0, 4)}…${addr.slice(-4)}`;
+  const a = addr.startsWith("0x") ? addr : `0x${addr}`;
+  return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
 
 function paymentRequirementsSelector(preferred: PayChain) {
@@ -211,33 +268,63 @@ function paymentRequirementsSelector(preferred: PayChain) {
   };
 }
 
+async function resolvePaymentChain(
+  session: WalletSession,
+  networkMode: "mainnet" | "testnet",
+  server: X402ServerPayConfig,
+  preferred?: PayChain,
+  provider?: EIP1193Provider,
+): Promise<PayChain> {
+  if (preferred) {
+    const opts = await getPaymentChainOptions(session, networkMode, server);
+    const pick = opts.find((o) => o.chain === preferred);
+    if (!pick?.available) throw new Error(pick?.disabledReason || "Selected chain is not available");
+    if (!pick.sufficient) throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
+    return preferred;
+  }
+
+  const opts = await getPaymentChainOptions(session, networkMode, server);
+  const usable = opts.filter((o) => o.available && o.sufficient);
+  if (usable.length) {
+    return usable.sort((a, b) =>
+      a.balanceAtomic >= b.balanceAtomic ? -1 : 1,
+    )[0].chain;
+  }
+  const anyAvail = opts.find((o) => o.available);
+  if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC");
+  throw new Error(
+    "Connect Solana and/or EVM (Base) in your wallet, or configure merchant receive addresses on the server.",
+  );
+}
+
 export async function createX402PaidFetch(
   session: WalletSession,
   networkMode: "mainnet" | "testnet" = "mainnet",
   serverConfig: X402ServerPayConfig = {},
+  options: X402PaidFetchOptions = {},
 ): Promise<typeof fetch> {
   const nets = USDC[networkMode];
   const provider = window.ethereum;
   const chain = networkMode === "testnet" ? baseSepolia : base;
 
-  const preferred = await resolvePaymentChain(session, networkMode, serverConfig, provider);
+  const preferred = await resolvePaymentChain(
+    session,
+    networkMode,
+    serverConfig,
+    options.preferredChain,
+    provider,
+  );
 
   const client = new x402Client(paymentRequirementsSelector(preferred));
 
   if (preferred === "evm") {
-    if (!session.evm?.address) {
-      throw new Error("Connect EVM (Ethereum on Base) in Phantom or OKX to pay with USDC.");
-    }
-    if (!provider) {
-      throw new Error("EVM wallet provider not found. Open Phantom or OKX and connect Ethereum.");
-    }
-    const userAddress = session.evm.address as `0x${string}`;
+    const userAddress = session.evm!.address as `0x${string}`;
     const walletClient = createWalletClient({
       account: userAddress,
       chain,
-      transport: custom(provider),
+      transport: custom(provider!),
     }).extend(publicActions);
-    const publicClient = createPublicClient({ chain, transport: custom(provider) });
+    const publicClient = createPublicClient({ chain, transport: custom(provider!) });
     const signer: ClientEvmSigner = {
       address: userAddress,
       signTypedData: (message) =>
@@ -253,14 +340,8 @@ export async function createX402PaidFetch(
     };
     registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
   } else {
-    if (!session.sol?.address) {
-      throw new Error("Connect Solana in Phantom or OKX to pay with USDC.");
-    }
-    const solProv = solanaProvider(session);
-    if (!solProv?.signTransaction) {
-      throw new Error("Solana wallet provider not found. Reconnect your wallet.");
-    }
-    const signer = createPhantomSolanaSigner(solProv, session.sol.address);
+    const solProv = solanaProvider(session)!;
+    const signer = createPhantomSolanaSigner(solProv, session.sol!.address);
     registerExactSvmScheme(client, { signer, networks: [nets.solNetwork] });
   }
 
@@ -268,5 +349,6 @@ export async function createX402PaidFetch(
 }
 
 if (typeof window !== "undefined") {
+  window.getX402PaymentOptions = getPaymentChainOptions;
   window.createX402PaidFetch = createX402PaidFetch;
 }

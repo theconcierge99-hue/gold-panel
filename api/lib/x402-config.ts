@@ -88,16 +88,11 @@ export function getPublicX402Config() {
   const solEnvInvalid = isSolPayToMisconfigured();
   const payReady = !!(evm || sol);
 
-  let configWarning: string | undefined;
-  if (evmEnvInvalid) {
-    configWarning =
-      "Server X402_EVM_PAY_TO is invalid. Use your Base Ethereum wallet (0x + 40 hex), not a Solana address.";
-  } else if (solEnvInvalid) {
-    configWarning = "Server X402_SOL_PAY_TO is invalid. Use a Solana base58 address (no 0x prefix).";
-  } else if (isX402Enabled() && !payReady) {
-    configWarning =
-      "Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel so users can pay on either chain.";
-  }
+  /** Blocks payments only when no valid merchant address exists */
+  const configWarning =
+    isX402Enabled() && !payReady
+      ? "Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel."
+      : undefined;
 
   return {
     enabled: isX402Enabled(),
@@ -111,6 +106,12 @@ export function getPublicX402Config() {
     evmPayToReady: !!evm,
     solPayToReady: !!sol,
     configWarning,
+    evmConfigNote: evmEnvInvalid
+      ? "X402_EVM_PAY_TO is invalid (use 0x + 40 hex). Solana payouts still work if configured."
+      : undefined,
+    solConfigNote: solEnvInvalid
+      ? "X402_SOL_PAY_TO is invalid (use a Solana base58 address)."
+      : undefined,
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,
