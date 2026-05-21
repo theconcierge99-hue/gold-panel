@@ -823,6 +823,36 @@
     return { sol: s.sol || null, evm: s.evm || null };
   }
 
+  const PAYMENT_CURRENCY = 'USDC';
+
+  function resolveCreatorPaymentChain(){
+    const s = getWalletSession();
+    if(s.sol && s.evm) return { family: 'multi', label: 'Solana + EVM (creator chooses at publish)' };
+    if(s.sol) return { family: 'sol', label: 'Solana (SOL)' };
+    if(s.evm) return { family: 'evm', label: 'EVM — Base, Polygon, or BNB' };
+    return { family: null, label: 'Connect wallet — Solana or EVM' };
+  }
+
+  function updateUnlockPriceHint(){
+    const el = document.getElementById('sigChainHint');
+    if(!el) return;
+    const chain = resolveCreatorPaymentChain();
+    el.textContent = PAYMENT_CURRENCY + ' only · chain: ' + chain.label;
+  }
+
+  function getSignalUnlockPrice(){
+    const raw = document.getElementById('sigPriceAmount')?.value;
+    const amount = parseFloat(raw);
+    const chain = resolveCreatorPaymentChain();
+    return {
+      currency: PAYMENT_CURRENCY,
+      amount: Number.isFinite(amount) && amount > 0 ? amount : null,
+      chainFamily: chain.family,
+      chainLabel: chain.label,
+    };
+  }
+  window.getSignalUnlockPrice = getSignalUnlockPrice;
+
   function renderWalletUI(){
     const session = getWalletSession();
     const hasAny = session.sol || session.evm;
@@ -1057,36 +1087,6 @@
   }
 
   // MODAL
-  const PAYMENT_CURRENCY = 'USDC';
-
-  function resolveCreatorPaymentChain(){
-    const s = getWalletSession();
-    if(s.sol && s.evm) return { family: 'multi', label: 'Solana + EVM (creator chooses at publish)' };
-    if(s.sol) return { family: 'sol', label: 'Solana (SOL)' };
-    if(s.evm) return { family: 'evm', label: 'EVM — Base, Polygon, or BNB' };
-    return { family: null, label: 'Connect wallet — Solana or EVM' };
-  }
-
-  function updateUnlockPriceHint(){
-    const el = document.getElementById('sigChainHint');
-    if(!el) return;
-    const chain = resolveCreatorPaymentChain();
-    el.textContent = PAYMENT_CURRENCY + ' only · chain: ' + chain.label;
-  }
-
-  function getSignalUnlockPrice(){
-    const raw = document.getElementById('sigPriceAmount')?.value;
-    const amount = parseFloat(raw);
-    const chain = resolveCreatorPaymentChain();
-    return {
-      currency: PAYMENT_CURRENCY,
-      amount: Number.isFinite(amount) && amount > 0 ? amount : null,
-      chainFamily: chain.family,
-      chainLabel: chain.label,
-    };
-  }
-  window.getSignalUnlockPrice = getSignalUnlockPrice;
-
   function openModal(){
     updateUnlockPriceHint();
     document.getElementById('overlay')?.classList.add('show');
