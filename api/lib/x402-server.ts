@@ -119,7 +119,9 @@ function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequi
   }
 
   if (!accepts.length) {
-    throw new Error("x402 merchant addresses not configured");
+    throw new Error(
+      "x402 merchant addresses not configured or invalid — set X402_EVM_PAY_TO to your Base wallet (0x + 40 hex)",
+    );
   }
 
   return accepts;

@@ -1,5 +1,7 @@
 /** Shared x402 / PayAI configuration (server + public config API). */
 
+import { normalizeEvmPayTo, normalizeSolPayTo } from "./x402-address";
+
 export const X402_PRICE_USDC = 0.1;
 export const X402_PRICE_LABEL = "$0.10";
 export const X402_PRICE_MONEY = "$0.10";
@@ -48,9 +50,13 @@ export function getX402NetworkProfile(): X402NetworkProfile {
 
 export function getMerchantAddresses(): { evm: string | null; sol: string | null } {
   return {
-    evm: (process.env.X402_EVM_PAY_TO || "").trim() || null,
-    sol: (process.env.X402_SOL_PAY_TO || "").trim() || null,
+    evm: normalizeEvmPayTo(process.env.X402_EVM_PAY_TO),
+    sol: normalizeSolPayTo(process.env.X402_SOL_PAY_TO),
   };
+}
+
+function hasRawEvmPayToEnv(): boolean {
+  return !!(process.env.X402_EVM_PAY_TO || "").trim();
 }
 
 /** When false, paid APIs are open (local dev). Set pay-to addresses to enable. */
@@ -61,10 +67,17 @@ export function isX402Enabled(): boolean {
   return !!(evm || sol);
 }
 
+/** True when X402_EVM_PAY_TO is set in env but failed validation */
+export function isEvmPayToMisconfigured(): boolean {
+  return hasRawEvmPayToEnv() && !getMerchantAddresses().evm;
+}
+
 /** Public config for /api/x402-config — no @x402 SDK imports (Edge-safe). */
 export function getPublicX402Config() {
   const nets = getX402NetworkProfile();
   const { evm, sol } = getMerchantAddresses();
+  const evmEnvInvalid = isEvmPayToMisconfigured();
+
   return {
     enabled: isX402Enabled(),
     facilitator: "PayAI",
@@ -74,6 +87,12 @@ export function getPublicX402Config() {
     networks: nets,
     acceptsEvm: !!evm,
     acceptsSol: !!sol,
+    evmPayToReady: !!evm,
+    configWarning: evmEnvInvalid
+      ? "Server X402_EVM_PAY_TO is invalid. In Vercel, set it to your Base Ethereum wallet (0x + 40 hex) — not a Solana address."
+      : isX402Enabled() && !evm
+        ? "EVM payments unavailable — set a valid X402_EVM_PAY_TO on the server."
+        : undefined,
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,

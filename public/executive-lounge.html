@@ -1268,12 +1268,32 @@
     const hint = document.getElementById('loungePayHint');
     if(hint){
       if(_x402Config.enabled){
-        hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> when you open a story';
+        if(_x402Config.configWarning){
+          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Payments misconfigured on server</span>';
+        } else if(_x402Config.enabled && !_x402Config.evmPayToReady){
+          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">EVM receive address missing — set X402_EVM_PAY_TO in Vercel</span>';
+        } else {
+          hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> when you open a story';
+        }
       } else {
         hint.textContent = 'Live wire';
       }
     }
     return _x402Config;
+  }
+
+  function assertX402PaymentsReady(cfg){
+    if(!cfg?.enabled) return;
+    if(cfg.configWarning) throw new Error(cfg.configWarning);
+    if(!cfg.evmPayToReady) throw new Error('EVM receive address not configured on server (X402_EVM_PAY_TO in Vercel).');
+  }
+
+  function formatPaymentError(err){
+    const m = err?.message || String(err);
+    if(/invalid.*address|is invalid|40 hex|checksum/i.test(m)){
+      return 'Payments misconfigured: server receive address must be your Base Ethereum wallet (0x + 40 hex). Fix X402_EVM_PAY_TO in Vercel.';
+    }
+    return m;
   }
   loadX402Config();
 
@@ -1293,6 +1313,7 @@
   async function paidApiFetch(url, options){
     const cfg = await loadX402Config();
     if(!cfg.enabled) return fetch(url, options || {});
+    assertX402PaymentsReady(cfg);
     ensureWalletForX402();
     if(typeof window.createX402PaidFetch !== 'function'){
       throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
@@ -1342,7 +1363,7 @@
       toast('Article unlocked ✓');
     }catch(e){
       console.warn('news-open', e);
-      toast(e.message||'Could not open article');
+      toast(formatPaymentError(e)||'Could not open article');
     }
   }
   window.openNewsArticle = openNewsArticle;
