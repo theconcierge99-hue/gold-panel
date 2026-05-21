@@ -86,6 +86,9 @@ function solMisconfigHint(): string | undefined {
   if (raw.startsWith("0x")) {
     return "X402_SOL_PAY_TO looks like an EVM address — paste it into X402_EVM_PAY_TO, and put your Solana base58 address here.";
   }
+  if (raw.length > 44) {
+    return "X402_SOL_PAY_TO is too long — you may have pasted a private key or seed (never use secrets in Vercel). Use only your public Solana receive address from Phantom (Receive → Solana, ~44 characters).";
+  }
   return undefined;
 }
 

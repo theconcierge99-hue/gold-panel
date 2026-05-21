@@ -370,6 +370,9 @@
   .pay-setup p{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--text2,#9aa3b2)}
   .pay-setup-hint{margin-top:12px!important;color:var(--text,#c8d0dc)!important}
   .pay-setup-diag{font-size:12px;opacity:.85}
+  .pay-setup-steps{margin:12px 0 0;padding-left:1.2rem;font-size:13px;line-height:1.5;color:var(--text2,#9aa3b2)}
+  .pay-setup-steps li{margin-bottom:8px}
+  .pay-setup-steps code{font-size:12px;color:var(--gold,#c9a227)}
   .pay-story{font-size:13px;line-height:1.5;color:var(--text-secondary);margin:12px 0 16px;max-height:4.5em;overflow:hidden}
   .pay-amount{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:18px}
   .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
@@ -1323,6 +1326,10 @@
     return !!(cfg?.enabled && (cfg.evmPayToReady || cfg.solPayToReady));
   }
 
+  function x402PaymentsWanted(cfg){
+    return !!(cfg?.paymentsRequested || cfg?.enabled);
+  }
+
   async function showPaySetupModal(cfg){
     const lines = [
       cfg.configWarning,
@@ -1340,8 +1347,11 @@
       ' · Sol env: '+(diag.sol?.set?'set ('+diag.sol.length+' chars)':'empty')+'</p>' : '';
     document.getElementById('payChainList').innerHTML =
       '<div class="pay-setup">'+lines.map(l=>'<p>'+escapeHtml(l)+'</p>').join('')+diagHtml+
-      '<p class="pay-setup-hint"><strong>X402_EVM_PAY_TO</strong> = Phantom → Ethereum on <strong>Base</strong> (0x + 40 hex). '+
-      '<strong>X402_SOL_PAY_TO</strong> = Phantom → <strong>Solana</strong> (base58, not 0x). Redeploy after saving.</p></div>';
+      '<ol class="pay-setup-steps">'+
+      '<li><strong>X402_EVM_PAY_TO</strong> — Phantom → <strong>Ethereum</strong> → network <strong>Base</strong> → copy address (<strong>42</strong> chars, <code>0x</code> + 40 hex). Not a transaction hash (66 chars).</li>'+
+      '<li><strong>X402_SOL_PAY_TO</strong> — Phantom → <strong>Solana</strong> → copy public receive address (<strong>32–44</strong> chars). Not private key / seed (often ~88 chars).</li>'+
+      '<li>Vercel → Save → <strong>Redeploy</strong> → check <code>/api/x402-config</code> shows <code>enabled: true</code>.</li>'+
+      '</ol><p class="pay-setup-hint">You only need <strong>one</strong> valid address (Solana or Base) to enable payments.</p></div>';
     document.getElementById('payOverlay').classList.add('show');
     return new Promise((_, reject)=>{
       _payModalDeferred = { resolve: ()=>{}, reject };
@@ -1539,6 +1549,10 @@
     }
     const cfg = await loadX402Config();
     if(!x402PaymentsLive(cfg)){
+      if(x402PaymentsWanted(cfg)){
+        try{ await showPaySetupModal(cfg); }catch(_){}
+        return;
+      }
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -1571,6 +1585,10 @@
   async function callConcierge(payload){
     const cfg = await loadX402Config();
     let preferredChain;
+    if(x402PaymentsWanted(cfg) && !x402PaymentsLive(cfg)){
+      try{ await showPaySetupModal(cfg); }catch(_){}
+      throw new Error('Payments not configured on server');
+    }
     if(x402PaymentsLive(cfg)){
       const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
       preferredChain = await showPaymentConfirm({
