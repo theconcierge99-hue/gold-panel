@@ -9,10 +9,9 @@ import {
 } from "./lib/concierge-security";
 import { requireX402Payment } from "./lib/x402-server";
 
-/** Node runtime for x402 verify/settle (PayAI) + Gemini */
+/** Edge — Gemini + x402 via PayAI HTTP (no Node-only @x402 server SDK) */
 export const config = {
-  runtime: "nodejs",
-  maxDuration: 60,
+  runtime: "edge",
 };
 
 function jsonResponse(

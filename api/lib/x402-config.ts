@@ -7,6 +7,22 @@ export const X402_PRICE_MONEY = "$0.10";
 /** USDC atomic units (6 decimals): 0.1 USDC = 100_000 */
 export const X402_PRICE_ATOMIC = "100000";
 
+/** PayAI facilitator fee payer for Solana exact scheme */
+export const SOLANA_FEE_PAYER = "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4";
+
+const USDC_BY_NETWORK: Record<string, string> = {
+  "eip155:8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "eip155:84532": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+};
+
+export function getUsdcAssetForNetwork(network: string): string {
+  const asset = USDC_BY_NETWORK[network];
+  if (!asset) throw new Error(`Unsupported x402 network: ${network}`);
+  return asset;
+}
+
 export type X402NetworkProfile = {
   evm: `eip155:${number}`;
   sol: `solana:${string}`;

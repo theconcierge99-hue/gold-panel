@@ -202,5 +202,27 @@ export function sanitizePublicError(error: unknown): string {
   if (msg.includes("Gemini") || msg.includes("model")) {
     return "Concierge is temporarily unavailable. Please try again shortly.";
   }
+  if (msg.includes("Payment") || msg.includes("x402") || msg.includes("Facilitator")) {
+    return msg;
+  }
   return "Concierge could not process this request. Try a shorter question.";
+}
+
+export function sanitizeNewsOpenError(error: unknown): string {
+  const msg = error instanceof Error ? error.message : "Unknown error";
+  if (!isProduction()) return msg;
+  if (
+    msg.includes("Origin not allowed") ||
+    msg.includes("too large") ||
+    msg.includes("required") ||
+    msg.includes("Invalid JSON") ||
+    msg.includes("Invalid request") ||
+    msg.includes("Valid article")
+  ) {
+    return msg;
+  }
+  if (msg.includes("Payment") || msg.includes("x402") || msg.includes("Facilitator")) {
+    return msg;
+  }
+  return "Could not open this article. Try again shortly.";
 }

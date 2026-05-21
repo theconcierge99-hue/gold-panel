@@ -2,13 +2,13 @@ import {
   assertAllowedOrigin,
   corsHeadersFor,
   readBodyWithLimit,
-  sanitizePublicError,
+  sanitizeNewsOpenError,
 } from "./lib/concierge-security";
 import { requireX402Payment } from "./lib/x402-server";
 
+/** Edge + PayAI HTTP facilitator (no Node-only @x402 server SDK) */
 export const config = {
-  runtime: "nodejs",
-  maxDuration: 30,
+  runtime: "edge",
 };
 
 const MAX_URL_LEN = 2048;
@@ -69,9 +69,10 @@ export default {
       if (!gate.ok) return gate.response;
 
       const raw = await readBodyWithLimit(request);
-      const article = parseNewsOpenBody(
-        typeof raw === "string" ? raw : JSON.stringify(raw ?? {}),
-      );
+      const article =
+        typeof raw === "string"
+          ? parseNewsOpenBody(raw)
+          : parseNewsOpenBody(JSON.stringify(raw ?? {}));
 
       const headers: Record<string, string> = {
         ...cors,
@@ -91,7 +92,7 @@ export default {
         { status: 200, headers },
       );
     } catch (e) {
-      const msg = sanitizePublicError(e);
+      const msg = sanitizeNewsOpenError(e);
       const status =
         msg.includes("not allowed") || msg.includes("too large")
           ? 403

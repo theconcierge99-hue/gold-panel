@@ -21,10 +21,6 @@
       ]
     }
   ],
-  "functions": {
-    "api/news-open.ts": { "maxDuration": 30 },
-    "api/concierge.ts": { "maxDuration": 60 }
-  },
   "rewrites": [
     {
       "source": "/favicon.ico",
