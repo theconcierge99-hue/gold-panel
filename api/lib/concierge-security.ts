@@ -61,15 +61,27 @@ function requestOrigin(request: Request): string | null {
   return null;
 }
 
-export function assertAllowedOrigin(request: Request): void {
-  const origin = requestOrigin(request);
-  if (!origin) {
-    if (isProduction()) throw new Error("Origin not allowed");
-    return;
+/** Custom domain on Vercel: allow when Origin host matches request Host (same site). */
+function originMatchesRequestHost(request: Request, origin: string): boolean {
+  const host = request.headers.get("host");
+  if (!host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
   }
+}
 
-  const allowed = getAllowedOrigins();
-  if (!allowed.includes(origin)) {
+export function isOriginAllowed(request: Request): boolean {
+  const origin = requestOrigin(request);
+  if (!origin) return !isProduction();
+
+  if (getAllowedOrigins().includes(origin)) return true;
+  return originMatchesRequestHost(request, origin);
+}
+
+export function assertAllowedOrigin(request: Request): void {
+  if (!isOriginAllowed(request)) {
     throw new Error("Origin not allowed");
   }
 }
@@ -150,12 +162,14 @@ export async function readBodyWithLimit(request: Request): Promise<unknown> {
 export function corsHeadersFor(request: Request): Record<string, string> {
   const origin = requestOrigin(request);
   const allowed = getAllowedOrigins();
-  const allowOrigin =
-    origin && allowed.includes(origin) ? origin : allowed[allowed.length - 1];
+  let allowOrigin = allowed[0] ?? "*";
+  if (origin && isOriginAllowed(request)) {
+    allowOrigin = origin;
+  }
 
   return {
-    "Access-Control-Allow-Origin": allowOrigin ?? "null",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",

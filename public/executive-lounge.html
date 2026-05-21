@@ -519,7 +519,7 @@
         <button type="button" class="theme-btn" data-theme-btn="light" id="themeLight">Light</button>
       </div>
       <div class="live" id="liveBadge" title="Market data source"><span class="dot"></span> <span id="liveLabel">Live</span></div>
-      <button class="btn gold" onclick="openModal()">+ Create Signal</button>
+      <button type="button" class="btn gold" id="createSignalBtn">+ Create Signal</button>
       <button class="btn" id="loginBtn" onclick="openWalletModal()">Login</button>
     </div>
   </header>
@@ -1089,9 +1089,11 @@
 
   function openModal(){
     updateUnlockPriceHint();
-    document.getElementById('overlay').classList.add('show');
+    document.getElementById('overlay')?.classList.add('show');
   }
-  function closeModal(){document.getElementById('overlay').classList.remove('show')}
+  function closeModal(){ document.getElementById('overlay')?.classList.remove('show'); }
+  window.openModal = openModal;
+  window.closeModal = closeModal;
   function updateImplication(){
     const t=document.getElementById('sigTitle').value.toLowerCase();
     let m='Regime context will load as the thesis develops. Concierge cross-references onchain flow, vol surface, and rates posture.';
@@ -1401,10 +1403,24 @@
     if(intel) intel.textContent='Live · '+headlines.length+' headlines';
   }
 
+  function showMarketLoadError(msg){
+    const text=escapeHtml(msg||'Feed unavailable');
+    const feat=document.getElementById('featuredSignals');
+    const grid=document.getElementById('marketIntelGrid');
+    const narr=document.getElementById('trendingNarratives');
+    const feed=document.getElementById('feedActivity');
+    if(feat) feat.innerHTML='<div class="intel-empty">'+text+'</div>';
+    if(grid) grid.innerHTML='<div class="intel-empty">'+text+'</div>';
+    if(narr) narr.innerHTML='<div class="intel-empty" style="border:none">'+text+'</div>';
+    if(feed) feed.innerHTML='<div class="intel-empty" style="border:none">'+text+'</div>';
+    const lbl=document.getElementById('liveLabel');
+    if(lbl) lbl.textContent='Offline';
+  }
+
   async function refreshMarket(){
     try{
-      const res=await fetch('/api/market');
-      const data=await res.json();
+      const res=await fetch('/api/market', { signal: AbortSignal.timeout(28000) });
+      const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
 
       renderTickerTicks(data.ticks||[]);
@@ -1423,12 +1439,12 @@
       }
     }catch(e){
       console.warn('market refresh', e);
-      const feat=document.getElementById('featuredSignals');
-      const grid=document.getElementById('marketIntelGrid');
-      if(feat && feat.querySelector('.intel-loading')) feat.innerHTML='<div class="intel-empty">Feed unavailable — check API / ALLOWED_ORIGINS.</div>';
-      if(grid && grid.querySelector('.intel-loading')) grid.innerHTML='<div class="intel-empty">Could not load intelligence wire.</div>';
+      const msg=e?.name==='TimeoutError' ? 'Request timed out — retry shortly.' : (e?.message||'Feed unavailable');
+      showMarketLoadError(msg);
     }
   }
+  document.getElementById('createSignalBtn')?.addEventListener('click', openModal);
+
   refreshMarket();
   setInterval(refreshMarket, 60000);
   syncMobileNav('lounge');
