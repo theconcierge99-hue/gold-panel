@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Executive Lounge — Private Intelligence Terminal</title>
-<meta name="viewport" content="width=1280" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="shortcut icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="apple-touch-icon" href="/images/the-concierge-logo.png" />
@@ -77,14 +77,20 @@
 
   .app{
     position:relative;z-index:1;
-    display:grid;grid-template-columns:200px 1fr 240px;grid-template-rows:60px 1fr;
-    height:100vh;width:100vw;overflow:hidden;
+    display:grid;grid-template-columns:200px minmax(0,1fr) 240px;grid-template-rows:var(--header-h,60px) minmax(0,1fr);
+    height:100vh;height:100dvh;width:100%;max-width:100vw;overflow:hidden;
   }
+  header{grid-column:1/-1;grid-row:1}
+  aside.left{grid-column:1;grid-row:2}
+  main{grid-column:2;grid-row:2;min-width:0}
+  aside.right{grid-column:3;grid-row:2;min-width:0}
+  aside.conc-sidebar{grid-column:3;grid-row:2;min-width:0}
+
+  .header-menu-btn,.nav-backdrop,.mobile-nav,.conc-drawer-btn{display:none}
 
   /* HEADER */
   header{
-    grid-column:1 / -1;
-    display:grid;grid-template-columns:240px 1fr auto;align-items:center;
+    display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) auto;align-items:center;
     padding:0 22px; gap:24px;
     background:var(--header-bg); backdrop-filter:blur(20px);
     transition:background .25s ease,border-color .25s;
@@ -143,7 +149,7 @@
   .cat-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:9px;vertical-align:middle}
 
   /* MAIN */
-  main{overflow-y:auto;padding:26px 32px 60px}
+  main{overflow-y:auto;padding:26px 32px 60px;-webkit-overflow-scrolling:touch}
   .view{display:none;animation:fadeUp .35s ease-out}
   .view.show{display:block}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -204,8 +210,8 @@
   .conc-hist-item.active{background:var(--nav-active-bg);color:var(--text-primary)}
   .conc-hist-empty{padding:12px 16px;font-size:12px;color:var(--text-muted);line-height:1.5}
 
-  .concierge-shell{display:flex;flex-direction:column;height:calc(100vh - 60px);background:var(--bg);position:relative}
-  .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:flex-start;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
+  .concierge-shell{display:flex;flex-direction:column;height:calc(100dvh - var(--header-h,60px) - var(--mobile-nav-h,0px));background:var(--bg);position:relative}
+  .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
   .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:default;text-align:left}
   .conc-model img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.4);box-shadow:var(--logo-shadow);flex-shrink:0}
   .conc-model-text{display:flex;flex-direction:column;gap:5px;line-height:1}
@@ -345,6 +351,130 @@
   .wallet-row .wmeta{font-size:10px;color:var(--text-secondary);margin-top:2px}
   .btn.sm{padding:5px 10px;font-size:9px}
   #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
+
+  /* —— Tablet (sidebar drawer, stack right panel) —— */
+  @media (max-width:1023px){
+    :root{--header-h:56px;--mobile-nav-h:52px}
+    .app{
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:var(--header-h) minmax(0,1fr) auto var(--mobile-nav-h);
+    }
+    aside.left{
+      position:fixed;top:0;left:0;bottom:var(--mobile-nav-h);width:min(288px,88vw);z-index:50;
+      transform:translateX(-100%);transition:transform .25s ease;
+      border-right:1px solid var(--border);box-shadow:none;
+    }
+    aside.left.open{transform:translateX(0);box-shadow:12px 0 40px rgba(0,0,0,.35)}
+    aside.right{
+      grid-column:1;grid-row:3;max-height:min(42vh,320px);overflow-y:auto;
+      border-left:none;border-top:1px solid var(--border);padding:16px 18px;
+    }
+    main{grid-column:1;grid-row:2;padding:20px 18px 28px}
+    aside.conc-sidebar{
+      position:fixed;top:var(--header-h);right:0;bottom:var(--mobile-nav-h);width:min(300px,92vw);z-index:48;
+      transform:translateX(100%);transition:transform .25s ease;border-left:1px solid var(--border);
+      display:none;flex-direction:column;
+    }
+    aside.conc-sidebar.open{transform:translateX(0)}
+    .app.concierge-mode aside.conc-sidebar{display:flex}
+    .app.concierge-mode aside.right{display:none}
+    .app.concierge-mode{grid-template-rows:var(--header-h) minmax(0,1fr) var(--mobile-nav-h)}
+    .app.concierge-mode aside.right{grid-row:unset;display:none}
+    .app.concierge-mode main{grid-row:2}
+    .featured{grid-template-columns:1fr}
+    .grid{grid-template-columns:1fr}
+    .header-menu-btn,.nav-backdrop,.mobile-nav,.conc-drawer-btn{display:flex}
+    .nav-backdrop{
+      display:none;position:fixed;inset:0;background:var(--overlay-bg);z-index:45;
+      opacity:0;transition:opacity .2s;pointer-events:none;
+    }
+    .nav-backdrop.show{display:block;opacity:1;pointer-events:auto}
+    .mobile-nav{
+      grid-column:1;grid-row:4;align-items:stretch;justify-content:space-around;gap:4px;
+      padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+      background:var(--header-bg);border-top:1px solid var(--border);backdrop-filter:blur(16px);
+    }
+    .mob-nav-i{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+      min-height:40px;border:none;background:transparent;color:var(--text-muted);
+      font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+      cursor:pointer;border-radius:8px;padding:6px 4px;transition:color .15s,background .15s;
+    }
+    .mob-nav-i svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75}
+    .mob-nav-i.active,.mob-nav-i:hover{color:var(--gold);background:var(--nav-active-bg)}
+    header{
+      padding:0 14px;gap:10px;
+      grid-template-columns:auto auto minmax(0,1fr) auto;
+    }
+    .brand-mark{grid-column:1;grid-row:1}
+    .header-menu-btn{grid-column:2;grid-row:1}
+    .ticker-wrap{grid-column:3;grid-row:1}
+    .hright{grid-column:4;grid-row:1}
+    .logo .sub{display:none}
+    .hright .btn.gold{display:none}
+    .conc-drawer-btn{
+      align-items:center;justify-content:center;width:36px;height:36px;margin-left:8px;
+      border:1px solid var(--border);border-radius:8px;background:var(--gcard-bg);
+      color:var(--text-secondary);cursor:pointer;flex-shrink:0;
+    }
+    .conc-drawer-btn:hover{border-color:var(--gold-dim);color:var(--text-primary)}
+    .app:not(.concierge-mode) .conc-drawer-btn{display:none!important}
+  }
+
+  /* —— Mobile —— */
+  @media (max-width:767px){
+    :root{--header-h:auto;--mobile-nav-h:56px}
+    header{
+      grid-template-columns:auto minmax(0,1fr) auto;
+      grid-template-rows:auto auto;align-items:center;padding:10px 12px 8px;gap:8px 10px;
+    }
+    .brand-mark{grid-column:1;grid-row:1;min-width:0}
+    .logo .name{font-size:18px}
+    .header-menu-btn{
+      grid-column:2;grid-row:1;justify-self:end;margin-right:4px;
+      align-items:center;justify-content:center;width:40px;height:40px;
+      border:1px solid var(--border);border-radius:8px;background:var(--gcard-bg);
+      color:var(--text-primary);cursor:pointer;
+    }
+    .hright{grid-column:3;grid-row:1;gap:8px;flex-wrap:nowrap}
+    .ticker-wrap{grid-column:1/-1;grid-row:2;width:100%;min-height:28px}
+    .live span#liveLabel{display:none}
+    .btn{padding:7px 10px;font-size:10px}
+    main{padding:16px 14px 24px}
+    .section-h h2{font-size:18px}
+    .fcard h3{font-size:19px}
+    .fcard{padding:16px 18px}
+    .meta-row .spacer{width:100%;margin-left:0;margin-top:10px;flex-basis:100%}
+    .pcard{flex-direction:column;align-items:flex-start;gap:16px}
+    .pcard .btn.gold{margin-left:0!important;width:100%;text-align:center}
+    .stats{grid-template-columns:1fr}
+    .wallet-grid{grid-template-columns:1fr}
+    .conc-topbar{padding:12px 14px;min-height:56px}
+    .conc-footer{padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
+    .chat{padding:16px 12px 8px}
+    .conc-suggestions{padding:0 4px}
+    .toasts{left:12px;right:12px;bottom:calc(var(--mobile-nav-h) + 12px)}
+    .toast{min-width:0}
+    .app.concierge-mode aside.right{display:none!important}
+    .app:not(.concierge-mode){
+      grid-template-rows:var(--header-h) minmax(0,1fr) var(--mobile-nav-h);
+    }
+    .app:not(.concierge-mode) aside.right{display:none}
+    .app:not(.concierge-mode) .mobile-nav{grid-row:3}
+    .app:not(.concierge-mode) main{grid-row:2}
+    header{grid-template-columns:auto minmax(0,1fr) auto}
+    body.drawer-open{overflow:hidden}
+  }
+
+  @media (min-width:768px) and (max-width:1023px){
+    header{grid-template-columns:auto minmax(0,1fr) auto}
+    .header-menu-btn{display:flex}
+  }
+
+  @media (min-width:1024px){
+    .app.concierge-mode{grid-template-columns:200px minmax(0,1fr) 260px}
+    :root{--mobile-nav-h:0px}
+  }
 </style>
 </head>
 <body>
@@ -359,6 +489,9 @@
         <span class="sub">Private Intelligence Terminal</span>
       </div>
     </div>
+    <button type="button" class="header-menu-btn" id="menuBtn" aria-label="Open menu" onclick="toggleNavDrawer()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
     <div class="ticker-wrap" id="tickerWrap">
       <div class="ticker-track" id="tickerTrack">
         <div class="ticker-set" id="tickerSetA"></div>
@@ -436,6 +569,9 @@
               <div class="conc-model-sub">Your Intelligence Partner</div>
             </div>
           </div>
+          <button type="button" class="conc-drawer-btn" id="concHistBtn" aria-label="Chat history" onclick="toggleConcDrawer()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          </button>
         </div>
         <div class="conc-body">
           <div class="conc-hero" id="concHero">
@@ -506,6 +642,27 @@
     <div class="conc-hist-h">Recents</div>
     <div class="conc-hist-list" id="concHistList"></div>
   </aside>
+
+  <div class="nav-backdrop" id="navBackdrop" onclick="closeAllDrawers()" aria-hidden="true"></div>
+
+  <nav class="mobile-nav" aria-label="Main navigation">
+    <button type="button" class="mob-nav-i active" data-mob="lounge" onclick="mobileNav('lounge')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+      Lounge
+    </button>
+    <button type="button" class="mob-nav-i" data-mob="concierge" onclick="mobileNav('concierge')">
+      <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="2"/></svg>
+      Concierge
+    </button>
+    <button type="button" class="mob-nav-i" data-mob="profile" onclick="mobileNav('profile')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 10h10"/></svg>
+      Wallet
+    </button>
+    <button type="button" class="mob-nav-i" data-mob="menu" onclick="toggleNavDrawer()">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      Menu
+    </button>
+  </nav>
 </div>
 
 <!-- WALLET MODAL -->
@@ -810,6 +967,54 @@
     inp.style.height=Math.min(inp.scrollHeight,140)+'px';
   }
 
+  function closeNavDrawer(){
+    document.querySelector('aside.left')?.classList.remove('open');
+    document.body.classList.remove('drawer-open');
+    const bd=document.getElementById('navBackdrop');
+    if(bd && !document.getElementById('concSidebar')?.classList.contains('open')) bd.classList.remove('show');
+  }
+  function closeConcDrawer(){
+    document.getElementById('concSidebar')?.classList.remove('open');
+    const bd=document.getElementById('navBackdrop');
+    if(bd && !document.querySelector('aside.left')?.classList.contains('open')) bd.classList.remove('show');
+  }
+  function closeAllDrawers(){ closeNavDrawer(); closeConcDrawer(); }
+  function toggleNavDrawer(){
+    const aside=document.querySelector('aside.left');
+    const bd=document.getElementById('navBackdrop');
+    if(!aside) return;
+    const open=!aside.classList.contains('open');
+    closeConcDrawer();
+    aside.classList.toggle('open', open);
+    document.body.classList.toggle('drawer-open', open);
+    bd?.classList.toggle('show', open);
+  }
+  function toggleConcDrawer(){
+    const panel=document.getElementById('concSidebar');
+    const bd=document.getElementById('navBackdrop');
+    if(!panel) return;
+    const open=!panel.classList.contains('open');
+    closeNavDrawer();
+    panel.classList.toggle('open', open);
+    bd?.classList.toggle('show', open);
+  }
+  function syncMobileNav(v){
+    document.querySelectorAll('.mob-nav-i').forEach(b=>{
+      const m=b.getAttribute('data-mob');
+      b.classList.toggle('active', m===v || (m==='menu' && document.querySelector('aside.left')?.classList.contains('open')));
+    });
+  }
+  function mobileNav(v){
+    if(v==='menu'){ toggleNavDrawer(); return; }
+    showView(v);
+    closeAllDrawers();
+    syncMobileNav(v);
+  }
+  window.toggleNavDrawer=toggleNavDrawer;
+  window.toggleConcDrawer=toggleConcDrawer;
+  window.closeAllDrawers=closeAllDrawers;
+  window.mobileNav=mobileNav;
+
   // VIEW SWITCHING
   function showView(v){
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
@@ -817,6 +1022,8 @@
     document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('active'));
     document.querySelectorAll('[data-nav="'+v+'"]').forEach(n=>n.classList.add('active'));
     document.querySelector('.app')?.classList.toggle('concierge-mode', v==='concierge');
+    closeAllDrawers();
+    syncMobileNav(v);
     if(v==='concierge'){
       if(!window._chatInit){ window._chatInit=true; ensureConciergeSession(); }
       else { renderConciergeHistory(); }
@@ -950,6 +1157,7 @@
     renderConciergeHistory();
   }
   function startNewChat(){
+    closeConcDrawer();
     persistCurrentSession();
     window._currentSessionId = genSessionId();
     localStorage.setItem(CONC_CURRENT_KEY, window._currentSessionId);
@@ -962,6 +1170,7 @@
   }
   function loadChatSession(id){
     if(id===window._currentSessionId) return;
+    closeConcDrawer();
     persistCurrentSession();
     const list = loadAllSessions();
     const session = list.find(s=>s.id===id);
@@ -1154,6 +1363,7 @@
   }
   refreshMarket();
   setInterval(refreshMarket, 60000);
+  syncMobileNav('lounge');
 
   function addAi(html, extra, trackSession){
     const c=document.getElementById('chat');
