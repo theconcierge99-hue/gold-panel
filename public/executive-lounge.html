@@ -329,6 +329,14 @@
   .cat-chip.sel{border-color:var(--gold);color:var(--gold);background:var(--nav-active-bg)}
   .cat-chip .cat-dot{margin-right:0;flex-shrink:0}
   .field-hint{font-size:10px;color:var(--text-muted);margin-top:-10px;margin-bottom:12px;letter-spacing:.04em}
+  .price-field{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--field-bg)}
+  .price-field:focus-within{border-color:var(--chrome)}
+  .price-field input{flex:1;min-width:0;border:none;background:transparent;padding:10px 13px;font-family:'DM Mono',monospace;font-size:12.5px}
+  .price-field input:focus{outline:none}
+  .price-unit{
+    display:flex;align-items:center;padding:0 14px;border-left:1px solid var(--border);
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--gold);background:var(--nav-active-bg);
+  }
   .imp{background:var(--field-bg);border:1px solid var(--border);border-left:2px solid var(--accent-teal);padding:12px 14px;font-size:12px;line-height:1.6;color:var(--text-secondary);min-height:60px}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}
 
@@ -742,7 +750,11 @@
     </div>
     <div class="field">
       <label>Unlock Price</label>
-      <input id="sigPrice" type="text" value="0.0005 ETH" />
+      <div class="price-field">
+        <input id="sigPriceAmount" type="number" min="0.01" step="0.01" value="1" inputmode="decimal" placeholder="1.00" aria-label="Unlock price amount in USDC" />
+        <span class="price-unit">USDC</span>
+      </div>
+      <p class="field-hint" id="sigChainHint">USDC only · chain follows your connected wallet</p>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -863,6 +875,7 @@
       form.style.display = '';
       panel.classList.remove('show');
     }
+    updateUnlockPriceHint();
   }
 
   function openWalletModal(){
@@ -1044,7 +1057,40 @@
   }
 
   // MODAL
-  function openModal(){document.getElementById('overlay').classList.add('show')}
+  const PAYMENT_CURRENCY = 'USDC';
+
+  function resolveCreatorPaymentChain(){
+    const s = getWalletSession();
+    if(s.sol && s.evm) return { family: 'multi', label: 'Solana + EVM (creator chooses at publish)' };
+    if(s.sol) return { family: 'sol', label: 'Solana (SOL)' };
+    if(s.evm) return { family: 'evm', label: 'EVM — Base, Polygon, or BNB' };
+    return { family: null, label: 'Connect wallet — Solana or EVM' };
+  }
+
+  function updateUnlockPriceHint(){
+    const el = document.getElementById('sigChainHint');
+    if(!el) return;
+    const chain = resolveCreatorPaymentChain();
+    el.textContent = PAYMENT_CURRENCY + ' only · chain: ' + chain.label;
+  }
+
+  function getSignalUnlockPrice(){
+    const raw = document.getElementById('sigPriceAmount')?.value;
+    const amount = parseFloat(raw);
+    const chain = resolveCreatorPaymentChain();
+    return {
+      currency: PAYMENT_CURRENCY,
+      amount: Number.isFinite(amount) && amount > 0 ? amount : null,
+      chainFamily: chain.family,
+      chainLabel: chain.label,
+    };
+  }
+  window.getSignalUnlockPrice = getSignalUnlockPrice;
+
+  function openModal(){
+    updateUnlockPriceHint();
+    document.getElementById('overlay').classList.add('show');
+  }
   function closeModal(){document.getElementById('overlay').classList.remove('show')}
   function updateImplication(){
     const t=document.getElementById('sigTitle').value.toLowerCase();
@@ -1067,6 +1113,8 @@
   function publishSignal(){
     const cats=getSelectedSignalCategories();
     if(!cats.length){ toast('Pilih minimal satu kategori'); return; }
+    const price = getSignalUnlockPrice();
+    if(!price.amount){ toast('Masukkan harga unlock USDC yang valid'); return; }
     closeModal();
     toast('Signal minted and published to the Lounge ✓');
     setTimeout(()=>toast('Onchain provenance record created ⛓'),900);
@@ -1427,7 +1475,7 @@
     if(t.includes('defi')||t.includes('tvl')||t.includes('uniswap')||t.includes('narrative'))
       return `<p><strong>DeFi narrative scan.</strong> Three threads are gathering weight: (1) Uniswap v4 hooks are restructuring MEV economics — searcher revenue is migrating to LPs, which changes the marginal yield calculation for stablecoin LPs; (2) Restaking is past its hype peak but EigenLayer's actively-validated services are now generating real cashflow; (3) Stablecoin float continues to outpace TVL growth — a regime where velocity, not deposits, is the cleaner lead.</p><p>The single most under-priced thesis on the desk: yield-bearing collateral becoming the dominant DeFi primitive within 12 months. That changes everything downstream — borrow markets, LSTs, and onchain credit.</p>`;
     if(t.includes('signal')||t.includes('create')||t.includes('btc dominance'))
-      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> I can pre-fill the editor with a 600-word thesis, citations from onchain flow, and a proposed unlock price of 0.0009 ETH. Open Create Signal when ready.</p>`;
+      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> I can pre-fill the editor with a 600-word thesis, citations from onchain flow, and a proposed unlock price of 5 USDC. Open Create Signal when ready.</p>`;
     if(t.includes('ai')||t.includes('agent')||t.includes('artificial'))
       return `<p><strong>AI × crypto convergence.</strong> The interesting datapoint is no longer adoption — it is reflexivity. Autonomous agent wallets now drive ~8% of DEX volume on Base and Arbitrum, with repeating, rule-driven signatures that the market is beginning to front-run. The marginal buyer is increasingly non-human, which compresses the timeline between thesis and price.</p><p>Two derivatives worth tracking: (1) compute-bound L2s capturing agent inference workloads, and (2) yield-bearing stablecoins becoming the default agent settlement asset. Both are early. Neither is priced in.</p>`;
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;
