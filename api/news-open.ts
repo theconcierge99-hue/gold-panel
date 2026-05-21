@@ -47,62 +47,60 @@ function parseNewsOpenBody(raw: string): { url: string; title: string; source: s
   return { url, title, source };
 }
 
-export default {
-  async fetch(request: Request): Promise<Response> {
-    const cors = corsHeadersFor(request);
+export default async function handler(request: Request): Promise<Response> {
+  const cors = corsHeadersFor(request);
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: cors });
-    }
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: cors });
+  }
 
-    if (request.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
-    }
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 
-    try {
-      assertAllowedOrigin(request);
+  try {
+    assertAllowedOrigin(request);
 
-      const gate = await requireX402Payment(request, "news", cors);
-      if (!gate.ok) return gate.response;
+    const gate = await requireX402Payment(request, "news", cors);
+    if (!gate.ok) return gate.response;
 
-      const raw = await readBodyWithLimit(request);
-      const article =
-        typeof raw === "string"
-          ? parseNewsOpenBody(raw)
-          : parseNewsOpenBody(JSON.stringify(raw ?? {}));
+    const raw = await readBodyWithLimit(request);
+    const article =
+      typeof raw === "string"
+        ? parseNewsOpenBody(raw)
+        : parseNewsOpenBody(JSON.stringify(raw ?? {}));
 
-      const headers: Record<string, string> = {
-        ...cors,
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store",
-      };
-      if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
+    const headers: Record<string, string> = {
+      ...cors,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    };
+    if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
 
-      return new Response(
-        JSON.stringify({
-          ok: true,
-          url: article.url,
-          title: article.title,
-          source: article.source,
-          priceUsdc: 0.1,
-        }),
-        { status: 200, headers },
-      );
-    } catch (e) {
-      const msg = sanitizeNewsOpenError(e);
-      const status =
-        msg.includes("not allowed") || msg.includes("too large")
-          ? 403
-          : msg.includes("required") || msg.includes("Invalid")
-            ? 400
-            : 500;
-      return new Response(JSON.stringify({ error: msg }), {
-        status,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
-    }
-  },
-};
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        url: article.url,
+        title: article.title,
+        source: article.source,
+        priceUsdc: 0.1,
+      }),
+      { status: 200, headers },
+    );
+  } catch (e) {
+    const msg = sanitizeNewsOpenError(e);
+    const status =
+      msg.includes("not allowed") || msg.includes("too large")
+        ? 403
+        : msg.includes("required") || msg.includes("Invalid")
+          ? 400
+          : 500;
+    return new Response(JSON.stringify({ error: msg }), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+}

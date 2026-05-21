@@ -1,9 +1,7 @@
 /**
  * x402 payment gate via PayAI facilitator HTTP API (Edge-safe).
- * Avoids @x402/evm/svm server SDKs that crash Vercel Node cold starts.
+ * Avoids @x402/evm/svm server SDKs and @payai/facilitator bundle on Vercel.
  */
-import { facilitator } from "@payai/facilitator";
-
 import {
   getMerchantAddresses,
   getX402NetworkProfile,
@@ -145,18 +143,36 @@ function findMatchingRequirement(
   );
 }
 
+/** Free tier: no auth. Optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). */
+async function facilitatorAuthHeaders(
+  endpoint: "verify" | "settle",
+): Promise<Record<string, string>> {
+  const keyId = process.env.PAYAI_API_KEY_ID?.trim();
+  const keySecret = process.env.PAYAI_API_KEY_SECRET?.trim();
+  if (!keyId || !keySecret) return {};
+
+  try {
+    const mod = await import("@payai/facilitator");
+    const headers = await mod.createPayAIAuthHeaders(keyId, keySecret)();
+    return headers[endpoint] ?? {};
+  } catch (e) {
+    console.error("[x402] PayAI JWT auth failed", e instanceof Error ? e.message : e);
+    return {};
+  }
+}
+
 async function facilitatorPost<T>(
   path: string,
   body: unknown,
   endpoint: "verify" | "settle",
 ): Promise<T> {
-  const auth = await facilitator.createAuthHeaders();
+  const auth = await facilitatorAuthHeaders(endpoint);
   const res = await fetch(`${FACILITATOR_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...(auth[endpoint] ?? {}),
+      ...auth,
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(25_000),
