@@ -27,7 +27,7 @@ const USDC = {
     evm: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as const,
     evmNetwork: "eip155:8453" as const,
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d" as const,
+    solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" as const,
     /** Public RPC blocks browser POST (403) — use fallbacks first */
     solRpcFallbacks: [
       "https://solana-rpc.publicnode.com",

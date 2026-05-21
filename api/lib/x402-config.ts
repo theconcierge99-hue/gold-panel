@@ -17,11 +17,15 @@ export const X402_PRICE_ATOMIC = "100000";
 /** PayAI facilitator fee payer for Solana exact scheme */
 export const SOLANA_FEE_PAYER = "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4";
 
+/** CAIP-2 Solana IDs — first 32 chars of genesis hash (x402 / @x402/svm requirement) */
+export const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
+export const SOLANA_DEVNET_CAIP2 = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
+
 const USDC_BY_NETWORK: Record<string, string> = {
   "eip155:8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   "eip155:84532": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  [SOLANA_MAINNET_CAIP2]: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  [SOLANA_DEVNET_CAIP2]: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 };
 
 export function getUsdcAssetForNetwork(network: string): string {
@@ -38,13 +42,13 @@ export type X402NetworkProfile = {
 
 const MAINNET: X402NetworkProfile = {
   evm: "eip155:8453",
-  sol: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  sol: SOLANA_MAINNET_CAIP2,
   label: "Base + Solana mainnet",
 };
 
 const TESTNET: X402NetworkProfile = {
   evm: "eip155:84532",
-  sol: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+  sol: SOLANA_DEVNET_CAIP2,
   label: "Base Sepolia + Solana devnet",
 };
 

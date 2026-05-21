@@ -90,6 +90,14 @@ function normalizePayTo(addr: string): string {
   return addr.startsWith("0x") ? addr.toLowerCase() : addr;
 }
 
+/** Match CAIP-2 Solana IDs whether facilitator sends 32-char or full genesis reference */
+function normalizeSolanaNetwork(network: string): string {
+  if (!network.startsWith("solana:")) return network;
+  const ref = network.slice(7);
+  if (ref.length > 32) return `solana:${ref.slice(0, 32)}`;
+  return network;
+}
+
 function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequirement[] {
   const nets = getX402NetworkProfile();
   const { evm, sol } = getMerchantAddresses();
@@ -136,7 +144,9 @@ function findMatchingRequirement(
   return (
     accepts.find((req) => {
       if (req.scheme !== accepted.scheme) return false;
-      if (req.network !== accepted.network) return false;
+      if (normalizeSolanaNetwork(req.network) !== normalizeSolanaNetwork(accepted.network)) {
+        return false;
+      }
       if (req.amount !== accepted.amount) return false;
       if (req.asset !== accepted.asset) return false;
       if (normalizePayTo(req.payTo) !== normalizePayTo(accepted.payTo)) return false;
