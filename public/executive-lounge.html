@@ -517,7 +517,7 @@
   .x402-hint{font-size:10px;color:var(--text-muted);letter-spacing:.06em;margin-top:4px}
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
-<script type="module" src="/js/x402-pay.mjs?v=exact-svm-partial-1"></script>
+<script type="module" src="/js/x402-pay.mjs?v=exact-svm-partial-2"></script>
 </head>
 <body>
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div></div>
@@ -1390,8 +1390,8 @@
     if(/Buffer is not defined/i.test(m)){
       return 'Payment module outdated — hard refresh (Ctrl+F5) and try again.';
     }
-    if(/Failed to create payment payload|8103002|\.serialize is not a function|403|Forbidden|mainnet-beta\.solana/i.test(m)){
-      return 'Solana payment could not start. Hard refresh (Ctrl+F5), pick Solana, approve in Phantom. Keep ~0.01 SOL for network fees.';
+    if(/Failed to create payment payload|8103002|8108802|48108802|Solana error|RPC|\.serialize is not a function|403|Forbidden|mainnet-beta\.solana/i.test(m)){
+      return 'Solana RPC failed — hard refresh (Ctrl+Shift+R), retry Solana payment. Keep ~0.01 SOL for fees. Detail: '+m;
     }
     if(/Merchant USDC account not initialized|no USDC account yet/i.test(m)){
       return 'Merchant cannot receive USDC on Solana yet. Send any USDC once to the merchant address (X402_SOL_PAY_TO in Vercel), redeploy if needed, then retry — or pay with Base (EVM).';

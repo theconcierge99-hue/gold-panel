@@ -6,7 +6,7 @@ import type { PaymentRequirements } from "@x402/core/types";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { address } from "@solana/addresses";
 import { createNoopSigner, type TransactionSigner } from "@solana/signers";
 import { getTransactionCodec, assertIsTransactionWithinSizeLimit } from "@solana/transactions";
@@ -130,6 +130,43 @@ function formatUsdc(atomic: bigint): string {
 function solRpcProxyUrl(): string {
   if (typeof window === "undefined") return "https://solana-rpc.publicnode.com";
   return `${window.location.origin}/api/solana-rpc`;
+}
+
+/** Public Solana RPC URLs blocked in browser (403) — redirect to our Helius proxy */
+const SOLANA_PUBLIC_RPC_RE =
+  /\/\/(?:api\.)?mainnet-beta\.solana\.com|\/\/api\.devnet\.solana\.com|\/\/api\.testnet\.solana\.com/i;
+
+let solRpcProxyDepth = 0;
+let nativeFetch: typeof fetch | null = null;
+
+function installSolanaRpcProxyFetch(): void {
+  if (typeof window === "undefined") return;
+  if (!nativeFetch) nativeFetch = window.fetch.bind(window);
+  if (solRpcProxyDepth++ > 0) return;
+  const proxy = solRpcProxyUrl();
+  window.fetch = async (input, init) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    if (SOLANA_PUBLIC_RPC_RE.test(url)) {
+      return nativeFetch!(proxy, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: init?.body,
+        signal: init?.signal,
+      });
+    }
+    return nativeFetch!(input, init);
+  };
+}
+
+function uninstallSolanaRpcProxyFetch(): void {
+  if (typeof window === "undefined" || !nativeFetch) return;
+  if (--solRpcProxyDepth > 0) return;
+  window.fetch = nativeFetch;
 }
 
 function signedTxToBytes(signed: unknown, fallback: Uint8Array): Uint8Array {
@@ -449,14 +486,25 @@ export async function createX402PaidFetch(
     registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
   } else {
     const solProv = solanaProvider(session)!;
-    registerExactSvmScheme(client, {
-      signer: createPhantomSolanaSigner(solProv, session.sol!.address),
-      networks: [nets.solNetwork],
-      rpcUrl: solRpcProxyUrl(),
-    });
+    client.register(
+      nets.solNetwork,
+      new ExactSvmScheme(createPhantomSolanaSigner(solProv, session.sol!.address), {
+        rpcUrl: solRpcProxyUrl(),
+      }),
+    );
   }
 
-  return wrapFetchWithPayment(fetch, client);
+  const paidFetch = wrapFetchWithPayment(fetch, client);
+  if (preferred !== "sol") return paidFetch;
+
+  return async (url, options) => {
+    installSolanaRpcProxyFetch();
+    try {
+      return await paidFetch(url, options);
+    } finally {
+      uninstallSolanaRpcProxyFetch();
+    }
+  };
 }
 
 if (typeof window !== "undefined") {
