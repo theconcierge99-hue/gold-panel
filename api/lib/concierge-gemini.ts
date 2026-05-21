@@ -257,6 +257,7 @@ export async function runConciergeGemini(options: {
       liveMarketBlock: intelBlock,
       imageMode: true,
       requireTradingPlan,
+      userMessage: message,
     });
     const analysis = await geminiGenerateText(apiKey, {
       systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -294,6 +295,7 @@ export async function runConciergeGemini(options: {
     market: ticks,
     liveMarketBlock: intelBlock,
     requireTradingPlan,
+    userMessage: message,
   });
   let reply = await geminiGenerateText(apiKey, {
     systemInstruction: { parts: [{ text: systemPrompt }] },
