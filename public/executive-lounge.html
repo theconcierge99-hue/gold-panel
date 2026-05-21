@@ -754,7 +754,6 @@
         <input id="sigPriceAmount" type="number" min="0.01" step="0.01" value="1" inputmode="decimal" placeholder="1.00" aria-label="Unlock price amount in USDC" />
         <span class="price-unit">USDC</span>
       </div>
-      <p class="field-hint" id="sigChainHint">USDC only · chain follows your connected wallet</p>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -833,13 +832,6 @@
     return { family: null, label: 'Connect wallet — Solana or EVM' };
   }
 
-  function updateUnlockPriceHint(){
-    const el = document.getElementById('sigChainHint');
-    if(!el) return;
-    const chain = resolveCreatorPaymentChain();
-    el.textContent = PAYMENT_CURRENCY + ' only · chain: ' + chain.label;
-  }
-
   function getSignalUnlockPrice(){
     const raw = document.getElementById('sigPriceAmount')?.value;
     const amount = parseFloat(raw);
@@ -905,7 +897,6 @@
       form.style.display = '';
       panel.classList.remove('show');
     }
-    updateUnlockPriceHint();
   }
 
   function openWalletModal(){
@@ -1088,7 +1079,6 @@
 
   // MODAL
   function openModal(){
-    updateUnlockPriceHint();
     document.getElementById('overlay')?.classList.add('show');
   }
   function closeModal(){ document.getElementById('overlay')?.classList.remove('show'); }
