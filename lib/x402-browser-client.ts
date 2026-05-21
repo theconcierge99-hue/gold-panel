@@ -157,7 +157,17 @@ function createPhantomSolanaSigner(
       for (const transaction of transactions) {
         const wire = transactionCodec.encode(transaction);
         const vtx = VersionedTransaction.deserialize(wire);
-        const signed = await provider.signTransaction(vtx);
+        let signed: unknown;
+        try {
+          signed = await provider.signTransaction(vtx);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          const code = (e as { code?: number })?.code;
+          if (code === 4001 || /reject|cancel|denied/i.test(msg)) {
+            throw new Error("Payment cancelled");
+          }
+          throw e;
+        }
         const bytes = signedTxToBytes(signed, wire);
         const decoded = transactionCodec.decode(bytes);
         assertIsTransactionWithinSizeLimit(decoded);

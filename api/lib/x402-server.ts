@@ -223,9 +223,13 @@ export async function buildPaymentRequiredResponse(
     extensions: {},
   };
 
+  const clientMessage =
+    error === "PAYMENT-SIGNATURE header is required" ? "Payment required" : error;
+
   return new Response(
     JSON.stringify({
-      error: "Payment required",
+      error: clientMessage,
+      detail: error,
       priceUsdc: X402_PRICE_USDC,
       priceLabel: X402_PRICE_LABEL,
       resource: kind,

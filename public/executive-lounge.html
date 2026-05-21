@@ -1383,6 +1383,12 @@
     if(/Failed to create payment payload|8103002|\.serialize is not a function|403|Forbidden|mainnet-beta\.solana/i.test(m)){
       return 'Solana payment could not start. Hard refresh (Ctrl+F5), pick Solana, approve in Phantom. Keep ~0.01 SOL for network fees.';
     }
+    if(/verification failed|invalid_exact|instructions_length|settlement failed|does not match/i.test(m)){
+      return 'Payment was rejected after signing. In Phantom tap Confirm (unsafe) — normal for new sites. Retry, or use Base (EVM) if you have USDC there. Detail: '+m;
+    }
+    if(m === 'Payment required'){
+      return 'Payment not completed. Approve the full transaction in Phantom (0.1 USDC + small SOL fee), then try again.';
+    }
     return m;
   }
   loadX402Config();
@@ -1527,7 +1533,7 @@
     );
     const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
-    if(u.includes('/api/news-open')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
+    if(u.includes('/api/news-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve 0.1 USDC on '+chainHint);
     else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
     return paidFetch(url, options || {});
   }
@@ -1573,7 +1579,7 @@
         body: JSON.stringify({ url, title, source }),
       }, { preferredChain: chain });
       const data = await res.json().catch(()=>({}));
-      if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
+      if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       const target = data.url || url;
       window.open(target, '_blank', 'noopener,noreferrer');
       toast('Article unlocked ✓');
