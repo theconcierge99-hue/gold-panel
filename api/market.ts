@@ -2,9 +2,9 @@ import { enrichHeadlinesForUi, buildTrendingNarratives } from "./lib/headline-ui
 import { fetchLiveMarketSnapshot, ticksForUi } from "./lib/market-data";
 import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
 
+/** Edge — free headline feed; no x402 / Node SDK deps */
 export const config = {
-  runtime: "nodejs",
-  maxDuration: 30,
+  runtime: "edge",
 };
 
 export default async function handler(request: Request): Promise<Response> {
