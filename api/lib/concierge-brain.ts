@@ -5,11 +5,48 @@ export type ConciergeTopic =
   | "liquidation"
   | "technology"
   | "geopolitics"
-  | "equities"
   | "crypto"
+  | "stocks"
+  | "energy"
+  | "equities"
+  | "oil"
+  | "precious_metals"
   | "defi"
   | "strategy"
+  | "other"
   | "general";
+
+/** Sidebar / Create Signal taxonomy — Concierge must answer any question in these lenses */
+export const EXECUTIVE_LOUNGE_CATEGORIES = [
+  "Technology",
+  "Macro",
+  "Micro",
+  "Geopolitics",
+  "Crypto",
+  "Stocks",
+  "Energy",
+  "Equities",
+  "Oil",
+  "Gold / Silver",
+  "Other",
+] as const;
+
+const LOUNGE_CATEGORY_TRIGGERS: { patterns: string[]; topics: ConciergeTopic[] }[] = [
+  { patterns: ["technology", "teknologi"], topics: ["technology"] },
+  { patterns: ["macro", "makro", "macroeconom"], topics: ["macro"] },
+  { patterns: ["micro", "mikro", "microeconom"], topics: ["micro"] },
+  { patterns: ["geopolit", "geopolitik"], topics: ["geopolitics"] },
+  { patterns: ["crypto", "kripto", "cryptocurrency"], topics: ["crypto"] },
+  { patterns: ["stocks", "saham", "single stock", "stock pick"], topics: ["stocks"] },
+  { patterns: ["energy", "energi", "renewable", "utilities sector"], topics: ["energy"] },
+  { patterns: ["equities", "ekuitas", "equity market"], topics: ["equities"] },
+  { patterns: ["oil", "crude", "wti", "brent", "opec", "minyak"], topics: ["oil"] },
+  {
+    patterns: ["gold / silver", "gold/silver", "precious metal", "xau", "xag", "emas", "perak"],
+    topics: ["precious_metals"],
+  },
+  { patterns: ["other category", "cross-asset", "miscellaneous", "lainnya"], topics: ["other"] },
+];
 
 export type MarketTick = { symbol: string; price: string; change: string };
 
@@ -116,19 +153,106 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "conflict",
     "diplomacy",
   ],
+  stocks: [
+    "stocks",
+    "stock",
+    "saham",
+    "single name",
+    "stock pick",
+    "earnings",
+    "guidance",
+    "aapl",
+    "msft",
+    "nvda",
+    "tsla",
+    "amzn",
+    "goog",
+    "meta",
+    "mag7",
+    "faang",
+    "berkshire",
+    "share price",
+    "market cap",
+    "dividend",
+    "buyback",
+    "insider",
+    "analyst rating",
+    "ipo",
+  ],
+  energy: [
+    "energy",
+    "energi",
+    "power grid",
+    "electricity",
+    "utility",
+    "utilities",
+    "renewable",
+    "solar",
+    "wind power",
+    "nuclear",
+    "lng",
+    "natural gas",
+    "nat gas",
+    "hydrogen",
+    "energy transition",
+    "xle",
+    "uranium",
+  ],
   equities: [
     "equity",
     "equities",
-    "stock",
-    "saham",
+    "ekuitas",
     "spx",
     "s&p",
     "nasdaq",
     "nyse",
-    "earnings",
-    "pe ratio",
+    "dow jones",
+    "russell",
+    "msci",
+    "ftse",
+    "dax",
+    "nikkei",
+    "hang seng",
     "sector rotation",
+    "factor",
+    "breadth",
+    "vix",
     "index",
+    "global equity",
+  ],
+  oil: [
+    "oil",
+    "crude",
+    "wti",
+    "brent",
+    "opec",
+    "opec+",
+    "barrel",
+    "petroleum",
+    "refinery",
+    "crack spread",
+    "inventory eia",
+    "eia report",
+    "minyak",
+    "usoil",
+    "ukoil",
+  ],
+  precious_metals: [
+    "gold",
+    "silver",
+    "xau",
+    "xag",
+    "precious",
+    "bullion",
+    "comex",
+    "safe haven",
+    "real yield",
+    "emas",
+    "perak",
+    "gld",
+    "slv",
+    "palladium",
+    "platinum",
   ],
   crypto: [
     "crypto",
@@ -183,6 +307,21 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "swing trade",
     "scalp",
     "breakout trade",
+  ],
+  other: [
+    "cross-asset",
+    "multi-asset",
+    "portfolio",
+    "allocation",
+    "correlation",
+    "diversification",
+    "regime shift",
+    "black swan",
+    "tail risk",
+    "hedge",
+    "thematic",
+    "narrative",
+    "sentiment",
   ],
   general: [
     "general",
@@ -266,10 +405,41 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Scenarios: base / upside risk / tail. Impact on energy, gold, BTC as geopolitical hedge narrative.
 - Avoid partisan takes; institutional neutral tone.`,
 
-  equities: `GLOBAL EQUITIES PLAYBOOK:
+  stocks: `STOCKS PLAYBOOK (single names & sectors):
+- Structure: catalyst → fundamentals (growth/margins/FCF) → valuation (P/E, EV/EBITDA vs peers) → technical context → risk.
+- Separate idiosyncratic drivers (earnings, guidance, legal, product) from beta (macro, sector ETF, index trend).
+- Name peer set and relative strength; flag event risk (earnings date, FDA, regulatory).
+- Cross-link to Macro (rates/DXY), Technology (if tech name), Energy (if energy name), Geopolitics (if ADR/exposure).`,
+
+  energy: `ENERGY PLAYBOOK:
+- Map supply/demand: OPEC+ discipline, inventories, refining capacity, power demand, LNG flows.
+- Sub-themes: oil & gas majors, utilities, renewables (solar/wind), nuclear, grid infrastructure, energy transition policy.
+- Transmission: energy → CPI goods → rates → equities energy sector (XLE) → inflation breakevens → gold.
+- Distinguish structural (decade) vs cyclical (quarter) drivers; cite policy (IRA, carbon, sanctions).`,
+
+  equities: `GLOBAL EQUITIES PLAYBOOK (indices & factors):
 - Sector/style factor lens: growth vs value, large vs small, regional rotation.
 - Connect SPX/Nasdaq trend to VIX, earnings revision breadth, buyback impulse.
-- Cross-asset: equities vs crypto correlation regime (risk-on/off).`,
+- Cross-asset: equities vs crypto correlation regime (risk-on/off).
+- For index-level questions, prefer this lens; for single-ticker questions, use STOCKS playbook.`,
+
+  oil: `OIL PLAYBOOK:
+- Focus WTI/Brent, spreads, OPEC+ decisions, EIA/API inventories, refinery utilization, crack spreads.
+- Geopolitical risk premium vs fundamental surplus/deficit; USD and rate sensitivity.
+- Link to Energy sector equities, inflation prints, and risk-off episodes.
+- Scenario framework: base / supply shock / demand shock with price bands (label scenario if no live crude feed).`,
+
+  precious_metals: `GOLD / SILVER PLAYBOOK:
+- Gold: real rates, DXY, inflation expectations, central bank demand, geopolitical hedge, BTC correlation regime.
+- Silver: industrial demand (solar/electronics) plus precious-metal beta; higher volatility vs gold.
+- Structure: macro drivers → positioning (ETF/COT conceptually) → key levels (XAU/XAG) → cross-asset (miners, DXY, yields).
+- Avoid treating gold as only an inflation hedge — specify which driver dominates now.`,
+
+  other: `OTHER / CROSS-CATEGORY PLAYBOOK:
+- When the question is broad, unconventional, or spans desks: name 2–3 Executive Lounge categories that apply and synthesize.
+- Deliver a unified insight (not a list of definitions); show transmission between categories.
+- If ambiguous, state your assumed lens in one sentence, then answer fully.
+- Still use live market data when the question touches tradable assets.`,
 
   crypto: `CRYPTO PLAYBOOK:
 - Layer: macro liquidity → BTC regime → ETH/BTC → alt beta → micro (L1/L2/DeFi).
@@ -316,6 +486,23 @@ Rules for plans:
 - Label clearly: "illustrative framework, not financial advice."
 - For neutral bias: describe range trade or wait-for-breakout plan instead of forcing direction.`;
 
+const EXECUTIVE_LOUNGE_CATEGORY_INTEL = `EXECUTIVE LOUNGE — 11 INTELLIGENCE CATEGORIES (mandatory taxonomy):
+Users may ask about ANY category below. Detect intent, apply the matching playbook(s), and combine when a question spans lenses (e.g. Geopolitics + Oil, Macro + Gold / Silver).
+
+1. Technology — AI, semiconductors, software, cloud, cyber; market expression via tech equities and compute/crypto themes.
+2. Macro — Fed, inflation, GDP, DXY, yields, liquidity, growth/inflation quadrant.
+3. Micro — firm/industry economics, pricing power, supply chains; crypto microstructure (fees, MEV, validators) when relevant.
+4. Geopolitics — conflict, sanctions, elections, trade policy; commodity and safe-haven channels.
+5. Crypto — BTC/ETH/SOL, onchain, DeFi, derivatives positioning, ETF flows.
+6. Stocks — single names, sectors, earnings, guidance, relative strength vs benchmarks.
+7. Energy — oil & gas, power, renewables, utilities, LNG, energy transition (broad desk).
+8. Equities — global indices, factor rotation, breadth, vol, regional markets.
+9. Oil — crude (WTI/Brent), OPEC+, inventories, crack spreads (narrow desk).
+10. Gold / Silver — precious metals, real rates, USD, safe-haven and industrial silver drivers.
+11. Other — cross-asset synthesis, portfolio/regime questions, unconventional topics; explicitly tag which categories you used.
+
+When the user names a category (e.g. "Energy insight", "pertanyaan tentang Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
+
 const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
 - Understand the user in ANY language they write (e.g. Indonesian, English, Mandarin, Japanese, Korean, Arabic, Spanish, Portuguese, French, German, Thai, Vietnamese, Hindi, Russian, Turkish, etc.).
 - Always reply in the SAME language as the user's latest message. If they mix languages, use the dominant language of that message.
@@ -332,15 +519,46 @@ const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (every market answer):
 4. <p>Trading plan block — use TRADING PLAN format above (required for strategy/technical/crypto/liquidation topics, or when user asks price direction).</p>
 5. <p>Optional: one clarifying question only if asset, timeframe, or intent was genuinely unclear.</p>`;
 
+function matchesCategoryPattern(text: string, pattern: string): boolean {
+  const p = pattern.trim().toLowerCase();
+  if (!p) return false;
+  if (p.length <= 5 && !/\s/.test(p)) {
+    return new RegExp(`\\b${p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(text);
+  }
+  return text.includes(p);
+}
+
 export function detectTopics(message: string): ConciergeTopic[] {
   const t = message.toLowerCase();
   const hits: ConciergeTopic[] = [];
+  for (const { patterns, topics } of LOUNGE_CATEGORY_TRIGGERS) {
+    if (patterns.some((p) => matchesCategoryPattern(t, p))) {
+      for (const topic of topics) {
+        if (!hits.includes(topic)) hits.push(topic);
+      }
+    }
+  }
   for (const topic of Object.keys(TOPIC_KEYWORDS) as ConciergeTopic[]) {
-    if (TOPIC_KEYWORDS[topic].some((kw) => t.includes(kw))) hits.push(topic);
+    if (TOPIC_KEYWORDS[topic].some((kw) => t.includes(kw))) {
+      if (!hits.includes(topic)) hits.push(topic);
+    }
   }
   const marketTopics: ConciergeTopic[] = [
-    "macro", "micro", "technical", "liquidation", "technology",
-    "geopolitics", "equities", "crypto", "defi", "strategy",
+    "macro",
+    "micro",
+    "technical",
+    "liquidation",
+    "technology",
+    "geopolitics",
+    "equities",
+    "crypto",
+    "defi",
+    "strategy",
+    "stocks",
+    "energy",
+    "oil",
+    "precious_metals",
+    "other",
   ];
   const hasMarket = hits.some((h) => marketTopics.includes(h));
   if (!hits.length || (!hasMarket && hits.length <= 2)) {
@@ -370,6 +588,10 @@ export function wantsTradingPlan(message: string, topics: ConciergeTopic[]): boo
     "technical",
     "crypto",
     "liquidation",
+    "oil",
+    "precious_metals",
+    "stocks",
+    "energy",
   ];
   return topics.some((x) => planTopics.includes(x));
 }
@@ -397,14 +619,16 @@ export function buildConciergeSystemPrompt(options: {
 
 MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). Answer precisely in the user's language.
 
+${EXECUTIVE_LOUNGE_CATEGORY_INTEL}
+
 ${LANGUAGE_AND_INTENT_RULES}
 
-CORE COMPETENCIES:
-- Macroeconomics & microeconomics → regime and cross-asset implications
+CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
+- Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other (cross-category synthesis)
 - Technical analysis (all timeframes) → levels, momentum, structure
 - Liquidation clusters & derivatives → funding, OI, positioning skew
 - Trading plan design → entry, stop, targets, R:R, size, catalysts
-- Geopolitics, global equities, crypto/DeFi, technology themes
+- DeFi protocol economics when DeFi/onchain questions arise
 
 ${RESPONSE_STRUCTURE}
 

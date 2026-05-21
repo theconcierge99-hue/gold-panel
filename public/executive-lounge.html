@@ -534,17 +534,17 @@
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#3b7dd8"></span>Technology</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#c9a84c"></span>Macro</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#1d8f7a"></span>Micro</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#e85d4a"></span>Geopolitics</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#22c87a"></span>Crypto</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#8899bb"></span>Stocks</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#f5a623"></span>Energy</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#6b8cce"></span>Equities</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#8b6914"></span>Oil</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#d4cfc4"></span>Gold / Silver</span></div>
-      <div class="nav-i"><span><span class="cat-dot" style="background:#5a6a82"></span>Other</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Technology')" onkeydown="categoryNavKey(event,'Technology')"><span><span class="cat-dot" style="background:#3b7dd8"></span>Technology</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Macro')" onkeydown="categoryNavKey(event,'Macro')"><span><span class="cat-dot" style="background:#c9a84c"></span>Macro</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Micro')" onkeydown="categoryNavKey(event,'Micro')"><span><span class="cat-dot" style="background:#1d8f7a"></span>Micro</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Geopolitics')" onkeydown="categoryNavKey(event,'Geopolitics')"><span><span class="cat-dot" style="background:#e85d4a"></span>Geopolitics</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Crypto')" onkeydown="categoryNavKey(event,'Crypto')"><span><span class="cat-dot" style="background:#22c87a"></span>Crypto</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Stocks')" onkeydown="categoryNavKey(event,'Stocks')"><span><span class="cat-dot" style="background:#8899bb"></span>Stocks</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Energy')" onkeydown="categoryNavKey(event,'Energy')"><span><span class="cat-dot" style="background:#f5a623"></span>Energy</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Equities')" onkeydown="categoryNavKey(event,'Equities')"><span><span class="cat-dot" style="background:#6b8cce"></span>Equities</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Oil')" onkeydown="categoryNavKey(event,'Oil')"><span><span class="cat-dot" style="background:#8b6914"></span>Oil</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Gold / Silver')" onkeydown="categoryNavKey(event,'Gold / Silver')"><span><span class="cat-dot" style="background:#d4cfc4"></span>Gold / Silver</span></div>
+      <div class="nav-i" role="button" tabindex="0" onclick="askCategoryInsight('Other')" onkeydown="categoryNavKey(event,'Other')"><span><span class="cat-dot" style="background:#5a6a82"></span>Other</span></div>
     </div>
     </div>
     <div class="sidebar-footer">
@@ -1263,7 +1263,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I answer in <strong>any language</strong> — markets, general knowledge, and world affairs. Live data: Binance, Yahoo, CoinGecko, DeFi Llama, headlines, plus <strong>Wikipedia</strong>, <strong>DuckDuckGo</strong>, and world news (BBC, NPR, Guardian).</p><p>Ask about macro, technicals, crypto, history, science, culture — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> I answer in <strong>any language</strong> — markets, general knowledge, and world affairs. Live data: Binance, Yahoo, CoinGecko, DeFi Llama, headlines, plus <strong>Wikipedia</strong>, <strong>DuckDuckGo</strong>, and world news (BBC, NPR, Guardian).</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap a category in the sidebar. Use <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function tickerItemHtml(t){
     const up=!String(t.change).includes('-');
@@ -1516,6 +1516,26 @@
     persistCurrentSession();
   }
   function stripTags(html){ return html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); }
+
+  const CATEGORY_INSIGHT_PROMPTS={
+    'Technology':'Technology desk insight: AI, semiconductors, software, and cloud — what matters now for markets? Use live data and cross-asset implications.',
+    'Macro':'Macro desk insight: current regime (growth/inflation, Fed, DXY, yields, liquidity) and impact on risk assets including BTC/ETH. Use live data.',
+    'Micro':'Microeconomics desk insight: pricing power, supply chains, and firm-level dynamics relevant to markets today. Tie to crypto microstructure if useful.',
+    'Geopolitics':'Geopolitics desk insight: key risks, sanctions/conflict channels, and impact on oil, gold, USD, and equities. Neutral institutional tone.',
+    'Crypto':'Crypto desk insight: BTC/ETH/SOL regime, positioning (funding/OI), onchain narratives, and 24–72h outlook. Anchor to live prices.',
+    'Stocks':'Stocks desk insight: single-name and sector themes, earnings/catalysts, and relative strength vs indices. Use live market context.',
+    'Energy':'Energy desk insight: oil, gas, power, renewables, and energy equities — supply/demand and policy drivers. Use live data where available.',
+    'Equities':'Equities desk insight: global indices, factor rotation, breadth, and vol regime. Connect to macro and crypto correlation.',
+    'Oil':'Oil desk insight: WTI/Brent, OPEC+, inventories, and geopolitical premium — scenarios for the next 1–2 weeks.',
+    'Gold / Silver':'Gold / Silver desk insight: real rates, USD, safe-haven flows, and gold–BTC correlation. Key levels and drivers for XAU/XAG.',
+    'Other':'Cross-category insight: synthesize the most important themes across Technology, Macro, Crypto, and commodities for a generalist portfolio view.'
+  };
+  function categoryNavKey(ev,cat){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); askCategoryInsight(cat); } }
+  function askCategoryInsight(cat){
+    const q=CATEGORY_INSIGHT_PROMPTS[cat]||('Executive insight for the '+cat+' category — drivers, risks, and 24–72h implications using live data.');
+    askPreset(q);
+  }
+  window.askCategoryInsight=askCategoryInsight;
 
   async function askPreset(q){
     showView('concierge');
