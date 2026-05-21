@@ -181,14 +181,32 @@ async function solUsdcBalanceViaRpc(
   return total;
 }
 
+/** Server proxy — Helius blocks browser CORS; same-origin API uses Vercel env RPC */
+async function solUsdcBalanceViaApi(owner: string): Promise<bigint | null> {
+  try {
+    const res = await fetch(
+      `/api/sol-usdc-balance?owner=${encodeURIComponent(owner)}`,
+      { cache: "no-store", signal: AbortSignal.timeout(12_000) },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { balanceAtomic?: string | null; ok?: boolean };
+    if (!data.ok || data.balanceAtomic == null) return null;
+    return BigInt(data.balanceAtomic);
+  } catch {
+    return null;
+  }
+}
+
 async function solUsdcBalance(
   owner: string,
   networkMode: "mainnet" | "testnet",
-  customRpc?: string,
+  _customRpc?: string,
 ): Promise<SolBalanceResult> {
+  const apiBal = await solUsdcBalanceViaApi(owner);
+  if (apiBal !== null) return { balance: apiBal, unknown: false };
+
   const nets = USDC[networkMode];
-  const urls = [...(customRpc ? [customRpc] : []), ...nets.solRpcFallbacks];
-  for (const rpc of urls) {
+  for (const rpc of nets.solRpcFallbacks) {
     try {
       const bal = await solUsdcBalanceViaRpc(rpc, owner, nets.solMint);
       if (bal !== null) return { balance: bal, unknown: false };
@@ -248,19 +266,17 @@ export async function getPaymentChainOptions(
     ) {
       disabledReason =
         "Merchant Solana address is your wallet — fix X402_SOL_PAY_TO in Vercel (use a different receive address)";
-    } else if (serverConfig.solMerchantUsdcAta === false) {
-      disabledReason =
-        "Merchant Solana wallet has no USDC account yet — send a small USDC to X402_SOL_PAY_TO once, then retry";
     } else {
-      const solBal = await solUsdcBalance(
-        session.sol!.address,
-        networkMode,
-        serverConfig.solRpcUrl,
-      );
+      const solBal = await solUsdcBalance(session.sol!.address, networkMode);
       bal = solBal.balance;
       balanceUnknown = solBal.unknown;
+      if (serverConfig.solMerchantUsdcAta === false) {
+        disabledReason =
+          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base";
+      }
     }
     const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
+    const merchantBlocked = serverConfig.solMerchantUsdcAta === false;
     options.push({
       chain: "sol",
       label: "Solana",
@@ -271,9 +287,9 @@ export async function getPaymentChainOptions(
           : formatUsdc(bal)
         : "—",
       balanceAtomic: bal,
-      sufficient,
+      sufficient: sufficient && !merchantBlocked,
       balanceUnknown,
-      available: hasWallet && !!solProv,
+      available: hasWallet && !!solProv && !merchantBlocked && !disabledReason,
       disabledReason:
         disabledReason ??
         (!sufficient && hasWallet && !balanceUnknown

@@ -38,12 +38,38 @@ export async function solanaRpcCall<T>(
   }
 }
 
+function sumParsedTokenBalances(rows: unknown[] | undefined): bigint {
+  let total = 0n;
+  for (const row of rows ?? []) {
+    const acct = row as {
+      account?: { data?: { parsed?: { info?: { tokenAmount?: { amount?: string } } } } };
+    };
+    const amt = acct.account?.data?.parsed?.info?.tokenAmount?.amount;
+    if (amt) total += BigInt(amt);
+  }
+  return total;
+}
+
+/** USDC balance in atomic units (6 decimals); null when RPC failed */
+export async function getSolUsdcBalanceAtomic(
+  ownerAddress: string,
+  rpcUrl: string,
+): Promise<bigint | null> {
+  const result = await solanaRpcCall<{ value?: unknown[] }>(rpcUrl, "getTokenAccountsByOwner", [
+    ownerAddress,
+    { mint: USDC_MINT_MAINNET },
+    { encoding: "jsonParsed" },
+  ]);
+  if (result === null) return null;
+  return sumParsedTokenBalances(result.value);
+}
+
 /** True when merchant already has a USDC token account (can receive transferChecked) */
 export async function merchantHasUsdcTokenAccount(
   ownerAddress: string,
   rpcUrl?: string,
 ): Promise<boolean | null> {
-  const url = (rpcUrl || "https://solana-rpc.publicnode.com").trim();
+  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? "https://solana-rpc.publicnode.com";
   const result = await solanaRpcCall<{ value?: unknown[] }>(url, "getTokenAccountsByOwner", [
     ownerAddress,
     { mint: USDC_MINT_MAINNET },
