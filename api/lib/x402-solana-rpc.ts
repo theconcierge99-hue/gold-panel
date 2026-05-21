@@ -1,16 +1,29 @@
 /** Edge-safe Solana RPC helpers for x402 merchant diagnostics */
 
-import { SOLANA_MAINNET_CAIP2, getUsdcAssetForNetwork } from "./x402-config";
+/** USDC mint (mainnet) — inlined to avoid circular import with x402-config */
+const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-const USDC_MINT_MAINNET = getUsdcAssetForNetwork(SOLANA_MAINNET_CAIP2);
+/** Normalize Helius / custom RPC URLs from Vercel (quotes, trailing slash) */
+export function normalizeSolanaRpcUrl(raw: string | undefined | null): string | null {
+  const s = (raw ?? "").trim().replace(/^['"`]+|['"`]+$/g, "").trim();
+  if (!s) return null;
+  try {
+    const u = new URL(s);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
 
 export async function solanaRpcCall<T>(
   rpcUrl: string,
   method: string,
   params: unknown[],
 ): Promise<T | null> {
+  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl.trim();
   try {
-    const res = await fetch(rpcUrl, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),

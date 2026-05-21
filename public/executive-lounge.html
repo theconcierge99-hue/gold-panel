@@ -1308,8 +1308,12 @@
     if(hint){
       const payLive = _x402Config.enabled && (_x402Config.evmPayToReady || _x402Config.solPayToReady);
       const payBroken = _x402Config.paymentsRequested && !payLive;
+      const payIdAlias = _x402Config.diagnostics?.usesPayIdAlias;
       if(payLive){
         hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
+        if(payIdAlias){
+          hint.innerHTML += ' <span style="opacity:.75">(tip: rename Vercel vars to X402_*_PAY_TO)</span>';
+        }
       } else if(payBroken){
         const note = _x402Config.evmConfigNote || _x402Config.solConfigNote || _x402Config.configWarning || 'Fix merchant addresses in Vercel';
         hint.innerHTML = '<span style="color:var(--red,#e85d4a)">'+escapeHtml(note)+'</span>';

@@ -6,7 +6,7 @@ import {
   normalizeEvmPayTo,
   normalizeSolPayTo,
 } from "./x402-address";
-import { merchantHasUsdcTokenAccount } from "./x402-solana-rpc";
+import { merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
 
 export const X402_PRICE_USDC = 0.1;
 export const X402_PRICE_LABEL = "$0.10";
@@ -58,23 +58,32 @@ export function getX402NetworkProfile(): X402NetworkProfile {
   return mode === "testnet" ? TESTNET : MAINNET;
 }
 
+/** Vercel env names (also accepts common typo X402_*_PAY_ID) */
+function rawEvmPayToEnv(): string | undefined {
+  return process.env.X402_EVM_PAY_TO || process.env.X402_EVM_PAY_ID;
+}
+
+function rawSolPayToEnv(): string | undefined {
+  return process.env.X402_SOL_PAY_TO || process.env.X402_SOL_PAY_ID;
+}
+
 export function getMerchantAddresses(): { evm: string | null; sol: string | null } {
   return {
-    evm: normalizeEvmPayTo(process.env.X402_EVM_PAY_TO),
-    sol: normalizeSolPayTo(process.env.X402_SOL_PAY_TO),
+    evm: normalizeEvmPayTo(rawEvmPayToEnv()),
+    sol: normalizeSolPayTo(rawSolPayToEnv()),
   };
 }
 
 function hasRawEvmPayToEnv(): boolean {
-  return !!cleanEnvAddress(process.env.X402_EVM_PAY_TO);
+  return !!cleanEnvAddress(rawEvmPayToEnv());
 }
 
 function hasRawSolPayToEnv(): boolean {
-  return !!cleanEnvAddress(process.env.X402_SOL_PAY_TO);
+  return !!cleanEnvAddress(rawSolPayToEnv());
 }
 
 function evmMisconfigHint(): string | undefined {
-  const raw = cleanEnvAddress(process.env.X402_EVM_PAY_TO);
+  const raw = cleanEnvAddress(rawEvmPayToEnv());
   if (!raw) return undefined;
   if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(raw) && !raw.startsWith("0x")) {
     return "X402_EVM_PAY_TO looks like a Solana address — paste it into X402_SOL_PAY_TO instead, and put your Base (0x…) address here.";
@@ -86,7 +95,7 @@ function evmMisconfigHint(): string | undefined {
 }
 
 function solMisconfigHint(): string | undefined {
-  const raw = cleanEnvAddress(process.env.X402_SOL_PAY_TO);
+  const raw = cleanEnvAddress(rawSolPayToEnv());
   if (!raw) return undefined;
   if (raw.startsWith("0x")) {
     return "X402_SOL_PAY_TO looks like an EVM address — paste it into X402_EVM_PAY_TO, and put your Solana base58 address here.";
@@ -146,33 +155,42 @@ export function getPublicX402Config() {
     configWarning,
     evmConfigNote: evmEnvInvalid
       ? evmMisconfigHint() ||
-        `X402_EVM_PAY_TO invalid (length ${cleanEnvAddress(process.env.X402_EVM_PAY_TO).length}, need 0x + 40 hex). Phantom → Ethereum on Base → copy address.`
+        `X402_EVM_PAY_TO invalid (length ${cleanEnvAddress(rawEvmPayToEnv()).length}, need 0x + 40 hex). Phantom → Ethereum on Base → copy address.`
       : undefined,
     solConfigNote: solEnvInvalid
       ? solMisconfigHint() ||
-        `X402_SOL_PAY_TO invalid (length ${cleanEnvAddress(process.env.X402_SOL_PAY_TO).length}, need Solana base58 32–44 chars). Phantom → Solana → copy address (not 0x).`
+        `X402_SOL_PAY_TO invalid (length ${cleanEnvAddress(rawSolPayToEnv()).length}, need Solana base58 32–44 chars). Phantom → Solana → copy address (not 0x).`
       : undefined,
     diagnostics: {
-      evm: addressEnvDiagnostics(process.env.X402_EVM_PAY_TO),
-      sol: addressEnvDiagnostics(process.env.X402_SOL_PAY_TO),
+      evm: addressEnvDiagnostics(rawEvmPayToEnv()),
+      sol: addressEnvDiagnostics(rawSolPayToEnv()),
+      usesPayIdAlias:
+        !!(process.env.X402_EVM_PAY_ID || process.env.X402_SOL_PAY_ID) &&
+        !(process.env.X402_EVM_PAY_TO && process.env.X402_SOL_PAY_TO),
     },
-    /** Optional — set SOLANA_RPC_URL in Vercel (e.g. Helius) for reliable balance checks */
-    solRpcUrl: (process.env.SOLANA_RPC_URL || "").trim() || undefined,
+    /** Optional — Helius or other RPC (browser balance + merchant ATA check) */
+    solRpcUrl: normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL) ?? undefined,
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,
   };
 }
 
+export function getSolanaRpcUrlForServer(): string {
+  return normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL) ?? "https://solana-rpc.publicnode.com";
+}
+
 /** Async public config — includes merchant USDC ATA readiness check */
 export async function getPublicX402ConfigAsync() {
   const base = getPublicX402Config();
   const { evm, sol } = getMerchantAddresses();
-  const rpc =
-    (process.env.SOLANA_RPC_URL || "").trim() || "https://solana-rpc.publicnode.com";
   let solMerchantUsdcAta: boolean | null = null;
   if (sol) {
-    solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, rpc);
+    try {
+      solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, getSolanaRpcUrlForServer());
+    } catch {
+      solMerchantUsdcAta = null;
+    }
   }
   return {
     ...base,

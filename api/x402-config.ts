@@ -16,8 +16,25 @@ export default async function handler(request: Request): Promise<Response> {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
-  return new Response(JSON.stringify(await getPublicX402ConfigAsync()), {
-    status: 200,
-    headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
+  try {
+    const body = await getPublicX402ConfigAsync();
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    console.error("[x402-config]", e instanceof Error ? e.message : e);
+    return new Response(
+      JSON.stringify({
+        enabled: false,
+        paymentsRequested: true,
+        configWarning: "x402 config failed to load — check Vercel env and redeploy",
+        error: e instanceof Error ? e.message : "internal_error",
+      }),
+      {
+        status: 200,
+        headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+      },
+    );
+  }
 }
