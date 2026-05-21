@@ -6,7 +6,7 @@ import type { PaymentRequirements } from "@x402/core/types";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { address } from "@solana/addresses";
 import { getTransactionCodec, assertIsTransactionWithinSizeLimit } from "@solana/transactions";
 import type { TransactionModifyingSigner } from "@solana/signers";
@@ -391,7 +391,11 @@ export async function createX402PaidFetch(
   } else {
     const solProv = solanaProvider(session)!;
     const signer = createPhantomSolanaSigner(solProv, session.sol!.address);
-    registerExactSvmScheme(client, { signer, networks: [nets.solNetwork] });
+    const solRpcUrl = serverConfig.solRpcUrl || nets.solRpcFallbacks[0];
+    client.register(
+      nets.solNetwork,
+      new ExactSvmScheme(signer, { rpcUrl: solRpcUrl }),
+    );
   }
 
   return wrapFetchWithPayment(fetch, client);
