@@ -346,6 +346,8 @@
   .toast{background:var(--graphite);border:1px solid var(--border);border-left:2px solid var(--signal-green);padding:12px 18px;font-size:12px;color:var(--text-primary);min-width:280px;animation:slideIn .3s ease-out;transition:opacity .4s}
   @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
   .toast.fade{opacity:0}
+  .toast a{color:var(--signal-green);text-decoration:underline;font-weight:500}
+  .toast a:hover{color:var(--gold)}
 
   /* WALLET */
   .wallet-modal{width:440px;max-width:94vw}
@@ -1157,11 +1159,36 @@
   }
 
   // TOAST
-  function toast(msg){
-    const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  function toast(msg, html){
+    const t=document.createElement('div');t.className='toast';
+    if(html){ t.innerHTML=msg; }else{ t.textContent=msg; }
     document.getElementById('toasts').appendChild(t);
-    setTimeout(()=>t.classList.add('fade'),2800);
-    setTimeout(()=>t.remove(),3200);
+    setTimeout(()=>t.classList.add('fade'),html?8000:2800);
+    setTimeout(()=>t.remove(),html?8400:3200);
+  }
+
+  let _articleTab = null;
+
+  /** Open article URL — pre-opened tab avoids popup blocker after async wallet sign */
+  function navigateToArticleUrl(target){
+    const u = String(target||'').trim();
+    if(!u) return false;
+    try{
+      if(_articleTab && !_articleTab.closed){
+        _articleTab.location.href = u;
+        _articleTab.focus();
+        _articleTab = null;
+        return true;
+      }
+      const w = window.open(u, '_blank', 'noopener,noreferrer');
+      if(w){ w.focus(); return true; }
+    }catch(_){}
+    _articleTab = null;
+    toast(
+      'Article unlocked — <a href="'+escapeHtml(u)+'" target="_blank" rel="noopener noreferrer">Tap to open article</a>',
+      true,
+    );
+    return false;
   }
 
   // CHAT (Gemini via /api/concierge — Vercel Hobby serverless + local dev middleware)
@@ -1444,6 +1471,7 @@
 
   let _payModalDeferred = null;
   let _selectedPayChain = null;
+  let _payModalOpensArticle = false;
 
   function closePayModal(confirmed){
     document.getElementById('payOverlay').classList.remove('show');
@@ -1454,6 +1482,11 @@
       else d.reject(new Error('Payment cancelled'));
     }
     _selectedPayChain = null;
+    _payModalOpensArticle = false;
+    if(!confirmed && _articleTab && !_articleTab.closed){
+      try{ _articleTab.close(); }catch(_){}
+      _articleTab = null;
+    }
   }
 
   function selectPayChain(chain){
@@ -1472,6 +1505,16 @@
 
   function confirmPayModal(){
     if(!_selectedPayChain) return;
+    if(_payModalOpensArticle){
+      _articleTab = window.open('about:blank', '_blank');
+      if(_articleTab){
+        try{
+          _articleTab.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Opening…</title></head><body style="margin:0;font-family:system-ui,sans-serif;background:#0a0a0b;color:#e8e6e3;display:flex;align-items:center;justify-content:center;min-height:100vh"><p>Completing payment…</p></body></html>');
+          _articleTab.document.close();
+        }catch(_){}
+      }
+      _payModalOpensArticle = false;
+    }
     closePayModal(true);
   }
 
@@ -1491,6 +1534,7 @@
     document.getElementById('payConfirmBtn').disabled = true;
     document.getElementById('payChainList').innerHTML = '<div class="pay-loading">Loading USDC balances…</div>';
     _selectedPayChain = null;
+    _payModalOpensArticle = !!opts.openArticleTab;
     document.getElementById('payOverlay').classList.add('show');
 
     const chainOpts = await window.getX402PaymentOptions(
@@ -1593,7 +1637,8 @@
       }, { preferredChain: chain });
       const data = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
-      window.open(data.url || url, '_blank', 'noopener,noreferrer');
+      const target = data.url || url;
+      navigateToArticleUrl(target);
       toast('Article unlocked ✓');
     }
     try{
@@ -1602,12 +1647,13 @@
         subtitle: 'One-time unlock · headlines are free to browse',
         story: title,
         confirmLabel: 'Pay & open article',
+        openArticleTab: true,
       });
       try{
         await payAndOpenArticle(chain);
       }catch(e){
         const msg = e?.message || '';
-        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed/i.test(msg)){
+        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed|instructions_length/i.test(msg)){
           toast('Solana failed — retrying with Base (EVM)…');
           await payAndOpenArticle('evm');
           return;
@@ -1615,6 +1661,10 @@
         throw e;
       }
     }catch(e){
+      if(_articleTab && !_articleTab.closed){
+        try{ _articleTab.close(); }catch(_){}
+        _articleTab = null;
+      }
       if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('news-open', e);
       toast(formatPaymentError(e)||'Could not open article');
