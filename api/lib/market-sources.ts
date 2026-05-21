@@ -138,18 +138,39 @@ function parseRssHeadlines(xml: string, source: string, max = 3): NewsHeadline[]
   return out;
 }
 
-/** Free credible RSS — markets, crypto, macro, world business */
+/** Free public RSS — crypto, markets, macro, world & business (not paid terminals) */
 const RSS_FEEDS: { url: string; source: string }[] = [
+  // Crypto
   { url: "https://www.coindesk.com/arc/outboundfeeds/rss/", source: "CoinDesk" },
-  { url: "https://feeds.bloomberg.com/markets/news.rss", source: "Bloomberg" },
-  { url: "https://feeds.reuters.com/reuters/businessNews", source: "Reuters" },
   { url: "https://cointelegraph.com/rss", source: "CoinTelegraph" },
   { url: "https://www.theblock.co/rss.xml", source: "The Block" },
-  { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business" },
-  { url: "https://feeds.npr.org/1001/rss.xml", source: "NPR" },
-  { url: "https://www.theguardian.com/business/rss", source: "Guardian" },
+  // Markets & finance
+  { url: "https://feeds.bloomberg.com/markets/news.rss", source: "Bloomberg" },
+  { url: "https://feeds.reuters.com/reuters/businessNews", source: "Reuters" },
+  { url: "https://www.ft.com/rss/home", source: "Financial Times" },
+  { url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", source: "WSJ" },
   { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664", source: "CNBC" },
   { url: "https://feeds.marketwatch.com/marketwatch/topstories/", source: "MarketWatch" },
+  { url: "https://finance.yahoo.com/news/rssindex", source: "Yahoo Finance" },
+  { url: "https://www.forbes.com/business/feed/", source: "Forbes" },
+  { url: "https://fortune.com/feed/", source: "Fortune" },
+  { url: "https://www.economist.com/finance-and-economics/rss.xml", source: "The Economist" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NYT Business" },
+  // TV & global news
+  { url: "http://rss.cnn.com/rss/cnn_topstories.rss", source: "CNN" },
+  { url: "http://rss.cnn.com/rss/money_latest.rss", source: "CNN Business" },
+  { url: "https://www.cbsnews.com/latest/rss/main", source: "CBS News" },
+  { url: "https://decrypt.co/feed", source: "Decrypt" },
+  { url: "https://www.investing.com/rss/news.rss", source: "Investing.com" },
+  { url: "https://feeds.bbci.co.uk/news/rss.xml", source: "BBC News" },
+  { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business" },
+  { url: "https://feeds.bbci.co.uk/news/world/rss.xml", source: "BBC World" },
+  { url: "https://www.theguardian.com/business/rss", source: "Guardian" },
+  { url: "https://feeds.npr.org/1001/rss.xml", source: "NPR" },
+  { url: "https://www.aljazeera.com/xml/rss/all.xml", source: "Al Jazeera" },
+  { url: "https://rss.politico.com/economy.xml", source: "Politico" },
+  { url: "https://feeds.skynews.com/feeds/rss/business.xml", source: "Sky News" },
+  { url: "https://feeds.reuters.com/Reuters/worldNews", source: "Reuters World" },
 ];
 
 export async function fetchCoinGeckoGlobal(): Promise<GlobalCryptoContext | null> {
@@ -219,7 +240,13 @@ export async function fetchBtcNetwork(): Promise<BtcNetworkContext | null> {
   };
 }
 
-export async function fetchMarketHeadlines(maxPerFeed = 3): Promise<NewsHeadline[]> {
+function headlineSortTime(raw?: string): number {
+  if (!raw) return 0;
+  const t = new Date(raw).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+export async function fetchMarketHeadlines(maxPerFeed = 2): Promise<NewsHeadline[]> {
   const results = await Promise.all(
     RSS_FEEDS.map(async ({ url, source }) => {
       const xml = await fetchText(url);
@@ -235,5 +262,6 @@ export async function fetchMarketHeadlines(maxPerFeed = 3): Promise<NewsHeadline
     seen.add(key);
     merged.push(h);
   }
-  return merged.slice(0, 30);
+  merged.sort((a, b) => headlineSortTime(b.published) - headlineSortTime(a.published));
+  return merged.slice(0, 48);
 }

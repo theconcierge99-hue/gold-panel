@@ -14,7 +14,8 @@ const CATEGORY_RULES: { label: string; color: string; keywords: string[] }[] = [
   { label: "Technology", color: "#3b7dd8", keywords: ["ai", "artificial intelligence", "tech", "chip", "semiconductor", "nvidia", "microsoft", "apple", "google", "openai"] },
   { label: "Energy", color: "#e85d4a", keywords: ["oil", "brent", "wti", "gas", "opec", "energy", "crude", "petroleum"] },
   { label: "Gold / Silver", color: "#d4cfc4", keywords: ["gold", "silver", "precious", "xau"] },
-  { label: "Geopolitics", color: "#e85d4a", keywords: ["war", "ukraine", "russia", "china", "taiwan", "sanction", "geopolit", "middle east", "israel", "election", "trump", "biden"] },
+  { label: "Geopolitics", color: "#e85d4a", keywords: ["war", "ukraine", "russia", "china", "taiwan", "sanction", "geopolit", "middle east", "israel", "gaza", "election", "trump", "biden", "nato", "conflict", "diplomat"] },
+  { label: "Micro", color: "#1d8f7a", keywords: ["company", "merger", "acquisition", "ceo", "startup", "retail", "bank"] },
   { label: "DeFi", color: "#1d8f7a", keywords: ["uniswap", "aave", "liquidity", "tvl", "lending", "dex", "staking"] },
 ];
 

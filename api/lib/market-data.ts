@@ -282,7 +282,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     fetchFearGreed(),
     fetchDefiLlama(),
     fetchBtcNetwork(),
-    fetchMarketHeadlines(3),
+    fetchMarketHeadlines(2),
   ]);
 
   const ticks: MarketTick[] = [...spot];

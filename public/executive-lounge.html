@@ -319,9 +319,14 @@
   .field input,.field textarea{width:100%;background:var(--field-bg);border:1px solid var(--border);color:var(--text-primary);padding:10px 13px;font-family:'Outfit',sans-serif;font-size:12.5px;outline:none;transition:border-color .15s,background .25s}
   .field input:focus,.field textarea:focus{border-color:var(--chrome)}
   .field textarea{min-height:100px;resize:vertical;line-height:1.5}
-  .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:6px 11px;border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all .15s}
-  .chip.sel{border-color:var(--gold);color:var(--gold)}
+  .cat-list{border:1px solid var(--border);background:var(--field-bg);max-height:220px;overflow-y:auto}
+  .cat-opt{
+    display:flex;align-items:center;gap:0;padding:8px 14px;cursor:pointer;font-size:12.5px;
+    color:var(--text-secondary);border-left:2px solid transparent;transition:all .15s;
+  }
+  .cat-opt:hover{color:var(--text-primary);background:var(--nav-active-bg)}
+  .cat-opt.sel{border-left-color:var(--gold);background:var(--nav-active-bg);color:var(--text-primary)}
+  .cat-opt .cat-dot{margin-right:9px}
   .imp{background:var(--field-bg);border:1px solid var(--border);border-left:2px solid var(--accent-teal);padding:12px 14px;font-size:12px;line-height:1.6;color:var(--text-secondary);min-height:60px}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}
 
@@ -546,7 +551,7 @@
         <h2>Featured Signals</h2>
       </div>
       <div class="featured" id="featuredSignals">
-        <div class="intel-loading">Loading headlines from CoinDesk, Bloomberg, Reuters, BBC, CNBC…</div>
+        <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
       </div>
 
       <div class="section-h">
@@ -714,15 +719,18 @@
     </div>
     <div class="field">
       <label>Categories</label>
-      <div class="chips" id="chips">
-        <div class="chip" onclick="this.classList.toggle('sel')">AI</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">Macro</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">DeFi</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">Solana</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">Equities</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">Energy</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">FX</div>
-        <div class="chip" onclick="this.classList.toggle('sel')">Options</div>
+      <div class="cat-list" id="chips">
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#3b7dd8"></span>Technology</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#c9a84c"></span>Macro</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#1d8f7a"></span>Micro</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#e85d4a"></span>Geopolitics</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#22c87a"></span>Crypto</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#8899bb"></span>Stocks</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#f5a623"></span>Energy</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#6b8cce"></span>Equities</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#8b6914"></span>Oil</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#d4cfc4"></span>Gold / Silver</div>
+        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#5a6a82"></span>Other</div>
       </div>
     </div>
     <div class="field">
