@@ -7,19 +7,27 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "./lib/concierge-security";
+import { requireX402Payment } from "./lib/x402-server";
 
-/** Edge runtime — fits Vercel Hobby (no Node serverless cold-start issues) */
+/** Node runtime for x402 verify/settle (PayAI) + Gemini */
 export const config = {
-  runtime: "edge",
+  runtime: "nodejs",
+  maxDuration: 60,
 };
 
-function jsonResponse(request: Request, body: unknown, status: number) {
+function jsonResponse(
+  request: Request,
+  body: unknown,
+  status: number,
+  extraHeaders: Record<string, string> = {},
+) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       ...corsHeadersFor(request),
       "Content-Type": "application/json",
       "Cache-Control": "no-store",
+      ...extraHeaders,
     },
   });
 }
@@ -37,6 +45,10 @@ export default async function handler(request: Request): Promise<Response> {
 
   try {
     assertAllowedOrigin(request);
+
+    const payGate = await requireX402Payment(request, "concierge", cors);
+    if (!payGate.ok) return payGate.response;
+
     const raw = await readBodyWithLimit(request);
     const { mode, message, history, signal, market } = validateConciergeRequest(raw);
 
@@ -52,7 +64,11 @@ export default async function handler(request: Request): Promise<Response> {
       liveSnapshot,
     });
 
-    return jsonResponse(request, result, 200);
+    const extraHeaders: Record<string, string> = {};
+    if (payGate.ok && payGate.paymentResponseHeader) {
+      extraHeaders["PAYMENT-RESPONSE"] = payGate.paymentResponseHeader;
+    }
+    return jsonResponse(request, result, 200, extraHeaders);
   } catch (e) {
     const msg = sanitizePublicError(e);
     console.error("[api/concierge]", e instanceof Error ? e.message : e);

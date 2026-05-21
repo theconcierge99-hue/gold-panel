@@ -3,7 +3,8 @@ import { fetchLiveMarketSnapshot, ticksForUi } from "./lib/market-data";
 import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
 
 export const config = {
-  runtime: "edge",
+  runtime: "nodejs",
+  maxDuration: 30,
 };
 
 export default async function handler(request: Request): Promise<Response> {
@@ -22,8 +23,15 @@ export default async function handler(request: Request): Promise<Response> {
 
   try {
     assertAllowedOrigin(request);
+
     const snapshot = await fetchLiveMarketSnapshot();
     const headlines = enrichHeadlinesForUi(snapshot.headlines);
+    const headers: Record<string, string> = {
+      ...cors,
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=30",
+    };
+
     return new Response(
       JSON.stringify({
         fetchedAt: snapshot.fetchedAt,
@@ -38,14 +46,7 @@ export default async function handler(request: Request): Promise<Response> {
         narratives: buildTrendingNarratives(headlines),
         sources: snapshot.sources,
       }),
-      {
-        status: 200,
-        headers: {
-          ...cors,
-          "Content-Type": "application/json",
-          "Cache-Control": "public, max-age=30",
-        },
-      },
+      { status: 200, headers },
     );
   } catch (e) {
     const msg = sanitizePublicError(e);
