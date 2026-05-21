@@ -6,11 +6,7 @@ import type { PaymentRequirements } from "@x402/core/types";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
-import { address } from "@solana/addresses";
-import { createNoopSigner, type TransactionSigner } from "@solana/signers";
-import { getTransactionCodec, assertIsTransactionWithinSizeLimit } from "@solana/transactions";
-import { VersionedTransaction } from "@solana/web3.js";
+import { SolanaExactPhantomScheme } from "./x402-solana-phantom-scheme";
 import {
   createPublicClient,
   createWalletClient,
@@ -72,6 +68,11 @@ export type X402ServerPayConfig = {
   solPayToReady?: boolean;
   /** Optional Helius/Alchemy RPC from Vercel SOLANA_RPC_URL */
   solRpcUrl?: string;
+  /** Merchant receive addresses (public) */
+  solPayTo?: string;
+  evmPayTo?: string;
+  /** false when merchant has never received USDC on Solana (ATA missing) */
+  solMerchantUsdcAta?: boolean | null;
 };
 
 export type PayChain = "evm" | "sol";
@@ -127,55 +128,6 @@ function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
   if (w === "phantom") return window.phantom?.solana ?? null;
   if (w === "okx") return window.okxwallet?.solana ?? null;
   return window.phantom?.solana ?? window.okxwallet?.solana ?? null;
-}
-
-function signedTxToBytes(signed: unknown, fallback: Uint8Array): Uint8Array {
-  if (signed instanceof Uint8Array) return signed;
-  if (signed instanceof VersionedTransaction) return signed.serialize();
-  const obj = signed as {
-    serialize?: () => Uint8Array;
-    serializedTransaction?: Uint8Array;
-  };
-  if (typeof obj?.serialize === "function") return obj.serialize();
-  if (obj?.serializedTransaction instanceof Uint8Array) return obj.serializedTransaction;
-  return fallback;
-}
-
-/** Phantom/OKX expect @solana/web3.js VersionedTransaction, not raw kit wire bytes */
-function createPhantomSolanaSigner(
-  provider: PhantomSolanaProvider,
-  pubkey: string,
-): TransactionSigner {
-  const addr = address(pubkey);
-  const base = createNoopSigner(addr);
-  const transactionCodec = getTransactionCodec();
-
-  return {
-    ...base,
-    async modifyAndSignTransactions(transactions, config) {
-      const results = [];
-      for (const transaction of transactions) {
-        const wire = transactionCodec.encode(transaction);
-        const vtx = VersionedTransaction.deserialize(wire);
-        let signed: unknown;
-        try {
-          signed = await provider.signTransaction(vtx);
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          const code = (e as { code?: number })?.code;
-          if (code === 4001 || /reject|cancel|denied/i.test(msg)) {
-            throw new Error("Payment cancelled");
-          }
-          throw e;
-        }
-        const bytes = signedTxToBytes(signed, wire);
-        const decoded = transactionCodec.decode(bytes);
-        assertIsTransactionWithinSizeLimit(decoded);
-        results.push(decoded);
-      }
-      return results;
-    },
-  };
 }
 
 async function evmUsdcBalance(
@@ -290,6 +242,15 @@ export async function getPaymentChainOptions(
       disabledReason = "Connect Solana in your wallet";
     } else if (!solProv) {
       disabledReason = "Solana provider not found — reopen Phantom/OKX";
+    } else if (
+      serverConfig.solPayTo &&
+      session.sol!.address === serverConfig.solPayTo
+    ) {
+      disabledReason =
+        "Merchant Solana address is your wallet — fix X402_SOL_PAY_TO in Vercel (use a different receive address)";
+    } else if (serverConfig.solMerchantUsdcAta === false) {
+      disabledReason =
+        "Merchant Solana wallet has no USDC account yet — send a small USDC to X402_SOL_PAY_TO once, then retry";
     } else {
       const solBal = await solUsdcBalance(
         session.sol!.address,
@@ -415,11 +376,14 @@ export async function createX402PaidFetch(
     registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
   } else {
     const solProv = solanaProvider(session)!;
-    const signer = createPhantomSolanaSigner(solProv, session.sol!.address);
     const solRpcUrl = serverConfig.solRpcUrl || nets.solRpcFallbacks[0];
     client.register(
       nets.solNetwork,
-      new ExactSvmScheme(signer, { rpcUrl: solRpcUrl }),
+      new SolanaExactPhantomScheme(
+        solProv as { signTransaction: (tx: import("@solana/web3.js").VersionedTransaction) => Promise<import("@solana/web3.js").VersionedTransaction> },
+        session.sol!.address,
+        solRpcUrl,
+      ),
     );
   }
 

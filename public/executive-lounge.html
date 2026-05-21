@@ -1372,6 +1372,9 @@
       evmPayToReady: !!cfg.evmPayToReady,
       solPayToReady: !!cfg.solPayToReady,
       solRpcUrl: cfg.solRpcUrl || undefined,
+      solPayTo: cfg.solPayTo || undefined,
+      evmPayTo: cfg.evmPayTo || undefined,
+      solMerchantUsdcAta: cfg.solMerchantUsdcAta,
     };
   }
 
@@ -1382,6 +1385,12 @@
     }
     if(/Failed to create payment payload|8103002|\.serialize is not a function|403|Forbidden|mainnet-beta\.solana/i.test(m)){
       return 'Solana payment could not start. Hard refresh (Ctrl+F5), pick Solana, approve in Phantom. Keep ~0.01 SOL for network fees.';
+    }
+    if(/Merchant USDC account not initialized|no USDC account yet/i.test(m)){
+      return 'Merchant cannot receive USDC on Solana yet. Send any USDC once to the merchant address (X402_SOL_PAY_TO in Vercel), redeploy if needed, then retry — or pay with Base (EVM).';
+    }
+    if(/transaction_simulation_failed|simulation failed/i.test(m)){
+      return 'Solana payment simulation failed — merchant may need a one-time USDC receive on Solana, or use Base (EVM). Detail: '+m;
     }
     if(/verification failed|invalid_exact|instructions_length|settlement failed|does not match/i.test(m)){
       return 'Payment was rejected after signing. In Phantom tap Confirm (unsafe) — normal for new sites. Retry, or use Base (EVM) if you have USDC there. Detail: '+m;
@@ -1566,13 +1575,7 @@
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    try{
-      const chain = await showPaymentConfirm({
-        title: 'Open article',
-        subtitle: 'One-time unlock · headlines are free to browse',
-        story: title,
-        confirmLabel: 'Pay & open article',
-      });
+    async function payAndOpenArticle(chain){
       const res = await paidApiFetch('/api/news-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1580,9 +1583,27 @@
       }, { preferredChain: chain });
       const data = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
-      const target = data.url || url;
-      window.open(target, '_blank', 'noopener,noreferrer');
+      window.open(data.url || url, '_blank', 'noopener,noreferrer');
       toast('Article unlocked ✓');
+    }
+    try{
+      let chain = await showPaymentConfirm({
+        title: 'Open article',
+        subtitle: 'One-time unlock · headlines are free to browse',
+        story: title,
+        confirmLabel: 'Pay & open article',
+      });
+      try{
+        await payAndOpenArticle(chain);
+      }catch(e){
+        const msg = e?.message || '';
+        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed/i.test(msg)){
+          toast('Solana failed — retrying with Base (EVM)…');
+          await payAndOpenArticle('evm');
+          return;
+        }
+        throw e;
+      }
     }catch(e){
       if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('news-open', e);
@@ -1599,6 +1620,18 @@
       try{ await showPaySetupModal(cfg); }catch(_){}
       throw new Error('Payments not configured on server');
     }
+    async function payConcierge(chain){
+      const res = await paidApiFetch('/api/concierge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }, { preferredChain: chain });
+      const text = await res.text();
+      let data = {};
+      try { data = JSON.parse(text); } catch { /* non-JSON */ }
+      if(!res.ok) throw new Error(data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status));
+      return data;
+    }
     if(x402PaymentsLive(cfg)){
       const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
       preferredChain = await showPaymentConfirm({
@@ -1607,6 +1640,16 @@
         story: preview,
         confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
       });
+      try{
+        return await payConcierge(preferredChain);
+      }catch(e){
+        const msg = e?.message || '';
+        if(preferredChain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed/i.test(msg)){
+          toast('Solana failed — retrying Concierge with Base (EVM)…');
+          return await payConcierge('evm');
+        }
+        throw e;
+      }
     }
     const res = await paidApiFetch('/api/concierge', {
       method: 'POST',
@@ -1615,8 +1658,8 @@
     }, { preferredChain });
     const text = await res.text();
     let data = {};
-    try { data = JSON.parse(text); } catch { /* non-JSON e.g. Vercel crash page */ }
-    if (!res.ok) throw new Error(data.error || text.slice(0, 200) || ('HTTP ' + res.status));
+    try { data = JSON.parse(text); } catch { /* non-JSON */ }
+    if (!res.ok) throw new Error(data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status));
     return data;
   }
 

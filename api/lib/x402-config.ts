@@ -6,6 +6,7 @@ import {
   normalizeEvmPayTo,
   normalizeSolPayTo,
 } from "./x402-address";
+import { merchantHasUsdcTokenAccount } from "./x402-solana-rpc";
 
 export const X402_PRICE_USDC = 0.1;
 export const X402_PRICE_LABEL = "$0.10";
@@ -160,5 +161,23 @@ export function getPublicX402Config() {
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,
+  };
+}
+
+/** Async public config — includes merchant USDC ATA readiness check */
+export async function getPublicX402ConfigAsync() {
+  const base = getPublicX402Config();
+  const { evm, sol } = getMerchantAddresses();
+  const rpc =
+    (process.env.SOLANA_RPC_URL || "").trim() || "https://solana-rpc.publicnode.com";
+  let solMerchantUsdcAta: boolean | null = null;
+  if (sol) {
+    solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, rpc);
+  }
+  return {
+    ...base,
+    evmPayTo: evm ?? undefined,
+    solPayTo: sol ?? undefined,
+    solMerchantUsdcAta,
   };
 }
