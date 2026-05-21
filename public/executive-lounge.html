@@ -319,14 +319,16 @@
   .field input,.field textarea{width:100%;background:var(--field-bg);border:1px solid var(--border);color:var(--text-primary);padding:10px 13px;font-family:'Outfit',sans-serif;font-size:12.5px;outline:none;transition:border-color .15s,background .25s}
   .field input:focus,.field textarea:focus{border-color:var(--chrome)}
   .field textarea{min-height:100px;resize:vertical;line-height:1.5}
-  .cat-list{border:1px solid var(--border);background:var(--field-bg);max-height:220px;overflow-y:auto}
-  .cat-opt{
-    display:flex;align-items:center;gap:0;padding:8px 14px;cursor:pointer;font-size:12.5px;
-    color:var(--text-secondary);border-left:2px solid transparent;transition:all .15s;
+  .cat-picks{display:flex;flex-wrap:wrap;gap:8px}
+  .cat-chip{
+    display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.06em;
+    padding:7px 12px;border:1px solid var(--border);color:var(--text-secondary);
+    cursor:pointer;transition:all .15s;background:var(--field-bg);user-select:none;
   }
-  .cat-opt:hover{color:var(--text-primary);background:var(--nav-active-bg)}
-  .cat-opt.sel{border-left-color:var(--gold);background:var(--nav-active-bg);color:var(--text-primary)}
-  .cat-opt .cat-dot{margin-right:9px}
+  .cat-chip:hover{border-color:var(--chrome);color:var(--text-primary)}
+  .cat-chip.sel{border-color:var(--gold);color:var(--gold);background:var(--nav-active-bg)}
+  .cat-chip .cat-dot{margin-right:0;flex-shrink:0}
+  .field-hint{font-size:10px;color:var(--text-muted);margin-top:-10px;margin-bottom:12px;letter-spacing:.04em}
   .imp{background:var(--field-bg);border:1px solid var(--border);border-left:2px solid var(--accent-teal);padding:12px 14px;font-size:12px;line-height:1.6;color:var(--text-secondary);min-height:60px}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}
 
@@ -719,18 +721,19 @@
     </div>
     <div class="field">
       <label>Categories</label>
-      <div class="cat-list" id="chips">
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#3b7dd8"></span>Technology</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#c9a84c"></span>Macro</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#1d8f7a"></span>Micro</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#e85d4a"></span>Geopolitics</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#22c87a"></span>Crypto</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#8899bb"></span>Stocks</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#f5a623"></span>Energy</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#6b8cce"></span>Equities</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#8b6914"></span>Oil</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#d4cfc4"></span>Gold / Silver</div>
-        <div class="cat-opt" onclick="this.classList.toggle('sel')"><span class="cat-dot" style="background:#5a6a82"></span>Other</div>
+      <p class="field-hint">Pilih satu atau lebih label untuk berita Anda.</p>
+      <div class="cat-picks" id="chips" role="group" aria-label="Signal categories">
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Technology" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#3b7dd8"></span>Technology</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Macro" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#c9a84c"></span>Macro</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Micro" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#1d8f7a"></span>Micro</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Geopolitics" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#e85d4a"></span>Geopolitics</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Crypto" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#22c87a"></span>Crypto</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Stocks" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#8899bb"></span>Stocks</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Energy" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#f5a623"></span>Energy</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Equities" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#6b8cce"></span>Equities</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Oil" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#8b6914"></span>Oil</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Gold / Silver" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#d4cfc4"></span>Gold / Silver</div>
+        <div class="cat-chip" role="button" tabindex="0" data-cat="Other" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#5a6a82"></span>Other</div>
       </div>
     </div>
     <div class="field">
@@ -1054,7 +1057,16 @@
     else if(t.includes('ai'))m='AI × crypto convergence is no longer a narrative — it is a flow regime. Agent-driven volume now structurally bid on mid-cap DeFi liquidity.';
     document.getElementById('imp').textContent=m;
   }
+  function toggleCatChip(el){ el.classList.toggle('sel'); }
+  function catChipKey(e,el){ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggleCatChip(el); } }
+  function getSelectedSignalCategories(){
+    return Array.from(document.querySelectorAll('#chips .cat-chip.sel')).map(el=>el.getAttribute('data-cat')||'').filter(Boolean);
+  }
+  window.getSelectedSignalCategories=getSelectedSignalCategories;
+
   function publishSignal(){
+    const cats=getSelectedSignalCategories();
+    if(!cats.length){ toast('Pilih minimal satu kategori'); return; }
     closeModal();
     toast('Signal minted and published to the Lounge ✓');
     setTimeout(()=>toast('Onchain provenance record created ⛓'),900);
