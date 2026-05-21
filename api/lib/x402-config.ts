@@ -1,6 +1,11 @@
 /** Shared x402 / PayAI configuration (server + public config API). */
 
-import { normalizeEvmPayTo, normalizeSolPayTo } from "./x402-address";
+import {
+  addressEnvDiagnostics,
+  cleanEnvAddress,
+  normalizeEvmPayTo,
+  normalizeSolPayTo,
+} from "./x402-address";
 
 export const X402_PRICE_USDC = 0.1;
 export const X402_PRICE_LABEL = "$0.10";
@@ -56,21 +61,41 @@ export function getMerchantAddresses(): { evm: string | null; sol: string | null
 }
 
 function hasRawEvmPayToEnv(): boolean {
-  return !!(process.env.X402_EVM_PAY_TO || "").trim();
+  return !!cleanEnvAddress(process.env.X402_EVM_PAY_TO);
 }
 
 function hasRawSolPayToEnv(): boolean {
-  return !!(process.env.X402_SOL_PAY_TO || "").trim();
+  return !!cleanEnvAddress(process.env.X402_SOL_PAY_TO);
+}
+
+function evmMisconfigHint(): string | undefined {
+  const raw = cleanEnvAddress(process.env.X402_EVM_PAY_TO);
+  if (!raw) return undefined;
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(raw) && !raw.startsWith("0x")) {
+    return "X402_EVM_PAY_TO looks like a Solana address — paste it into X402_SOL_PAY_TO instead, and put your Base (0x…) address here.";
+  }
+  if (raw.startsWith("0x") && raw.length > 42) {
+    return "X402_EVM_PAY_TO is too long (tx hash?) — use your wallet receive address: 0x + 40 hex only.";
+  }
+  return undefined;
+}
+
+function solMisconfigHint(): string | undefined {
+  const raw = cleanEnvAddress(process.env.X402_SOL_PAY_TO);
+  if (!raw) return undefined;
+  if (raw.startsWith("0x")) {
+    return "X402_SOL_PAY_TO looks like an EVM address — paste it into X402_EVM_PAY_TO, and put your Solana base58 address here.";
+  }
+  return undefined;
 }
 
 export function isSolPayToMisconfigured(): boolean {
   return hasRawSolPayToEnv() && !getMerchantAddresses().sol;
 }
 
-/** When false, paid APIs are open (local dev). Set pay-to addresses to enable. */
+/** Payments active only when at least one valid merchant receive address exists */
 export function isX402Enabled(): boolean {
   if (process.env.X402_ENABLED === "false") return false;
-  if (process.env.X402_ENABLED === "true") return true;
   const { evm, sol } = getMerchantAddresses();
   return !!(evm || sol);
 }
@@ -87,15 +112,20 @@ export function getPublicX402Config() {
   const evmEnvInvalid = isEvmPayToMisconfigured();
   const solEnvInvalid = isSolPayToMisconfigured();
   const payReady = !!(evm || sol);
+  const wantsPay =
+    process.env.X402_ENABLED === "true" ||
+    hasRawEvmPayToEnv() ||
+    hasRawSolPayToEnv();
 
-  /** Blocks payments only when no valid merchant address exists */
+  /** Shown when env vars exist but fail validation */
   const configWarning =
-    isX402Enabled() && !payReady
-      ? "Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel."
+    wantsPay && !payReady
+      ? "Merchant receive addresses invalid in Vercel — fix X402_EVM_PAY_TO (Base 0x…) and/or X402_SOL_PAY_TO (Solana)."
       : undefined;
 
   return {
     enabled: isX402Enabled(),
+    paymentsRequested: wantsPay,
     facilitator: "PayAI",
     facilitatorUrl: "https://facilitator.payai.network",
     priceUsdc: X402_PRICE_USDC,
@@ -107,11 +137,17 @@ export function getPublicX402Config() {
     solPayToReady: !!sol,
     configWarning,
     evmConfigNote: evmEnvInvalid
-      ? "X402_EVM_PAY_TO is invalid (use 0x + 40 hex). Solana payouts still work if configured."
+      ? evmMisconfigHint() ||
+        `X402_EVM_PAY_TO invalid (length ${cleanEnvAddress(process.env.X402_EVM_PAY_TO).length}, need 0x + 40 hex). Phantom → Ethereum on Base → copy address.`
       : undefined,
     solConfigNote: solEnvInvalid
-      ? "X402_SOL_PAY_TO is invalid (use a Solana base58 address)."
+      ? solMisconfigHint() ||
+        `X402_SOL_PAY_TO invalid (length ${cleanEnvAddress(process.env.X402_SOL_PAY_TO).length}, need Solana base58 32–44 chars). Phantom → Solana → copy address (not 0x).`
       : undefined,
+    diagnostics: {
+      evm: addressEnvDiagnostics(process.env.X402_EVM_PAY_TO),
+      sol: addressEnvDiagnostics(process.env.X402_SOL_PAY_TO),
+    },
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,

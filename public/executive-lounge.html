@@ -367,6 +367,9 @@
   .wallet-row .wmeta{font-size:10px;color:var(--text-secondary);margin-top:2px}
 
   .pay-modal{width:480px;max-width:94vw}
+  .pay-setup p{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--text2,#9aa3b2)}
+  .pay-setup-hint{margin-top:12px!important;color:var(--text,#c8d0dc)!important}
+  .pay-setup-diag{font-size:12px;opacity:.85}
   .pay-story{font-size:13px;line-height:1.5;color:var(--text-secondary);margin:12px 0 16px;max-height:4.5em;overflow:hidden}
   .pay-amount{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:18px}
   .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
@@ -1290,24 +1293,25 @@
   let _x402Config = null;
   let _marketPollId = null;
 
-  async function loadX402Config(){
-    if(_x402Config) return _x402Config;
+  async function loadX402Config(force){
+    if(_x402Config && !force) return _x402Config;
     try{
-      const r = await fetch('/api/x402-config');
+      const r = await fetch('/api/x402-config', { cache: 'no-store' });
       _x402Config = await r.json();
     }catch{
       _x402Config = { enabled: false };
     }
     const hint = document.getElementById('loungePayHint');
     if(hint){
-      if(_x402Config.enabled){
-        if(_x402Config.configWarning){
-          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">'+escapeHtml(_x402Config.configWarning)+'</span>';
-        } else if(_x402Config.enabled && !_x402Config.evmPayToReady && !_x402Config.solPayToReady){
-          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Set X402_EVM_PAY_TO and/or X402_SOL_PAY_TO in Vercel</span>';
-        } else {
-          hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
-        }
+      const payLive = _x402Config.enabled && (_x402Config.evmPayToReady || _x402Config.solPayToReady);
+      const payBroken = _x402Config.paymentsRequested && !payLive;
+      if(payLive){
+        hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
+      } else if(payBroken){
+        const note = _x402Config.evmConfigNote || _x402Config.solConfigNote || _x402Config.configWarning || 'Fix merchant addresses in Vercel';
+        hint.innerHTML = '<span style="color:var(--red,#e85d4a)">'+escapeHtml(note)+'</span>';
+      } else if(_x402Config.enabled){
+        hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong>';
       } else {
         hint.textContent = 'Live wire';
       }
@@ -1315,11 +1319,40 @@
     return _x402Config;
   }
 
-  function assertX402PaymentsReady(cfg){
-    if(!cfg?.enabled) return;
-    if(!cfg.evmPayToReady && !cfg.solPayToReady){
-      throw new Error(cfg.configWarning || 'No valid merchant receive address on server. Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel.');
-    }
+  function x402PaymentsLive(cfg){
+    return !!(cfg?.enabled && (cfg.evmPayToReady || cfg.solPayToReady));
+  }
+
+  async function showPaySetupModal(cfg){
+    const lines = [
+      cfg.configWarning,
+      cfg.evmConfigNote,
+      cfg.solConfigNote,
+    ].filter(Boolean);
+    document.getElementById('payModalTitle').textContent = 'Payments not ready';
+    document.getElementById('payModalSub').textContent = 'Fix Vercel environment variables, then redeploy';
+    document.getElementById('payModalStory').textContent = '';
+    document.getElementById('payConfirmBtn').textContent = 'Close';
+    document.getElementById('payConfirmBtn').disabled = false;
+    document.getElementById('payConfirmBtn').onclick = ()=>closePayModal(false);
+    const diag = cfg.diagnostics;
+    const diagHtml = diag ? '<p class="pay-setup-diag">EVM env: '+(diag.evm?.set?'set ('+diag.evm.length+' chars)':'empty')+
+      ' · Sol env: '+(diag.sol?.set?'set ('+diag.sol.length+' chars)':'empty')+'</p>' : '';
+    document.getElementById('payChainList').innerHTML =
+      '<div class="pay-setup">'+lines.map(l=>'<p>'+escapeHtml(l)+'</p>').join('')+diagHtml+
+      '<p class="pay-setup-hint"><strong>X402_EVM_PAY_TO</strong> = Phantom → Ethereum on <strong>Base</strong> (0x + 40 hex). '+
+      '<strong>X402_SOL_PAY_TO</strong> = Phantom → <strong>Solana</strong> (base58, not 0x). Redeploy after saving.</p></div>';
+    document.getElementById('payOverlay').classList.add('show');
+    return new Promise((_, reject)=>{
+      _payModalDeferred = { resolve: ()=>{}, reject };
+    });
+  }
+
+  async function assertX402PaymentsReady(cfg){
+    if(!cfg?.paymentsRequested && !cfg?.enabled) return;
+    if(x402PaymentsLive(cfg)) return;
+    await showPaySetupModal(cfg);
+    throw new Error('Payments not configured on server');
   }
 
   function x402ServerPayConfig(cfg){
@@ -1405,7 +1438,8 @@
 
   async function showPaymentConfirm(opts){
     const cfg = await loadX402Config();
-    assertX402PaymentsReady(cfg);
+    await assertX402PaymentsReady(cfg);
+    document.getElementById('payConfirmBtn').onclick = confirmPayModal;
     ensureWalletForX402(cfg);
     if(typeof window.getX402PaymentOptions !== 'function'){
       throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
@@ -1464,8 +1498,8 @@
 
   async function paidApiFetch(url, options, payOpts){
     const cfg = await loadX402Config();
-    if(!cfg.enabled) return fetch(url, options || {});
-    assertX402PaymentsReady(cfg);
+    if(!x402PaymentsLive(cfg)) return fetch(url, options || {});
+    await assertX402PaymentsReady(cfg);
     ensureWalletForX402(cfg);
     if(typeof window.createX402PaidFetch !== 'function'){
       throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
@@ -1504,7 +1538,7 @@
       return;
     }
     const cfg = await loadX402Config();
-    if(!cfg.enabled){
+    if(!x402PaymentsLive(cfg)){
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -1526,7 +1560,7 @@
       window.open(target, '_blank', 'noopener,noreferrer');
       toast('Article unlocked ✓');
     }catch(e){
-      if(e?.message === 'Payment cancelled') return;
+      if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('news-open', e);
       toast(formatPaymentError(e)||'Could not open article');
     }
@@ -1537,7 +1571,7 @@
   async function callConcierge(payload){
     const cfg = await loadX402Config();
     let preferredChain;
-    if(cfg.enabled){
+    if(x402PaymentsLive(cfg)){
       const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
       preferredChain = await showPaymentConfirm({
         title: payload.mode === 'enhance' ? 'AI enhance signal' : 'Concierge chat',
@@ -1811,7 +1845,7 @@
       window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
       removeTyping();
-      if(err?.message === 'Payment cancelled') return;
+      if(err?.message === 'Payment cancelled' || err?.message === 'Payments not configured on server') return;
       addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
       const fallback=respond(v);
       addAi(fallback);
@@ -1856,7 +1890,7 @@
         window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){
         removeTyping();
-        if(err?.message === 'Payment cancelled') return;
+        if(err?.message === 'Payment cancelled' || err?.message === 'Payments not configured on server') return;
         addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
         addAi(respond(q));
       }
@@ -1880,7 +1914,7 @@
       if(data.implication) document.getElementById('imp').textContent=data.implication;
       toast('Concierge enhanced the signal copy ⬡');
     }catch(err){
-      if(err?.message === 'Payment cancelled') return;
+      if(err?.message === 'Payment cancelled' || err?.message === 'Payments not configured on server') return;
       toast('Enhance failed — check GEMINI_API_KEY');
       updateImplication();
     }
