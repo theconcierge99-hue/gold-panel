@@ -168,8 +168,8 @@ export function getPublicX402Config() {
         !!(process.env.X402_EVM_PAY_ID || process.env.X402_SOL_PAY_ID) &&
         !(process.env.X402_EVM_PAY_TO && process.env.X402_SOL_PAY_TO),
     },
-    /** Optional — Helius or other RPC (browser balance + merchant ATA check) */
-    solRpcUrl: normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL) ?? undefined,
+    /** True when SOLANA_RPC_URL is set server-side (URL never exposed to clients) */
+    hasCustomSolRpc: !!normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL),
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,

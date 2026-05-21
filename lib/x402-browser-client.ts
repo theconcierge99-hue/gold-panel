@@ -66,8 +66,8 @@ export type X402ServerPayConfig = {
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
   solPayToReady?: boolean;
-  /** Optional Helius/Alchemy RPC from Vercel SOLANA_RPC_URL */
-  solRpcUrl?: string;
+  /** Server has SOLANA_RPC_URL configured (RPC URL is never sent to the browser) */
+  hasCustomSolRpc?: boolean;
   /** Merchant receive addresses (public) */
   solPayTo?: string;
   evmPayTo?: string;

@@ -465,7 +465,7 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 /** Core trading-plan methodology — applied when user asks for trades or analysis implies actionable setup */
 const TRADING_PLAN_FRAMEWORK = `TRADING PLAN INTELLIGENCE (embed when user asks for direction, outlook, levels, or explicit trading plan):
 
-When the question is market-related OR topics include technical/crypto/liquidation/strategy, append a dedicated block titled "Trading plan" (in English by default; match the user's language only if they clearly wrote in that language this turn).
+When the question is market-related OR topics include technical/crypto/liquidation/strategy, append a dedicated block titled "Trading plan" (always in English).
 
 Use this exact structure inside one or two <p> tags (use <br/> for line breaks inside a paragraph):
 
@@ -501,50 +501,18 @@ Users may ask about ANY category below. Detect intent, apply the matching playbo
 10. Gold / Silver — precious metals, real rates, USD, safe-haven and industrial silver drivers.
 11. Other — cross-asset synthesis, portfolio/regime questions, unconventional topics; explicitly tag which categories you used.
 
-When the user names a category (e.g. "Energy insight", "pertanyaan tentang Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
+When the user names a category (e.g. "Energy insight", "question about Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
 
 const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
-- Default reply language: **English** — use for preset chips, English questions, ticker-only prompts, and mixed/neutral trading text.
-- Mirror the user's language **only when they clearly write in that language in the latest message** (e.g. full Indonesian prose → reply in Indonesian; Spanish question → Spanish). Do not infer language from chat history alone.
-- Understand input in ANY language (Indonesian, English, Mandarin, Japanese, etc.) but **output** follows the rule above.
-- If the latest message mixes languages, prefer **English** unless non-English clearly dominates (most sentences / question words in that language).
+- **Always reply in English** — the terminal UI is English-only. You may understand questions in any language, but every response must be written in English.
 - Answer exactly what was asked — do not change the topic, asset, or timeframe unless the user was ambiguous (then ask one short clarifying question at the end only).
 - Lead with a direct answer to the specific question in the first paragraph; then analysis, data, and trading plan if relevant.
 - Match depth to the question: brief question → tighter answer; deep or multi-part question → fuller structured answer covering each part explicitly.
-- Keep standard market tickers and metrics in Latin script (BTC, ETH, RSI); explain concepts in the chosen reply language.`;
+- Keep standard market tickers and metrics in Latin script (BTC, ETH, RSI).`;
 
-/** Indonesian function/content words — used only to detect when user wants an ID reply */
-const INDONESIAN_REPLY_MARKERS =
-  /\b(apa|yang|dan|untuk|dengan|ini|itu|bagaimana|mengapa|kenapa|jelaskan|bisa|tidak|adalah|mohon|tolong|pertanyaan|tentang|secara|juga|atau|dari|pada|akan|sudah|belum|harus|kamu|saya|kami|mereka|mengenai|penjelasan|rencana|harga|posisi|berapa|gimana|kenapa|klo|kalau|berikan|jelaskan|apa itu|bagaimana cara)\b/gi;
-
-const ENGLISH_REPLY_MARKERS =
-  /\b(the|and|for|what|how|why|explain|describe|brief|trading plan|trade plan|bias|entry|stop|target|targets|use live|insight|outlook|regime|liquidation|cluster|cascade)\b/i;
-
-/** Default English; Indonesian only when the latest user message is clearly Indonesian */
-export function detectReplyLanguage(message: string): "en" | "id" {
-  const t = message.trim();
-  if (!t) return "en";
-
-  const idHits = [...t.matchAll(INDONESIAN_REPLY_MARKERS)].length;
-  const hasIdPhrase = /\b(apa itu|bagaimana cara|tolong jelaskan|mohon jelaskan|pertanyaan tentang|jelaskan tentang)\b/i.test(
-    t,
-  );
-
-  if (hasIdPhrase || idHits >= 2) return "id";
-  if (idHits === 1 && !ENGLISH_REPLY_MARKERS.test(t)) return "id";
-  return "en";
-}
-
-export function buildReplyLanguageBlock(message: string): string {
-  if (detectReplyLanguage(message) === "id") {
-    return `REPLY LANGUAGE (mandatory — this turn only):
-The user's latest message is clearly in Indonesian. Write your ENTIRE response in Indonesian (Bahasa Indonesia).
-Keep tickers, prices, and acronyms in standard form (BTC, ETH, USDC, RSI).`;
-  }
-  return `REPLY LANGUAGE (mandatory — this turn only):
-Write your ENTIRE response in English (terminal default).
-The user's latest message is English or language-neutral — do NOT reply in Indonesian or other languages for this turn.
-If earlier chat turns were in another language but this message is English, respond in English now.`;
+export function buildReplyLanguageBlock(_message?: string): string {
+  return `REPLY LANGUAGE (mandatory):
+Write your ENTIRE response in English only. Do not reply in Indonesian or any other language.`;
 }
 
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (every market answer):
@@ -604,7 +572,7 @@ export function detectTopics(message: string): ConciergeTopic[] {
 
 export function wantsImage(message: string): boolean {
   const t = message.toLowerCase();
-  return /\b(gambar|grafik|chart visual|generate image|buat gambar|infographic|heatmap visual|plot|sketch|diagram|illustrate|visualize)\b/.test(
+  return /\b(chart visual|generate image|create image|infographic|heatmap visual|plot|sketch|diagram|illustrate|visualize|image|graphic)\b/.test(
     t,
   );
 }
@@ -641,9 +609,7 @@ export function buildConciergeSystemPrompt(options: {
 }): string {
   const { topics, market = [], liveMarketBlock = "", imageMode, requireTradingPlan, userMessage } =
     options;
-  const replyLangBlock = userMessage
-    ? buildReplyLanguageBlock(userMessage)
-    : "REPLY LANGUAGE: English by default; mirror another language only if the user's latest message is clearly in that language.";
+  const replyLangBlock = buildReplyLanguageBlock(userMessage);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
   const tradingBlock = requireTradingPlan ? `\n${TRADING_PLAN_FRAMEWORK}\n` : "";
 
@@ -657,7 +623,7 @@ export function buildConciergeSystemPrompt(options: {
 
   return `You are Concierge — Chief Market Strategist of Executive Lounge (private terminal). You combine research desk rigor with actionable trade construction.
 
-MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). Default to English; match the user's language only when they clearly use it.
+MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). All replies in English.
 
 ${EXECUTIVE_LOUNGE_CATEGORY_INTEL}
 
@@ -675,7 +641,7 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 ${RESPONSE_STRUCTURE}
 
 RULES:
-1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (English default).
+1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (English only).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
 3. MULTI-SOURCE MARKET INTELLIGENCE + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Wikipedia, BBC, NPR, etc.); anchor trade levels to Binance mark ± structure.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").

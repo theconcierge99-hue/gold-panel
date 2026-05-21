@@ -1339,7 +1339,7 @@
       if(payLive){
         hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
         if(payIdAlias){
-          hint.innerHTML += ' <span style="opacity:.75">(tip: rename Vercel vars to X402_*_PAY_TO)</span>';
+          hint.innerHTML += ' <span style="opacity:.75">(Tip: rename Vercel vars to X402_*_PAY_TO)</span>';
         }
       } else if(payBroken){
         const note = _x402Config.evmConfigNote || _x402Config.solConfigNote || _x402Config.configWarning || 'Fix merchant addresses in Vercel';
@@ -1402,7 +1402,7 @@
       acceptsSol: !!cfg.acceptsSol,
       evmPayToReady: !!cfg.evmPayToReady,
       solPayToReady: !!cfg.solPayToReady,
-      solRpcUrl: cfg.solRpcUrl || undefined,
+      hasCustomSolRpc: !!cfg.hasCustomSolRpc,
       solPayTo: cfg.solPayTo || undefined,
       evmPayTo: cfg.evmPayTo || undefined,
       solMerchantUsdcAta: cfg.solMerchantUsdcAta,
@@ -1724,7 +1724,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I reply in <strong>English by default</strong> — ask in your language when you want an answer in that language. <strong>Headlines are free to browse</strong>; opening a story or each Concierge message costs <strong>0.1 USDC</strong> — you choose <strong>Solana or Base</strong> at checkout.</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> I respond in <strong>English</strong>. <strong>Headlines are free to browse</strong>; opening a story or each Concierge message costs <strong>0.1 USDC</strong> — choose <strong>Solana or Base</strong> at checkout.</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function tickerItemHtml(t){
     const up=!String(t.change).includes('-');

@@ -19,6 +19,18 @@ dist-ssr
 .env.*
 !.env.example
 
+# Secrets & credentials (never commit)
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+**/secrets/
+service-account*.json
+.vercel/.env*
+.dev.vars
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
