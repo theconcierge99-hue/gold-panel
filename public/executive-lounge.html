@@ -1380,8 +1380,8 @@
     if(/invalid.*address|is invalid|40 hex|checksum/i.test(m)){
       return 'Payments misconfigured: server receive address must be your Base Ethereum wallet (0x + 40 hex). Fix X402_EVM_PAY_TO in Vercel.';
     }
-    if(/Failed to create payment payload|8103002|403|Forbidden|mainnet-beta\.solana/i.test(m)){
-      return 'Solana payment could not start (RPC blocked). Hard refresh (Ctrl+F5), pick Solana, and retry. Keep ~0.01 SOL in Phantom for network fees.';
+    if(/Failed to create payment payload|8103002|\.serialize is not a function|403|Forbidden|mainnet-beta\.solana/i.test(m)){
+      return 'Solana payment could not start. Hard refresh (Ctrl+F5), pick Solana, approve in Phantom. Keep ~0.01 SOL for network fees.';
     }
     return m;
   }

@@ -8,8 +8,9 @@ import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { address } from "@solana/addresses";
+import { createNoopSigner, type TransactionSigner } from "@solana/signers";
 import { getTransactionCodec, assertIsTransactionWithinSizeLimit } from "@solana/transactions";
-import type { TransactionModifyingSigner } from "@solana/signers";
+import { VersionedTransaction } from "@solana/web3.js";
 import {
   createPublicClient,
   createWalletClient,
@@ -92,7 +93,7 @@ export type X402PaidFetchOptions = {
 };
 
 type PhantomSolanaProvider = {
-  signTransaction: (tx: Uint8Array) => Promise<Uint8Array | { serializedTransaction?: Uint8Array }>;
+  signTransaction: (tx: unknown) => Promise<unknown>;
 };
 
 declare global {
@@ -128,22 +129,36 @@ function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
   return window.phantom?.solana ?? window.okxwallet?.solana ?? null;
 }
 
+function signedTxToBytes(signed: unknown, fallback: Uint8Array): Uint8Array {
+  if (signed instanceof Uint8Array) return signed;
+  if (signed instanceof VersionedTransaction) return signed.serialize();
+  const obj = signed as {
+    serialize?: () => Uint8Array;
+    serializedTransaction?: Uint8Array;
+  };
+  if (typeof obj?.serialize === "function") return obj.serialize();
+  if (obj?.serializedTransaction instanceof Uint8Array) return obj.serializedTransaction;
+  return fallback;
+}
+
+/** Phantom/OKX expect @solana/web3.js VersionedTransaction, not raw kit wire bytes */
 function createPhantomSolanaSigner(
   provider: PhantomSolanaProvider,
   pubkey: string,
-): TransactionModifyingSigner<string> {
-  const transactionCodec = getTransactionCodec();
+): TransactionSigner {
   const addr = address(pubkey);
+  const base = createNoopSigner(addr);
+  const transactionCodec = getTransactionCodec();
 
   return {
-    address: addr,
-    async modifyAndSignTransactions(transactions) {
+    ...base,
+    async modifyAndSignTransactions(transactions, config) {
       const results = [];
       for (const transaction of transactions) {
         const wire = transactionCodec.encode(transaction);
-        const signed = await provider.signTransaction(wire);
-        const bytes =
-          signed instanceof Uint8Array ? signed : (signed.serializedTransaction ?? wire);
+        const vtx = VersionedTransaction.deserialize(wire);
+        const signed = await provider.signTransaction(vtx);
+        const bytes = signedTxToBytes(signed, wire);
         const decoded = transactionCodec.decode(bytes);
         assertIsTransactionWithinSizeLimit(decoded);
         results.push(decoded);
