@@ -1,6 +1,7 @@
 /**
- * Browser Solana x402 exact payments — matches @x402/svm layout:
- * compute limit, compute price, transferChecked, memo (PayAI verify requires this order).
+ * Browser Solana x402 exact — 3 instructions only (limit, price, transfer).
+ * PayAI allows 3–6 instructions; Phantom Lighthouse adds extras at the end.
+ * Omitting memo leaves room for up to 3 Lighthouse instructions (3+3=6).
  */
 import type { PaymentRequirements } from "@x402/core/types";
 import type { SchemeNetworkClient } from "@x402/core/types";
@@ -10,22 +11,35 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
+  decompileTransactionMessage,
+  getCompiledTransactionMessageDecoder,
+  getTransactionDecoder,
+} from "@solana/kit";
+import {
   ComputeBudgetProgram,
   Connection,
   PublicKey,
-  TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 
-/** Solana memo program (x402 exact optional 4th instruction) */
-const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-/** @x402/svm DEFAULT_COMPUTE_UNIT_LIMIT */
 const COMPUTE_UNIT_LIMIT = 20_000;
+const MAX_INSTRUCTIONS = 6;
 
 type PhantomProvider = {
   signTransaction: (tx: VersionedTransaction) => Promise<VersionedTransaction>;
 };
+
+function countTxInstructions(wire: Uint8Array): number {
+  try {
+    const tx = getTransactionDecoder().decode(wire);
+    const compiled = getCompiledTransactionMessageDecoder().decode(tx.messageBytes);
+    const decompiled = decompileTransactionMessage(compiled);
+    return decompiled.instructions?.length ?? 0;
+  } catch {
+    return 0;
+  }
+}
 
 export class SolanaExactPhantomScheme implements SchemeNetworkClient {
   readonly scheme = "exact";
@@ -40,7 +54,6 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     x402Version: number,
     paymentRequirements: PaymentRequirements,
   ): Promise<{ x402Version: number; payload: { transaction: string } }> {
-    /** Route RPC via same-origin proxy (Helius blocks browser CORS) */
     const connection = new Connection(this.rpcUrl, {
       commitment: "confirmed",
       fetch: async (_url, init) =>
@@ -51,6 +64,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
           signal: init?.signal ?? undefined,
         }),
     });
+
     const user = new PublicKey(this.userAddress);
     const merchant = new PublicKey(paymentRequirements.payTo);
     const mint = new PublicKey(paymentRequirements.asset);
@@ -70,22 +84,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     const userAta = getAssociatedTokenAddressSync(mint, user, false, TOKEN_PROGRAM_ID);
     const merchantAta = getAssociatedTokenAddressSync(mint, merchant, false, TOKEN_PROGRAM_ID);
 
-    const merchantAtaInfo = await connection.getAccountInfo(merchantAta);
-    if (!merchantAtaInfo) {
-      throw new Error(
-        "Merchant USDC account not initialized — send any USDC once to the merchant Solana address in Vercel (X402_SOL_PAY_TO), then retry",
-      );
-    }
-
-    const userAtaInfo = await connection.getAccountInfo(userAta);
-    if (!userAtaInfo) {
-      throw new Error("Your USDC token account was not found — receive USDC in Phantom on Solana first");
-    }
-
-    const nonce = crypto.getRandomValues(new Uint8Array(16));
-    const memoText = Array.from(nonce)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const { blockhash } = await connection.getLatestBlockhash("confirmed");
 
     const instructions = [
       ComputeBudgetProgram.setComputeUnitLimit({ units: COMPUTE_UNIT_LIMIT }),
@@ -100,21 +99,16 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
         [],
         TOKEN_PROGRAM_ID,
       ),
-      new TransactionInstruction({
-        keys: [],
-        programId: MEMO_PROGRAM_ID,
-        data: new TextEncoder().encode(memoText),
-      }),
     ];
 
-    const { blockhash } = await connection.getLatestBlockhash("confirmed");
-    const message = new TransactionMessage({
-      payerKey: feePayer,
-      recentBlockhash: blockhash,
-      instructions,
-    }).compileToV0Message();
+    const vtx = new VersionedTransaction(
+      new TransactionMessage({
+        payerKey: feePayer,
+        recentBlockhash: blockhash,
+        instructions,
+      }).compileToV0Message(),
+    );
 
-    const vtx = new VersionedTransaction(message);
     let signed: VersionedTransaction;
     try {
       signed = await this.provider.signTransaction(vtx);
@@ -128,9 +122,18 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     }
 
     const wire = signed.serialize();
+    const ixCount = countTxInstructions(wire);
+    if (ixCount > MAX_INSTRUCTIONS) {
+      throw new Error(
+        `invalid_exact_svm_payload_transaction_instructions_length: Phantom added ${ixCount} instructions (max ${MAX_INSTRUCTIONS}). Update Phantom or pay with Base (EVM).`,
+      );
+    }
+    if (ixCount < 3) {
+      throw new Error("Transaction missing required payment instructions");
+    }
+
     let binary = "";
     for (let i = 0; i < wire.length; i++) binary += String.fromCharCode(wire[i]);
-    const base64 = btoa(binary);
-    return { x402Version, payload: { transaction: base64 } };
+    return { x402Version, payload: { transaction: btoa(binary) } };
   }
 }

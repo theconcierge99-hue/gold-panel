@@ -6,11 +6,7 @@ import type { PaymentRequirements } from "@x402/core/types";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
-import { address } from "@solana/addresses";
-import { createNoopSigner, type TransactionSigner } from "@solana/signers";
-import { getTransactionCodec, assertIsTransactionWithinSizeLimit } from "@solana/transactions";
-import { VersionedTransaction } from "@solana/web3.js";
+import { SolanaExactPhantomScheme } from "./x402-solana-phantom-scheme";
 import {
   createPublicClient,
   createWalletClient,
@@ -167,55 +163,6 @@ function uninstallSolanaRpcProxyFetch(): void {
   if (typeof window === "undefined" || !nativeFetch) return;
   if (--solRpcProxyDepth > 0) return;
   window.fetch = nativeFetch;
-}
-
-function signedTxToBytes(signed: unknown, fallback: Uint8Array): Uint8Array {
-  if (signed instanceof Uint8Array) return signed;
-  if (signed instanceof VersionedTransaction) return signed.serialize();
-  const obj = signed as {
-    serialize?: () => Uint8Array;
-    serializedTransaction?: Uint8Array;
-  };
-  if (typeof obj?.serialize === "function") return obj.serialize();
-  if (obj?.serializedTransaction instanceof Uint8Array) return obj.serializedTransaction;
-  return fallback;
-}
-
-/** Partial sign via Phantom — avoids Lighthouse extra instructions on full signTransaction */
-function createPhantomSolanaSigner(
-  provider: PhantomSolanaProvider,
-  pubkey: string,
-): TransactionSigner {
-  const addr = address(pubkey);
-  const base = createNoopSigner(addr);
-  const transactionCodec = getTransactionCodec();
-
-  return {
-    ...base,
-    async modifyAndSignTransactions(transactions, config) {
-      const results = [];
-      for (const transaction of transactions) {
-        const wire = transactionCodec.encode(transaction);
-        const vtx = VersionedTransaction.deserialize(wire);
-        let signed: unknown;
-        try {
-          signed = await provider.signTransaction(vtx);
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          const code = (e as { code?: number })?.code;
-          if (code === 4001 || /reject|cancel|denied/i.test(msg)) {
-            throw new Error("Payment cancelled");
-          }
-          throw e;
-        }
-        const bytes = signedTxToBytes(signed, wire);
-        const decoded = transactionCodec.decode(bytes);
-        assertIsTransactionWithinSizeLimit(decoded);
-        results.push(decoded);
-      }
-      return results;
-    },
-  };
 }
 
 function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
@@ -488,9 +435,13 @@ export async function createX402PaidFetch(
     const solProv = solanaProvider(session)!;
     client.register(
       nets.solNetwork,
-      new ExactSvmScheme(createPhantomSolanaSigner(solProv, session.sol!.address), {
-        rpcUrl: solRpcProxyUrl(),
-      }),
+      new SolanaExactPhantomScheme(
+        solProv as {
+          signTransaction: (tx: import("@solana/web3.js").VersionedTransaction) => Promise<import("@solana/web3.js").VersionedTransaction>;
+        },
+        session.sol!.address,
+        solRpcProxyUrl(),
+      ),
     );
   }
 
