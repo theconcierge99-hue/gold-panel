@@ -28,14 +28,24 @@ const USDC = {
     evmNetwork: "eip155:8453" as const,
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d" as const,
-    solRpc: "https://api.mainnet-beta.solana.com",
+    /** Public RPC blocks browser POST (403) — use fallbacks first */
+    solRpcFallbacks: [
+      "https://solana-rpc.publicnode.com",
+      "https://rpc.ankr.com/solana",
+      "https://solana.drpc.org",
+      "https://api.mainnet-beta.solana.com",
+    ],
   },
   testnet: {
     evm: "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as const,
     evmNetwork: "eip155:84532" as const,
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const,
-    solRpc: "https://api.devnet.solana.com",
+    solRpcFallbacks: [
+      "https://solana-devnet-rpc.publicnode.com",
+      "https://rpc.ankr.com/solana_devnet",
+      "https://api.devnet.solana.com",
+    ],
   },
 };
 
@@ -59,6 +69,8 @@ export type X402ServerPayConfig = {
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
   solPayToReady?: boolean;
+  /** Optional Helius/Alchemy RPC from Vercel SOLANA_RPC_URL */
+  solRpcUrl?: string;
 };
 
 export type PayChain = "evm" | "sol";
@@ -71,6 +83,7 @@ export type ChainPayOption = {
   balanceAtomic: bigint;
   sufficient: boolean;
   available: boolean;
+  balanceUnknown?: boolean;
   disabledReason?: string;
 };
 
@@ -160,35 +173,53 @@ async function evmUsdcBalance(
   }
 }
 
+type SolBalanceResult = { balance: bigint; unknown: boolean };
+
+async function solUsdcBalanceViaRpc(
+  rpcUrl: string,
+  owner: string,
+  mint: string,
+): Promise<bigint | null> {
+  const res = await fetch(rpcUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getTokenAccountsByOwner",
+      params: [owner, { mint }, { encoding: "jsonParsed" }],
+    }),
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as Record<string, unknown>;
+  if (data.error) return null;
+  const value = (data.result as { value?: unknown[] } | undefined)?.value ?? [];
+  let total = 0n;
+  for (const row of value) {
+    const acct = row as { account?: { data?: { parsed?: { info?: { tokenAmount?: { amount?: string } } } } } };
+    const amt = acct.account?.data?.parsed?.info?.tokenAmount?.amount;
+    if (amt) total += BigInt(amt);
+  }
+  return total;
+}
+
 async function solUsdcBalance(
   owner: string,
   networkMode: "mainnet" | "testnet",
-): Promise<bigint> {
+  customRpc?: string,
+): Promise<SolBalanceResult> {
   const nets = USDC[networkMode];
-  try {
-    const res = await fetch(nets.solRpc, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "getTokenAccountsByOwner",
-        params: [owner, { mint: nets.solMint }, { encoding: "jsonParsed" }],
-      }),
-      signal: AbortSignal.timeout(8_000),
-    });
-    const data = (await res.json()) as {
-      result?: { value?: Array<{ account?: { data?: { parsed?: { info?: { tokenAmount?: { amount?: string } } } } } }> };
-    };
-    let total = 0n;
-    for (const row of data.result?.value ?? []) {
-      const amt = row.account?.data?.parsed?.info?.tokenAmount?.amount;
-      if (amt) total += BigInt(amt);
+  const urls = [...(customRpc ? [customRpc] : []), ...nets.solRpcFallbacks];
+  for (const rpc of urls) {
+    try {
+      const bal = await solUsdcBalanceViaRpc(rpc, owner, nets.solMint);
+      if (bal !== null) return { balance: bal, unknown: false };
+    } catch {
+      /* try next RPC */
     }
-    return total;
-  } catch {
-    return 0n;
   }
+  return { balance: 0n, unknown: true };
 }
 
 /** Lists chains the user can pay on, with live USDC balances. */
@@ -228,24 +259,40 @@ export async function getPaymentChainOptions(
     const hasWallet = !!session.sol?.address;
     const solProv = solanaProvider(session);
     let bal = 0n;
+    let balanceUnknown = false;
     let disabledReason: string | undefined;
     if (!hasWallet) {
       disabledReason = "Connect Solana in your wallet";
     } else if (!solProv) {
       disabledReason = "Solana provider not found — reopen Phantom/OKX";
     } else {
-      bal = await solUsdcBalance(session.sol!.address, networkMode);
+      const solBal = await solUsdcBalance(
+        session.sol!.address,
+        networkMode,
+        serverConfig.solRpcUrl,
+      );
+      bal = solBal.balance;
+      balanceUnknown = solBal.unknown;
     }
-    const sufficient = bal >= PRICE_ATOMIC;
+    const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
     options.push({
       chain: "sol",
       label: "Solana",
       sublabel: hasWallet ? shortAddr(session.sol!.address, "sol") : "Not connected",
-      balanceUsdc: hasWallet && solProv ? formatUsdc(bal) : "—",
+      balanceUsdc: hasWallet && solProv
+        ? balanceUnknown
+          ? "Check wallet (RPC unavailable)"
+          : formatUsdc(bal)
+        : "—",
       balanceAtomic: bal,
       sufficient,
+      balanceUnknown,
       available: hasWallet && !!solProv,
-      disabledReason: disabledReason ?? (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on Solana` : undefined),
+      disabledReason:
+        disabledReason ??
+        (!sufficient && hasWallet && !balanceUnknown
+          ? `Need at least ${PRICE_USDC} USDC on Solana`
+          : undefined),
     });
   }
 
@@ -279,12 +326,14 @@ async function resolvePaymentChain(
     const opts = await getPaymentChainOptions(session, networkMode, server);
     const pick = opts.find((o) => o.chain === preferred);
     if (!pick?.available) throw new Error(pick?.disabledReason || "Selected chain is not available");
-    if (!pick.sufficient) throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
+    if (!pick.sufficient && !pick.balanceUnknown) {
+      throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
+    }
     return preferred;
   }
 
   const opts = await getPaymentChainOptions(session, networkMode, server);
-  const usable = opts.filter((o) => o.available && o.sufficient);
+  const usable = opts.filter((o) => o.available && (o.sufficient || o.balanceUnknown));
   if (usable.length) {
     return usable.sort((a, b) =>
       a.balanceAtomic >= b.balanceAtomic ? -1 : 1,

@@ -151,6 +151,8 @@ export function getPublicX402Config() {
       evm: addressEnvDiagnostics(process.env.X402_EVM_PAY_TO),
       sol: addressEnvDiagnostics(process.env.X402_SOL_PAY_TO),
     },
+    /** Optional — set SOLANA_RPC_URL in Vercel (e.g. Helius) for reliable balance checks */
+    solRpcUrl: (process.env.SOLANA_RPC_URL || "").trim() || undefined,
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,
