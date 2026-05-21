@@ -1270,10 +1270,10 @@
       if(_x402Config.enabled){
         if(_x402Config.configWarning){
           hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Payments misconfigured on server</span>';
-        } else if(_x402Config.enabled && !_x402Config.evmPayToReady){
-          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">EVM receive address missing — set X402_EVM_PAY_TO in Vercel</span>';
+        } else if(_x402Config.enabled && !_x402Config.evmPayToReady && !_x402Config.solPayToReady){
+          hint.innerHTML = '<span style="color:var(--red,#e85d4a)">Set X402_EVM_PAY_TO and/or X402_SOL_PAY_TO in Vercel</span>';
         } else {
-          hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> when you open a story';
+          hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
         }
       } else {
         hint.textContent = 'Live wire';
@@ -1285,7 +1285,18 @@
   function assertX402PaymentsReady(cfg){
     if(!cfg?.enabled) return;
     if(cfg.configWarning) throw new Error(cfg.configWarning);
-    if(!cfg.evmPayToReady) throw new Error('EVM receive address not configured on server (X402_EVM_PAY_TO in Vercel).');
+    if(!cfg.evmPayToReady && !cfg.solPayToReady){
+      throw new Error('No valid merchant receive address on server. Set X402_EVM_PAY_TO (Base) and/or X402_SOL_PAY_TO (Solana) in Vercel.');
+    }
+  }
+
+  function x402ServerPayConfig(cfg){
+    return {
+      acceptsEvm: !!cfg.acceptsEvm,
+      acceptsSol: !!cfg.acceptsSol,
+      evmPayToReady: !!cfg.evmPayToReady,
+      solPayToReady: !!cfg.solPayToReady,
+    };
   }
 
   function formatPaymentError(err){
@@ -1301,12 +1312,29 @@
     return cfg?.networks?.evm === 'eip155:84532' ? 'testnet' : 'mainnet';
   }
 
-  function ensureWalletForX402(){
+  function ensureWalletForX402(cfg){
     const s = getWalletSession();
-    if(!s.evm){
-      toast('Connect EVM wallet (Ethereum on Phantom or OKX) to pay 0.1 USDC');
+    const needEvm = cfg?.evmPayToReady;
+    const needSol = cfg?.solPayToReady;
+    if(needEvm && needSol && !s.evm && !s.sol){
+      toast('Connect Solana and/or EVM (Base) in your wallet to pay 0.1 USDC');
       openWalletModal();
-      throw new Error('EVM wallet required for x402 payment');
+      throw new Error('Wallet required for x402 payment');
+    }
+    if(needEvm && !needSol && !s.evm){
+      toast('Connect EVM (Ethereum on Base) in Phantom or OKX');
+      openWalletModal();
+      throw new Error('EVM wallet required');
+    }
+    if(needSol && !needEvm && !s.sol){
+      toast('Connect Solana in Phantom or OKX');
+      openWalletModal();
+      throw new Error('Solana wallet required');
+    }
+    if(!s.evm && !s.sol){
+      toast('Connect a wallet to pay 0.1 USDC');
+      openWalletModal();
+      throw new Error('Wallet required');
     }
   }
 
@@ -1314,14 +1342,20 @@
     const cfg = await loadX402Config();
     if(!cfg.enabled) return fetch(url, options || {});
     assertX402PaymentsReady(cfg);
-    ensureWalletForX402();
+    ensureWalletForX402(cfg);
     if(typeof window.createX402PaidFetch !== 'function'){
       throw new Error('Payment module not loaded — hard refresh (Ctrl+F5)');
     }
-    const paidFetch = await window.createX402PaidFetch(getWalletSession(), x402NetworkMode(cfg));
+    const paidFetch = await window.createX402PaidFetch(
+      getWalletSession(),
+      x402NetworkMode(cfg),
+      x402ServerPayConfig(cfg),
+    );
     const u = String(url);
-    if(u.includes('/api/news-open')) toast('Approve 0.1 USDC to open this article (x402)…');
-    else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC for Concierge (x402)…');
+    const s = getWalletSession();
+    const chainHint = (cfg.solPayToReady && s.sol && (!cfg.evmPayToReady || !s.evm)) ? 'Solana' : (cfg.evmPayToReady && s.evm) ? 'Base' : 'wallet';
+    if(u.includes('/api/news-open')) toast('Approve 0.1 USDC on '+chainHint+' to open this article…');
+    else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' for Concierge…');
     return paidFetch(url, options || {});
   }
 
@@ -1350,7 +1384,7 @@
       return;
     }
     try{
-      ensureWalletForX402();
+      ensureWalletForX402(cfg);
       const res = await paidApiFetch('/api/news-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
