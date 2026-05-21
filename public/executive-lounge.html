@@ -517,7 +517,7 @@
   .x402-hint{font-size:10px;color:var(--text-muted);letter-spacing:.06em;margin-top:4px}
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
-<script type="module" src="/js/x402-pay.mjs?v=buffer-polyfill-1"></script>
+<script type="module" src="/js/x402-pay.mjs?v=exact-svm-partial-1"></script>
 </head>
 <body>
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div></div>
@@ -1399,7 +1399,10 @@
     if(/transaction_simulation_failed|simulation failed/i.test(m)){
       return 'Solana payment simulation failed — merchant may need a one-time USDC receive on Solana, or use Base (EVM). Detail: '+m;
     }
-    if(/verification failed|invalid_exact|instructions_length|settlement failed|does not match/i.test(m)){
+    if(/instructions_length|invalid_exact_svm_payload_unknown/i.test(m)){
+      return 'Phantom added extra instructions — hard refresh (Ctrl+Shift+R) and retry. If it persists, update Phantom or pay with Base (EVM). Detail: '+m;
+    }
+    if(/verification failed|invalid_exact|settlement failed|does not match/i.test(m)){
       return 'Payment was rejected after signing. In Phantom tap Confirm (unsafe) — normal for new sites. Retry, or use Base (EVM) if you have USDC there. Detail: '+m;
     }
     if(m === 'Payment required'){

@@ -6,11 +6,11 @@ export const config = {
   runtime: "edge",
 };
 
-const ALLOWED_METHODS = new Set([
-  "getLatestBlockhash",
-  "getAccountInfo",
-  "getTokenAccountsByOwner",
+/** Read-only RPC forwarded to Helius — blocks transaction submission from browser */
+const BLOCKED_METHODS = new Set([
+  "sendTransaction",
   "simulateTransaction",
+  "signTransaction",
 ]);
 
 export default async function handler(request: Request): Promise<Response> {
@@ -36,7 +36,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const method = body.method?.trim() ?? "";
-  if (!ALLOWED_METHODS.has(method)) {
+  if (!method || BLOCKED_METHODS.has(method)) {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 403,
       headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
