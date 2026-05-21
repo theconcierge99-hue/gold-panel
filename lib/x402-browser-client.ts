@@ -392,13 +392,12 @@ export async function createX402PaidFetch(
     registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
   } else {
     const solProv = solanaProvider(session)!;
-    const solRpcUrl = serverConfig.solRpcUrl || nets.solRpcFallbacks[0];
     client.register(
       nets.solNetwork,
       new SolanaExactPhantomScheme(
         solProv as { signTransaction: (tx: import("@solana/web3.js").VersionedTransaction) => Promise<import("@solana/web3.js").VersionedTransaction> },
         session.sol!.address,
-        solRpcUrl,
+        serverConfig.solRpcUrl || nets.solRpcFallbacks[0],
       ),
     );
   }

@@ -40,7 +40,17 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     x402Version: number,
     paymentRequirements: PaymentRequirements,
   ): Promise<{ x402Version: number; payload: { transaction: string } }> {
-    const connection = new Connection(this.rpcUrl, "confirmed");
+    /** Route RPC via same-origin proxy (Helius blocks browser CORS) */
+    const connection = new Connection(this.rpcUrl, {
+      commitment: "confirmed",
+      fetch: async (_url, init) =>
+        fetch("/api/solana-rpc", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: init?.body ?? undefined,
+          signal: init?.signal ?? undefined,
+        }),
+    });
     const user = new PublicKey(this.userAddress);
     const merchant = new PublicKey(paymentRequirements.payTo);
     const mint = new PublicKey(paymentRequirements.asset);
@@ -93,7 +103,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
       new TransactionInstruction({
         keys: [],
         programId: MEMO_PROGRAM_ID,
-        data: Buffer.from(new TextEncoder().encode(memoText)),
+        data: new TextEncoder().encode(memoText),
       }),
     ];
 
