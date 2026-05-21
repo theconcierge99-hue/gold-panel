@@ -729,7 +729,7 @@
     </div>
     <div class="field">
       <label>Categories</label>
-      <p class="field-hint">Pilih satu atau lebih label untuk berita Anda.</p>
+      <p class="field-hint">Select one or more labels for your story.</p>
       <div class="cat-picks" id="chips" role="group" aria-label="Signal categories">
         <div class="cat-chip" role="button" tabindex="0" data-cat="Technology" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#3b7dd8"></span>Technology</div>
         <div class="cat-chip" role="button" tabindex="0" data-cat="Macro" onclick="toggleCatChip(this)" onkeydown="catChipKey(event,this)"><span class="cat-dot" style="background:#c9a84c"></span>Macro</div>
@@ -1104,9 +1104,9 @@
 
   function publishSignal(){
     const cats=getSelectedSignalCategories();
-    if(!cats.length){ toast('Pilih minimal satu kategori'); return; }
+    if(!cats.length){ toast('Select at least one category'); return; }
     const price = getSignalUnlockPrice();
-    if(!price.amount){ toast('Masukkan harga unlock USDC yang valid'); return; }
+    if(!price.amount){ toast('Enter a valid USDC unlock price'); return; }
     closeModal();
     toast('Signal minted and published to the Lounge ✓');
     setTimeout(()=>toast('Onchain provenance record created ⛓'),900);
@@ -1263,7 +1263,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I answer in <strong>any language</strong> — markets, general knowledge, and world affairs. Live data: Binance, Yahoo, CoinGecko, DeFi Llama, headlines, plus <strong>Wikipedia</strong>, <strong>DuckDuckGo</strong>, and world news (BBC, NPR, Guardian).</p><p>Ask macro, teknikal, crypto, history, science, culture — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> I answer in <strong>any language</strong> — markets, general knowledge, and world affairs. Live data: Binance, Yahoo, CoinGecko, DeFi Llama, headlines, plus <strong>Wikipedia</strong>, <strong>DuckDuckGo</strong>, and world news (BBC, NPR, Guardian).</p><p>Ask about macro, technicals, crypto, history, science, culture — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function tickerItemHtml(t){
     const up=!String(t.change).includes('-');
