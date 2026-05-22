@@ -238,10 +238,17 @@ export async function runConciergeGemini(options: {
       .filter(Boolean)
       .join("\n");
 
-    const langSource = message || signal?.summary || signal?.title || "";
+    const draftParts = [signal?.title, signal?.summary, message].filter(Boolean) as string[];
     const raw = await geminiGenerateText(apiKey, {
       systemInstruction: {
-        parts: [{ text: `${ENHANCE_PROMPT}\n\n${buildReplyLanguageBlock(langSource)}` }],
+        parts: [
+          {
+            text: `${ENHANCE_PROMPT}\n\n${buildReplyLanguageBlock(
+              draftParts[draftParts.length - 1] ?? "",
+              draftParts,
+            )}`,
+          },
+        ],
       },
       contents: [{ role: "user", parts: [{ text: userText }] }],
       generationConfig: { temperature: 0.5, maxOutputTokens: 800 },
@@ -262,6 +269,7 @@ export async function runConciergeGemini(options: {
   }
 
   if (mode === "image") {
+    const recentUser = history.filter((h) => h.role === "user").map((h) => h.text);
     const systemPrompt = buildConciergeSystemPrompt({
       topics,
       market: ticks,
@@ -270,6 +278,7 @@ export async function runConciergeGemini(options: {
       imageMode: true,
       requireTradingPlan,
       userMessage: message,
+      recentUserMessages: recentUser,
     });
     const analysis = await geminiGenerateText(apiKey, {
       systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -302,6 +311,7 @@ export async function runConciergeGemini(options: {
     };
   }
 
+  const recentUser = history.filter((h) => h.role === "user").map((h) => h.text);
   const systemPrompt = buildConciergeSystemPrompt({
     topics,
     market: ticks,
@@ -309,6 +319,7 @@ export async function runConciergeGemini(options: {
     ...promptContext,
     requireTradingPlan,
     userMessage: message,
+    recentUserMessages: recentUser,
   });
   let reply = await geminiGenerateText(apiKey, {
     systemInstruction: { parts: [{ text: systemPrompt }] },
