@@ -4,7 +4,7 @@ import {
   readBodyWithLimit,
   sanitizeNewsOpenError,
 } from "./lib/concierge-security";
-import { requireX402Payment } from "./lib/x402-server";
+import { guardPaidX402Api } from "./lib/x402-server";
 
 /** Edge + PayAI HTTP facilitator (no Node-only @x402 server SDK) */
 export const config = {
@@ -48,24 +48,12 @@ function parseNewsOpenBody(raw: string): { url: string; title: string; source: s
 }
 
 export default async function handler(request: Request): Promise<Response> {
-  const cors = corsHeadersFor(request);
-
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
-  }
-
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
-  }
+  const routed = await guardPaidX402Api(request, "news");
+  if ("response" in routed) return routed.response;
+  const { cors, gate } = routed.continue;
 
   try {
     assertAllowedOrigin(request);
-
-    const gate = await requireX402Payment(request, "news", cors);
-    if (!gate.ok) return gate.response;
 
     const raw = await readBodyWithLimit(request);
     const article =

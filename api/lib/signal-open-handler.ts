@@ -4,7 +4,7 @@ import {
   readBodyWithLimit,
   sanitizePublicError,
 } from "./concierge-security";
-import { requireX402Payment } from "./x402-server";
+import { guardPaidX402Api } from "./x402-server";
 import { X402_READ_PRICE_ATOMIC, X402_READ_PRICE_USDC } from "./x402-pricing";
 import {
   SIGNAL_CREATOR_SHARE_BPS,
@@ -15,24 +15,12 @@ import { parseSignalOpenBody } from "./signal-validation";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
 
 export async function handleSignalOpen(request: Request): Promise<Response> {
-  const cors = corsHeadersFor(request);
-
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
-  }
-
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
-  }
+  const routed = await guardPaidX402Api(request, "signal-open");
+  if ("response" in routed) return routed.response;
+  const { cors, gate } = routed.continue;
 
   try {
     assertAllowedOrigin(request);
-
-    const gate = await requireX402Payment(request, "signal-open", cors);
-    if (!gate.ok) return gate.response;
 
     const raw = await readBodyWithLimit(request);
     const { signalId } =

@@ -7,7 +7,7 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "./lib/concierge-security";
-import { requireX402Payment } from "./lib/x402-server";
+import { guardPaidX402Api } from "./lib/x402-server";
 
 /** Edge — Gemini + x402 via PayAI HTTP (no Node-only @x402 server SDK) */
 export const config = {
@@ -32,21 +32,12 @@ function jsonResponse(
 }
 
 export default async function handler(request: Request): Promise<Response> {
-  const cors = corsHeadersFor(request);
-
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
-  }
-
-  if (request.method !== "POST") {
-    return jsonResponse(request, { error: "Method not allowed" }, 405);
-  }
+  const routed = await guardPaidX402Api(request, "concierge");
+  if ("response" in routed) return routed.response;
+  const { cors, gate: payGate } = routed.continue;
 
   try {
     assertAllowedOrigin(request);
-
-    const payGate = await requireX402Payment(request, "concierge", cors);
-    if (!payGate.ok) return payGate.response;
 
     const raw = await readBodyWithLimit(request);
     const { mode, message, history, signal, market } = validateConciergeRequest(raw);

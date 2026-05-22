@@ -10,6 +10,7 @@ import {
   SOLANA_FEE_PAYER,
   X402_PRICE_LABEL,
 } from "./x402-config";
+import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
 import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 
@@ -405,4 +406,51 @@ export async function requireX402Payment(
       ),
     };
   }
+}
+
+export type PaidX402RouteContinue = {
+  cors: Record<string, string>;
+  gate: Extract<X402GateResult, { ok: true }>;
+};
+
+/**
+ * x402scan probes with GET (and POST) without Origin — return 402 before 405 / CORS rejection.
+ * Real clients still use POST + payment + allowed Origin.
+ */
+export async function guardPaidX402Api(
+  request: Request,
+  kind: X402ResourceKind,
+): Promise<{ response: Response } | { continue: PaidX402RouteContinue }> {
+  const cors = corsHeadersFor(request);
+
+  if (request.method === "OPTIONS") {
+    return { response: new Response(null, { status: 204, headers: cors }) };
+  }
+
+  if (request.method !== "POST" && request.method !== "GET" && request.method !== "HEAD") {
+    return {
+      response: new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+      }),
+    };
+  }
+
+  const gate = await requireX402Payment(request, kind, cors);
+  if (!gate.ok) {
+    return { response: gate.response };
+  }
+
+  if (request.method === "GET" || request.method === "HEAD") {
+    return {
+      response: await buildPaymentRequiredResponse(
+        request,
+        kind,
+        cors,
+        "Use POST with a JSON body after payment",
+      ),
+    };
+  }
+
+  return { continue: { cors, gate } };
 }
