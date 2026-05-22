@@ -138,21 +138,8 @@
   aside.left{border-right:1px solid var(--border);background:var(--sidebar-bg);transition:background .25s;display:flex;flex-direction:column;overflow:hidden}
   .sidebar-body{flex:1;overflow-y:auto;padding:18px 0 12px}
   .sidebar-footer{flex-shrink:0;padding:14px 18px 18px;border-top:1px solid var(--border)}
-  .sidebar-about{margin-bottom:14px}
-  .sidebar-about-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0;border:none;background:transparent;cursor:pointer;font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:400;text-align:left;transition:color .15s}
-  .sidebar-about-toggle:hover{color:var(--chrome-bright)}
-  .sidebar-about-toggle .chev{font-size:10px;color:var(--text-muted);transition:transform .2s}
-  .sidebar-about.open .sidebar-about-toggle .chev{transform:rotate(180deg);color:var(--gold)}
-  .sidebar-about-panel{display:none;margin-top:10px;max-height:42vh;overflow-y:auto;padding-right:4px}
-  .sidebar-about.open .sidebar-about-panel{display:block}
-  .sidebar-about .hook{font-family:'Cormorant Garamond',serif;font-size:15px;line-height:1.35;color:var(--text-primary);font-weight:300;margin:0 0 10px;font-style:italic}
-  .sidebar-about p{font-size:11px;line-height:1.55;color:var(--text-muted);margin:0 0 8px}
-  .sidebar-about ul{margin:0 0 10px;padding:0 0 0 14px;font-size:10.5px;line-height:1.5;color:var(--text-muted)}
-  .sidebar-about li{margin-bottom:4px}
-  .sidebar-about .cta{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-  .sidebar-about .cta-btn{font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;text-align:center;padding:8px 10px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;border-radius:4px;transition:all .15s;text-decoration:none}
-  .sidebar-about .cta-btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg)}
-  .sidebar-about .cta-btn.gold{border-color:var(--gold);color:var(--gold)}
+  .sidebar-about-link{display:block;text-align:center;margin-bottom:12px;font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:color .15s}
+  .sidebar-about-link:hover{color:var(--chrome-bright)}
   .sidebar-x{display:flex;align-items:center;justify-content:center;width:36px;height:36px;margin:0 auto;border:1px solid var(--border);border-radius:6px;transition:all .15s}
   .sidebar-x:hover{border-color:var(--chrome);background:var(--nav-active-bg)}
   .sidebar-x img{width:18px;height:18px;object-fit:contain;opacity:.85;transition:opacity .15s}
@@ -599,28 +586,7 @@
     </div>
     </div>
     <div class="sidebar-footer">
-      <div class="sidebar-about" id="sidebarAbout">
-        <button type="button" class="sidebar-about-toggle" id="aboutUsToggle" aria-expanded="false" aria-controls="aboutUsPanel" onclick="toggleAboutUs()">
-          <span>About Us</span>
-          <span class="chev" aria-hidden="true">▾</span>
-        </button>
-        <div class="sidebar-about-panel" id="aboutUsPanel">
-          <p class="hook">Markets move fast. Your edge should not depend on scattered tabs and noisy feeds.</p>
-          <p><strong style="color:var(--text-secondary);font-weight:400">Executive Lounge</strong> is a private intelligence terminal for participants in the onchain economy—live wire, market telemetry, creator signals, and an AI Concierge in one disciplined surface.</p>
-          <p>We built the Lounge for readers who want <em style="color:var(--text-secondary);font-style:normal">research-desk context</em>: clear headlines, paid depth when it matters, and answers that remember what has already appeared here.</p>
-          <ul>
-            <li><strong style="color:var(--text-secondary);font-weight:400">Lounge</strong> — browse global wire free; unlock full reads with transparent USDC micropayments.</li>
-            <li><strong style="color:var(--text-secondary);font-weight:400">Concierge AI</strong> — trading plans, macro, crypto, and category insight; recalls Lounge memory for continuity.</li>
-            <li><strong style="color:var(--text-secondary);font-weight:400">Creator Signals</strong> — publish with an anti-spam fee; readers unlock at a flat rate; quality over volume.</li>
-          </ul>
-          <p>Payments run on <strong style="color:var(--text-secondary);font-weight:400">Solana or Base</strong> via x402—small, intentional, and spam-resistant. No engagement bait. No infinite scroll trap.</p>
-          <div class="cta">
-            <button type="button" class="cta-btn gold" onclick="showView('lounge');closeAllDrawers()">Explore the Lounge</button>
-            <button type="button" class="cta-btn" onclick="showView('concierge');closeAllDrawers();setTimeout(function(){document.getElementById('chatInput')?.focus()},120)">Ask Concierge</button>
-            <button type="button" class="cta-btn" onclick="openModal();closeAllDrawers()">Publish a Signal</button>
-          </div>
-        </div>
-      </div>
+      <a class="sidebar-about-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
       <a class="sidebar-x" href="https://x.com/Th3concierge_" target="_blank" rel="noopener noreferrer" aria-label="Follow on X @Th3concierge_">
         <img src="/images/x-social.png" alt="" width="18" height="18" />
       </a>
@@ -1116,16 +1082,6 @@
   }
   function closeAllDrawers(){ closeNavDrawer(); closeConcDrawer(); }
 
-  function toggleAboutUs(){
-    const root = document.getElementById('sidebarAbout');
-    const panel = document.getElementById('aboutUsPanel');
-    const btn = document.getElementById('aboutUsToggle');
-    if(!root || !panel || !btn) return;
-    const open = !root.classList.contains('open');
-    root.classList.toggle('open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  window.toggleAboutUs = toggleAboutUs;
   function toggleNavDrawer(){
     const aside=document.querySelector('aside.left');
     const bd=document.getElementById('navBackdrop');

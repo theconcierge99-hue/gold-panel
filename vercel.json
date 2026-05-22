@@ -34,6 +34,10 @@
       "destination": "/images/the-concierge-logo.png"
     },
     {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
       "source": "/",
       "destination": "/executive-lounge.html"
     }
