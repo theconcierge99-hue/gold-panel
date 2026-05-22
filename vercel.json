@@ -21,6 +21,13 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/executive-lounge.html",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/favicon.ico",
