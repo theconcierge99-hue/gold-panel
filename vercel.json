@@ -46,6 +46,10 @@
       "destination": "/about.html"
     },
     {
+      "source": "/docs",
+      "destination": "/docs.html"
+    },
+    {
       "source": "/",
       "destination": "/executive-lounge.html"
     }

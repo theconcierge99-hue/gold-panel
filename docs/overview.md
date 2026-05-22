@@ -10,6 +10,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 |-----|---------|
 | `https://your-domain.com/` | Main lounge (clean URL; rewrites to `executive-lounge.html`) |
 | `https://your-domain.com/about` | About page |
+| `https://your-domain.com/docs` | Documentation (web) |
 | `https://your-domain.com/api/market` | Free headline + signal feed (JSON) |
 | `https://your-domain.com/api/x402-config` | Public payment configuration (may include merchant receive addresses) |
 | `https://your-domain.com/.well-known/x402` | x402 resource fan-out (discovery) |

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Documentation — Executive Lounge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, Concierge AI, and creator signals." />
+<meta name="robots" content="index,follow" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  html,html[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;
+    --text-primary:#d8e4f0;--text-secondary:#6b7d9a;--text-muted:#3a4a62;
+    --nav-active-bg:rgba(201,168,76,.08);--card-grad-1:#121a2e;--card-grad-2:#0e1525;
+  }
+  html[data-theme="light"]{
+    color-scheme:light;
+    --bg:#f4f2ec;--border:#d4cfc4;--gold:#9a7b2e;--gold-dim:#c9a84c;
+    --text-primary:#1a1f2e;--text-secondary:#4a5568;--text-muted:#6b7280;
+    --nav-active-bg:rgba(154,123,46,.1);--card-grad-1:#fff;--card-grad-2:#f8f6f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.65}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 24px 72px}
+  .back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:inline-block;margin-bottom:24px}
+  .back:hover{color:var(--gold)}
+  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .logo-row img{width:40px;height:40px;border-radius:50%;border:1px solid var(--gold-dim)}
+  .logo-row h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px}
+  .eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  .lead{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;line-height:1.4;margin-bottom:28px;color:var(--text-primary)}
+  .toc{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;margin-bottom:28px}
+  .toc-title{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .toc ul{list-style:none;display:grid;gap:6px}
+  .toc a{font-size:13px;color:var(--text-secondary);text-decoration:none}
+  .toc a:hover{color:var(--gold)}
+  section{margin-bottom:32px;scroll-margin-top:24px}
+  section h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:24px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  section h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:18px 0 10px;font-weight:400}
+  .card{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;margin-bottom:16px}
+  .card p,.card li{font-size:14px;color:var(--text-secondary);margin-bottom:10px}
+  .card p:last-child,.card li:last-child{margin-bottom:0}
+  .card ul{padding-left:18px;margin:8px 0}
+  .card strong{color:var(--text-primary);font-weight:400}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+  th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:400}
+  code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);word-break:break-all}
+  .note{font-size:12px;color:var(--text-muted);border-left:2px solid var(--gold-dim);padding-left:12px;margin-top:12px}
+  .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .btn{font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);text-decoration:none;border-radius:4px;transition:all .15s}
+  .btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg)}
+  .btn.gold{border-color:var(--gold);color:var(--gold)}
+  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Back to Lounge</a>
+  <div class="logo-row">
+    <img src="/images/the-concierge-logo.png" alt="The Concierge" width="40" height="40" />
+    <h1>Documentation</h1>
+  </div>
+  <div class="eyebrow">Executive Lounge</div>
+  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, and Concierge AI.</p>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">On this page</div>
+    <ul>
+      <li><a href="#overview">Overview &amp; pricing</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#api">API reference</a></li>
+      <li><a href="#x402">x402 payments</a></li>
+      <li><a href="#x402scan">x402scan listing</a></li>
+      <li><a href="#concierge">Concierge AI</a></li>
+      <li><a href="#signals">Creator signals</a></li>
+      <li><a href="#config">Configuration</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#deploy">Deployment</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>Overview &amp; pricing</h2>
+    <div class="card">
+      <p>Executive Lounge is a private intelligence terminal: live market wire, creator signals, and paid Concierge AI. The UI is English; Concierge mirrors the user’s language when clear from their messages.</p>
+      <table>
+        <thead><tr><th>Action</th><th>Price</th></tr></thead>
+        <tbody>
+          <tr><td>Browse headlines</td><td>Free</td></tr>
+          <tr><td>Open RSS article</td><td>0.1 USDC</td></tr>
+          <tr><td>Concierge message</td><td>0.1 USDC</td></tr>
+          <tr><td>Unlock creator signal</td><td>0.1 USDC</td></tr>
+          <tr><td>Publish creator signal</td><td>1 USDC</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Reader unlock fees split 80% creator / 20% merchant (monthly off-chain). Publish fee is 100% merchant.</p>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <div class="card">
+      <ul>
+        <li><strong>UI</strong> — <code>executive-lounge.html</code> + <code>x402-pay.mjs</code> client bundle</li>
+        <li><strong>APIs</strong> — Vercel Edge functions under <code>/api/*</code></li>
+        <li><strong>AI</strong> — Google Gemini</li>
+        <li><strong>Payments</strong> — x402 v2 via PayAI facilitator (on-chain settlement)</li>
+        <li><strong>Storage</strong> — Redis/KV for signals, ledger, and Concierge lounge memory</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="api">
+    <h2>API reference</h2>
+    <div class="card">
+      <h3>Free</h3>
+      <ul>
+        <li><code>GET /api/market</code> — headline feed + ticks</li>
+        <li><code>GET /api/x402-config</code> — public payment config</li>
+        <li><code>GET /.well-known/x402</code> — x402 discovery fan-out</li>
+        <li><code>GET /openapi.json</code> — OpenAPI + payment metadata</li>
+      </ul>
+      <h3>Paid (POST, x402)</h3>
+      <ul>
+        <li><code>POST /api/news-open</code> — unlock article URL</li>
+        <li><code>POST /api/concierge</code> — AI chat / enhance / image</li>
+        <li><code>POST /api/signal-publish</code> — publish signal (1 USDC)</li>
+        <li><code>POST /api/signal-open</code> — unlock signal body (0.1 USDC)</li>
+      </ul>
+      <p>Without payment, paid routes return <strong>402</strong> with <code>PAYMENT-REQUIRED</code>. <code>GET</code> on paid routes also returns 402 for marketplace probes.</p>
+    </div>
+  </section>
+
+  <section id="x402">
+    <h2>x402 payments</h2>
+    <div class="card">
+      <p>USDC on <strong>Base</strong> and optionally <strong>Solana</strong>. Facilitator: PayAI (<code>facilitator.payai.network</code>).</p>
+      <ol style="padding-left:18px;color:var(--text-secondary);font-size:14px">
+        <li style="margin-bottom:8px">Client receives 402 + payment requirements</li>
+        <li style="margin-bottom:8px">Wallet signs USDC transfer</li>
+        <li style="margin-bottom:8px">Client retries with <code>PAYMENT-SIGNATURE</code></li>
+        <li>Server verifies and settles; response includes <code>PAYMENT-RESPONSE</code> with transaction hash</li>
+      </ol>
+      <p class="note">Set <code>X402_EVM_PAY_TO</code> and/or <code>X402_SOL_PAY_TO</code> in your host environment. Never commit keys or RPC URLs with embedded secrets.</p>
+    </div>
+  </section>
+
+  <section id="x402scan">
+    <h2>x402scan listing</h2>
+    <div class="card">
+      <p>List this server on <a href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">x402scan.com</a> for public discovery and transaction indexing.</p>
+      <ul>
+        <li>Register your production origin (fan-out discovers all four paid routes)</li>
+        <li>If batch registration fails, register each <code>/api/...</code> URL separately</li>
+        <li>Complete a real micropayment so settlements appear on-chain</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="concierge">
+    <h2>Concierge AI</h2>
+    <div class="card">
+      <p><strong>Modes:</strong> <code>chat</code>, <code>enhance</code> (signal editor), <code>image</code> (analysis + optional visual).</p>
+      <p>Uses live market data, general-knowledge feeds, and lounge memory (recent headlines + creator signals).</p>
+      <p><strong>Language:</strong> defaults to English; replies in Indonesian or other languages when the user’s message (or recent user turns for short replies) is clearly in that language.</p>
+    </div>
+  </section>
+
+  <section id="signals">
+    <h2>Creator signals</h2>
+    <div class="card">
+      <p>Publish stores a signal in KV and surfaces it on the market feed. Unlock shows the full summary in a modal.</p>
+      <p>Requires <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> (or Upstash equivalents) in production.</p>
+    </div>
+  </section>
+
+  <section id="config">
+    <h2>Configuration</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>GEMINI_API_KEY</code></td><td>Concierge AI</td></tr>
+          <tr><td><code>X402_EVM_PAY_TO</code></td><td>Base USDC receive address</td></tr>
+          <tr><td><code>X402_SOL_PAY_TO</code></td><td>Solana USDC receive (optional)</td></tr>
+          <tr><td><code>KV_REST_*</code></td><td>Signals + memory</td></tr>
+          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL for discovery docs</td></tr>
+          <tr><td><code>ALLOWED_ORIGINS</code></td><td>Extra CORS origins</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Copy <code>.env.example</code> to <code>.env.local</code> for local development. Operators set secrets only in the hosting dashboard.</p>
+    </div>
+  </section>
+
+  <section id="security">
+    <h2>Security</h2>
+    <div class="card">
+      <ul>
+        <li>Never commit API keys, KV tokens, private keys, or RPC URLs with keys</li>
+        <li>Do not paste full <code>/api/x402-config</code> responses in public support threads</li>
+        <li>Restrict Gemini keys by HTTP referrer in Google AI Studio</li>
+        <li>Rotate any credential that was exposed</li>
+      </ul>
+      <p>Extended markdown docs for operators live in the repository <code>docs/</code> folder (same content, security-reviewed).</p>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <h2>Deployment</h2>
+    <div class="card">
+      <p>Deploy via <strong>Git → Vercel</strong> on the correct team and project. Avoid <code>vercel deploy</code> from a personal account that lacks production env vars.</p>
+      <p>After deploy, verify: site loads, <code>/api/x402-config</code> shows <code>enabled: true</code>, and <code>/api/concierge</code> returns 402 without payment.</p>
+    </div>
+  </section>
+
+  <div class="cta-row">
+    <a class="btn gold" href="/">Open the Lounge</a>
+    <a class="btn" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
+  </div>
+
+  <p class="foot">Executive Lounge · Documentation · Payments via x402 · Not financial advice</p>
+</div>
+</body>
+</html>
