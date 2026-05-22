@@ -2,6 +2,8 @@
 
 Executive Lounge handles API keys, wallet payments, and user data. Follow these rules in every environment.
 
+**Documentation:** [docs/security.md](docs/security.md) — what must never appear in docs, commits, or public tickets.
+
 ## Secrets
 
 - **Never commit** `.env`, `.env.local`, `.dev.vars`, or any file containing API keys, RPC URLs with embedded keys, or private keys.
