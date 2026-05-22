@@ -603,12 +603,20 @@ export function buildConciergeSystemPrompt(options: {
   topics: ConciergeTopic[];
   market?: MarketTick[];
   liveMarketBlock?: string;
+  loungeMemoryBlock?: string;
   imageMode?: boolean;
   requireTradingPlan?: boolean;
   userMessage?: string;
 }): string {
-  const { topics, market = [], liveMarketBlock = "", imageMode, requireTradingPlan, userMessage } =
-    options;
+  const {
+    topics,
+    market = [],
+    liveMarketBlock = "",
+    loungeMemoryBlock = "",
+    imageMode,
+    requireTradingPlan,
+    userMessage,
+  } = options;
   const replyLangBlock = buildReplyLanguageBlock(userMessage);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
   const tradingBlock = requireTradingPlan ? `\n${TRADING_PLAN_FRAMEWORK}\n` : "";
@@ -640,6 +648,11 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 
 ${RESPONSE_STRUCTURE}
 
+LOUNGE MEMORY (when provided below):
+- These are real headlines and creator signals that appeared on the Executive Lounge feed (stored for continuity).
+- When the user asks about "the lounge", recent stories, a headline, or creator content, prioritize LOUNGE MEMORY and name the publisher or "Lounge Signal".
+- Do not claim you read a paid unlock unless the summary is present in LOUNGE MEMORY; wire items may be headline-only.
+
 RULES:
 1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (English only).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
@@ -649,6 +662,7 @@ RULES:
 6. Think step-by-step internally: parse question → language → direct answer → data → plan → risks.
 ${tradingBlock}
 ${marketBlock}
+${loungeMemoryBlock ? `\n${loungeMemoryBlock}\n` : ""}
 ACTIVE DOMAINS:
 ${playbooks}
 ${imageMode ? "\nIMAGE MODE: Include analysis + trading plan in text; visual generated separately.\n" : ""}`;

@@ -6,6 +6,7 @@ import {
 } from "./concierge-security";
 import { requireX402Payment } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
+import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
@@ -67,6 +68,11 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
     };
 
     await savePublishedSignal(signal);
+    try {
+      await ingestCreatorSignalMemory(signal);
+    } catch (e) {
+      console.error("[signal-publish] lounge memory", e instanceof Error ? e.message : e);
+    }
 
     const headers: Record<string, string> = {
       ...cors,

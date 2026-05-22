@@ -11,6 +11,10 @@ import {
   formatGeneralKnowledgeForPrompt,
 } from "./general-knowledge";
 import {
+  buildLoungeMemoryContextBlock,
+  ingestWireHeadlinesAsync,
+} from "./lounge-memory";
+import {
   fetchLiveMarketSnapshot,
   formatLiveMarketForPrompt,
   type LiveMarketSnapshot,
@@ -173,16 +177,17 @@ async function resolveIntelligenceContext(
   userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
 ): Promise<{ intelBlock: string; ticks: MarketTick[]; snapshot: LiveMarketSnapshot }> {
-  const [snapshot, general] = await Promise.all([
+  const [snapshot, general, loungeMemoryBlock] = await Promise.all([
     liveSnapshot ? Promise.resolve(liveSnapshot) : fetchLiveMarketSnapshot(),
     fetchGeneralKnowledgeSnapshot(userMessage),
+    buildLoungeMemoryContextBlock(userMessage),
   ]);
-  const intelBlock = [
-    formatLiveMarketForPrompt(snapshot),
-    formatGeneralKnowledgeForPrompt(general),
-  ].join("\n\n");
+  ingestWireHeadlinesAsync(snapshot.headlines);
+  const intelBlock = [formatLiveMarketForPrompt(snapshot), formatGeneralKnowledgeForPrompt(general)]
+    .filter(Boolean)
+    .join("\n\n");
   const ticks = snapshot.ticks.length ? snapshot.ticks : market;
-  return { intelBlock, ticks, snapshot };
+  return { intelBlock, ticks, snapshot, loungeMemoryBlock };
 }
 
 export async function runConciergeGemini(options: {
@@ -207,11 +212,12 @@ export async function runConciergeGemini(options: {
   const { message, history = [], signal, market = [] } = options;
   const topics = detectTopics(message);
   const requireTradingPlan = wantsTradingPlan(message, topics);
-  const { intelBlock, ticks, snapshot } = await resolveIntelligenceContext(
+  const { intelBlock, ticks, snapshot, loungeMemoryBlock } = await resolveIntelligenceContext(
     market,
     message,
     options.liveSnapshot,
   );
+  const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
   const mode =
     options.mode === "image" || (options.mode === "chat" && wantsImage(message))
@@ -255,6 +261,7 @@ export async function runConciergeGemini(options: {
       topics,
       market: ticks,
       liveMarketBlock: intelBlock,
+      ...promptContext,
       imageMode: true,
       requireTradingPlan,
       userMessage: message,
@@ -294,6 +301,7 @@ export async function runConciergeGemini(options: {
     topics,
     market: ticks,
     liveMarketBlock: intelBlock,
+    ...promptContext,
     requireTradingPlan,
     userMessage: message,
   });
