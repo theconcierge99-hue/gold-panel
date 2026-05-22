@@ -6,8 +6,9 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "../api/lib/concierge-security";
-import { enrichHeadlinesForUi, buildTrendingNarratives } from "../api/lib/headline-ui";
-import { fetchLiveMarketSnapshot, ticksForUi } from "../api/lib/market-data";
+import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
+import { handleSignalOpen } from "../api/lib/signal-open-handler";
+import { handleSignalPublish } from "../api/lib/signal-publish-handler";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,27 +18,37 @@ const jsonHeaders = {
 
 async function handleMarket(): Promise<{ status: number; json: unknown }> {
   try {
-    const snapshot = await fetchLiveMarketSnapshot();
-    const headlines = enrichHeadlinesForUi(snapshot.headlines);
-    return {
-      status: 200,
-      json: {
-        fetchedAt: snapshot.fetchedAt,
-        ticks: ticksForUi(snapshot),
-        derivatives: snapshot.derivatives,
-        positioning: snapshot.positioning,
-        globalCrypto: snapshot.globalCrypto,
-        sentiment: snapshot.sentiment,
-        defi: snapshot.defi,
-        btcNetwork: snapshot.btcNetwork,
-        headlines,
-        narratives: buildTrendingNarratives(headlines),
-        sources: snapshot.sources,
-      },
-    };
+    return { status: 200, json: await buildLoungeMarketPayload() };
   } catch (e) {
     return { status: 500, json: { error: sanitizePublicError(e) } };
   }
+}
+
+async function forwardApi(
+  handler: (req: Request) => Promise<Response>,
+  method: string | undefined,
+  bodyText: string,
+  pathname: string,
+): Promise<{ status: number; json: unknown; noBody?: boolean }> {
+  const fakeRequest = new Request(`http://localhost${pathname}`, {
+    method: method || "GET",
+    headers: {
+      "content-type": "application/json",
+      "content-length": String(Buffer.byteLength(bodyText)),
+      origin: "http://localhost:5173",
+    },
+    body: bodyText || undefined,
+  });
+  const res = await handler(fakeRequest);
+  if (res.status === 204) return { status: 204, json: null, noBody: true };
+  const text = await res.text();
+  let json: unknown = {};
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = { error: text.slice(0, 200) };
+  }
+  return { status: res.status, json };
 }
 
 async function handleConcierge(
@@ -90,6 +101,33 @@ export function conciergeDevPlugin(): Plugin {
           res.statusCode = status;
           for (const [k, v] of Object.entries(jsonHeaders)) res.setHeader(k, v);
           res.end(JSON.stringify(json));
+          return;
+        }
+
+        const signalRoutes: Record<string, (r: Request) => Promise<Response>> = {
+          "/api/signal-publish": handleSignalPublish,
+          "/api/signal-open": handleSignalOpen,
+        };
+        if (url && signalRoutes[url]) {
+          const chunks: Buffer[] = [];
+          req.on("data", (c) => chunks.push(c));
+          req.on("end", async () => {
+            const bodyText = Buffer.concat(chunks).toString("utf8");
+            const { status, json, noBody } = await forwardApi(
+              signalRoutes[url],
+              req.method,
+              bodyText,
+              url,
+            );
+            for (const [k, v] of Object.entries(jsonHeaders)) res.setHeader(k, v);
+            if (noBody) {
+              res.statusCode = 204;
+              res.end();
+              return;
+            }
+            res.statusCode = status;
+            res.end(JSON.stringify(json));
+          });
           return;
         }
 

@@ -8,12 +8,11 @@ import {
   getUsdcAssetForNetwork,
   isX402Enabled,
   SOLANA_FEE_PAYER,
-  X402_PRICE_ATOMIC,
   X402_PRICE_LABEL,
-  X402_PRICE_USDC,
 } from "./x402-config";
+import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 
-export type X402ResourceKind = "news" | "concierge";
+export type { X402ResourceKind };
 
 const FACILITATOR_URL = "https://facilitator.payai.network";
 
@@ -24,6 +23,14 @@ const RESOURCE_META: Record<X402ResourceKind, { description: string; mimeType: s
   },
   concierge: {
     description: "Concierge AI chat turn (single request)",
+    mimeType: "application/json",
+  },
+  "signal-publish": {
+    description: "Publish one creator signal to the Lounge (anti-spam fee)",
+    mimeType: "application/json",
+  },
+  "signal-open": {
+    description: "Unlock one creator signal (full intelligence summary)",
     mimeType: "application/json",
   },
 };
@@ -79,11 +86,23 @@ function getPaymentSignatureHeader(request: Request): string | null {
   return request.headers.get("payment-signature") ?? request.headers.get("PAYMENT-SIGNATURE");
 }
 
+function resourcePath(kind: X402ResourceKind): string {
+  switch (kind) {
+    case "news":
+      return "/api/news-open";
+    case "concierge":
+      return "/api/concierge";
+    case "signal-publish":
+      return "/api/signal-publish";
+    case "signal-open":
+      return "/api/signal-open";
+  }
+}
+
 function resourceUrl(request: Request, kind: X402ResourceKind): string {
   const host = request.headers.get("host") || "localhost";
   const proto = request.headers.get("x-forwarded-proto") || "https";
-  const path = kind === "news" ? "/api/news-open" : "/api/concierge";
-  return `${proto}://${host}${path}`;
+  return `${proto}://${host}${resourcePath(kind)}`;
 }
 
 function normalizePayTo(addr: string): string {
@@ -101,13 +120,14 @@ function normalizeSolanaNetwork(network: string): string {
 function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequirement[] {
   const nets = getX402NetworkProfile();
   const { evm, sol } = getMerchantAddresses();
+  const amount = atomicAmountForResource(kind);
   const accepts: X402AcceptRequirement[] = [];
 
   if (evm) {
     accepts.push({
       scheme: "exact",
       network: nets.evm,
-      amount: X402_PRICE_ATOMIC,
+      amount,
       asset: getUsdcAssetForNetwork(nets.evm),
       payTo: evm,
       maxTimeoutSeconds: 120,
@@ -118,7 +138,7 @@ function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequi
     accepts.push({
       scheme: "exact",
       network: nets.sol,
-      amount: X402_PRICE_ATOMIC,
+      amount,
       asset: getUsdcAssetForNetwork(nets.sol),
       payTo: sol,
       maxTimeoutSeconds: 120,
@@ -230,8 +250,11 @@ export async function buildPaymentRequiredResponse(
     JSON.stringify({
       error: clientMessage,
       detail: error,
-      priceUsdc: X402_PRICE_USDC,
-      priceLabel: X402_PRICE_LABEL,
+      priceUsdc: priceUsdcForResource(kind),
+      priceLabel:
+        kind === "signal-publish"
+          ? "$1.00"
+          : X402_PRICE_LABEL,
       resource: kind,
     }),
     {

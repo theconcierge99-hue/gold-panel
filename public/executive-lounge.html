@@ -377,6 +377,11 @@
   .pay-setup-steps code{font-size:12px;color:var(--gold,#c9a227)}
   .pay-story{font-size:13px;line-height:1.5;color:var(--text-secondary);margin:12px 0 16px;max-height:4.5em;overflow:hidden}
   .pay-amount{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:18px}
+  .signal-reader-modal{max-width:640px;max-height:90vh;overflow-y:auto}
+  .signal-body{font-size:14px;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap;margin-top:14px}
+  .signal-cats{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .signal-cats span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--border);color:var(--gold)}
+  .fcard.creator-signal .chain{color:var(--gold)}
   .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
   .pay-chains{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
   .pay-chain-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);background:var(--gcard-bg);cursor:pointer;transition:all .15s;text-align:left}
@@ -588,7 +593,7 @@
     <section class="view show" id="view-lounge">
       <div class="section-h">
         <h2>Featured Signals</h2>
-        <div class="meta x402-hint" id="loungePayHint">Browse free · <strong>0.1 USDC per article</strong> when you open a story (x402)</div>
+        <div class="meta x402-hint" id="loungePayHint">Browse free · <strong>0.1 USDC</strong> to open stories · creators pay <strong>1 USDC</strong> to publish</div>
       </div>
       <div class="featured" id="featuredSignals">
         <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
@@ -750,7 +755,7 @@
     <h2 id="payModalTitle">Confirm payment</h2>
     <div class="sub" id="payModalSub">Choose chain · 0.1 USDC</div>
     <p class="pay-story" id="payModalStory"></p>
-    <div class="pay-amount"><span>Amount</span>0.1 USDC</div>
+    <div class="pay-amount" id="payModalAmount"><span>Amount</span>0.1 USDC</div>
     <div class="pay-chains" id="payChainList"><div class="pay-loading">Loading balances…</div></div>
     <div class="modal-foot">
       <button type="button" class="btn" onclick="closePayModal(false)">Cancel</button>
@@ -795,16 +800,30 @@
       <div class="imp" id="imp">Begin typing a title — implication preview will assemble from current regime data.</div>
     </div>
     <div class="field">
-      <label>Unlock Price</label>
-      <div class="price-field">
-        <input id="sigPriceAmount" type="number" min="0.01" step="0.01" value="1" inputmode="decimal" placeholder="1.00" aria-label="Unlock price amount in USDC" />
-        <span class="price-unit">USDC</span>
+      <label>Pricing</label>
+      <div class="imp" style="margin-top:0">
+        <strong>Publish fee:</strong> 1 USDC (anti-spam, one-time per signal).<br />
+        <strong>Reader unlock:</strong> 0.1 USDC per open (platform standard). Revenue share 50:50 on reader fees — settled monthly.
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn" onclick="enhanceSignal()">⬡ AI Enhance</button>
       <button class="btn gold" onclick="publishSignal()">Mint &amp; Publish →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNAL READER -->
+<div class="overlay" id="signalReaderOverlay" onclick="if(event.target===this)closeSignalReader()">
+  <div class="modal signal-reader-modal" onclick="event.stopPropagation()">
+    <button class="close" onclick="closeSignalReader()">×</button>
+    <div class="sub" id="signalReaderMeta">Lounge Signal</div>
+    <h2 id="signalReaderTitle">Signal</h2>
+    <div class="signal-cats" id="signalReaderCats"></div>
+    <div class="signal-body" id="signalReaderBody"></div>
+    <div class="modal-foot" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <button type="button" class="btn gold" onclick="closeSignalReader()">Close</button>
     </div>
   </div>
 </div>
@@ -877,19 +896,6 @@
     if(s.evm) return { family: 'evm', label: 'EVM — Base, Polygon, or BNB' };
     return { family: null, label: 'Connect wallet — Solana or EVM' };
   }
-
-  function getSignalUnlockPrice(){
-    const raw = document.getElementById('sigPriceAmount')?.value;
-    const amount = parseFloat(raw);
-    const chain = resolveCreatorPaymentChain();
-    return {
-      currency: PAYMENT_CURRENCY,
-      amount: Number.isFinite(amount) && amount > 0 ? amount : null,
-      chainFamily: chain.family,
-      chainLabel: chain.label,
-    };
-  }
-  window.getSignalUnlockPrice = getSignalUnlockPrice;
 
   function renderWalletUI(){
     const session = getWalletSession();
@@ -1148,15 +1154,53 @@
   }
   window.getSelectedSignalCategories=getSelectedSignalCategories;
 
-  function publishSignal(){
+  async function publishSignal(){
+    const title=document.getElementById('sigTitle')?.value?.trim()||'';
+    const summary=document.getElementById('sigSummary')?.value?.trim()||'';
     const cats=getSelectedSignalCategories();
+    if(!title){ toast('Enter a title'); return; }
+    if(summary.length<40){ toast('Summary must be at least 40 characters'); return; }
     if(!cats.length){ toast('Select at least one category'); return; }
-    const price = getSignalUnlockPrice();
-    if(!price.amount){ toast('Enter a valid USDC unlock price'); return; }
-    closeModal();
-    toast('Signal minted and published to the Lounge ✓');
-    setTimeout(()=>toast('Onchain provenance record created ⛓'),900);
+    const session=getWalletSession();
+    const creatorWallet=session.sol?.address||session.evm?.address;
+    const creatorChain=session.sol?'sol':session.evm?'evm':null;
+    if(!creatorWallet||!creatorChain){
+      toast('Connect wallet to publish');
+      openWalletModal();
+      return;
+    }
+    const cfg=await loadX402Config();
+    try{
+      let chain;
+      if(x402PaymentsLive(cfg)){
+        chain=await showPaymentConfirm({
+          title:'Publish signal',
+          subtitle:'One-time anti-spam fee · choose payment chain',
+          story:title,
+          confirmLabel:'Pay 1 USDC & publish',
+          amountUsdc:cfg.signalPublishUsdc||1,
+        });
+      }
+      const res=await paidApiFetch('/api/signal-publish',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
+      },{preferredChain:chain});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
+      closeModal();
+      document.getElementById('sigTitle').value='';
+      document.getElementById('sigSummary').value='';
+      document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
+      toast('Signal published to the Lounge ✓');
+      await refreshMarket();
+    }catch(e){
+      if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
+      console.warn('signal-publish',e);
+      toast(formatPaymentError(e)||'Could not publish signal');
+    }
   }
+  window.publishSignal=publishSignal;
 
   // TOAST
   function toast(msg, html){
@@ -1528,8 +1572,11 @@
     }
 
     document.getElementById('payModalTitle').textContent = opts.title || 'Confirm payment';
-    document.getElementById('payModalSub').textContent = opts.subtitle || 'Choose how to pay · 0.1 USDC';
+    const amount = typeof opts.amountUsdc === 'number' && opts.amountUsdc > 0 ? opts.amountUsdc : 0.1;
+    document.getElementById('payModalSub').textContent = opts.subtitle || ('Choose how to pay · '+amount+' USDC');
     document.getElementById('payModalStory').textContent = opts.story || '';
+    const amtEl = document.getElementById('payModalAmount');
+    if(amtEl) amtEl.innerHTML = '<span>Amount</span>'+amount+' USDC';
     document.getElementById('payConfirmBtn').textContent = opts.confirmLabel || 'Pay & continue';
     document.getElementById('payConfirmBtn').disabled = true;
     document.getElementById('payChainList').innerHTML = '<div class="pay-loading">Loading USDC balances…</div>';
@@ -1596,7 +1643,8 @@
     );
     const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
-    if(u.includes('/api/news-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve 0.1 USDC on '+chainHint);
+    if(u.includes('/api/news-open')||u.includes('/api/signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
+    else if(u.includes('/api/signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
     return paidFetch(url, options || {});
   }
@@ -1607,6 +1655,10 @@
 
   function openNewsArticleFromEl(el){
     if(!el) return;
+    if(el.dataset.signalId){
+      openCreatorSignal(el.dataset.signalId, el.dataset.title||'', el.dataset.source||'');
+      return;
+    }
     if(el.dataset.noUrl || !el.dataset.url){
       toast('No link available for this story');
       return;
@@ -1614,6 +1666,70 @@
     openNewsArticle(el.dataset.url, el.dataset.title||'', el.dataset.source||'');
   }
   window.openNewsArticleFromEl = openNewsArticleFromEl;
+
+  function closeSignalReader(){
+    document.getElementById('signalReaderOverlay')?.classList.remove('show');
+  }
+  window.closeSignalReader = closeSignalReader;
+
+  function showSignalReader(signal){
+    document.getElementById('signalReaderTitle').textContent = signal.title || 'Signal';
+    document.getElementById('signalReaderMeta').textContent =
+      'Lounge Signal · '+new Date(signal.publishedAt||Date.now()).toLocaleString();
+    const cats = (signal.categories||[]).map(c=>'<span>'+escapeHtml(c)+'</span>').join('');
+    document.getElementById('signalReaderCats').innerHTML = cats;
+    document.getElementById('signalReaderBody').textContent = signal.summary || '';
+    document.getElementById('signalReaderOverlay')?.classList.add('show');
+  }
+
+  async function openCreatorSignal(signalId, title, source){
+    if(!signalId){ toast('Signal unavailable'); return; }
+    const cfg = await loadX402Config();
+    if(!x402PaymentsLive(cfg)){
+      if(x402PaymentsWanted(cfg)){
+        try{ await showPaySetupModal(cfg); }catch(_){}
+        return;
+      }
+      toast('Payments disabled — cannot unlock signal');
+      return;
+    }
+    async function payAndOpen(chain){
+      const res = await paidApiFetch('/api/signal-open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signalId }),
+      }, { preferredChain: chain });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
+      if(data.signal) showSignalReader(data.signal);
+      toast('Signal unlocked ✓');
+    }
+    try{
+      let chain = await showPaymentConfirm({
+        title: 'Open creator signal',
+        subtitle: 'One-time unlock · 0.1 USDC',
+        story: title || source || signalId,
+        confirmLabel: 'Pay & read signal',
+        amountUsdc: cfg.signalOpenUsdc || 0.1,
+      });
+      try{
+        await payAndOpen(chain);
+      }catch(e){
+        const msg = e?.message || '';
+        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed|instructions_length/i.test(msg)){
+          toast('Solana failed — retrying with Base (EVM)…');
+          await payAndOpen('evm');
+          return;
+        }
+        throw e;
+      }
+    }catch(e){
+      if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
+      console.warn('signal-open', e);
+      toast(formatPaymentError(e)||'Could not open signal');
+    }
+  }
+  window.openCreatorSignal = openCreatorSignal;
 
   async function openNewsArticle(url, title, source){
     if(!url){
@@ -1775,11 +1891,14 @@
       return;
     }
     el.innerHTML=items.slice(0,2).map((h,i)=>{
-      const summary=h.summary?escapeHtml(h.summary):'Live headline from '+escapeHtml(h.source)+'. Tap to read — 0.1 USDC.';
-      const tag=escapeHtml(h.category)+' <span class="sep">/</span> '+escapeHtml(h.source);
+      const isCreator=h.signalId||h.kind==='creator';
+      const summary=h.summary?escapeHtml(h.summary):(isCreator?'Creator intelligence — unlock to read full thesis.':'Live headline from '+escapeHtml(h.source)+'. Tap to read — 0.1 USDC.');
+      const tag=escapeHtml(h.category)+' <span class="sep">/</span> '+escapeHtml(h.source)+(isCreator?' <span class="sep">/</span> Creator':'');
       const urlAttr=h.url?escapeHtml(h.url):'';
-      const noUrl=!h.url?' data-no-url="1"':'';
-      return `<article class="fcard is-live news-card" role="button" tabindex="0"${noUrl}
+      const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
+      const noUrl=!h.url&&!h.signalId?' data-no-url="1"':'';
+      const cardClass='fcard is-live news-card'+(isCreator?' creator-signal':'');
+      return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
         <div class="tag">${tag}</div>
@@ -1789,7 +1908,7 @@
           <div class="avatar ${avatarClass(i)}">${sourceInitials(h.source)}</div>
           <span class="src-badge">${escapeHtml(h.source)}</span>
           <span class="score">◆ ${h.score}</span>
-          <span class="chain">↗ read · 0.1 USDC</span>
+          <span class="chain">${isCreator?'◆ unlock · 0.1 USDC':'↗ read · 0.1 USDC'}</span>
           <div class="spacer"><span>${escapeHtml(h.ageLabel)}</span></div>
         </div>
       </article>`;
@@ -1805,8 +1924,12 @@
       return;
     }
     el.innerHTML=grid.map((h,i)=>{
+      const isCreator=h.signalId||h.kind==='creator';
       const urlAttr=h.url?escapeHtml(h.url):'';
-      return `<article class="gcard is-live news-card" role="button" tabindex="0"
+      const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
+      const noUrl=!h.url&&!h.signalId?' data-no-url="1"':'';
+      const cardClass='gcard is-live news-card'+(isCreator?' creator-signal':'');
+      return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
         <div class="gcat"><span class="cat-dot" style="background:${h.categoryColor}"></span>${escapeHtml(h.category)}</div>

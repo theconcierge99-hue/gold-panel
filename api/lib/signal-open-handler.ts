@@ -1,0 +1,94 @@
+import {
+  assertAllowedOrigin,
+  corsHeadersFor,
+  readBodyWithLimit,
+  sanitizePublicError,
+} from "./concierge-security";
+import { requireX402Payment } from "./x402-server";
+import { X402_READ_PRICE_ATOMIC, X402_READ_PRICE_USDC } from "./x402-pricing";
+import { parseSignalOpenBody } from "./signal-validation";
+import { appendUnlockLedger, getSignalById } from "./signal-store";
+
+export async function handleSignalOpen(request: Request): Promise<Response> {
+  const cors = corsHeadersFor(request);
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: cors });
+  }
+
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    assertAllowedOrigin(request);
+
+    const gate = await requireX402Payment(request, "signal-open", cors);
+    if (!gate.ok) return gate.response;
+
+    const raw = await readBodyWithLimit(request);
+    const { signalId } =
+      typeof raw === "string"
+        ? parseSignalOpenBody(raw)
+        : parseSignalOpenBody(JSON.stringify(raw ?? {}));
+
+    const signal = await getSignalById(signalId);
+    if (!signal) {
+      return new Response(JSON.stringify({ error: "Signal not found" }), {
+        status: 404,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
+    if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
+      await appendUnlockLedger({
+        type: "signal_unlock",
+        signalId: signal.id,
+        creatorWallet: signal.creatorWallet,
+        payer: gate.payer,
+        amountAtomic: X402_READ_PRICE_ATOMIC,
+        transaction: gate.transaction,
+        at: new Date().toISOString(),
+      });
+    }
+
+    const headers: Record<string, string> = {
+      ...cors,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    };
+    if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        priceUsdc: X402_READ_PRICE_USDC,
+        signal: {
+          id: signal.id,
+          title: signal.title,
+          summary: signal.summary,
+          categories: signal.categories,
+          creatorWallet: signal.creatorWallet,
+          creatorChain: signal.creatorChain,
+          publishedAt: signal.publishedAt,
+        },
+      }),
+      { status: 200, headers },
+    );
+  } catch (e) {
+    const msg = sanitizePublicError(e);
+    const status =
+      msg.includes("not allowed") || msg.includes("too large")
+        ? 403
+        : msg.includes("required") || msg.includes("Invalid")
+          ? 400
+          : 500;
+    return new Response(JSON.stringify({ error: msg }), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+}

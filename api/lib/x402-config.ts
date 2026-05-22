@@ -8,12 +8,21 @@ import {
 } from "./x402-address";
 import { merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
 
-export const X402_PRICE_USDC = 0.1;
+import {
+  X402_READ_PRICE_ATOMIC,
+  X402_READ_PRICE_USDC,
+  X402_SIGNAL_PUBLISH_ATOMIC,
+  X402_SIGNAL_PUBLISH_USDC,
+} from "./x402-pricing";
+
+export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
 export const X402_PRICE_LABEL = "$0.10";
 export const X402_PRICE_MONEY = "$0.10";
 
 /** USDC atomic units (6 decimals): 0.1 USDC = 100_000 */
-export const X402_PRICE_ATOMIC = "100000";
+export const X402_PRICE_ATOMIC = X402_READ_PRICE_ATOMIC;
+
+export { X402_SIGNAL_PUBLISH_USDC, X402_SIGNAL_PUBLISH_ATOMIC };
 
 /** PayAI facilitator fee payer for Solana exact scheme */
 export const SOLANA_FEE_PAYER = "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4";
@@ -173,6 +182,9 @@ export function getPublicX402Config() {
     newsPerArticle: true,
     marketFeedFree: true,
     conciergePerChat: true,
+    signalPublishUsdc: X402_SIGNAL_PUBLISH_USDC,
+    signalOpenUsdc: X402_READ_PRICE_USDC,
+    creatorSignalsEnabled: true,
   };
 }
 

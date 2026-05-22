@@ -11,6 +11,7 @@ Executive Lounge handles API keys, wallet payments, and user data. Follow these 
   - `X402_EVM_PAY_TO` / `X402_SOL_PAY_TO` — public **receive** addresses only (not private keys)
   - `SOLANA_RPC_URL` — optional; **never exposed** in `/api/x402-config` (server proxy only)
   - `PAYAI_API_KEY_ID` / `PAYAI_API_KEY_SECRET` — optional PayAI facilitator auth
+  - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (or Upstash `UPSTASH_REDIS_*`) — creator signal storage in production
 
 ## What stays on the server
 

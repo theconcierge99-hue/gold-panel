@@ -1,6 +1,5 @@
-import { enrichHeadlinesForUi, buildTrendingNarratives } from "./lib/headline-ui";
-import { fetchLiveMarketSnapshot, ticksForUi } from "./lib/market-data";
 import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
+import { buildLoungeMarketPayload } from "./lib/lounge-market";
 
 /** Edge — free headline feed; no x402 / Node SDK deps */
 export const config = {
@@ -24,30 +23,14 @@ export default async function handler(request: Request): Promise<Response> {
   try {
     assertAllowedOrigin(request);
 
-    const snapshot = await fetchLiveMarketSnapshot();
-    const headlines = enrichHeadlinesForUi(snapshot.headlines);
+    const payload = await buildLoungeMarketPayload();
     const headers: Record<string, string> = {
       ...cors,
       "Content-Type": "application/json",
       "Cache-Control": "public, max-age=30",
     };
 
-    return new Response(
-      JSON.stringify({
-        fetchedAt: snapshot.fetchedAt,
-        ticks: ticksForUi(snapshot),
-        derivatives: snapshot.derivatives,
-        positioning: snapshot.positioning,
-        globalCrypto: snapshot.globalCrypto,
-        sentiment: snapshot.sentiment,
-        defi: snapshot.defi,
-        btcNetwork: snapshot.btcNetwork,
-        headlines,
-        narratives: buildTrendingNarratives(headlines),
-        sources: snapshot.sources,
-      }),
-      { status: 200, headers },
-    );
+    return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch (e) {
     const msg = sanitizePublicError(e);
     return new Response(JSON.stringify({ error: msg }), {
