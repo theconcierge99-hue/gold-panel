@@ -15,7 +15,14 @@ export type SignalLedgerEntry = {
   signalId: string;
   creatorWallet: string;
   payer: string;
+  /** Gross reader unlock (0.1 USDC) */
   amountAtomic: string;
+  /** Creator 80% of reader unlock */
+  creatorShareAtomic: string;
+  /** Merchant 20% of reader unlock */
+  merchantShareAtomic: string;
+  creatorShareBps: number;
+  merchantShareBps: number;
   transaction: string;
   at: string;
 };

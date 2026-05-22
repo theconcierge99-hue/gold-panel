@@ -6,6 +6,11 @@ import {
 } from "./concierge-security";
 import { requireX402Payment } from "./x402-server";
 import { X402_READ_PRICE_ATOMIC, X402_READ_PRICE_USDC } from "./x402-pricing";
+import {
+  SIGNAL_CREATOR_SHARE_BPS,
+  SIGNAL_MERCHANT_SHARE_BPS,
+  splitReaderUnlockAtomic,
+} from "./signal-revenue";
 import { parseSignalOpenBody } from "./signal-validation";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
 
@@ -44,12 +49,17 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
     }
 
     if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
+      const split = splitReaderUnlockAtomic(X402_READ_PRICE_ATOMIC);
       await appendUnlockLedger({
         type: "signal_unlock",
         signalId: signal.id,
         creatorWallet: signal.creatorWallet,
         payer: gate.payer,
         amountAtomic: X402_READ_PRICE_ATOMIC,
+        creatorShareAtomic: split.creatorAtomic,
+        merchantShareAtomic: split.merchantAtomic,
+        creatorShareBps: SIGNAL_CREATOR_SHARE_BPS,
+        merchantShareBps: SIGNAL_MERCHANT_SHARE_BPS,
         transaction: gate.transaction,
         at: new Date().toISOString(),
       });

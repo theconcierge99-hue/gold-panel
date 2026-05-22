@@ -14,6 +14,10 @@ import {
   X402_SIGNAL_PUBLISH_ATOMIC,
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
+import {
+  SIGNAL_CREATOR_SHARE_PERCENT,
+  SIGNAL_MERCHANT_SHARE_PERCENT,
+} from "./signal-revenue";
 
 export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
 export const X402_PRICE_LABEL = "$0.10";
@@ -185,6 +189,12 @@ export function getPublicX402Config() {
     signalPublishUsdc: X402_SIGNAL_PUBLISH_USDC,
     signalOpenUsdc: X402_READ_PRICE_USDC,
     creatorSignalsEnabled: true,
+    signalReaderRevenueShare: {
+      creatorPercent: SIGNAL_CREATOR_SHARE_PERCENT,
+      merchantPercent: SIGNAL_MERCHANT_SHARE_PERCENT,
+      settledMonthly: true,
+      note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) split 80/20.",
+    },
   };
 }
 
