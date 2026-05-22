@@ -1,6 +1,7 @@
 import {
   buildConciergeSystemPrompt,
   buildImagePrompt,
+  buildReplyLanguageBlock,
   detectTopics,
   wantsImage,
   wantsTradingPlan,
@@ -25,7 +26,8 @@ export type ChatTurn = { role: "user" | "model"; text: string };
 export type ConciergeMode = "chat" | "enhance" | "image";
 
 const ENHANCE_PROMPT = `Rewrite the signal copy for Executive Lounge. Return JSON only: {"title":"...","summary":"...","implication":"..."}.
-Keep institutional tone. Title under 120 chars. Summary 2–3 sentences. Implication 2 sentences on market impact.`;
+Keep institutional tone. Title under 120 chars. Summary 2–3 sentences. Implication 2 sentences on market impact.
+Use the same language as the draft (see REPLY LANGUAGE below).`;
 
 const TEXT_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
 const IMAGE_MODELS = [
@@ -236,8 +238,11 @@ export async function runConciergeGemini(options: {
       .filter(Boolean)
       .join("\n");
 
+    const langSource = message || signal?.summary || signal?.title || "";
     const raw = await geminiGenerateText(apiKey, {
-      systemInstruction: { parts: [{ text: ENHANCE_PROMPT }] },
+      systemInstruction: {
+        parts: [{ text: `${ENHANCE_PROMPT}\n\n${buildReplyLanguageBlock(langSource)}` }],
+      },
       contents: [{ role: "user", parts: [{ text: userText }] }],
       generationConfig: { temperature: 0.5, maxOutputTokens: 800 },
     });

@@ -6,6 +6,7 @@
 <script>(function(){if(/\/executive-lounge\.html$/i.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/\/executive-lounge\.html$/i,'/')+location.search+location.hash);}})();</script>
 <link rel="canonical" href="/" />
 <title>Executive Lounge — Private Intelligence Lobby</title>
+<meta name="description" content="Live market wire, creator signals, and Concierge AI for the onchain economy. Browse free; unlock depth with USDC on Solana or Base." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="shortcut icon" href="/images/the-concierge-logo.png" type="image/png" />
@@ -1846,7 +1847,7 @@
   }
 
   function openingMessage(){
-    return `<p><strong>Good evening.</strong> I respond in <strong>English</strong>. <strong>Headlines are free to browse</strong>; opening a story or each Concierge message costs <strong>0.1 USDC</strong> — choose <strong>Solana or Base</strong> at checkout.</p><p>Ask about any lounge category — <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
+    return `<p><strong>Good evening.</strong> <strong>Headlines are free to browse</strong>; opening a story or each Concierge message costs <strong>0.1 USDC</strong> — pay with <strong>Solana or Base</strong> at checkout.</p><p>Concierge defaults to <strong>English</strong> and matches your language when your message is clearly in it. Categories: <strong>Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Gold / Silver, Other</strong> — or tap <strong>Trading plan</strong> for a live BTC setup.</p>`;
   }
   function tickerItemHtml(t){
     const up=!String(t.change).includes('-');
@@ -2079,7 +2080,7 @@
     if(t.includes('defi')||t.includes('tvl')||t.includes('uniswap')||t.includes('narrative'))
       return `<p><strong>DeFi narrative scan.</strong> Three threads are gathering weight: (1) Uniswap v4 hooks are restructuring MEV economics — searcher revenue is migrating to LPs, which changes the marginal yield calculation for stablecoin LPs; (2) Restaking is past its hype peak but EigenLayer's actively-validated services are now generating real cashflow; (3) Stablecoin float continues to outpace TVL growth — a regime where velocity, not deposits, is the cleaner lead.</p><p>The single most under-priced thesis on the desk: yield-bearing collateral becoming the dominant DeFi primitive within 12 months. That changes everything downstream — borrow markets, LSTs, and onchain credit.</p>`;
     if(t.includes('signal')||t.includes('create')||t.includes('btc dominance'))
-      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> I can pre-fill the editor with a 600-word thesis, citations from onchain flow, and a proposed unlock price of 5 USDC. Open Create Signal when ready.</p>`;
+      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> Open <strong>Create Signal</strong> to publish (1 USDC anti-spam fee; readers unlock at 0.1 USDC).</p>`;
     if(t.includes('ai')||t.includes('agent')||t.includes('artificial'))
       return `<p><strong>AI × crypto convergence.</strong> The interesting datapoint is no longer adoption — it is reflexivity. Autonomous agent wallets now drive ~8% of DEX volume on Base and Arbitrum, with repeating, rule-driven signatures that the market is beginning to front-run. The marginal buyer is increasingly non-human, which compresses the timeline between thesis and price.</p><p>Two derivatives worth tracking: (1) compute-bound L2s capturing agent inference workloads, and (2) yield-bearing stablecoins becoming the default agent settlement asset. Both are early. Neither is priced in.</p>`;
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;
@@ -2139,7 +2140,7 @@
   async function askPreset(q){
     showView('concierge');
     if(!window._currentSessionId) ensureConciergeSession();
-    const imageMode=/visual|gambar|grafik|chart/i.test(q);
+    const imageMode=/\b(visual|chart|image|graph|diagram|infographic|illustration|heatmap)\b/i.test(q);
     setTimeout(async ()=>{
       addUser(q);addTyping();
       try{

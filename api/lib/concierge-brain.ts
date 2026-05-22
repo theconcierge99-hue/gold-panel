@@ -504,15 +504,53 @@ Users may ask about ANY category below. Detect intent, apply the matching playbo
 When the user names a category (e.g. "Energy insight", "question about Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
 
 const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
-- **Always reply in English** — the terminal UI is English-only. You may understand questions in any language, but every response must be written in English.
+- **Default: English** for every reply. Switch language only when the **current user message** is clearly written in another language (Indonesian, Chinese, etc.) — then mirror that language for this reply only.
+- Do **not** carry language from earlier turns; short or ambiguous lines (e.g. "ok", "ya", "thanks") → English.
 - Answer exactly what was asked — do not change the topic, asset, or timeframe unless the user was ambiguous (then ask one short clarifying question at the end only).
 - Lead with a direct answer to the specific question in the first paragraph; then analysis, data, and trading plan if relevant.
 - Match depth to the question: brief question → tighter answer; deep or multi-part question → fuller structured answer covering each part explicitly.
 - Keep standard market tickers and metrics in Latin script (BTC, ETH, RSI).`;
 
-export function buildReplyLanguageBlock(_message?: string): string {
+export type ReplyLanguage = "en" | "id" | "other";
+
+const ID_REPLY_MARKERS =
+  /\b(yang|dan|di|ke|dari|untuk|pada|dengan|ini|itu|apa|bagaimana|kenapa|mengapa|kapan|dimana|saya|kamu|anda|tidak|bisa|akan|adalah|juga|atau|sudah|belum|harus|tolong|mohon|jelaskan|berita|saham|harga|kena|berapa|gimana|dong|nih|aja|sih|banget|kayak|gak|nggak)\b/i;
+
+/** Short/neutral replies — always English (no language from prior turns). */
+function isLanguageNeutralShort(text: string): boolean {
+  return /^(ok|okay|yes|ya|yep|sure|thanks|thank you|si|sip|oke|baik|lanjut|continue|go|y|no|nope)$/i.test(
+    text.trim(),
+  );
+}
+
+function detectLanguageFromText(text: string): ReplyLanguage {
+  const t = text.trim();
+  if (!t) return "en";
+  if (ID_REPLY_MARKERS.test(t)) return "id";
+  if (/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff]/.test(t)) return "other";
+  if (/[àáâãäåæçèéêëìíîïñòóôõöùúûüýÿÀ-ÿ]/.test(t)) return "other";
+  return "en";
+}
+
+/** Reply language from the current user message only; default English. */
+export function detectReplyLanguage(message?: string): ReplyLanguage {
+  const latest = (message ?? "").trim();
+  if (!latest || isLanguageNeutralShort(latest)) return "en";
+  return detectLanguageFromText(latest);
+}
+
+export function buildReplyLanguageBlock(message?: string): string {
+  const lang = detectReplyLanguage(message);
+  if (lang === "id") {
+    return `REPLY LANGUAGE (mandatory):
+The user's current message is in Indonesian. Write your entire response in Indonesian (Bahasa Indonesia). Use a clear, professional institutional tone. Keep market tickers and symbols in Latin script (BTC, ETH, DXY).`;
+  }
+  if (lang === "other") {
+    return `REPLY LANGUAGE (mandatory):
+The user's current message is not in English. Write your entire response in the same language as that message. Keep tickers in Latin script.`;
+  }
   return `REPLY LANGUAGE (mandatory):
-Write your ENTIRE response in English only. Do not reply in Indonesian or any other language.`;
+Default to English. Write your entire response in English unless the user's current message clearly used another language (see rules above).`;
 }
 
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (every market answer):
@@ -572,7 +610,7 @@ export function detectTopics(message: string): ConciergeTopic[] {
 
 export function wantsImage(message: string): boolean {
   const t = message.toLowerCase();
-  return /\b(chart visual|generate image|create image|infographic|heatmap visual|plot|sketch|diagram|illustrate|visualize|image|graphic)\b/.test(
+  return /\b(chart visual|generate image|create image|infographic|heatmap visual|plot|sketch|diagram|illustrate|visualize|image|graphic|gambar|grafik|chart)\b/.test(
     t,
   );
 }
@@ -631,7 +669,7 @@ export function buildConciergeSystemPrompt(options: {
 
   return `You are Concierge — Chief Market Strategist of Executive Lounge (private terminal). You combine research desk rigor with actionable trade construction.
 
-MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). All replies in English.
+MISSION: Universal intelligence officer — markets, trading plans, AND general knowledge (history, science, culture, world affairs). Default English; match the user's language when their current message is clearly in that language (see REPLY LANGUAGE).
 
 ${EXECUTIVE_LOUNGE_CATEGORY_INTEL}
 
@@ -654,7 +692,7 @@ LOUNGE MEMORY (when provided below):
 - Do not claim you read a paid unlock unless the summary is present in LOUNGE MEMORY; wire items may be headline-only.
 
 RULES:
-1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (English only).
+1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (English default; mirror only the current message's language).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
 3. MULTI-SOURCE MARKET INTELLIGENCE + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Wikipedia, BBC, NPR, etc.); anchor trade levels to Binance mark ± structure.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
