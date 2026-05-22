@@ -6,6 +6,7 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "../api/lib/concierge-security";
+import { fetchLiveMarketSnapshot } from "../api/lib/market-data";
 import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
 import { handleSignalOpen } from "../api/lib/signal-open-handler";
 import { handleSignalPublish } from "../api/lib/signal-publish-handler";

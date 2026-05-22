@@ -10,28 +10,40 @@ import {
   SOLANA_FEE_PAYER,
   X402_PRICE_LABEL,
 } from "./x402-config";
+import { buildBazaarExtension } from "./x402-discovery";
 import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 
 export type { X402ResourceKind };
 
 const FACILITATOR_URL = "https://facilitator.payai.network";
 
-const RESOURCE_META: Record<X402ResourceKind, { description: string; mimeType: string }> = {
+const RESOURCE_META: Record<
+  X402ResourceKind,
+  { name: string; description: string; mimeType: string; tags: string[] }
+> = {
   news: {
+    name: "Executive Lounge — Open article",
     description: "Open one news article (full story link)",
     mimeType: "application/json",
+    tags: ["executive-lounge", "news", "markets"],
   },
   concierge: {
+    name: "Executive Lounge — Concierge AI",
     description: "Concierge AI chat turn (single request)",
     mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge"],
   },
   "signal-publish": {
+    name: "Executive Lounge — Publish signal",
     description: "Publish one creator signal to the Lounge (anti-spam fee)",
     mimeType: "application/json",
+    tags: ["executive-lounge", "creator", "signals"],
   },
   "signal-open": {
+    name: "Executive Lounge — Unlock signal",
     description: "Unlock one creator signal (full intelligence summary)",
     mimeType: "application/json",
+    tags: ["executive-lounge", "creator", "signals"],
   },
 };
 
@@ -236,11 +248,13 @@ export async function buildPaymentRequiredResponse(
     error,
     resource: {
       url: resourceUrl(request, kind),
+      name: meta.name,
       description: meta.description,
       mimeType: meta.mimeType,
+      tags: meta.tags,
     },
     accepts,
-    extensions: {},
+    extensions: buildBazaarExtension(kind),
   };
 
   const clientMessage =

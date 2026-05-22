@@ -178,7 +178,12 @@ async function resolveIntelligenceContext(
   market: MarketTick[],
   userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
-): Promise<{ intelBlock: string; ticks: MarketTick[]; snapshot: LiveMarketSnapshot }> {
+): Promise<{
+  intelBlock: string;
+  ticks: MarketTick[];
+  snapshot: LiveMarketSnapshot;
+  loungeMemoryBlock: string;
+}> {
   const [snapshot, general, loungeMemoryBlock] = await Promise.all([
     liveSnapshot ? Promise.resolve(liveSnapshot) : fetchLiveMarketSnapshot(),
     fetchGeneralKnowledgeSnapshot(userMessage),

@@ -14,6 +14,7 @@ import {
   X402_SIGNAL_PUBLISH_ATOMIC,
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
+import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
 import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
@@ -195,6 +196,7 @@ export function getPublicX402Config() {
       settledMonthly: true,
       note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) split 80/20.",
     },
+    discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
   };
 }
 

@@ -30,6 +30,14 @@
   ],
   "rewrites": [
     {
+      "source": "/.well-known/x402",
+      "destination": "/api/well-known-x402"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "/api/openapi"
+    },
+    {
       "source": "/favicon.ico",
       "destination": "/images/the-concierge-logo.png"
     },
