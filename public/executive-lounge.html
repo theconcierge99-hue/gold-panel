@@ -599,7 +599,6 @@
     <section class="view show" id="view-lounge">
       <div class="section-h">
         <h2>Featured Signals</h2>
-        <div class="meta x402-hint" id="loungePayHint">Browse free · <strong>0.1 USDC</strong> to open stories · creators pay <strong>1 USDC</strong> to publish</div>
       </div>
       <div class="featured" id="featuredSignals">
         <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
@@ -1382,25 +1381,6 @@
     }catch{
       _x402Config = { enabled: false };
     }
-    const hint = document.getElementById('loungePayHint');
-    if(hint){
-      const payLive = _x402Config.enabled && (_x402Config.evmPayToReady || _x402Config.solPayToReady);
-      const payBroken = _x402Config.paymentsRequested && !payLive;
-      const payIdAlias = _x402Config.diagnostics?.usesPayIdAlias;
-      if(payLive){
-        hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong> (pay with Solana or Base USDC)';
-        if(payIdAlias){
-          hint.innerHTML += ' <span style="opacity:.75">(Tip: rename Vercel vars to X402_*_PAY_TO)</span>';
-        }
-      } else if(payBroken){
-        const note = _x402Config.evmConfigNote || _x402Config.solConfigNote || _x402Config.configWarning || 'Fix merchant addresses in Vercel';
-        hint.innerHTML = '<span style="color:var(--red,#e85d4a)">'+escapeHtml(note)+'</span>';
-      } else if(_x402Config.enabled){
-        hint.innerHTML = 'Browse headlines free · <strong>0.1 USDC per article</strong>';
-      } else {
-        hint.textContent = 'Live wire';
-      }
-    }
     return _x402Config;
   }
 
@@ -1767,7 +1747,7 @@
     try{
       let chain = await showPaymentConfirm({
         title: 'Open article',
-        subtitle: 'One-time unlock · headlines are free to browse',
+        subtitle: 'One-time unlock · 0.1 USDC',
         story: title,
         confirmLabel: 'Pay & open article',
         openArticleTab: true,
