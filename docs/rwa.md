@@ -13,10 +13,9 @@ On successful `POST /api/signal-publish`:
    - Metadata (name, image SVG, attributes) ready for ERC-1155 or SPL mint
 3. `rwaTokenId` is saved on the signal record.
 
-**Optional (future on-chain mint):**
+**Solana on-chain mint (live):** see [rwa-solana-setup.md](rwa-solana-setup.md) — `RWA_MINT_SOL_SECRET`, optional `RWA_SIGNAL_CONTRACT_SOL`.
 
-- `RWA_SIGNAL_CONTRACT_EVM` — ERC-1155 contract on Base
-- `RWA_SIGNAL_CONTRACT_SOL` — SPL program / collection address on Solana
+**Base (future):** `RWA_SIGNAL_CONTRACT_EVM` — ERC-1155 on Base (not implemented yet).
 
 ## Reader badge (unlock)
 

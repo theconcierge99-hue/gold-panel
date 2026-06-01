@@ -9,6 +9,7 @@ import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { mintSignalRwaToken } from "./rwa-token";
+import { getSignalRwaToken } from "./rwa-store";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 
@@ -57,9 +58,17 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
     };
 
     let rwaToken: Awaited<ReturnType<typeof mintSignalRwaToken>> | undefined;
+    let solanaMint:
+      | Awaited<ReturnType<typeof import("./rwa-solana-mint").mintSolanaSignalNft>>
+      | undefined;
     try {
       rwaToken = await mintSignalRwaToken(signal);
       signal.rwaTokenId = rwaToken.tokenId;
+      if (signal.creatorChain === "sol") {
+        const { mintSolanaSignalNft } = await import("./rwa-solana-mint");
+        solanaMint = await mintSolanaSignalNft(signal, rwaToken);
+        rwaToken = (await getSignalRwaToken(signal.id)) ?? rwaToken;
+      }
       await savePublishedSignal(signal);
     } catch (e) {
       console.error("[signal-publish] rwa mint", e instanceof Error ? e.message : e);
@@ -95,8 +104,12 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
               contentHash: rwaToken.contentHash,
               standard: rwaToken.standard,
               targetChain: rwaToken.targetChain,
+              onChainMintAddress: rwaToken.onChainMintAddress,
+              onChainMintTx: rwaToken.onChainMintTx,
+              onChainMintStatus: rwaToken.onChainMintStatus ?? solanaMint?.status,
             }
           : undefined,
+        solanaNft: solanaMint,
       }),
       { status: 200, headers },
     );

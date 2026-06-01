@@ -11,7 +11,10 @@ export type SignalRwaToken = {
   /** ERC-1155 or SPL metadata-ready */
   tokenStandard: "ERC-1155" | "SPL-Asset-Metadata";
   contractAddress?: string;
+  /** Solana NFT mint address (Metaplex) */
+  onChainMintAddress?: string;
   onChainMintTx?: string;
+  onChainMintStatus?: "sent" | "skipped" | "failed";
   contentHash: string;
   metadata: {
     name: string;

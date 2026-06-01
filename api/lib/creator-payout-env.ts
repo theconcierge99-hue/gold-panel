@@ -1,4 +1,8 @@
-/** Edge-safe: payout wallet presence only (no @solana / viem imports). */
+/** Edge-safe: payout / mint wallet presence only (no @solana / viem imports). */
+
+export function solanaRwaMintConfigured(): boolean {
+  return !!process.env.RWA_MINT_SOL_SECRET?.trim();
+}
 
 export function creatorPayoutWalletsConfigured(): { sol: boolean; evm: boolean } {
   const solSecret = process.env.CREATOR_PAYOUT_SOL_SECRET?.trim();

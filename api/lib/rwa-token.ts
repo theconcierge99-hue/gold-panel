@@ -3,7 +3,7 @@ import type { SignalRwaToken } from "./rwa-types";
 import { canonicalJson, sha256Hex } from "./rwa-hash";
 import { getSignalRwaToken, saveSignalRwaToken } from "./rwa-store";
 
-function siteOrigin(): string {
+export function siteOrigin(): string {
   const fromEnv = process.env.X402_SITE_ORIGIN?.trim().replace(/\/$/, "");
   return fromEnv || "https://conc-exe.xyz";
 }

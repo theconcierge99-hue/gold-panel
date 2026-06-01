@@ -128,7 +128,12 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
           ? { status: creatorPayoutStatus, transaction: creatorPayoutTx }
           : undefined,
         rwa: rwaToken
-          ? { tokenId: rwaToken.tokenId, contentHash: rwaToken.contentHash, standard: rwaToken.standard }
+          ? {
+              tokenId: rwaToken.tokenId,
+              contentHash: rwaToken.contentHash,
+              standard: rwaToken.standard,
+              onChainMintAddress: rwaToken.onChainMintAddress,
+            }
           : signal.rwaTokenId
             ? { tokenId: signal.rwaTokenId }
             : undefined,

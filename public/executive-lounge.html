@@ -1213,10 +1213,16 @@
       document.getElementById('sigTitle').value='';
       document.getElementById('sigSummary').value='';
       document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
-      const rwaMsg = data.rwa?.tokenId
-        ? ' · RWA '+String(data.rwa.tokenId).slice(0,18)+'…'
-        : '';
-      toast('Signal published & tokenized'+rwaMsg+' ✓');
+      let msg = 'Signal published & tokenized ✓';
+      if(data.rwa?.onChainMintAddress){
+        msg = 'NFT minted to your Solana wallet · '+String(data.rwa.onChainMintAddress).slice(0,8)+'… ✓';
+      } else if(data.rwa?.tokenId){
+        msg = 'Signal published · RWA '+String(data.rwa.tokenId).slice(0,14)+'… ✓';
+      }
+      if(data.solanaNft?.status==='skipped' && data.rwa?.targetChain==='sol'){
+        console.info('Solana NFT mint skipped:', data.solanaNft.reason);
+      }
+      toast(msg);
       await refreshMarket();
     }catch(e){
       if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
@@ -1692,6 +1698,7 @@
         let html = '';
         if(rwa?.tokenId){
           html += '<div><strong>RWA certificate</strong><div class="rwa-id">'+escapeHtml(rwa.tokenId)+'</div>';
+          if(rwa.onChainMintAddress) html += '<div style="margin-top:6px">Solana NFT · <span class="rwa-id">'+escapeHtml(rwa.onChainMintAddress)+'</span></div>';
           if(rwa.contentHash) html += '<div style="margin-top:6px;opacity:.85">Hash · '+escapeHtml(String(rwa.contentHash).slice(0,24))+'…</div>';
           html += '</div>';
         }
