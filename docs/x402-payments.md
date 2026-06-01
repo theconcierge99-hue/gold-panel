@@ -101,6 +101,10 @@ Example `PAYMENT-REQUIRED` payload (decoded):
 }
 ```
 
+## zauth trust layer
+
+Optional [zauth](https://zauth.inc/) integration records successful paid responses to Provider Hub, exposes `/api/zauth-directory` and `/api/zauth-status`, and adds `discovery.zauth` links. Set `ZAUTH_API_KEY` in Vercel — see **[zauth.md](zauth.md)**. PayAI settlement and browser wallets are unchanged.
+
 ## Related code
 
 | File | Role |
@@ -109,3 +113,4 @@ Example `PAYMENT-REQUIRED` payload (decoded):
 | `api/lib/x402-config.ts` | Networks, addresses, public config |
 | `api/lib/x402-discovery.ts` | Bazaar extension + OpenAPI |
 | `api/x402-config.ts` | HTTP handler |
+| `api/lib/zauth.ts`, `api/lib/zauth-paid-response.ts` | zauth directory + telemetry (optional) |

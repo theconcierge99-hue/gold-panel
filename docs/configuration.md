@@ -77,8 +77,19 @@ On Vercel, requests whose `Origin` host matches the request `Host` are allowed a
 
 | Variable | Description |
 |----------|-------------|
-| `X402_SITE_ORIGIN` | Canonical public URL, e.g. `https://your-production-domain.com`. Used in discovery documents when `Host` is ambiguous. |
+| `X402_SITE_ORIGIN` | Canonical public URL, e.g. `https://your-production-domain.com`. Used in discovery documents when `Host` is ambiguous. Also used by zauth status to filter directory endpoints for this site. |
 | `X402_OWNERSHIP_PROOFS` | Comma-separated EVM **public** addresses for ownership proofs. Defaults include `X402_EVM_PAY_TO` when set—never private keys. |
+
+## zauth (x402 trust layer)
+
+Optional integration with [zauth.inc](https://zauth.inc/) — directory proxy, Provider Hub telemetry, verification checks. Full guide: [zauth.md](zauth.md).
+
+| Variable | Description |
+|----------|-------------|
+| `ZAUTH_API_KEY` | Provider Hub API key from [Provider Hub](https://zauth.inc/provider-hub). Enables post-payment telemetry and live checks in `/api/zauth-status`. |
+| `ZAUTH_API_ENDPOINT` | Backend URL (default `https://back.zauthx402.com`). Override only if zauth instructs. |
+
+Check: `GET /api/x402-config` → `zauthTelemetryEnabled: true` after deploy.
 
 ## Vercel-injected (read-only)
 

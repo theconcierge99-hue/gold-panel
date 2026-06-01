@@ -410,6 +410,7 @@
   .pay-chain-opt .pc-meta{font-size:11px;color:var(--text-secondary);margin-top:2px}
   .pay-chain-opt .pc-bal{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:6px}
   .pay-chain-opt .pc-warn{font-size:10px;color:var(--signal-red);margin-top:4px}
+  .pay-chain-opt .pc-rec{font-size:9px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
   .pay-loading{font-size:12px;color:var(--text-muted);padding:20px 0;text-align:center}
   .btn.sm{padding:5px 10px;font-size:9px}
   #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
@@ -543,7 +544,7 @@
   .zauth-trust a{color:var(--gold-dim);text-decoration:none}
   .zauth-trust a:hover{color:var(--gold);text-decoration:underline}
 </style>
-<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-5"></script>
+<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body>
@@ -1219,13 +1220,11 @@
           amountUsdc:cfg.signalPublishUsdc||1,
         });
       }
-      const res=await runPaidWithEvmFallback(cfg, chain, (ch)=>
-        paidApiFetch('/api/lounge-signal-publish',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
-        },{preferredChain:ch})
-      );
+      const res=await paidApiFetch('/api/lounge-signal-publish',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
+      },{preferredChain:chain});
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       let clientMintOk=false;
@@ -1298,7 +1297,7 @@
     }catch(e){
       if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
       console.warn('signal-publish',e);
-      toast(formatPaymentError(e)||e?.message||'Could not publish signal');
+      toast(formatPaymentError(e, chain)||e?.message||'Could not publish signal');
     }finally{
       if(publishBtn){
         publishBtn.disabled=false;
@@ -1540,54 +1539,36 @@
     };
   }
 
-  function shouldFallbackSolToEvm(msg, preferredChain, cfg){
-    if(preferredChain !== 'sol') return false;
-    if(!cfg?.acceptsEvm || !getWalletSession().evm) return false;
-    const m = String(msg || '');
-    return /transaction_simulation_failed|simulation failed|Failed to create payment payload|Unexpected error|blockhash|Solana RPC|invalid_exact_svm|instructions_length/i.test(m);
-  }
-
-  async function evmPayReady(cfg){
-    if(typeof window.isX402ChainPaymentReady !== 'function') return false;
-    return window.isX402ChainPaymentReady(
-      getWalletSession(),
-      x402NetworkMode(cfg),
-      x402ServerPayConfig(cfg),
-      'evm',
-    );
-  }
-
-  async function runPaidWithEvmFallback(cfg, preferredChain, payFn){
-    try{
-      return await payFn(preferredChain);
-    }catch(e){
-      const msg = e?.message || '';
-      if(shouldFallbackSolToEvm(msg, preferredChain, cfg)){
-        if(await evmPayReady(cfg)){
-          toast('Solana payment issue — retrying with Base (EVM)…');
-          return await payFn('evm');
-        }
-        throw new Error(
-          'Solana payment failed and you do not have enough USDC on Base. In the payment dialog choose Solana (if your USDC is there), or fund Base with at least 0.1 USDC.',
-        );
-      }
-      throw e;
-    }
-  }
-
-  function formatPaymentError(err){
+  function formatPaymentError(err, preferredChain){
     const m = err?.message || String(err);
+    if(preferredChain === 'sol'){
+      if(/Need at least .* USDC on Base/i.test(m)){
+        return 'Wrong payment chain — you chose Solana. Hard refresh (Ctrl+F5), open payment again, and select Solana only.';
+      }
+      if(/^Unexpected error$/i.test(m.trim())){
+        return 'Phantom returned an unexpected error — update Phantom, approve the USDC transfer, and tap Confirm (unsafe) if shown. Keep a little SOL for fees.';
+      }
+      if(/Payment required/i.test(m)){
+        return 'Solana payment not completed — in Phantom approve 0.1 USDC transfer. Tap Confirm (unsafe) if prompted.';
+      }
+      if(/Payment cancelled/i.test(m)) return m;
+      if(/Insufficient USDC on Solana|No USDC token account|Merchant USDC account not initialized/i.test(m)){
+        return m;
+      }
+      if(/Failed to create payment payload/i.test(m)){
+        return 'Solana payment could not start — hard refresh (Ctrl+F5) and retry. Detail: '+m;
+      }
+    }
     if(/Need at least .* USDC on Base/i.test(m)){
       return 'You need at least 0.1 USDC on Base for EVM pay — or choose Solana in the payment dialog if your USDC is on Solana. '+m;
     }
-    if(/Solana payment failed and you do not have enough USDC on Base/i.test(m)){
-      return m;
-    }
     if(/Failed to create payment payload/i.test(m)){
-      return 'Payment could not start — try Solana in the payment picker if your USDC is on Solana, or Base (EVM) on Base. Hard refresh (Ctrl+F5) if needed. '+m;
+      return 'Payment could not start — pick the chain where your USDC is (Solana or Base). Hard refresh (Ctrl+F5) if needed. '+m;
     }
     if(/^Unexpected error$/i.test(m.trim())){
-      return 'Wallet returned an unexpected error — try Base (EVM) or hard refresh (Ctrl+F5).';
+      return preferredChain === 'sol'
+        ? 'Phantom returned an unexpected error — approve USDC in Phantom and retry.'
+        : 'Wallet returned an unexpected error — hard refresh (Ctrl+F5) and retry.';
     }
     if(/invalid.*address|is invalid|40 hex|checksum/i.test(m)){
       return 'Payments misconfigured: server receive address must be your Base Ethereum wallet (0x + 40 hex). Fix X402_EVM_PAY_TO in Vercel.';
@@ -1602,13 +1583,13 @@
       return 'Merchant cannot receive USDC on Solana yet. Send any USDC once to the merchant address (X402_SOL_PAY_TO in Vercel), redeploy if needed, then retry — or pay with Base (EVM).';
     }
     if(/transaction_simulation_failed|simulation failed/i.test(m)){
-      return 'Solana payment simulation failed — merchant may need a one-time USDC receive on Solana, or use Base (EVM). Detail: '+m;
+      return 'Solana payment simulation failed — merchant may need a one-time USDC receive on Solana. Detail: '+m;
     }
     if(/instructions_length|invalid_exact_svm_payload_unknown/i.test(m)){
-      return 'Phantom added extra instructions — hard refresh (Ctrl+Shift+R) and retry. If it persists, update Phantom or pay with Base (EVM). Detail: '+m;
+      return 'Phantom added extra instructions — hard refresh (Ctrl+Shift+R) and retry. Update Phantom if it persists. Detail: '+m;
     }
     if(/verification failed|invalid_exact|settlement failed|does not match/i.test(m)){
-      return 'Payment was rejected after signing. In Phantom tap Confirm (unsafe) — normal for new sites. Retry, or use Base (EVM) if you have USDC there. Detail: '+m;
+      return 'Payment rejected after signing — in Phantom tap Confirm (unsafe), then retry. Detail: '+m;
     }
     if(m === 'Payment required'){
       return 'Payment not completed. Approve the full transaction in Phantom (0.1 USDC + small SOL fee), then try again.';
@@ -1739,14 +1720,17 @@
       throw new Error('No payment chains available on the server.');
     }
 
+    const solReady = chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient);
+    const evmReady = chainOpts.find(o=>o.chain==='evm'&&o.available&&o.sufficient);
     const list = document.getElementById('payChainList');
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
+      const rec = !dis && o.chain==='sol' && solReady && !evmReady;
       const warn = o.disabledReason ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
       return `<label class="pay-chain-opt${dis?' disabled':''}" data-chain="${o.chain}">
         <input type="radio" name="payChain" value="${o.chain}" ${dis?'disabled':''} />
         <div class="pc-body">
-          <div class="pc-title">${escapeHtml(o.label)}</div>
+          <div class="pc-title">${escapeHtml(o.label)}${rec?' <span class="pc-rec">Recommended</span>':''}</div>
           <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
           <div class="pc-bal">Balance: ${escapeHtml(o.balanceUsdc)}</div>
           ${warn}
@@ -1795,7 +1779,7 @@
     try{
       return await paidFetch(url, options || {});
     }catch(e){
-      throw new Error(formatPaymentError(e) || (e?.message || String(e)));
+      throw new Error(formatPaymentError(e, preferredChain) || (e?.message || String(e)));
     }
   }
 
@@ -1912,19 +1896,20 @@
       if(data.readerBadge?.isNew) toast('Badge earned · '+data.readerBadge.badgeLabel+' ✓');
       else toast('Signal unlocked ✓');
     }
+    let payChain;
     try{
-      let chain = await showPaymentConfirm({
+      payChain = await showPaymentConfirm({
         title: 'Open creator signal',
         subtitle: 'One-time unlock · 0.1 USDC',
         story: title || source || signalId,
         confirmLabel: 'Pay & read signal',
         amountUsdc: cfg.signalOpenUsdc || 0.1,
       });
-      await runPaidWithEvmFallback(cfg, chain, payAndOpen);
+      await payAndOpen(payChain);
     }catch(e){
       if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('signal-open', e);
-      toast(formatPaymentError(e)||'Could not open signal');
+      toast(formatPaymentError(e, payChain)||'Could not open signal');
     }
   }
   window.openCreatorSignal = openCreatorSignal;
@@ -1955,15 +1940,16 @@
       navigateToArticleUrl(target);
       toast('Article unlocked ✓');
     }
+    let payChain;
     try{
-      let chain = await showPaymentConfirm({
+      payChain = await showPaymentConfirm({
         title: 'Open article',
         subtitle: 'One-time unlock · 0.1 USDC',
         story: title,
         confirmLabel: 'Pay & open article',
         openArticleTab: true,
       });
-      await runPaidWithEvmFallback(cfg, chain, payAndOpenArticle);
+      await payAndOpenArticle(payChain);
     }catch(e){
       if(_articleTab && !_articleTab.closed){
         try{ _articleTab.close(); }catch(_){}
@@ -1971,7 +1957,7 @@
       }
       if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('news-open', e);
-      toast(formatPaymentError(e)||'Could not open article');
+      toast(formatPaymentError(e, payChain)||'Could not open article');
     }
   }
   window.openNewsArticle = openNewsArticle;
@@ -2004,7 +1990,7 @@
         story: preview,
         confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
       });
-      return await runPaidWithEvmFallback(cfg, preferredChain, payConcierge);
+      return await payConcierge(preferredChain);
     }
     const res = await paidApiFetch('/api/concierge', {
       method: 'POST',

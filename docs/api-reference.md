@@ -53,6 +53,24 @@ x402 resource fan-out for scanners. See [x402scan.md](x402scan.md).
 
 OpenAPI 3.1 document with `x-payment-info` per paid operation.
 
+### `GET /api/zauth-directory`
+
+Proxy to [zauth](https://zauth.inc/) x402 endpoint directory (CORS `*` for agents). See [zauth.md](zauth.md).
+
+**Query:** `search`, `network`, `status`, `verified` (`true`/`false`), `limit` (max 100), `offset`.
+
+**Response (200):** `endpoints[]`, `pagination`, `stats`, `source: "zauth.inc"`, `links` (hub, database, this site’s status URL).
+
+### `GET /api/zauth-status`
+
+Directory slice and optional Provider Hub verification for **this** deployment origin (`X402_SITE_ORIGIN` or request host).
+
+**Response (200):** `origin`, `endpoints`, `directory` stats, `providerCheck[]` (when `ZAUTH_API_KEY` set), `providerTelemetryEnabled`, `links`.
+
+**Response (502):** zauth directory unreachable.
+
+`/api/x402-config` also returns `zauthTelemetryEnabled` and `discovery.zauth` link bundle.
+
 ## Paid endpoints
 
 Probed by x402scan with **GET** (returns 402) and **POST** (402 without payment, 200 with payment).
@@ -234,7 +252,9 @@ Server-side Metaplex mint (Node). Requires internal auth header. Prefer client m
 |-------|--------|---------|
 | `/api/solana-rpc` | POST | Legacy/server Solana RPC helper |
 | `/api/solana-rpc-send` | POST | Browser NFT mint RPC proxy (Edge) |
-| `/api/sol-usdc-balance` | POST | USDC balance check for payment modal |
+| `/api/sol-usdc-balance` | GET | Solana USDC balance for payment modal |
+| `/api/zauth-directory` | GET | zauth x402 directory proxy (agents) |
+| `/api/zauth-status` | GET | This origin’s zauth directory + verification |
 | `/deploy-version.txt` | GET | Git commit id baked at build time |
 
 ## Error codes

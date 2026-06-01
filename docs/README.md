@@ -16,16 +16,17 @@ Full technical documentation for the **gold-panel** project (**Executive Lounge*
 8. **[x402 payments](x402-payments.md)** — PayAI facilitator, client pay flow, networks  
 9. **[x402scan](x402scan.md)** — Discovery documents and marketplace registration  
 10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory
-11. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry)  
-11. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
-12. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
-13. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
-14. **[Security](security.md)** — What must never appear in docs or commits  
-15. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
+11. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
+12. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
+13. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
+14. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
+15. **[Security](security.md)** — What must never appear in docs or commits  
+16. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
 
 ## External references
 
 - [x402 protocol](https://www.x402.org/)
 - [PayAI facilitator](https://facilitator.payai.network)
 - [x402scan explorer](https://www.x402scan.com/)
+- [zauth](https://zauth.inc/) — x402 trust, directory, Provider Hub
 - [Metaplex](https://www.metaplex.com/docs) — Solana NFT metadata

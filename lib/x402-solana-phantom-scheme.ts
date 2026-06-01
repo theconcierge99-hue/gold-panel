@@ -26,6 +26,13 @@ import {
 const COMPUTE_UNIT_LIMIT = 20_000;
 const MAX_INSTRUCTIONS = 6;
 
+function formatUsdcAtomic(atomic: bigint): string {
+  const whole = atomic / 1_000_000n;
+  const frac = atomic % 1_000_000n;
+  if (frac === 0n) return `${whole} USDC`;
+  return `${whole}.${frac.toString().padStart(6, "0").replace(/0+$/, "")} USDC`;
+}
+
 type PhantomProvider = {
   signTransaction: (tx: VersionedTransaction) => Promise<VersionedTransaction>;
 };
@@ -84,15 +91,48 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     const userAta = getAssociatedTokenAddressSync(mint, user, false, TOKEN_PROGRAM_ID);
     const merchantAta = getAssociatedTokenAddressSync(mint, merchant, false, TOKEN_PROGRAM_ID);
 
+    if (merchant.equals(feePayer)) {
+      throw new Error(
+        "X402_SOL_PAY_TO must not be the PayAI fee payer address — use your merchant receive wallet in Vercel",
+      );
+    }
+
+    const [userAtaInfo, merchantAtaInfo] = await Promise.all([
+      connection.getAccountInfo(userAta),
+      connection.getAccountInfo(merchantAta),
+    ]);
+    if (!merchantAtaInfo) {
+      throw new Error(
+        "Merchant USDC account not initialized on Solana — send a tiny USDC once to the merchant address (X402_SOL_PAY_TO), then retry",
+      );
+    }
+    if (!userAtaInfo) {
+      throw new Error(
+        "No USDC token account on Solana — receive USDC once in Phantom to open your USDC account, then retry",
+      );
+    }
+    if (amount > 0n) {
+      try {
+        const bal = await connection.getTokenAccountBalance(userAta);
+        const userBal = BigInt(bal.value.amount);
+        if (userBal < amount) {
+          throw new Error(
+            `Insufficient USDC on Solana (have ${formatUsdcAtomic(userBal)}, need ${formatUsdcAtomic(amount)})`,
+          );
+        }
+      } catch (e) {
+        if (e instanceof Error && /Insufficient USDC/i.test(e.message)) throw e;
+        /* balance read failed — still attempt sign; facilitator will reject if underfunded */
+      }
+    }
+
     let blockhash: string;
     try {
       const latest = await connection.getLatestBlockhash("confirmed");
       blockhash = latest.blockhash;
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
-      throw new Error(
-        `Solana RPC blockhash failed (${detail}). Hard refresh, retry, or pay with Base (EVM).`,
-      );
+      throw new Error(`Solana RPC blockhash failed (${detail}). Hard refresh and retry.`);
     }
 
     const instructions = [
@@ -134,7 +174,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     const ixCount = countTxInstructions(wire);
     if (ixCount > MAX_INSTRUCTIONS) {
       throw new Error(
-        `invalid_exact_svm_payload_transaction_instructions_length: Phantom added ${ixCount} instructions (max ${MAX_INSTRUCTIONS}). Update Phantom or pay with Base (EVM).`,
+        `invalid_exact_svm_payload_transaction_instructions_length: Phantom added ${ixCount} instructions (max ${MAX_INSTRUCTIONS}). Update Phantom or retry.`,
       );
     }
     if (ixCount < 3) {

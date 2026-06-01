@@ -29,10 +29,12 @@ api/
   lounge-rwa-mint-sol.ts       # Optional server mint (Node)
   lounge-creator-payout.ts     # Creator USDC payout (Node)
   x402-config.ts, well-known-x402.ts, openapi.ts
+  zauth-directory.ts, zauth-status.ts
   lib/
     signal-publish-handler.ts, signal-open-handler.ts
     rwa-token.ts, rwa-store.ts, rwa-solana-mint.ts
     x402-server.ts, x402-solana-rpc.ts
+    zauth.ts, zauth-paid-response.ts
     lounge-market.ts, lounge-memory.ts
 lib/
   mint-signal-browser.ts       # Metaplex createNft + Phantom
@@ -86,6 +88,8 @@ sequenceDiagram
 ```
 
 Publish may return **200** with `mintParams` before a separate Phantom SOL mint (not part of x402).
+
+When `ZAUTH_API_KEY` is set, successful paid handlers also enqueue async telemetry to [zauth](https://zauth.inc/) Provider Hub (`api/lib/zauth-paid-response.ts`). See [zauth.md](zauth.md).
 
 ## Payment gate order
 
