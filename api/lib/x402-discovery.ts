@@ -9,6 +9,7 @@ import {
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
 import { getMerchantAddresses } from "./x402-config";
+import { x402ServiceListingMeta } from "./x402-service-meta";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
 export const X402SCAN_EXPLORE_URL = "https://www.x402scan.com/";
@@ -47,18 +48,18 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     method: "POST",
     path: "/api/lounge-signal-publish",
     name: "Publish creator signal",
-    description: "Publish one creator signal to the Executive Lounge feed (anti-spam fee).",
+    description: "Publish one RWA intelligence signal to the Executive Lounge feed (anti-spam fee).",
     priceUsd: String(X402_SIGNAL_PUBLISH_USDC.toFixed(2)),
-    tags: ["creator", "signals", "publish"],
+    tags: ["creator", "signals", "publish", "rwa"],
   },
   {
     kind: "signal-open",
     method: "POST",
     path: "/api/lounge-signal-open",
     name: "Unlock creator signal",
-    description: "Unlock full intelligence summary for one Lounge creator signal.",
+    description: "Unlock full intelligence summary for one Lounge RWA creator signal.",
     priceUsd: "0.10",
-    tags: ["creator", "signals", "unlock"],
+    tags: ["creator", "signals", "unlock", "rwa"],
   },
 ];
 
@@ -104,12 +105,17 @@ export function ownershipProofs(): string[] {
 
 export function buildWellKnownX402Document(origin: string): Record<string, unknown> {
   const proofs = ownershipProofs();
+  const listing = x402ServiceListingMeta(origin);
   return {
     version: 1,
     resources: listDiscoveryResourceUrls(origin),
     ...(proofs.length ? { ownershipProofs: proofs } : {}),
+    serviceName: listing.serviceName,
+    description: listing.description,
+    tags: listing.tags,
+    iconUrl: listing.iconUrl,
     instructions:
-      "Executive Lounge x402 resources. Settlements are on-chain via PayAI facilitator. Index at x402scan.com after probing POST endpoints (402 + PAYMENT-REQUIRED).",
+      "Executive Lounge x402 resources (RWA signals, Concierge AI, market wire). Settlements on-chain via PayAI. Index at x402scan.com after probing POST (402 + PAYMENT-REQUIRED).",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -330,33 +336,44 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
   }
 
   const proofs = ownershipProofs();
+  const listing = x402ServiceListingMeta(base);
 
   return {
     openapi: "3.1.0",
     info: {
-      title: "Executive Lounge x402 API",
-      version: "1.0.0",
+      title: "Executive Lounge — Private Intelligence Lobby",
+      version: "2.0.0",
       description:
-        "Micropayment-gated resources for Executive Lounge (conc-exe.xyz). Discoverable on x402scan.com. Payments settle on-chain via PayAI facilitator.",
+        "Micropayment-gated resources for Executive Lounge: market wire, RWA creator signals (Solana NFT), and Concierge AI. Discoverable on x402scan.com. USDC on Base and Solana via PayAI facilitator.",
     },
     servers: [{ url: base, description: "Executive Lounge" }],
     paths,
     "x-discovery": {
       ownershipProofs: proofs,
       x402scan: X402SCAN_REGISTER_URL,
+      serviceName: listing.serviceName,
+      description: listing.description,
+      tags: listing.tags,
+      iconUrl: listing.iconUrl,
     },
     tags: [
       { name: "news", description: "Wire article unlock" },
       { name: "concierge", description: "Concierge AI" },
-      { name: "creator", description: "Creator signals" },
+      { name: "creator", description: "Creator signals & RWA" },
+      { name: "rwa", description: "Real World Asset intelligence certificates" },
     ],
   };
 }
 
 export function discoveryMetaForConfig(origin: string) {
   const base = origin.replace(/\/$/, "");
+  const listing = x402ServiceListingMeta(base);
   return {
     siteOrigin: base,
+    serviceName: listing.serviceName,
+    serviceDescription: listing.description,
+    serviceTags: listing.tags,
+    serviceIconUrl: listing.iconUrl,
     wellKnownUrl: `${base}/.well-known/x402`,
     openApiUrl: `${base}/openapi.json`,
     resourceUrls: listDiscoveryResourceUrls(base),

@@ -13,6 +13,7 @@ import {
 import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
 import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
+import { x402ServiceListingMeta } from "./x402-service-meta";
 
 export type { X402ResourceKind };
 
@@ -36,15 +37,15 @@ const RESOURCE_META: Record<
   },
   "signal-publish": {
     name: "Executive Lounge — Publish signal",
-    description: "Publish one creator signal to the Lounge (anti-spam fee)",
+    description: "Publish one RWA intelligence signal to the Lounge (anti-spam fee; Solana NFT mint in Phantom)",
     mimeType: "application/json",
-    tags: ["executive-lounge", "creator", "signals"],
+    tags: ["executive-lounge", "creator", "signals", "rwa"],
   },
   "signal-open": {
     name: "Executive Lounge — Unlock signal",
-    description: "Unlock one creator signal (full intelligence summary)",
+    description: "Unlock one creator RWA signal (full intelligence summary)",
     mimeType: "application/json",
-    tags: ["executive-lounge", "creator", "signals"],
+    tags: ["executive-lounge", "creator", "signals", "rwa"],
   },
 };
 
@@ -244,15 +245,20 @@ export async function buildPaymentRequiredResponse(
 ): Promise<Response> {
   const accepts = buildAccepts(request, kind);
   const meta = RESOURCE_META[kind];
+  const listing = x402ServiceListingMeta(
+    `${request.headers.get("x-forwarded-proto") || "https"}://${request.headers.get("host") || "conc-exe.xyz"}`,
+  );
   const paymentRequired = {
     x402Version: 2,
     error,
     resource: {
       url: resourceUrl(request, kind),
       name: meta.name,
+      serviceName: listing.serviceName,
       description: meta.description,
       mimeType: meta.mimeType,
-      tags: meta.tags,
+      tags: listing.tags,
+      iconUrl: listing.iconUrl,
     },
     accepts,
     extensions: buildBazaarExtension(kind),

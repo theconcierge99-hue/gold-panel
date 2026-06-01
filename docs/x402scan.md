@@ -28,6 +28,25 @@ Each 402 response includes:
 - Non-empty `accepts` (Base and/or Solana USDC)
 - `PAYMENT-REQUIRED` header (x402 v2)
 - `extensions.bazaar` with HTTP POST JSON input schema (for agent invocation)
+- Bazaar **service metadata** on `resource`: `serviceName`, `tags`, `iconUrl` (see `api/lib/x402-service-meta.ts`)
+
+### Listing tags (x402scan / AGENTCASH)
+
+Server-level tags exposed on every 402 `resource` object and in OpenAPI `x-discovery`:
+
+| Tag | Meaning |
+|-----|---------|
+| **AI** | Concierge AI desk |
+| **Trading** | Trading plans, market categories |
+| **Search** | Wire unlock, knowledge retrieval |
+| **Crypto** | Onchain economy, Solana/Base USDC |
+| **RWA** | Tokenized intelligence signals + optional Solana NFT |
+
+After deploy, re-run discovery or re-register at [x402scan](https://www.x402scan.com/resources/register) so the marketplace picks up new tags:
+
+```bash
+npx -y @agentcash/discovery conc-exe.xyz -v
+```
 
 ## Probe behavior (why GET returns 402)
 
