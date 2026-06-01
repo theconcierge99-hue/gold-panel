@@ -35,11 +35,17 @@ The mint authority (`RWA_MINT_SOL_SECRET`) must be the **update authority** of t
 
 ## Step 3 — Collection (optional)
 
-1. [Metaplex Studio](https://studio.metaplex.com/) or [Core](https://developers.metaplex.com/) → create a **Collection** on Solana mainnet.
-2. Copy the **collection mint address** → `RWA_SIGNAL_CONTRACT_SOL`.
-3. Use the same wallet as update authority for `RWA_MINT_SOL_SECRET`.
+**Do not use `truffle.wtf`** — that product shut down; it is not Metaplex.
 
-Without a collection, each signal is still minted as a **standalone NFT** to the creator.
+You do **not** need a collection to start. Without `RWA_SIGNAL_CONTRACT_SOL`, each signal mints as a **standalone NFT** to the creator.
+
+If you want a grouped collection later:
+
+1. **Metaplex CLI** — [Create Collection docs](https://www.metaplex.com/docs/dev-tools/cli/core/create-collection) (`mplx core collection create …`)
+2. **Metaplex Core (code)** — [Create a Core Collection](https://www.metaplex.com/docs/smart-contracts/core/collections/create)
+3. Browse assets after mint: [core.metaplex.com/explorer](https://core.metaplex.com/explorer)
+
+Copy the collection **mint address** → `RWA_SIGNAL_CONTRACT_SOL`. The wallet in `RWA_MINT_SOL_SECRET` must be that collection’s **update authority**.
 
 ## Step 4 — Verify
 
