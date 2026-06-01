@@ -543,7 +543,7 @@
   .zauth-trust a{color:var(--gold-dim);text-decoration:none}
   .zauth-trust a:hover{color:var(--gold);text-decoration:underline}
 </style>
-<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-4"></script>
+<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-5"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body>
@@ -1544,7 +1544,17 @@
     if(preferredChain !== 'sol') return false;
     if(!cfg?.acceptsEvm || !getWalletSession().evm) return false;
     const m = String(msg || '');
-    return /transaction_simulation_failed|simulation failed|Failed to create payment payload|Unexpected error|blockhash|Solana RPC|invalid_exact_svm|instructions_length|Switch your wallet to Base/i.test(m);
+    return /transaction_simulation_failed|simulation failed|Failed to create payment payload|Unexpected error|blockhash|Solana RPC|invalid_exact_svm|instructions_length/i.test(m);
+  }
+
+  async function evmPayReady(cfg){
+    if(typeof window.isX402ChainPaymentReady !== 'function') return false;
+    return window.isX402ChainPaymentReady(
+      getWalletSession(),
+      x402NetworkMode(cfg),
+      x402ServerPayConfig(cfg),
+      'evm',
+    );
   }
 
   async function runPaidWithEvmFallback(cfg, preferredChain, payFn){
@@ -1553,8 +1563,13 @@
     }catch(e){
       const msg = e?.message || '';
       if(shouldFallbackSolToEvm(msg, preferredChain, cfg)){
-        toast('Solana payment issue — retrying with Base (EVM)…');
-        return await payFn('evm');
+        if(await evmPayReady(cfg)){
+          toast('Solana payment issue — retrying with Base (EVM)…');
+          return await payFn('evm');
+        }
+        throw new Error(
+          'Solana payment failed and you do not have enough USDC on Base. In the payment dialog choose Solana (if your USDC is there), or fund Base with at least 0.1 USDC.',
+        );
       }
       throw e;
     }
@@ -1562,8 +1577,14 @@
 
   function formatPaymentError(err){
     const m = err?.message || String(err);
+    if(/Need at least .* USDC on Base/i.test(m)){
+      return 'You need at least 0.1 USDC on Base for EVM pay — or choose Solana in the payment dialog if your USDC is on Solana. '+m;
+    }
+    if(/Solana payment failed and you do not have enough USDC on Base/i.test(m)){
+      return m;
+    }
     if(/Failed to create payment payload/i.test(m)){
-      return 'Payment could not start — choose Base (EVM) in the payment picker, hard refresh (Ctrl+F5), or reconnect wallet. '+m;
+      return 'Payment could not start — try Solana in the payment picker if your USDC is on Solana, or Base (EVM) on Base. Hard refresh (Ctrl+F5) if needed. '+m;
     }
     if(/^Unexpected error$/i.test(m.trim())){
       return 'Wallet returned an unexpected error — try Base (EVM) or hard refresh (Ctrl+F5).';
@@ -1740,7 +1761,9 @@
       });
     });
 
-    const defaultOpt = chainOpts.find(o=>o.available && o.sufficient)
+    const defaultOpt = chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient)
+      || chainOpts.find(o=>o.available&&o.sufficient)
+      || chainOpts.find(o=>o.chain==='sol'&&o.available)
       || chainOpts.find(o=>o.available);
     if(defaultOpt) selectPayChain(defaultOpt.chain);
 

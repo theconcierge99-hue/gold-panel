@@ -11,6 +11,7 @@ import {
   createPublicClient,
   createWalletClient,
   custom,
+  http,
   publicActions,
   type EIP1193Provider,
 } from "viem";
@@ -113,8 +114,19 @@ declare global {
       serverConfig?: X402ServerPayConfig,
       options?: X402PaidFetchOptions,
     ) => Promise<typeof fetch>;
+    isX402ChainPaymentReady?: (
+      session: WalletSession,
+      networkMode?: "mainnet" | "testnet",
+      serverConfig?: X402ServerPayConfig,
+      chain?: PayChain,
+    ) => Promise<boolean>;
   }
 }
+
+const BASE_HTTP_RPC = {
+  mainnet: "https://mainnet.base.org",
+  testnet: "https://sepolia.base.org",
+} as const;
 
 function formatUsdc(atomic: bigint): string {
   const whole = atomic / 1_000_000n;
@@ -217,11 +229,13 @@ function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
 async function evmUsdcBalance(
   userAddress: `0x${string}`,
   networkMode: "mainnet" | "testnet",
-  provider: EIP1193Provider,
 ): Promise<bigint> {
   const nets = USDC[networkMode];
   const chain = networkMode === "testnet" ? baseSepolia : base;
-  const client = createPublicClient({ chain, transport: custom(provider) });
+  const client = createPublicClient({
+    chain,
+    transport: http(BASE_HTTP_RPC[networkMode]),
+  });
   try {
     return await client.readContract({
       address: nets.evm,
@@ -319,7 +333,7 @@ export async function getPaymentChainOptions(
     } else if (!provider) {
       disabledReason = "EVM provider not found — reopen Phantom/OKX";
     } else {
-      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, provider);
+      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode);
     }
     const sufficient = bal >= PRICE_ATOMIC;
     options.push({
@@ -420,6 +434,10 @@ async function resolvePaymentChain(
   const opts = await getPaymentChainOptions(session, networkMode, server);
   const usable = opts.filter((o) => o.available && (o.sufficient || o.balanceUnknown));
   if (usable.length) {
+    const sol = usable.find((o) => o.chain === "sol");
+    const evm = usable.find((o) => o.chain === "evm");
+    if (sol?.sufficient && !evm?.sufficient) return "sol";
+    if (evm?.sufficient && !sol?.sufficient) return "evm";
     return usable.sort((a, b) =>
       a.balanceAtomic >= b.balanceAtomic ? -1 : 1,
     )[0].chain;
@@ -504,7 +522,19 @@ export async function createX402PaidFetch(
   };
 }
 
+export async function isChainPaymentReady(
+  session: WalletSession,
+  networkMode: "mainnet" | "testnet" = "mainnet",
+  serverConfig: X402ServerPayConfig = {},
+  chain: PayChain,
+): Promise<boolean> {
+  const opts = await getPaymentChainOptions(session, networkMode, serverConfig);
+  const pick = opts.find((o) => o.chain === chain);
+  return !!(pick?.available && (pick.sufficient || pick.balanceUnknown));
+}
+
 if (typeof window !== "undefined") {
   window.getX402PaymentOptions = getPaymentChainOptions;
   window.createX402PaidFetch = createX402PaidFetch;
+  window.isX402ChainPaymentReady = isChainPaymentReady;
 }
