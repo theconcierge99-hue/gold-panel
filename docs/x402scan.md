@@ -42,10 +42,20 @@ Server-level tags exposed on every 402 `resource` object and in OpenAPI `x-disco
 | **Crypto** | Onchain economy, Solana/Base USDC |
 | **RWA** | Tokenized intelligence signals + optional Solana NFT |
 
-After deploy, re-run discovery or re-register at [x402scan](https://www.x402scan.com/resources/register) so the marketplace picks up new tags:
+OpenAPI **operation** `tags` use the same labels (`Search`, `AI`, `RWA`, …) — x402scan builds the sidebar from those, not only `x-discovery`.
+
+After deploy, **re-register** so the Tags row refreshes (cached listing may lag):
 
 ```bash
 npx -y @agentcash/discovery conc-exe.xyz -v
+```
+
+Or at [x402scan register](https://www.x402scan.com/resources/register) submit `https://conc-exe.xyz` again.
+
+Verify OpenAPI:
+
+```bash
+curl.exe -s https://conc-exe.xyz/openapi.json | findstr RWA
 ```
 
 ## Probe behavior (why GET returns 402)

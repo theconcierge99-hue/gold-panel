@@ -9,7 +9,11 @@ import {
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
 import { getMerchantAddresses } from "./x402-config";
-import { x402ServiceListingMeta } from "./x402-service-meta";
+import {
+  X402_OPERATION_TAGS,
+  X402_SERVICE_TAGS,
+  x402ServiceListingMeta,
+} from "./x402-service-meta";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
 export const X402SCAN_EXPLORE_URL = "https://www.x402scan.com/";
@@ -32,7 +36,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     name: "Open news article",
     description: "Unlock one wire headline and receive the canonical article URL.",
     priceUsd: "0.10",
-    tags: ["news", "markets", "micropayment"],
+    tags: [...X402_OPERATION_TAGS.news],
   },
   {
     kind: "concierge",
@@ -41,7 +45,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     name: "Concierge AI message",
     description: "One Concierge AI turn (chat, enhance, or image analysis).",
     priceUsd: "0.10",
-    tags: ["ai", "concierge", "markets"],
+    tags: [...X402_OPERATION_TAGS.concierge],
   },
   {
     kind: "signal-publish",
@@ -50,7 +54,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     name: "Publish creator signal",
     description: "Publish one RWA intelligence signal to the Executive Lounge feed (anti-spam fee).",
     priceUsd: String(X402_SIGNAL_PUBLISH_USDC.toFixed(2)),
-    tags: ["creator", "signals", "publish", "rwa"],
+    tags: [...X402_OPERATION_TAGS["signal-publish"]],
   },
   {
     kind: "signal-open",
@@ -59,7 +63,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     name: "Unlock creator signal",
     description: "Unlock full intelligence summary for one Lounge RWA creator signal.",
     priceUsd: "0.10",
-    tags: ["creator", "signals", "unlock", "rwa"],
+    tags: [...X402_OPERATION_TAGS["signal-open"]],
   },
 ];
 
@@ -342,9 +346,10 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
     openapi: "3.1.0",
     info: {
       title: "Executive Lounge — Private Intelligence Lobby",
-      version: "2.0.0",
+      version: "2.0.1",
       description:
         "Micropayment-gated resources for Executive Lounge: market wire, RWA creator signals (Solana NFT), and Concierge AI. Discoverable on x402scan.com. USDC on Base and Solana via PayAI facilitator.",
+      "x-marketplace-tags": [...X402_SERVICE_TAGS],
     },
     servers: [{ url: base, description: "Executive Lounge" }],
     paths,
