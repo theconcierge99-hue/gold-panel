@@ -27,7 +27,7 @@ function queueSolanaNftMint(signalId: string): void {
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (secret) headers.Authorization = `Bearer ${secret}`;
-      const res = await fetch(`${origin}/api/rwa-mint-sol`, {
+      const res = await fetch(`${origin}/api/concierge?__lounge_resource=rwa-mint-sol`, {
         method: "POST",
         headers,
         body: JSON.stringify({ signalId }),
