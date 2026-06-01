@@ -314,6 +314,8 @@
   /* MODAL */
   .overlay{position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;animation:fadeUp .25s}
   .overlay.show{display:flex}
+  /* Payment + wallet must sit above Create Signal / reader modals (same default z-index) */
+  #payOverlay,#walletOverlay{z-index:70}
   .modal{width:600px;max-width:92vw;background:var(--graphite);border:1px solid var(--border);position:relative;padding:28px 30px;max-height:90vh;overflow-y:auto}
   .modal::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
   .modal h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;margin-bottom:4px}
@@ -783,7 +785,7 @@
 
 <!-- MODAL -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
+  <div class="modal" onclick="event.stopPropagation()">
     <button class="close" onclick="closeModal()">✕</button>
     <h2>Create Signal</h2>
     <div class="sub">Mint to the Lounge · Onchain provenance</div>
@@ -825,9 +827,9 @@
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn" onclick="enhanceSignal()">⬡ AI Enhance</button>
-      <button class="btn gold" onclick="publishSignal()">Mint &amp; Publish →</button>
+      <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+      <button type="button" class="btn" onclick="enhanceSignal()">⬡ AI Enhance</button>
+      <button type="button" class="btn gold" id="publishSignalBtn" onclick="publishSignal()">Mint &amp; Publish →</button>
     </div>
   </div>
 </div>
@@ -1176,6 +1178,8 @@
   window.getSelectedSignalCategories=getSelectedSignalCategories;
 
   async function publishSignal(){
+    const publishBtn=document.getElementById('publishSignalBtn');
+    if(publishBtn?.disabled) return;
     const title=document.getElementById('sigTitle')?.value?.trim()||'';
     const summary=document.getElementById('sigSummary')?.value?.trim()||'';
     const cats=getSelectedSignalCategories();
@@ -1191,9 +1195,12 @@
       return;
     }
     const cfg=await loadX402Config();
+    const prevLabel=publishBtn?.textContent||'';
     try{
+      if(publishBtn){ publishBtn.disabled=true; publishBtn.textContent='Publishing…'; }
       let chain;
       if(x402PaymentsLive(cfg)){
+        toast('Choose payment chain (1 USDC)…');
         chain=await showPaymentConfirm({
           title:'Publish signal',
           subtitle:'One-time anti-spam fee · choose payment chain',
@@ -1228,6 +1235,11 @@
       if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
       console.warn('signal-publish',e);
       toast(formatPaymentError(e)||'Could not publish signal');
+    }finally{
+      if(publishBtn){
+        publishBtn.disabled=false;
+        publishBtn.textContent=prevLabel||'Mint & Publish →';
+      }
     }
   }
   window.publishSignal=publishSignal;
