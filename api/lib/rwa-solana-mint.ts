@@ -11,10 +11,9 @@ import {
   percentAmount,
   publicKey,
   some,
-  type TransactionSignature,
 } from "@metaplex-foundation/umi";
-import { base58 } from "@metaplex-foundation/umi/serializers";
 import { fromWeb3JsKeypair } from "@metaplex-foundation/umi-web3js-adapters";
+import bs58 from "bs58";
 import { getSolanaRpcUrlForServer } from "./x402-config";
 import { normalizeSolPayTo } from "./x402-address";
 import { rwaMetadataUri } from "./rwa-metadata-json";
@@ -26,8 +25,8 @@ import { isSolanaKeypairEnvSet, loadSolanaKeypairFromEnv } from "./solana-keypai
 
 const MINT_SECRET_ENV = "RWA_MINT_SOL_SECRET";
 
-function txSignatureToString(signature: TransactionSignature): string {
-  return base58.serialize(signature);
+function txSignatureToString(signature: Uint8Array): string {
+  return bs58.encode(signature);
 }
 
 export type SolanaRwaMintStatus = "sent" | "skipped" | "failed";
