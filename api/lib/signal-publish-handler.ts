@@ -14,6 +14,7 @@ import { mintSignalRwaToken, siteOrigin } from "./rwa-token";
 import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
+import { truncateOnChainMetaName } from "../../lib/on-chain-meta";
 
 function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
@@ -83,7 +84,7 @@ export async function runSignalPublishAfterPayment(
         mintParams = {
           signalId: signal.id,
           uri: rwaMetadataUri(signal.id, siteOrigin()),
-          name: rwaToken.metadata.name,
+          name: truncateOnChainMetaName(signal.title),
           collectionMint: validCollectionMint(process.env.RWA_SIGNAL_CONTRACT_SOL),
         };
         solanaMint = {
