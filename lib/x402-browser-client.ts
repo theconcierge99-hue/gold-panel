@@ -165,6 +165,48 @@ function uninstallSolanaRpcProxyFetch(): void {
   window.fetch = nativeFetch;
 }
 
+const BASE_MAINNET_CHAIN_ID = 8453;
+
+async function ensureWalletOnBase(provider: EIP1193Provider): Promise<void> {
+  const raw = await provider.request({ method: "eth_chainId" });
+  const current =
+    typeof raw === "string" ? parseInt(raw, 16) : typeof raw === "number" ? raw : 0;
+  if (current === BASE_MAINNET_CHAIN_ID) return;
+
+  const baseHex = "0x2105";
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: baseHex }],
+    });
+    return;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!/4902|unrecognized chain/i.test(msg)) {
+      throw new Error(
+        `Switch your wallet to Base network to pay (current chain id ${current}). ${msg}`,
+      );
+    }
+  }
+
+  await provider.request({
+    method: "wallet_addEthereumChain",
+    params: [
+      {
+        chainId: baseHex,
+        chainName: "Base",
+        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        rpcUrls: ["https://mainnet.base.org"],
+        blockExplorerUrls: ["https://basescan.org"],
+      },
+    ],
+  });
+  await provider.request({
+    method: "wallet_switchEthereumChain",
+    params: [{ chainId: baseHex }],
+  });
+}
+
 function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
   const w = session.sol?.wallet;
   if (w === "phantom") return window.phantom?.solana ?? null;
@@ -410,6 +452,10 @@ export async function createX402PaidFetch(
   const client = new x402Client(paymentRequirementsSelector(preferred));
 
   if (preferred === "evm") {
+    if (!provider) throw new Error("EVM wallet not connected — connect Base (Ethereum) in your wallet");
+    if (networkMode === "mainnet") {
+      await ensureWalletOnBase(provider);
+    }
     const userAddress = session.evm!.address as `0x${string}`;
     const walletClient = createWalletClient({
       account: userAddress,

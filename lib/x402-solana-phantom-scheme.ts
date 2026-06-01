@@ -84,7 +84,16 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
     const userAta = getAssociatedTokenAddressSync(mint, user, false, TOKEN_PROGRAM_ID);
     const merchantAta = getAssociatedTokenAddressSync(mint, merchant, false, TOKEN_PROGRAM_ID);
 
-    const { blockhash } = await connection.getLatestBlockhash("confirmed");
+    let blockhash: string;
+    try {
+      const latest = await connection.getLatestBlockhash("confirmed");
+      blockhash = latest.blockhash;
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : String(e);
+      throw new Error(
+        `Solana RPC blockhash failed (${detail}). Hard refresh, retry, or pay with Base (EVM).`,
+      );
+    }
 
     const instructions = [
       ComputeBudgetProgram.setComputeUnitLimit({ units: COMPUTE_UNIT_LIMIT }),
@@ -118,7 +127,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
       if (code === 4001 || /reject|cancel|denied/i.test(msg)) {
         throw new Error("Payment cancelled");
       }
-      throw e;
+      throw new Error(msg || "Phantom signTransaction failed");
     }
 
     const wire = signed.serialize();

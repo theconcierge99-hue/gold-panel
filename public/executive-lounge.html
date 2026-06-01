@@ -543,7 +543,7 @@
   .zauth-trust a{color:var(--gold-dim);text-decoration:none}
   .zauth-trust a:hover{color:var(--gold);text-decoration:underline}
 </style>
-<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-3"></script>
+<script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-4"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body>
@@ -1219,11 +1219,13 @@
           amountUsdc:cfg.signalPublishUsdc||1,
         });
       }
-      const res=await paidApiFetch('/api/lounge-signal-publish',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
-      },{preferredChain:chain});
+      const res=await runPaidWithEvmFallback(cfg, chain, (ch)=>
+        paidApiFetch('/api/lounge-signal-publish',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
+        },{preferredChain:ch})
+      );
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       let clientMintOk=false;
@@ -1538,8 +1540,34 @@
     };
   }
 
+  function shouldFallbackSolToEvm(msg, preferredChain, cfg){
+    if(preferredChain !== 'sol') return false;
+    if(!cfg?.acceptsEvm || !getWalletSession().evm) return false;
+    const m = String(msg || '');
+    return /transaction_simulation_failed|simulation failed|Failed to create payment payload|Unexpected error|blockhash|Solana RPC|invalid_exact_svm|instructions_length|Switch your wallet to Base/i.test(m);
+  }
+
+  async function runPaidWithEvmFallback(cfg, preferredChain, payFn){
+    try{
+      return await payFn(preferredChain);
+    }catch(e){
+      const msg = e?.message || '';
+      if(shouldFallbackSolToEvm(msg, preferredChain, cfg)){
+        toast('Solana payment issue — retrying with Base (EVM)…');
+        return await payFn('evm');
+      }
+      throw e;
+    }
+  }
+
   function formatPaymentError(err){
     const m = err?.message || String(err);
+    if(/Failed to create payment payload/i.test(m)){
+      return 'Payment could not start — choose Base (EVM) in the payment picker, hard refresh (Ctrl+F5), or reconnect wallet. '+m;
+    }
+    if(/^Unexpected error$/i.test(m.trim())){
+      return 'Wallet returned an unexpected error — try Base (EVM) or hard refresh (Ctrl+F5).';
+    }
     if(/invalid.*address|is invalid|40 hex|checksum/i.test(m)){
       return 'Payments misconfigured: server receive address must be your Base Ethereum wallet (0x + 40 hex). Fix X402_EVM_PAY_TO in Vercel.';
     }
@@ -1741,7 +1769,11 @@
     if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
     else if(u.includes('/api/lounge-signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
-    return paidFetch(url, options || {});
+    try{
+      return await paidFetch(url, options || {});
+    }catch(e){
+      throw new Error(formatPaymentError(e) || (e?.message || String(e)));
+    }
   }
 
   function newsCardKey(ev, el){
@@ -1865,17 +1897,7 @@
         confirmLabel: 'Pay & read signal',
         amountUsdc: cfg.signalOpenUsdc || 0.1,
       });
-      try{
-        await payAndOpen(chain);
-      }catch(e){
-        const msg = e?.message || '';
-        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed|instructions_length/i.test(msg)){
-          toast('Solana failed — retrying with Base (EVM)…');
-          await payAndOpen('evm');
-          return;
-        }
-        throw e;
-      }
+      await runPaidWithEvmFallback(cfg, chain, payAndOpen);
     }catch(e){
       if(e?.message === 'Payment cancelled' || e?.message === 'Payments not configured on server') return;
       console.warn('signal-open', e);
@@ -1918,17 +1940,7 @@
         confirmLabel: 'Pay & open article',
         openArticleTab: true,
       });
-      try{
-        await payAndOpenArticle(chain);
-      }catch(e){
-        const msg = e?.message || '';
-        if(chain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed|instructions_length/i.test(msg)){
-          toast('Solana failed — retrying with Base (EVM)…');
-          await payAndOpenArticle('evm');
-          return;
-        }
-        throw e;
-      }
+      await runPaidWithEvmFallback(cfg, chain, payAndOpenArticle);
     }catch(e){
       if(_articleTab && !_articleTab.closed){
         try{ _articleTab.close(); }catch(_){}
@@ -1969,16 +1981,7 @@
         story: preview,
         confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
       });
-      try{
-        return await payConcierge(preferredChain);
-      }catch(e){
-        const msg = e?.message || '';
-        if(preferredChain === 'sol' && cfg.acceptsEvm && getWalletSession().evm && /transaction_simulation_failed|simulation failed/i.test(msg)){
-          toast('Solana failed — retrying Concierge with Base (EVM)…');
-          return await payConcierge('evm');
-        }
-        throw e;
-      }
+      return await runPaidWithEvmFallback(cfg, preferredChain, payConcierge);
     }
     const res = await paidApiFetch('/api/concierge', {
       method: 'POST',
