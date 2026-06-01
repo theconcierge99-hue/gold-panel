@@ -45,7 +45,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
   {
     kind: "signal-publish",
     method: "POST",
-    path: "/api/signal-publish",
+    path: "/api/lounge-signal-publish",
     name: "Publish creator signal",
     description: "Publish one creator signal to the Executive Lounge feed (anti-spam fee).",
     priceUsd: String(X402_SIGNAL_PUBLISH_USDC.toFixed(2)),
@@ -54,7 +54,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
   {
     kind: "signal-open",
     method: "POST",
-    path: "/api/signal-open",
+    path: "/api/lounge-signal-open",
     name: "Unlock creator signal",
     description: "Unlock full intelligence summary for one Lounge creator signal.",
     priceUsd: "0.10",

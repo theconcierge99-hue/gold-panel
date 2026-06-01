@@ -106,9 +106,9 @@ function resourcePath(kind: X402ResourceKind): string {
     case "concierge":
       return "/api/concierge";
     case "signal-publish":
-      return "/api/signal-publish";
+      return "/api/lounge-signal-publish";
     case "signal-open":
-      return "/api/signal-open";
+      return "/api/lounge-signal-open";
   }
 }
 

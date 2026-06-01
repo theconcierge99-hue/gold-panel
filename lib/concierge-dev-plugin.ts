@@ -106,6 +106,8 @@ export function conciergeDevPlugin(): Plugin {
         }
 
         const signalRoutes: Record<string, (r: Request) => Promise<Response>> = {
+          "/api/lounge-signal-publish": handleSignalPublish,
+          "/api/lounge-signal-open": handleSignalOpen,
           "/api/signal-publish": handleSignalPublish,
           "/api/signal-open": handleSignalOpen,
         };

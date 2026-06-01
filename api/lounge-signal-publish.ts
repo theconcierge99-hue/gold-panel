@@ -1,9 +1,8 @@
 import { guardPaidX402Api } from "./lib/x402-server";
 
-/** Edge — thin entry (402 without loading KV/RWA); Solana NFT on /api/rwa-mint-sol */
+/** Edge — publish creator signal (replaces broken /api/signal-publish deployment) */
 export const config = {
   runtime: "edge",
-  maxDuration: 60,
 };
 
 export default async function handler(request: Request): Promise<Response> {

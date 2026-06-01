@@ -1209,7 +1209,7 @@
           amountUsdc:cfg.signalPublishUsdc||1,
         });
       }
-      const res=await paidApiFetch('/api/signal-publish',{
+      const res=await paidApiFetch('/api/lounge-signal-publish',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
@@ -1668,8 +1668,8 @@
     );
     const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
-    if(u.includes('/api/news-open')||u.includes('/api/signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
-    else if(u.includes('/api/signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
+    if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
+    else if(u.includes('/api/lounge-signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
     return paidFetch(url, options || {});
   }
@@ -1776,7 +1776,7 @@
       return;
     }
     async function payAndOpen(chain){
-      const res = await paidApiFetch('/api/signal-open', {
+      const res = await paidApiFetch('/api/lounge-signal-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signalId }),
