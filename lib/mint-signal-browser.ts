@@ -1,5 +1,6 @@
 /**
  * Mint Executive Lounge signal NFT in the creator's Phantom wallet (creator pays SOL gas).
+ * Uses server RPC proxy only — browser fallbacks (dRPC/Ankr) block getLatestBlockhash on free tier.
  */
 import { createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -30,39 +31,36 @@ export type MintLoungeSignalResult =
   | { ok: true; mintAddress: string; tx: string }
   | { ok: false; error: string };
 
-function rpcEndpoints(): string[] {
+function serverRpcProxy(): string {
   const origin =
     typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "";
-  const list: string[] = [];
-  if (origin) list.push(`${origin}/api/solana-rpc-send`);
-  list.push(
-    "https://solana-rpc.publicnode.com",
-    "https://rpc.ankr.com/solana",
-    "https://solana.drpc.org",
-  );
-  return list;
+  if (!origin) throw new Error("Cannot resolve site origin for Solana RPC");
+  return `${origin}/api/solana-rpc-send`;
 }
 
 function friendlyMintError(msg: string): string {
   const m = msg.toLowerCase();
+  if (m.includes("freetier") || m.includes("upgrade to paid") || m.includes("code\":35")) {
+    return "Solana RPC misconfigured (dRPC free tier). In Vercel set SOLANA_RPC_URL to Helius or publicnode — see docs/configuration.md.";
+  }
   if (m.includes("insufficient") || m.includes("lamports") || m.includes("0x1")) {
-    return "Not enough SOL for NFT mint fees — add at least 0.03 SOL in Phantom, then publish again.";
+    return "Not enough SOL for NFT mint — add at least 0.03 SOL in Phantom, then publish again.";
   }
   if (m.includes("collection") || m.includes("account not found")) {
-    return "NFT mint failed (collection or account). Retrying without collection…";
+    return "NFT mint failed (invalid collection). Retried without collection.";
   }
-  if (m.includes("rpc failed") || m.includes("fetch")) {
-    return "Solana RPC error — check connection and try again in a minute.";
+  if (m.includes("blockhash") || m.includes("rpc")) {
+    return `Solana RPC error: ${msg.slice(0, 120)}. Ensure SOLANA_RPC_URL on Vercel is Helius (not dRPC free).`;
   }
   return msg.slice(0, 240) || "Mint failed";
 }
 
 async function mintOnce(
-  rpcUrl: string,
   params: MintLoungeSignalParams,
   phantom: PhantomLike,
   useCollection: boolean,
 ): Promise<{ mintAddress: string; tx: string }> {
+  const rpcUrl = serverRpcProxy();
   const umi = createUmi(rpcUrl).use(mplTokenMetadata()).use(walletAdapterIdentity(phantom));
   const mint = generateSigner(umi);
   const creatorPk = publicKey(params.creatorAddress.trim());
@@ -105,19 +103,16 @@ export async function mintLoungeSignalNft(
     return { ok: false, error: "Connected wallet must match creator address" };
   }
 
-  const endpoints = rpcEndpoints();
   const hasCollection = !!params.collectionMint?.trim();
   let lastErr = "Mint failed";
 
-  for (const rpcUrl of endpoints) {
-    for (const useCollection of hasCollection ? [true, false] : [false]) {
-      try {
-        const { mintAddress, tx } = await mintOnce(rpcUrl, params, phantom, useCollection);
-        return { ok: true, mintAddress, tx };
-      } catch (e) {
-        lastErr = e instanceof Error ? e.message : String(e);
-        if (!hasCollection) break;
-      }
+  for (const useCollection of hasCollection ? [true, false] : [false]) {
+    try {
+      const { mintAddress, tx } = await mintOnce(params, phantom, useCollection);
+      return { ok: true, mintAddress, tx };
+    } catch (e) {
+      lastErr = e instanceof Error ? e.message : String(e);
+      if (!hasCollection) break;
     }
   }
 

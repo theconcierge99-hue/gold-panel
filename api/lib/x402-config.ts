@@ -206,8 +206,22 @@ export function getPublicX402Config() {
   };
 }
 
+/** dRPC/Ankr free endpoints block getLatestBlockhash from server/browser — avoid for mint + x402 */
+function isUnreliablePublicSolRpc(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    if (h.includes("drpc.org")) return true;
+    if (h === "rpc.ankr.com" || h.endsWith(".ankr.com")) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 export function getSolanaRpcUrlForServer(): string {
-  return normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL) ?? "https://solana-rpc.publicnode.com";
+  const fromEnv = normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL);
+  if (fromEnv && !isUnreliablePublicSolRpc(fromEnv)) return fromEnv;
+  return "https://solana-rpc.publicnode.com";
 }
 
 /** Async public config — includes merchant USDC ATA readiness check */
