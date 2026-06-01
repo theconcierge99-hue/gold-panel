@@ -1216,13 +1216,56 @@
       },{preferredChain:chain});
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
+      let clientMintOk=false;
+      if(data.mintParams&&creatorChain==='sol'&&session.sol?.address){
+        try{
+          if(publishBtn) publishBtn.textContent='Minting NFT in Phantom…';
+          toast('Approve NFT mint in Phantom (~0.02 SOL network fee)…');
+          if(typeof window.mintLoungeSignalNft!=='function'){
+            await new Promise((resolve,reject)=>{
+              const s=document.createElement('script');
+              s.src='/js/mint-signal.mjs?'+Date.now();
+              s.type='module';
+              s.onload=()=>resolve();
+              s.onerror=()=>reject(new Error('NFT mint module failed to load — hard refresh'));
+              document.head.appendChild(s);
+            });
+          }
+          const provider=window.solana;
+          if(!provider?.publicKey) throw new Error('Reconnect Phantom on Solana');
+          const mintRes=await window.mintLoungeSignalNft({
+            uri:data.mintParams.uri,
+            name:data.mintParams.name,
+            creatorAddress:session.sol.address,
+            collectionMint:data.mintParams.collectionMint,
+          },provider);
+          if(!mintRes.ok) throw new Error(mintRes.error||'Mint failed');
+          const rec=await fetch('/api/lounge-rwa-record-mint',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              signalId:data.mintParams.signalId,
+              mintAddress:mintRes.mintAddress,
+              tx:mintRes.tx,
+              creatorWallet:session.sol.address,
+            }),
+          });
+          if(!rec.ok){ console.warn('record-mint',await rec.text()); }
+          clientMintOk=true;
+          data.rwa={...(data.rwa||{}),onChainMintAddress:mintRes.mintAddress};
+        }catch(mintErr){
+          console.warn('client nft mint',mintErr);
+        }
+      }
       closeModal();
       document.getElementById('sigTitle').value='';
       document.getElementById('sigSummary').value='';
       document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
       let msg = 'Signal published & tokenized ✓';
-      if(data.solanaNft?.status==='pending'){
-        msg = 'Signal live ✓ Solana NFT minting to your wallet (~1–2 min)';
+      if(clientMintOk&&data.rwa?.onChainMintAddress){
+        msg='NFT minted to your wallet · '+String(data.rwa.onChainMintAddress).slice(0,8)+'… ✓';
+      }else if(data.solanaNft?.status==='pending'){
+        msg = 'Signal live ✓ — confirm NFT mint in Phantom or add ~0.02 SOL for network fee';
       } else if(data.rwa?.onChainMintAddress){
         msg = 'NFT minted to your Solana wallet · '+String(data.rwa.onChainMintAddress).slice(0,8)+'… ✓';
       } else if(data.rwa?.tokenId){

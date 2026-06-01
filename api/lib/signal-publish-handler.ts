@@ -11,7 +11,8 @@ import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { solanaRwaMintConfigured } from "./creator-payout-env";
 import { internalAuthHeaders, loungeApiOrigin } from "./lounge-internal-auth";
-import { mintSignalRwaToken } from "./rwa-token";
+import { rwaMetadataUri } from "./rwa-metadata-json";
+import { mintSignalRwaToken, siteOrigin } from "./rwa-token";
 import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
@@ -90,18 +91,30 @@ export async function runSignalPublishAfterPayment(
 
     let rwaToken: Awaited<ReturnType<typeof mintSignalRwaToken>> | undefined;
     let solanaMint: SolanaRwaMintResult | undefined;
+    let mintParams:
+      | { signalId: string; uri: string; name: string; collectionMint?: string }
+      | undefined;
 
     try {
       rwaToken = await mintSignalRwaToken(signal);
       signal.rwaTokenId = rwaToken.tokenId;
       await savePublishedSignal(signal);
 
-      if (signal.creatorChain === "sol" && solanaRwaMintConfigured()) {
+      if (signal.creatorChain === "sol") {
+        const origin = siteOrigin();
+        mintParams = {
+          signalId: signal.id,
+          uri: rwaMetadataUri(signal.id, origin),
+          name: rwaToken.metadata.name,
+          collectionMint: process.env.RWA_SIGNAL_CONTRACT_SOL?.trim() || undefined,
+        };
         solanaMint = {
           status: "pending",
-          reason: "NFT mint queued — check your Solana wallet in ~1 minute",
+          reason: "Confirm NFT mint in Phantom (~0.02 SOL network fee)",
         };
-        queueSolanaNftMint(signal.id);
+        if (solanaRwaMintConfigured()) {
+          queueSolanaNftMint(signal.id);
+        }
       }
 
       await ingestCreatorSignalMemory(signal);
@@ -139,6 +152,7 @@ export async function runSignalPublishAfterPayment(
             }
           : undefined,
         solanaNft: solanaMint,
+        mintParams,
       }),
       { status: 200, headers },
     );
