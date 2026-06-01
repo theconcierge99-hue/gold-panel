@@ -1,0 +1,31 @@
+# Vercel sometimes stops auto-deploying from GitHub (Production stuck on an old commit).
+# Option A: add secret VERCEL_DEPLOY_HOOK (Vercel → Project → Settings → Git → Deploy Hooks).
+# Option B: fix Git connection (Settings → Git → reconnect theconcierge99-hue/gold-panel, branch main).
+
+name: Trigger Vercel deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-hook:
+    if: ${{ secrets.VERCEL_DEPLOY_HOOK != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST Vercel deploy hook
+        run: |
+          echo "Triggering Vercel production deploy for commit ${{ github.sha }}"
+          curl -fsS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+          echo "Deploy hook accepted — check Vercel → Deployments in 1–2 minutes."
+
+  no-hook-configured:
+    if: ${{ secrets.VERCEL_DEPLOY_HOOK == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remind to connect Vercel Git or add deploy hook
+        run: |
+          echo "::warning::VERCEL_DEPLOY_HOOK is not set. This push will NOT deploy to Vercel automatically."
+          echo "Latest commit: ${{ github.sha }}"
+          echo "Fix: docs/vercel-deploy.md — reconnect Git or add Deploy Hook secret."
