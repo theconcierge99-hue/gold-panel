@@ -11,7 +11,9 @@ import {
   percentAmount,
   publicKey,
   some,
+  type TransactionSignature,
 } from "@metaplex-foundation/umi";
+import { base58 } from "@metaplex-foundation/umi/serializers";
 import { fromWeb3JsKeypair } from "@metaplex-foundation/umi-web3js-adapters";
 import { getSolanaRpcUrlForServer } from "./x402-config";
 import { normalizeSolPayTo } from "./x402-address";
@@ -23,6 +25,10 @@ import { getSignalRwaToken, saveSignalRwaToken } from "./rwa-store";
 import { isSolanaKeypairEnvSet, loadSolanaKeypairFromEnv } from "./solana-keypair";
 
 const MINT_SECRET_ENV = "RWA_MINT_SOL_SECRET";
+
+function txSignatureToString(signature: TransactionSignature): string {
+  return base58.deserialize(signature)[0];
+}
 
 export type SolanaRwaMintStatus = "sent" | "skipped" | "failed";
 
@@ -97,18 +103,19 @@ export async function mintSolanaSignalNft(
     });
 
     const { signature } = await builder.sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
+    const txSig = txSignatureToString(signature);
     const mintAddress = mint.publicKey.toString();
 
     const updated: SignalRwaToken = {
       ...token,
       contractAddress: collectionMint || token.contractAddress,
       onChainMintAddress: mintAddress,
-      onChainMintTx: signature,
+      onChainMintTx: txSig,
       onChainMintStatus: "sent",
     };
     await saveSignalRwaToken(updated);
 
-    return { status: "sent", mintAddress, transaction: signature };
+    return { status: "sent", mintAddress, transaction: txSig };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[rwa-solana-mint]", msg);
