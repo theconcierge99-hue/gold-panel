@@ -25,6 +25,8 @@ const MEMORY_INDEX_KEY = "lounge:memory:index";
 const MAX_MEMORY_ITEMS = 400;
 const MAX_INGEST_BATCH = 48;
 const MAX_PROMPT_ITEMS = 18;
+/** Max index ids to load from KV per Concierge turn (was 220 sequential gets → timeout). */
+const MAX_LIST_FOR_RETRIEVAL = 48;
 
 const STOPWORDS = new Set([
   "the",
@@ -187,14 +189,18 @@ export async function ingestCreatorSignalMemory(signal: CreatorSignal): Promise<
   });
 }
 
-async function listRecentMemoryItems(limit = 220): Promise<LoungeMemoryItem[]> {
+async function listRecentMemoryItems(limit = MAX_LIST_FOR_RETRIEVAL): Promise<LoungeMemoryItem[]> {
   const ids = (await readMemoryIndex()).slice(0, limit);
-  const out: LoungeMemoryItem[] = [];
-  for (const id of ids) {
-    const item = await getMemoryItem(id);
-    if (item) out.push(item);
+  if (!ids.length) return [];
+
+  if (hasRedis()) {
+    const kv = await kvClient();
+    const keys = ids.map((id) => memoryItemKey(id));
+    const values = await kv.mget<LoungeMemoryItem | null>(...keys);
+    return values.filter((v): v is LoungeMemoryItem => v != null);
   }
-  return out;
+
+  return ids.map((id) => devMemory.get(id)).filter((v): v is LoungeMemoryItem => v != null);
 }
 
 function scoreItem(item: LoungeMemoryItem, tokens: string[]): number {

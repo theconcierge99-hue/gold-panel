@@ -13,6 +13,7 @@ import {
 } from "./market-sources";
 
 const FETCH_MS = 4_500;
+const CONCIERGE_FETCH_MS = 2_800;
 
 export type DerivativeSnap = {
   symbol: string;
@@ -43,11 +44,15 @@ export type LiveMarketSnapshot = {
   sources: string[];
 };
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T | null> {
+async function fetchJson<T>(
+  url: string,
+  init?: RequestInit,
+  timeoutMs = FETCH_MS,
+): Promise<T | null> {
   try {
     const res = await fetch(url, {
       ...init,
-      signal: AbortSignal.timeout(FETCH_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Accept: "application/json",
         "User-Agent": "ExecutiveLounge/1.0",
@@ -105,12 +110,14 @@ const BLUECHIP_STOCKS: { yahoo: string; label: string }[] = [
   { yahoo: "JPM", label: "JPM" },
 ];
 
-async function binanceSpot(): Promise<MarketTick[]> {
+async function binanceSpot(timeoutMs = FETCH_MS): Promise<MarketTick[]> {
   const symbols = Object.keys(BINANCE_SPOT_MAP);
   const data = await fetchJson<
     { symbol: string; lastPrice: string; priceChangePercent: string }[]
   >(
     `https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(symbols)}`,
+    undefined,
+    timeoutMs,
   );
   if (!data) return [];
 
@@ -126,7 +133,7 @@ async function binanceSpot(): Promise<MarketTick[]> {
     });
 }
 
-async function binanceFutures(): Promise<DerivativeSnap[]> {
+async function binanceFutures(timeoutMs = FETCH_MS): Promise<DerivativeSnap[]> {
   const symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
   const labels: Record<string, string> = {
     BTCUSDT: "BTC",
@@ -139,9 +146,13 @@ async function binanceFutures(): Promise<DerivativeSnap[]> {
       const [prem, oi] = await Promise.all([
         fetchJson<{ lastFundingRate: string; markPrice: string }>(
           `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${sym}`,
+          undefined,
+          timeoutMs,
         ),
         fetchJson<{ openInterest: string }>(
           `https://fapi.binance.com/fapi/v1/openInterest?symbol=${sym}`,
+          undefined,
+          timeoutMs,
         ),
       ]);
       if (!prem) return null;
@@ -167,7 +178,11 @@ type RatioRow = {
   buySellRatio?: string;
 };
 
-async function binancePositioning(symbol: string, label: string): Promise<PositioningSnap | null> {
+async function binancePositioning(
+  symbol: string,
+  label: string,
+  timeoutMs = FETCH_MS,
+): Promise<PositioningSnap | null> {
   const period = "1h";
   const limit = 1;
   const base = "https://fapi.binance.com/futures/data";
@@ -175,12 +190,18 @@ async function binancePositioning(symbol: string, label: string): Promise<Positi
   const [accounts, positions, taker] = await Promise.all([
     fetchJson<RatioRow[]>(
       `${base}/topLongShortAccountRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+      undefined,
+      timeoutMs,
     ),
     fetchJson<RatioRow[]>(
       `${base}/topLongShortPositionRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+      undefined,
+      timeoutMs,
     ),
     fetchJson<RatioRow[]>(
       `${base}/takerlongshortRatio?symbol=${symbol}&period=${period}&limit=${limit}`,
+      undefined,
+      timeoutMs,
     ),
   ]);
 
@@ -215,7 +236,11 @@ async function binancePositioningAll(): Promise<PositioningSnap[]> {
   return rows.filter((r): r is PositioningSnap => r !== null);
 }
 
-async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTick | null> {
+async function yahooQuote(
+  yahooSymbol: string,
+  label: string,
+  timeoutMs = FETCH_MS,
+): Promise<MarketTick | null> {
   const data = await fetchJson<{
     chart?: {
       result?: {
@@ -224,6 +249,8 @@ async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTic
     };
   }>(
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1m`,
+    undefined,
+    timeoutMs,
   );
 
   const meta = data?.chart?.result?.[0]?.meta;
@@ -246,6 +273,51 @@ async function yahooQuote(yahooSymbol: string, label: string): Promise<MarketTic
     symbol: label,
     price: priceDisplay,
     change: fmtPct(chg),
+  };
+}
+
+/** Lighter snapshot for Concierge (avoids Vercel FUNCTION_INVOCATION_TIMEOUT). */
+export async function fetchConciergeMarketSnapshot(): Promise<LiveMarketSnapshot> {
+  const ms = CONCIERGE_FETCH_MS;
+  const [spot, derivs, btcPositioning, spx, dxy, vix, globalCrypto, sentiment, headlines] =
+    await Promise.all([
+      binanceSpot(ms),
+      binanceFutures(ms),
+      binancePositioning("BTCUSDT", "BTC", ms),
+      yahooQuote("^GSPC", "SPX", ms),
+      yahooQuote("DX-Y.NYB", "DXY", ms),
+      yahooQuote("^VIX", "VIX", ms),
+      fetchCoinGeckoGlobal(),
+      fetchFearGreed(),
+      fetchMarketHeadlines(1),
+    ]);
+
+  const ticks: MarketTick[] = [...spot];
+  for (const t of [spx, dxy, vix]) {
+    if (t) ticks.push(t);
+  }
+
+  const sources: string[] = [];
+  if (spot.length) sources.push("Binance");
+  if (derivs.length) sources.push("Binance futures");
+  if (btcPositioning) sources.push("Binance positioning");
+  if (spx || dxy || vix) sources.push("Yahoo Finance");
+  if (globalCrypto) sources.push("CoinGecko");
+  if (sentiment) sources.push("Alternative.me Fear & Greed");
+  if (headlines.length) {
+    const pubs = [...new Set(headlines.map((h) => h.source))];
+    sources.push(`Headlines (${pubs.join(", ")})`);
+  }
+
+  return {
+    fetchedAt: new Date().toISOString(),
+    ticks,
+    derivatives: derivs,
+    positioning: btcPositioning ? [btcPositioning] : [],
+    globalCrypto,
+    sentiment,
+    headlines,
+    sources,
   };
 }
 

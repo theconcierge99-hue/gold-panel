@@ -16,10 +16,11 @@ import {
   ingestWireHeadlinesAsync,
 } from "./lounge-memory";
 import {
-  fetchLiveMarketSnapshot,
+  fetchConciergeMarketSnapshot,
   formatLiveMarketForPrompt,
   type LiveMarketSnapshot,
 } from "./market-data";
+import { withTimeout } from "./with-timeout";
 
 export type ChatTurn = { role: "user" | "model"; text: string };
 
@@ -98,16 +99,20 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   return { text: text.trim(), images };
 }
 
+const GEMINI_CALL_MS = 12_000;
+
 async function geminiCall(
   apiKey: string,
   model: string,
   payload: Record<string, unknown>,
+  timeoutMs = GEMINI_CALL_MS,
 ): Promise<{ text: string; images: string[] }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (!res.ok) {
@@ -130,9 +135,10 @@ async function geminiCall(
 async function geminiGenerateText(
   apiKey: string,
   payload: Record<string, unknown>,
+  options?: { models?: string[] },
 ): Promise<string> {
   const errors: string[] = [];
-  for (const model of TEXT_MODELS) {
+  for (const model of options?.models ?? TEXT_MODELS) {
     try {
       const { text } = await geminiCall(apiKey, model, payload);
       if (text) return text;
@@ -184,10 +190,31 @@ async function resolveIntelligenceContext(
   snapshot: LiveMarketSnapshot;
   loungeMemoryBlock: string;
 }> {
+  const emptyGeneral = {
+    fetchedAt: new Date().toISOString(),
+    wikipedia: [],
+    worldNews: [],
+    sources: [] as string[],
+  };
+  const liteGeneral = wantsTradingPlan(userMessage, detectTopics(userMessage));
+
   const [snapshot, general, loungeMemoryBlock] = await Promise.all([
-    liveSnapshot ? Promise.resolve(liveSnapshot) : fetchLiveMarketSnapshot(),
-    fetchGeneralKnowledgeSnapshot(userMessage),
-    buildLoungeMemoryContextBlock(userMessage),
+    liveSnapshot
+      ? Promise.resolve(liveSnapshot)
+      : withTimeout(fetchConciergeMarketSnapshot(), 8_000, {
+          fetchedAt: new Date().toISOString(),
+          ticks: market,
+          derivatives: [],
+          positioning: [],
+          headlines: [],
+          sources: [],
+        }),
+    withTimeout(
+      fetchGeneralKnowledgeSnapshot(userMessage, { lite: liteGeneral }),
+      4_000,
+      emptyGeneral,
+    ),
+    withTimeout(buildLoungeMemoryContextBlock(userMessage), 4_000, ""),
   ]);
   ingestWireHeadlinesAsync(snapshot.headlines);
   const intelBlock = [formatLiveMarketForPrompt(snapshot), formatGeneralKnowledgeForPrompt(general)]
@@ -326,20 +353,24 @@ export async function runConciergeGemini(options: {
     userMessage: message,
     recentUserMessages: recentUser,
   });
-  let reply = await geminiGenerateText(apiKey, {
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents: buildContents(
-      history.map((h) => ({
-        role: h.role,
-        text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
-      })),
-      message,
-    ),
-    generationConfig: {
-      temperature: 0.55,
-      maxOutputTokens: requireTradingPlan ? 2048 : 1536,
+  let reply = await geminiGenerateText(
+    apiKey,
+    {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: buildContents(
+        history.map((h) => ({
+          role: h.role,
+          text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
+        })),
+        message,
+      ),
+      generationConfig: {
+        temperature: 0.55,
+        maxOutputTokens: requireTradingPlan ? 1536 : 1024,
+      },
     },
-  });
+    { models: requireTradingPlan ? TEXT_MODELS.slice(0, 1) : TEXT_MODELS.slice(0, 2) },
+  );
 
   return { reply: wrapHtmlParagraphs(reply), topics, ...meta };
 }

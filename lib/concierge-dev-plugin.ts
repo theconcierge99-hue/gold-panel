@@ -6,7 +6,6 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "../api/lib/concierge-security";
-import { fetchLiveMarketSnapshot } from "../api/lib/market-data";
 import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
 import { handleSignalOpen } from "../api/lib/signal-open-handler";
 import { handleSignalPublish } from "../api/lib/signal-publish-handler";
@@ -72,7 +71,6 @@ async function handleConcierge(
   try {
     const raw = await readBodyWithLimit(request);
     const { mode, message, history, signal, market } = validateConciergeRequest(raw);
-    const liveSnapshot = await fetchLiveMarketSnapshot();
     const result = await runConciergeGemini({
       apiKey: apiKey!,
       mode,
@@ -80,7 +78,6 @@ async function handleConcierge(
       history,
       signal,
       market,
-      liveSnapshot,
     });
     return { status: 200, json: result };
   } catch (e) {

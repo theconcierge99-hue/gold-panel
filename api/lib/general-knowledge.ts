@@ -182,11 +182,31 @@ async function fetchWorldNews(maxPerFeed = 2): Promise<{ source: string; title: 
   return results.flat().slice(0, 8);
 }
 
+function isMarketFocusedQuery(message: string): boolean {
+  return /\b(trading plan|trade plan|btc|eth|sol|crypto|macro|entry|stop|target|funding|oi|bias)\b/i.test(
+    message,
+  );
+}
+
 /** Aggregate general knowledge for Concierge (runs in parallel with market data). */
 export async function fetchGeneralKnowledgeSnapshot(
   userMessage: string,
+  options?: { lite?: boolean },
 ): Promise<GeneralKnowledgeSnapshot> {
   const queries = extractKnowledgeQueries(userMessage);
+  const lite = options?.lite ?? isMarketFocusedQuery(userMessage);
+
+  if (lite) {
+    const instantAnswer = await fetchDuckDuckGoInstant(queries[0]);
+    const sources = instantAnswer ? ["DuckDuckGo"] : [];
+    return {
+      fetchedAt: new Date().toISOString(),
+      wikipedia: [],
+      worldNews: [],
+      instantAnswer: instantAnswer ?? undefined,
+      sources,
+    };
+  }
 
   const [wikipedia, worldNews, instantAnswer] = await Promise.all([
     fetchWikipediaForQueries(queries),
