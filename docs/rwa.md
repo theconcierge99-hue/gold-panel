@@ -127,9 +127,14 @@ On successful `POST /api/lounge-signal-open`:
 | Record client mint | `api/lounge-rwa-record-mint.ts` |
 | RPC proxy | `api/solana-rpc-send.ts`, `api/lib/x402-solana-rpc.ts` |
 
+## x402scan listing
+
+RWA appears in our **OpenAPI** and **402** metadata. The **Tags** row on [x402scan.com](https://www.x402scan.com/) is assigned by x402scan’s own labeling (fixed categories today: Search, AI, Crypto, Trading, Utility, Random — **not** `RWA`). To get an **RWA** pill on the profile, ask Merit Systems via [Discord](https://discord.gg/JuKt7tPnNc) or a [GitHub issue](https://github.com/Merit-Systems/x402scan/issues/new). Details: [x402scan.md](x402scan.md#listing-tags-x402scan-sidebar-vs-our-openapi).
+
 ## Related docs
 
 - [creator-signals.md](creator-signals.md) — publish/unlock, validation, revenue
 - [rwa-solana-setup.md](rwa-solana-setup.md) — env vars, RPC, troubleshooting
 - [configuration.md](configuration.md) — all environment variables
 - [api-reference.md](api-reference.md) — HTTP contracts
+- [x402scan.md](x402scan.md) — discovery and marketplace tags

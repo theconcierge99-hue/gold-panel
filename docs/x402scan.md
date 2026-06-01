@@ -30,9 +30,40 @@ Each 402 response includes:
 - `extensions.bazaar` with HTTP POST JSON input schema (for agent invocation)
 - Bazaar **service metadata** on `resource`: `serviceName`, `tags`, `iconUrl` (see `api/lib/x402-service-meta.ts`)
 
-### Listing tags (x402scan / AGENTCASH)
+### Listing tags (x402scan sidebar vs our OpenAPI)
 
-Server-level tags exposed on every 402 `resource` object and in OpenAPI `x-discovery`:
+**Executive Lounge already sends `RWA` in production metadata** (`x-discovery.tags`, `info.x-marketplace-tags`, operation `tags`, and `Payment-Required` → `resource.tags`). Verify:
+
+```bash
+curl.exe -s https://conc-exe.xyz/openapi.json | findstr RWA
+```
+
+**Why the x402scan profile may still show only AI, Trading, Search, Crypto**
+
+x402scan does **not** copy OpenAPI / Bazaar tags into the **Tags** row on re-register. In [Merit-Systems/x402scan](https://github.com/Merit-Systems/x402scan), server pills come from **database tags** on each resource, usually assigned by an internal **GPT labeling** step against a fixed main-category list:
+
+`Search`, `AI`, `Crypto`, `Trading`, `Utility`, `Random`
+
+**`RWA` is not in that list today**, so the marketplace will not show an RWA pill until x402scan adds it or an admin assigns a custom tag.
+
+| Where | Shows RWA? |
+|-------|------------|
+| Our site, `/openapi.json`, 402 headers | Yes (after deploy `1a7c738+`) |
+| x402scan **description** (scraped / OpenAPI `info`) | Often yes (“RWA creator signals”) |
+| x402scan **Tags** pills | No — not controlled by our repo alone |
+
+**What you can do**
+
+1. **Ask x402scan to add the tag** (fastest path for the sidebar):
+   - [Discord](https://discord.gg/JuKt7tPnNc) (Merit Systems / x402scan)
+   - [GitHub issue](https://github.com/Merit-Systems/x402scan/issues/new) — request adding **`RWA`** to main tags and applying it to origin `https://conc-exe.xyz`
+2. **Re-register** only refreshes resources and title/description — not Tags:
+   ```bash
+   npx -y @agentcash/discovery conc-exe.xyz -v
+   ```
+3. Optional upstream: contribute `RWA` to `apps/scan/src/services/labeling/main-tags.ts` in the x402scan repo.
+
+**Tags we publish for agents / facilitators** (for when indexers read 402 or OpenAPI):
 
 | Tag | Meaning |
 |-----|---------|
@@ -41,22 +72,6 @@ Server-level tags exposed on every 402 `resource` object and in OpenAPI `x-disco
 | **Search** | Wire unlock, knowledge retrieval |
 | **Crypto** | Onchain economy, Solana/Base USDC |
 | **RWA** | Tokenized intelligence signals + optional Solana NFT |
-
-OpenAPI **operation** `tags` use the same labels (`Search`, `AI`, `RWA`, …) — x402scan builds the sidebar from those, not only `x-discovery`.
-
-After deploy, **re-register** so the Tags row refreshes (cached listing may lag):
-
-```bash
-npx -y @agentcash/discovery conc-exe.xyz -v
-```
-
-Or at [x402scan register](https://www.x402scan.com/resources/register) submit `https://conc-exe.xyz` again.
-
-Verify OpenAPI:
-
-```bash
-curl.exe -s https://conc-exe.xyz/openapi.json | findstr RWA
-```
 
 ## Probe behavior (why GET returns 402)
 
