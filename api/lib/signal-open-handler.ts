@@ -4,6 +4,7 @@ import {
   readBodyWithLimit,
   sanitizePublicError,
 } from "./concierge-security";
+import type { PaidX402RouteContinue } from "./x402-server";
 import { guardPaidX402Api } from "./x402-server";
 import { X402_READ_PRICE_ATOMIC, X402_READ_PRICE_USDC } from "./x402-pricing";
 import {
@@ -16,11 +17,10 @@ import { awardReaderBadge } from "./rwa-badge";
 import { getSignalRwaToken } from "./rwa-store";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
 
-export async function handleSignalOpen(request: Request): Promise<Response> {
-  const routed = await guardPaidX402Api(request, "signal-open");
-  if ("response" in routed) return routed.response;
-  const { cors, gate } = routed.continue;
-
+export async function runSignalOpenAfterPayment(
+  request: Request,
+  { cors, gate }: PaidX402RouteContinue,
+): Promise<Response> {
   try {
     assertAllowedOrigin(request);
 
@@ -154,4 +154,10 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
+}
+
+export async function handleSignalOpen(request: Request): Promise<Response> {
+  const routed = await guardPaidX402Api(request, "signal-open");
+  if ("response" in routed) return routed.response;
+  return runSignalOpenAfterPayment(request, routed.continue);
 }

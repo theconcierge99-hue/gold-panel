@@ -4,6 +4,7 @@ import {
   readBodyWithLimit,
   sanitizePublicError,
 } from "./concierge-security";
+import type { PaidX402RouteContinue } from "./x402-server";
 import { guardPaidX402Api } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
@@ -46,11 +47,11 @@ function queueSolanaNftMint(signalId: string): void {
     });
 }
 
-export async function handleSignalPublish(request: Request): Promise<Response> {
-  const routed = await guardPaidX402Api(request, "signal-publish");
-  if ("response" in routed) return routed.response;
-  const { cors, gate } = routed.continue;
-
+/** Paid POST body only — import dynamically from api/signal-publish.ts so cold start can return 402. */
+export async function runSignalPublishAfterPayment(
+  request: Request,
+  { cors, gate }: PaidX402RouteContinue,
+): Promise<Response> {
   try {
     assertAllowedOrigin(request);
 
@@ -157,4 +158,10 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
+}
+
+export async function handleSignalPublish(request: Request): Promise<Response> {
+  const routed = await guardPaidX402Api(request, "signal-publish");
+  if ("response" in routed) return routed.response;
+  return runSignalPublishAfterPayment(request, routed.continue);
 }
