@@ -63,8 +63,8 @@ export function normalizeGeminiApiKey(raw: string | undefined): string {
   return key;
 }
 
-function buildContents(history: ChatTurn[], message: string): GeminiContent[] {
-  const contents: GeminiContent[] = history.slice(-10).map((t) => ({
+function buildContents(history: ChatTurn[], message: string, maxTurns = 10): GeminiContent[] {
+  const contents: GeminiContent[] = history.slice(-maxTurns).map((t) => ({
     role: t.role === "user" ? "user" : "model",
     parts: [{ text: t.text }],
   }));
@@ -100,6 +100,7 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
 }
 
 const GEMINI_CALL_MS = 12_000;
+const GEMINI_TRADING_MS = 9_000;
 
 async function geminiCall(
   apiKey: string,
@@ -184,6 +185,7 @@ async function resolveIntelligenceContext(
   market: MarketTick[],
   userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
+  tradingPlan = false,
 ): Promise<{
   intelBlock: string;
   ticks: MarketTick[];
@@ -196,30 +198,36 @@ async function resolveIntelligenceContext(
     worldNews: [],
     sources: [] as string[],
   };
-  const topics = detectTopics(userMessage);
-  const tradingPlan = wantsTradingPlan(userMessage, topics);
-  const knowledgeMode = tradingPlan ? ("trading" as const) : undefined;
+  const marketTimeout = tradingPlan ? 5_000 : 7_000;
+  const generalTimeout = tradingPlan ? 2_500 : 4_000;
 
   const [snapshot, general, loungeMemoryBlock] = await Promise.all([
     liveSnapshot
       ? Promise.resolve(liveSnapshot)
-      : withTimeout(fetchConciergeMarketSnapshot(), 8_000, {
-          fetchedAt: new Date().toISOString(),
-          ticks: market,
-          derivatives: [],
-          positioning: [],
-          headlines: [],
-          sources: [],
-        }),
+      : withTimeout(
+          fetchConciergeMarketSnapshot({
+            mode: tradingPlan ? "trading" : "standard",
+            clientTicks: market,
+            message: userMessage,
+          }),
+          marketTimeout,
+          {
+            fetchedAt: new Date().toISOString(),
+            ticks: market,
+            derivatives: [],
+            positioning: [],
+            headlines: [],
+            sources: [],
+          },
+        ),
     withTimeout(
-      fetchGeneralKnowledgeSnapshot(
-        userMessage,
-        knowledgeMode ? { mode: knowledgeMode } : { lite: true },
-      ),
-      5_000,
+      fetchGeneralKnowledgeSnapshot(userMessage, { mode: "lite" }),
+      generalTimeout,
       emptyGeneral,
     ),
-    withTimeout(buildLoungeMemoryContextBlock(userMessage), 4_000, ""),
+    tradingPlan
+      ? Promise.resolve("")
+      : withTimeout(buildLoungeMemoryContextBlock(userMessage), 3_000, ""),
   ]);
   ingestWireHeadlinesAsync(snapshot.headlines);
   const intelBlock = [formatLiveMarketForPrompt(snapshot), formatGeneralKnowledgeForPrompt(general)]
@@ -255,6 +263,7 @@ export async function runConciergeGemini(options: {
     market,
     message,
     options.liveSnapshot,
+    requireTradingPlan,
   );
   const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
@@ -349,33 +358,55 @@ export async function runConciergeGemini(options: {
   }
 
   const recentUser = history.filter((h) => h.role === "user").map((h) => h.text);
+  const historyTurns = requireTradingPlan ? 4 : 8;
   const systemPrompt = buildConciergeSystemPrompt({
     topics,
     market: ticks,
     liveMarketBlock: intelBlock,
     ...promptContext,
     requireTradingPlan,
+    compactTradingPlan: requireTradingPlan,
     userMessage: message,
     recentUserMessages: recentUser,
   });
-  let reply = await geminiGenerateText(
-    apiKey,
-    {
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: buildContents(
-        history.map((h) => ({
-          role: h.role,
-          text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
-        })),
-        message,
-      ),
-      generationConfig: {
-        temperature: 0.55,
-        maxOutputTokens: requireTradingPlan ? 2048 : 1024,
-      },
+  const geminiPayload = {
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    contents: buildContents(
+      history.map((h) => ({
+        role: h.role,
+        text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
+      })),
+      message,
+      historyTurns,
+    ),
+    generationConfig: {
+      temperature: 0.55,
+      maxOutputTokens: requireTradingPlan ? 1400 : 1024,
     },
-    { models: requireTradingPlan ? TEXT_MODELS.slice(0, 2) : TEXT_MODELS.slice(0, 2) },
-  );
+  };
+  let reply = "";
+  if (requireTradingPlan) {
+    const errors: string[] = [];
+    for (const model of TEXT_MODELS.slice(0, 2)) {
+      try {
+        const { text } = await geminiCall(apiKey, model, geminiPayload, GEMINI_TRADING_MS);
+        if (text) {
+          reply = text;
+          break;
+        }
+        errors.push(`${model}: empty`);
+      } catch (e) {
+        errors.push(e instanceof Error ? e.message : String(e));
+      }
+    }
+    if (!reply) {
+      throw new Error(errors[0] || "Concierge timed out — try again in a moment");
+    }
+  } else {
+    reply = await geminiGenerateText(apiKey, geminiPayload, {
+      models: TEXT_MODELS.slice(0, 2),
+    });
+  }
 
   return { reply: wrapHtmlParagraphs(reply), topics, ...meta };
 }

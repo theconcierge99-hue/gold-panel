@@ -11,6 +11,8 @@ import { guardPaidX402Api } from "./lib/x402-server";
 /** Edge — Gemini + x402 only (no Solana / Metaplex imports) */
 export const config = {
   runtime: "edge",
+  /** Max wall time for paid chat (x402 verify+settle + Gemini); Edge cap is 30s on all plans. */
+  maxDuration: 30,
 };
 
 function jsonResponse(

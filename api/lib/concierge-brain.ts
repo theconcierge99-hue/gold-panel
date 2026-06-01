@@ -516,6 +516,19 @@ Rules:
 - If funding contradicts bias, state crowded-trade risk explicitly.
 - Neutral bias → range or breakout-wait plan, not forced direction.`;
 
+/** Shorter prompt for trading-plan requests (same 6 sections, fits Vercel time budget). */
+const TRADING_PLAN_FRAMEWORK_COMPACT = `INSTITUTIONAL TRADING PLAN (mandatory — user's language):
+
+Use six <p> blocks (titles may be localized):
+1. <strong>Executive summary</strong> — asset, timeframe, bias, conviction, thesis + live prices.
+2. <strong>Geopolitical & macro</strong> — geo risks from LATEST HEADLINES; DXY/VIX/SPX transmission; base vs tail (1 line each).
+3. <strong>Fundamental</strong> — crypto lens (flows, dominance, narrative) and/or stock lens (catalyst, valuation, beta) as relevant.
+4. <strong>Technical</strong> — trend, S/R from live mark, momentum; perps: funding/OI/L-S; stocks: index confluence.
+5. <strong>Trading plan</strong> — entry, stop, TP1/TP2, R:R, size, Plan B.
+6. <strong>Risks & catalysts</strong> (24–72h) + <em>not financial advice</em> + one-line <code>A2A|asset=…|bias=…|entry=…|stop=…|tp1=…</code>.
+
+Keep each section tight (2–5 bullets). Never skip geo, fundamental, or technical. Anchor levels to live data only.`;
+
 const TRADING_PLAN_RESPONSE_STRUCTURE = `TRADING-PLAN RESPONSE STRUCTURE (when trading plan is required):
 Follow sections 1–6 + Agent handoff from INSTITUTIONAL TRADING PLAN above.
 Do not skip geopolitical, fundamental, or technical sections — even if brief when data is thin (say what you would watch).
@@ -717,6 +730,7 @@ export function buildConciergeSystemPrompt(options: {
   loungeMemoryBlock?: string;
   imageMode?: boolean;
   requireTradingPlan?: boolean;
+  compactTradingPlan?: boolean;
   userMessage?: string;
   recentUserMessages?: string[];
 }): string {
@@ -727,12 +741,17 @@ export function buildConciergeSystemPrompt(options: {
     loungeMemoryBlock = "",
     imageMode,
     requireTradingPlan,
+    compactTradingPlan,
     userMessage,
     recentUserMessages = [],
   } = options;
   const replyLangBlock = buildReplyLanguageBlock(userMessage, recentUserMessages);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
-  const tradingBlock = requireTradingPlan ? `\n${TRADING_PLAN_FRAMEWORK}\n` : "";
+  const planFramework =
+    compactTradingPlan && requireTradingPlan
+      ? TRADING_PLAN_FRAMEWORK_COMPACT
+      : TRADING_PLAN_FRAMEWORK;
+  const tradingBlock = requireTradingPlan ? `\n${planFramework}\n` : "";
 
   const marketBlock = liveMarketBlock
     ? `\n${liveMarketBlock}\n`

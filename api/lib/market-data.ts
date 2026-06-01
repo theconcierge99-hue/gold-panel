@@ -14,6 +14,28 @@ import {
 
 const FETCH_MS = 4_500;
 const CONCIERGE_FETCH_MS = 2_800;
+/** Tighter timeouts on the trading-plan fast path (fits Vercel 30s incl. x402). */
+const CONCIERGE_TRADING_FETCH_MS = 2_000;
+
+export type ConciergeSnapshotMode = "standard" | "trading";
+
+function hasClientTick(ticks: MarketTick[], label: string): boolean {
+  const u = label.toUpperCase();
+  return ticks.some((t) => (t.symbol ?? "").toUpperCase() === u);
+}
+
+function assetHintsFromMessage(message: string): {
+  stock: boolean;
+  gold: boolean;
+  ndx: boolean;
+} {
+  const t = message.toLowerCase();
+  return {
+    stock: /\b(nvda|aapl|msft|tsla|amzn|meta|goog|stock|saham|equity|equities)\b/.test(t),
+    gold: /\b(gold|xau|emas|gld)\b/.test(t),
+    ndx: /\b(ndx|nasdaq|tech index)\b/.test(t),
+  };
+}
 
 export type DerivativeSnap = {
   symbol: string;
@@ -276,28 +298,90 @@ async function yahooQuote(
   };
 }
 
-/** Lighter snapshot for Concierge — crypto + equities macro + key single names. */
-export async function fetchConciergeMarketSnapshot(): Promise<LiveMarketSnapshot> {
+/** Concierge market snapshot — `trading` mode minimizes fetches to avoid Vercel timeout. */
+export async function fetchConciergeMarketSnapshot(options?: {
+  mode?: ConciergeSnapshotMode;
+  clientTicks?: MarketTick[];
+  message?: string;
+}): Promise<LiveMarketSnapshot> {
+  const mode = options?.mode ?? "standard";
+  const client = options?.clientTicks ?? [];
+  const hints = assetHintsFromMessage(options?.message ?? "");
+
+  if (mode === "trading") {
+    const ms = CONCIERGE_TRADING_FETCH_MS;
+    const yahooTasks: Promise<MarketTick | null>[] = [];
+    if (!hasClientTick(client, "SPX")) yahooTasks.push(yahooQuote("^GSPC", "SPX", ms));
+    if (!hasClientTick(client, "DXY")) yahooTasks.push(yahooQuote("DX-Y.NYB", "DXY", ms));
+    if (!hasClientTick(client, "VIX")) yahooTasks.push(yahooQuote("^VIX", "VIX", ms));
+    if (hints.ndx && !hasClientTick(client, "NDX")) {
+      yahooTasks.push(yahooQuote("^IXIC", "NDX", ms));
+    }
+    if (hints.gold && !hasClientTick(client, "GOLD")) {
+      yahooTasks.push(yahooQuote("GC=F", "GOLD", ms));
+    }
+    if (hints.stock) {
+      if (!hasClientTick(client, "NVDA")) yahooTasks.push(yahooQuote("NVDA", "NVDA", ms));
+      if (!hasClientTick(client, "AAPL")) yahooTasks.push(yahooQuote("AAPL", "AAPL", ms));
+    }
+
+    const [spot, derivs, btcPositioning, sentiment, headlines, ...yahooExtra] = await Promise.all([
+      binanceSpot(ms),
+      binanceFutures(ms),
+      binancePositioning("BTCUSDT", "BTC", ms),
+      fetchFearGreed(),
+      fetchMarketHeadlines(2),
+      ...yahooTasks,
+    ]);
+
+    const ticks: MarketTick[] = [];
+    const seen = new Set<string>();
+    for (const t of [...client, ...spot, ...yahooExtra]) {
+      if (!t?.symbol) continue;
+      const sym = t.symbol.toUpperCase();
+      if (seen.has(sym)) continue;
+      seen.add(sym);
+      ticks.push(t);
+    }
+
+    const sources: string[] = [];
+    if (spot.length || client.length) sources.push("Binance / terminal tape");
+    if (derivs.length) sources.push("Binance futures");
+    if (btcPositioning) sources.push("Binance positioning");
+    if (yahooExtra.some(Boolean)) sources.push("Yahoo Finance");
+    if (sentiment) sources.push("Alternative.me Fear & Greed");
+    if (headlines.length) {
+      const pubs = [...new Set(headlines.map((h) => h.source))];
+      sources.push(`Headlines (${pubs.join(", ")})`);
+    }
+
+    return {
+      fetchedAt: new Date().toISOString(),
+      ticks,
+      derivatives: derivs,
+      positioning: btcPositioning ? [btcPositioning] : [],
+      sentiment,
+      headlines,
+      sources,
+    };
+  }
+
   const ms = CONCIERGE_FETCH_MS;
-  const [spot, derivs, btcPositioning, spx, ndx, dxy, vix, gold, nvda, aapl, globalCrypto, sentiment, headlines] =
+  const [spot, derivs, btcPositioning, spx, dxy, vix, globalCrypto, sentiment, headlines] =
     await Promise.all([
       binanceSpot(ms),
       binanceFutures(ms),
       binancePositioning("BTCUSDT", "BTC", ms),
       yahooQuote("^GSPC", "SPX", ms),
-      yahooQuote("^IXIC", "NDX", ms),
       yahooQuote("DX-Y.NYB", "DXY", ms),
       yahooQuote("^VIX", "VIX", ms),
-      yahooQuote("GC=F", "GOLD", ms),
-      yahooQuote("NVDA", "NVDA", ms),
-      yahooQuote("AAPL", "AAPL", ms),
       fetchCoinGeckoGlobal(),
       fetchFearGreed(),
-      fetchMarketHeadlines(3),
+      fetchMarketHeadlines(2),
     ]);
 
   const ticks: MarketTick[] = [...spot];
-  for (const t of [spx, ndx, dxy, vix, gold, nvda, aapl]) {
+  for (const t of [spx, dxy, vix]) {
     if (t) ticks.push(t);
   }
 
@@ -305,7 +389,7 @@ export async function fetchConciergeMarketSnapshot(): Promise<LiveMarketSnapshot
   if (spot.length) sources.push("Binance");
   if (derivs.length) sources.push("Binance futures");
   if (btcPositioning) sources.push("Binance positioning");
-  if (spx || ndx || dxy || vix || gold || nvda || aapl) sources.push("Yahoo Finance");
+  if (spx || dxy || vix) sources.push("Yahoo Finance");
   if (globalCrypto) sources.push("CoinGecko");
   if (sentiment) sources.push("Alternative.me Fear & Greed");
   if (headlines.length) {
