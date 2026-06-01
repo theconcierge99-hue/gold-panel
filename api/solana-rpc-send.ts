@@ -1,12 +1,13 @@
 import { corsHeadersFor } from "./lib/concierge-security";
 import { getSolanaRpcUrlForServer } from "./lib/x402-config";
-import { solanaRpcCall } from "./lib/x402-solana-rpc";
+import { solanaRpcCallEx } from "./lib/x402-solana-rpc";
 
-/** Edge — forward sendTransaction / simulateTransaction for client NFT mint only */
+/** Edge — forward Solana JSON-RPC for client NFT mint (creator signs in Phantom) */
 export const config = { runtime: "edge" };
 
-/** Allow reads + submitting already-signed txs from the creator's wallet */
 const BLOCKED = new Set(["requestAirdrop"]);
+
+const SLOW_METHODS = new Set(["simulateTransaction", "sendTransaction", "getLatestBlockhash"]);
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
@@ -39,13 +40,18 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const rpc = getSolanaRpcUrlForServer();
-  const result = await solanaRpcCall<unknown>(rpc, method, body.params ?? []);
+  const timeoutMs = SLOW_METHODS.has(method) ? 55_000 : 20_000;
+  const out = await solanaRpcCallEx<unknown>(rpc, method, body.params ?? [], timeoutMs);
 
   return new Response(
     JSON.stringify(
-      result === null
-        ? { jsonrpc: "2.0", id: body.id ?? 1, error: { code: -32000, message: "RPC failed" } }
-        : { jsonrpc: "2.0", id: body.id ?? 1, result },
+      out.ok
+        ? { jsonrpc: "2.0", id: body.id ?? 1, result: out.result }
+        : {
+            jsonrpc: "2.0",
+            id: body.id ?? 1,
+            error: { code: -32000, message: out.error },
+          },
     ),
     {
       status: 200,

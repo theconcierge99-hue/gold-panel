@@ -1225,7 +1225,7 @@
       if(data.mintParams&&creatorChain==='sol'&&session.sol?.address){
         try{
           if(publishBtn) publishBtn.textContent='Minting NFT in Phantom…';
-          toast('Approve NFT mint in Phantom (~0.02 SOL network fee)…');
+          toast('Approve NFT mint in Phantom — need ~0.03 SOL for network fees (not USDC)…');
           if(typeof window.mintLoungeSignalNft!=='function'){
             await new Promise((resolve,reject)=>{
               const s=document.createElement('script');

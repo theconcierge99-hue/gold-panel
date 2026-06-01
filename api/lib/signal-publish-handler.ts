@@ -19,6 +19,12 @@ function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
 }
 
+function validCollectionMint(addr: string | undefined): string | undefined {
+  const a = addr?.trim();
+  if (!a || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)) return undefined;
+  return a;
+}
+
 /** Paid POST body only — import dynamically from api/lounge-signal-publish.ts so cold start can return 402. */
 export async function runSignalPublishAfterPayment(
   request: Request,
@@ -78,7 +84,7 @@ export async function runSignalPublishAfterPayment(
           signalId: signal.id,
           uri: rwaMetadataUri(signal.id, siteOrigin()),
           name: rwaToken.metadata.name,
-          collectionMint: process.env.RWA_SIGNAL_CONTRACT_SOL?.trim() || undefined,
+          collectionMint: validCollectionMint(process.env.RWA_SIGNAL_CONTRACT_SOL),
         };
         solanaMint = {
           status: "pending",

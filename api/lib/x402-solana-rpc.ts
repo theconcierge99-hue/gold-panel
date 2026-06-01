@@ -16,26 +16,50 @@ export function normalizeSolanaRpcUrl(raw: string | undefined | null): string | 
   }
 }
 
-export async function solanaRpcCall<T>(
+function rpcErrorMessage(err: unknown): string {
+  if (!err || typeof err !== "object") return String(err ?? "RPC error");
+  const o = err as { message?: string; data?: unknown };
+  if (o.message) return o.message;
+  return JSON.stringify(err).slice(0, 400);
+}
+
+export async function solanaRpcCallEx<T>(
   rpcUrl: string,
   method: string,
   params: unknown[],
-): Promise<T | null> {
+  timeoutMs = 15_000,
+): Promise<{ ok: true; result: T } | { ok: false; error: string }> {
   const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl.trim();
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      return { ok: false, error: `RPC HTTP ${res.status}` };
+    }
     const data = (await res.json()) as { result?: T; error?: unknown };
-    if (data.error) return null;
-    return data.result ?? null;
-  } catch {
-    return null;
+    if (data.error) {
+      return { ok: false, error: rpcErrorMessage(data.error) };
+    }
+    if (data.result === undefined) {
+      return { ok: false, error: "RPC returned no result" };
+    }
+    return { ok: true, result: data.result };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "RPC request failed" };
   }
+}
+
+export async function solanaRpcCall<T>(
+  rpcUrl: string,
+  method: string,
+  params: unknown[],
+): Promise<T | null> {
+  const out = await solanaRpcCallEx<T>(rpcUrl, method, params);
+  return out.ok ? out.result : null;
 }
 
 function sumParsedTokenBalances(rows: unknown[] | undefined): bigint {
