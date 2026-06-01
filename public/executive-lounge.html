@@ -1236,7 +1236,7 @@
     }catch(e){
       if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
       console.warn('signal-publish',e);
-      toast(formatPaymentError(e)||'Could not publish signal');
+      toast(formatPaymentError(e)||e?.message||'Could not publish signal');
     }finally{
       if(publishBtn){
         publishBtn.disabled=false;

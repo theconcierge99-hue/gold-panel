@@ -8,12 +8,34 @@ import { guardPaidX402Api } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
+import { solanaRwaMintConfigured } from "./creator-payout-env";
 import { mintSignalRwaToken } from "./rwa-token";
+import type { SolanaRwaMintResult } from "./rwa-solana-mint";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 
 function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
+}
+
+/** Metaplex loads only inside waitUntil — never block the publish HTTP response. */
+function queueSolanaNftMint(signal: CreatorSignal): void {
+  const job = async () => {
+    try {
+      const { getSignalRwaToken } = await import("./rwa-store");
+      const { mintSolanaSignalNft } = await import("./rwa-solana-mint");
+      const token = await getSignalRwaToken(signal.id);
+      if (!token) return;
+      await mintSolanaSignalNft(signal, token);
+    } catch (e) {
+      console.error("[signal-publish] bg sol mint", e instanceof Error ? e.message : e);
+    }
+  };
+  void import("@vercel/functions")
+    .then((m) => m.waitUntil(job()))
+    .catch(() => {
+      void job();
+    });
 }
 
 export async function handleSignalPublish(request: Request): Promise<Response> {
@@ -60,32 +82,24 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
     await savePublishedSignal(signal);
 
     let rwaToken: Awaited<ReturnType<typeof mintSignalRwaToken>> | undefined;
-    let solanaMint:
-      | Awaited<ReturnType<typeof import("./rwa-solana-mint").scheduleBackgroundSolanaMint>>
-      | undefined;
+    let solanaMint: SolanaRwaMintResult | undefined;
 
     try {
       rwaToken = await mintSignalRwaToken(signal);
       signal.rwaTokenId = rwaToken.tokenId;
       await savePublishedSignal(signal);
-    } catch (e) {
-      console.error("[signal-publish] rwa cert", e instanceof Error ? e.message : e);
-    }
 
-    if (rwaToken && signal.creatorChain === "sol") {
-      try {
-        const { scheduleBackgroundSolanaMint } = await import("./rwa-solana-mint");
-        solanaMint = scheduleBackgroundSolanaMint(signal, rwaToken);
-      } catch (e) {
-        console.error("[signal-publish] sol mint schedule", e instanceof Error ? e.message : e);
-        solanaMint = { status: "skipped", reason: "Solana mint module unavailable" };
+      if (signal.creatorChain === "sol" && solanaRwaMintConfigured()) {
+        solanaMint = {
+          status: "pending",
+          reason: "NFT mint queued — check your Solana wallet in ~1 minute",
+        };
+        queueSolanaNftMint(signal);
       }
-    }
 
-    try {
       await ingestCreatorSignalMemory(signal);
     } catch (e) {
-      console.error("[signal-publish] lounge memory", e instanceof Error ? e.message : e);
+      console.error("[signal-publish] post-save", e instanceof Error ? e.message : e);
     }
 
     const headers: Record<string, string> = {
