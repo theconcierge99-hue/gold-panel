@@ -27,7 +27,7 @@ import { isSolanaKeypairEnvSet, loadSolanaKeypairFromEnv } from "./solana-keypai
 const MINT_SECRET_ENV = "RWA_MINT_SOL_SECRET";
 
 function txSignatureToString(signature: TransactionSignature): string {
-  return base58.deserialize(signature)[0];
+  return base58.serialize(signature);
 }
 
 export type SolanaRwaMintStatus = "sent" | "skipped" | "failed";
