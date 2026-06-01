@@ -1,6 +1,6 @@
 # Overview
 
-Executive Lounge is a single-page web application for institutional-style market intelligence. Users browse a free headline wire, pay small USDC fees to unlock depth, chat with Concierge AI, and (with a connected wallet) publish or unlock **creator signals**.
+**Executive Lounge** is a single-page web application for institutional-style market intelligence. It combines a free headline wire, **x402 micropayments**, **Concierge AI**, and **creator signals** tokenized as **Real World Assets (RWA)** — each signal is an intelligence certificate with optional **on-chain Solana NFT** mint to the creator’s wallet.
 
 ## Production URLs
 
@@ -8,11 +8,12 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 
 | URL | Purpose |
 |-----|---------|
-| `https://your-domain.com/` | Main lounge (clean URL; rewrites to `executive-lounge.html`) |
+| `https://your-domain.com/` | Main lounge (rewrites to `executive-lounge.html`) |
 | `https://your-domain.com/about` | About page |
 | `https://your-domain.com/docs` | Documentation (web) |
+| `https://your-domain.com/deploy-version.txt` | Deployed git commit (verify production build) |
 | `https://your-domain.com/api/market` | Free headline + signal feed (JSON) |
-| `https://your-domain.com/api/x402-config` | Public payment configuration (may include merchant receive addresses) |
+| `https://your-domain.com/api/x402-config` | Public payment + RWA readiness flags |
 | `https://your-domain.com/.well-known/x402` | x402 resource fan-out (discovery) |
 | `https://your-domain.com/openapi.json` | OpenAPI + x-payment-info (discovery) |
 
@@ -21,32 +22,41 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 ### Lounge (free browse)
 
 - Aggregated headlines from public RSS sources (FT, BBC, Bloomberg, Reuters, etc.).
-- Creator signals appear at the top of the feed when published.
-- No payment required to scroll headlines or see summaries.
+- Creator signals appear at the top of the feed when published (with **⬡ RWA** when tokenized).
+- No payment required to scroll headlines or see signal titles/teasers.
 
 ### Paid article open
 
 - User selects a wire card → pays **0.1 USDC** → receives the canonical external article URL.
-- Implemented as `POST /api/news-open` with x402 settlement before redirect.
+- `POST /api/news-open` with x402 settlement before redirect.
 
 ### Concierge AI
 
 - Multi-mode assistant: **chat**, **enhance** (signal copy), **image** (analysis + optional visual).
 - **0.1 USDC** per chat/image request (enhance runs inside Create Signal flow).
-- Uses **Google Gemini** with live market data, general-knowledge feeds, and **lounge memory** (recent headlines + creator signals).
-- Replies in the **user’s language** when their message (or recent thread context for short replies) is clearly non-English; defaults to **English** when unknown.
+- Google **Gemini** with live market data, general-knowledge feeds, and **lounge memory** (recent headlines + creator signals).
 
-### Creator signals
+### Creator signals & RWA
 
-- **Publish:** **1 USDC** one-time anti-spam fee; signal stored in Redis/KV and surfaced on the market feed.
-- **Unlock:** **0.1 USDC** per reader; full summary shown in-app (not an external URL).
-- **Revenue:** 50% of reader unlock fees sent on-chain to the creator wallet; 50% merchant (via x402 to merchant address).
+Each published signal is an **RWA intelligence certificate**:
+
+| Layer | What it is |
+|-------|------------|
+| **Off-chain certificate** | `tokenId`, SHA-256 `contentHash`, JSON metadata in Redis/KV — always created on publish |
+| **On-chain NFT (Solana)** | Metaplex NFT minted to the **creator’s Phantom wallet** after publish (creator pays ~0.02–0.05 SOL gas) |
+| **Reader badge** | Off-chain tier badge when a wallet pays to unlock a signal |
+
+**Publish:** **1 USDC** anti-spam fee (100% merchant) → `POST /api/lounge-signal-publish`  
+**Unlock:** **0.1 USDC** per reader → `POST /api/lounge-signal-open` — full summary in-app  
+**Revenue:** 50% of unlock fees to creator on-chain when payout treasuries are configured; 50% merchant via x402
+
+See [rwa.md](rwa.md) and [creator-signals.md](creator-signals.md) for full flows.
 
 ### Wallet & payments
 
-- **Phantom** and **OKX** supported for Solana and EVM (Base).
-- Checkout uses x402 v2 (`PAYMENT-SIGNATURE` / `PAYMENT-REQUIRED` / `PAYMENT-RESPONSE`).
-- User chooses **Solana** or **Base** at payment modal when both are configured.
+- **Phantom** and **OKX** for Solana and EVM (Base).
+- x402 v2 (`PAYMENT-SIGNATURE` / `PAYMENT-REQUIRED` / `PAYMENT-RESPONSE`).
+- User chooses **Solana** or **Base** in the payment modal when both are configured.
 
 ## Pricing summary
 
@@ -55,16 +65,17 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | Market feed | `GET /api/market` | Free |
 | Open article | `POST /api/news-open` | 0.10 |
 | Concierge | `POST /api/concierge` | 0.10 |
-| Unlock signal | `POST /api/signal-open` | 0.10 |
-| Publish signal | `POST /api/signal-publish` | 1.00 |
+| Unlock signal | `POST /api/lounge-signal-open` | 0.10 |
+| Publish signal | `POST /api/lounge-signal-publish` | 1.00 |
 
 ## UI language
 
-- **Application chrome** (navigation, buttons, modals, About page) is **English**.
-- **Concierge** responses follow the user’s language rules described in [concierge-ai.md](concierge-ai.md).
+- Application chrome (navigation, buttons, modals) is **English**.
+- Concierge responses follow language rules in [concierge-ai.md](concierge-ai.md).
 
 ## What is not in scope (today)
 
-- On-chain NFT mint for signals (publish is storage + x402 payment only).
+- **Base / EVM on-chain** RWA mint (ERC-1155) — certificates and UI only on EVM creators for now.
+- On-chain **reader badges** (SBT/cNFT) — badges are off-chain in Redis.
 - Treasury float monitoring / alerts for `CREATOR_PAYOUT_*` wallets.
 - Per-creator custom unlock pricing (flat 0.1 USDC platform standard).

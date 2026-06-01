@@ -20,8 +20,8 @@ Implementation: `api/lib/x402-discovery.ts`, handlers `api/well-known-x402.ts`, 
 |------|-----|-------|
 | Open news article | `POST /api/news-open` | $0.10 |
 | Concierge AI message | `POST /api/concierge` | $0.10 |
-| Publish creator signal | `POST /api/signal-publish` | $1.00 |
-| Unlock creator signal | `POST /api/signal-open` | $0.10 |
+| Publish creator signal | `POST /api/lounge-signal-publish` | $1.00 |
+| Unlock creator signal | `POST /api/lounge-signal-open` | $0.10 |
 
 Each 402 response includes:
 
@@ -66,8 +66,8 @@ Register each URL separately:
 ```
 https://your-production-domain.com/api/news-open
 https://your-production-domain.com/api/concierge
-https://your-production-domain.com/api/signal-publish
-https://your-production-domain.com/api/signal-open
+https://your-production-domain.com/api/lounge-signal-publish
+https://your-production-domain.com/api/lounge-signal-open
 ```
 
 ### Known x402scan batch issue

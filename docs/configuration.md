@@ -36,7 +36,22 @@ Upstash may instead provide:
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
-Without KV in production, `POST /api/signal-publish` returns **503**.
+Without KV in production, `POST /api/lounge-signal-publish` returns **503**.
+
+## RWA (Real World Assets)
+
+Executive Lounge registers each published signal as an **RWA intelligence certificate** and supports **Solana Metaplex NFT** mint to the creator wallet. See [rwa.md](rwa.md) and [rwa-solana-setup.md](rwa-solana-setup.md).
+
+| Variable | Description |
+|----------|-------------|
+| `X402_SITE_ORIGIN` | Public site URL for RWA metadata (`/api/rwa-metadata?signalId=…`) and x402 discovery. |
+| `SOLANA_RPC_URL` | Server RPC for x402 Solana checks and **`/api/solana-rpc-send`** (browser NFT mint). Helius recommended; avoid dRPC/Ankr free tiers. |
+| `RWA_SIGNAL_CONTRACT_SOL` | Optional Metaplex **collection** mint (base58). Invalid values ignored; client retries mint without collection on failure. |
+| `RWA_MINT_SOL_SECRET` | Optional **server** mint authority keypair — not required for default Phantom client mint. |
+| `LOUNGE_INTERNAL_KEY` | Bearer secret for internal routes (`lounge-rwa-mint-sol`, creator payout). Alias: `RWA_MINT_INTERNAL_KEY`. |
+| `RWA_SIGNAL_CONTRACT_EVM` | Reserved for future Base ERC-1155 RWA mint (not live). |
+
+**Client mint path (default):** no `RWA_MINT_SOL_SECRET` needed — creator pays SOL in Phantom; platform only proxies RPC.
 
 ### Instant creator payout (50% of unlock)
 
@@ -82,7 +97,8 @@ On Vercel, requests whose `Origin` host matches the request `Host` are allowed a
 After deploy (check flags only—avoid sharing full JSON publicly):
 
 ```bash
-curl -s https://your-production-domain.com/api/x402-config | jq '{ enabled, evmPayToReady, solPayToReady, discovery: .discovery.wellKnownUrl }'
+curl -s https://your-production-domain.com/api/x402-config | jq '{ enabled, evmPayToReady, solPayToReady, creatorInstantPayoutReady, discovery: .discovery.wellKnownUrl }'
+curl -s https://your-production-domain.com/deploy-version.txt
 ```
 
 Expect:

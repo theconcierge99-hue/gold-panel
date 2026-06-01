@@ -45,7 +45,9 @@ npm run build
 This runs:
 
 1. Vite client/SSR build → `dist/client`
-2. `scripts/build-x402-client.mjs` → `public/js/x402-pay.mjs`
+2. `scripts/write-deploy-version.mjs` → `public/deploy-version.txt`
+3. `scripts/build-x402-client.mjs` → `public/js/x402-pay.mjs`
+4. `scripts/build-mint-signal.mjs` → `public/js/mint-signal.mjs` (Solana RWA NFT mint in browser)
 
 Vercel uses `outputDirectory: dist/client` but rewrites `/` to `public/executive-lounge.html` per `vercel.json`.
 

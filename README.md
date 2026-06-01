@@ -1,11 +1,11 @@
 # Executive Lounge
 
-**Private intelligence terminal for markets and the onchain economy.**
+**Private intelligence terminal for markets and the onchain economy — with RWA-tokenized creator signals.**
 
 Production site: your deployed domain (e.g. Executive Lounge on Vercel)  
 Repository: private `gold-panel` — clone from your Git remote only; do not commit secrets
 
-Executive Lounge combines a live market wire, creator-published signals, and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via the [PayAI facilitator](https://facilitator.payai.network). Paid APIs can be listed on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
+Executive Lounge combines a live market wire, **RWA intelligence certificates** (creator signals with optional **Solana NFT** mint), and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via the [PayAI facilitator](https://facilitator.payai.network). Paid APIs can be listed on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
 
 > **Security:** Documentation uses placeholders only. Never commit API keys, RPC URLs with keys, or KV tokens. See [docs/security.md](docs/security.md).
 
@@ -14,6 +14,8 @@ Executive Lounge combines a live market wire, creator-published signals, and a p
 | Document | Description |
 |----------|-------------|
 | [docs/overview.md](docs/overview.md) | Product features, pricing, and user flows |
+| [docs/rwa.md](docs/rwa.md) | RWA certificates, Solana NFT mint, reader badges |
+| [docs/rwa-solana-setup.md](docs/rwa-solana-setup.md) | Solana mint env, RPC, troubleshooting |
 | [docs/architecture.md](docs/architecture.md) | Stack, repo layout, and request flow |
 | [docs/getting-started.md](docs/getting-started.md) | Local development setup |
 | [docs/configuration.md](docs/configuration.md) | Environment variables |
@@ -50,12 +52,14 @@ Open the dev URL shown in the terminal (typically port 5173). The lounge UI is s
 
 Reader unlock fees on creator signals split **50% creator / 50% merchant**; the creator half is sent on-chain to their wallet after each unlock. The publish fee is **100% merchant**.
 
+**Solana publish:** after 1 USDC, creators mint an RWA **NFT in Phantom** (~0.03 SOL gas). See [docs/rwa.md](docs/rwa.md).
+
 ## Scripts
 
 | Command | Purpose |
 |---------|---------|
 | `npm run dev` | Vite dev server + concierge API plugin |
-| `npm run build` | Production client build + x402 browser bundle |
+| `npm run build` | Production build + x402 + mint-signal bundles + `deploy-version.txt` |
 | `npm run build:x402` | Rebuild `public/js/x402-pay.mjs` only |
 | `npm run lint` | ESLint |
 

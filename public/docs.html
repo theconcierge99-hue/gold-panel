@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Documentation — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, Concierge AI, and creator signals." />
+<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, RWA signals, Solana NFT mint, Concierge AI." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs" />
@@ -68,7 +68,7 @@
     <h1>Documentation</h1>
   </div>
   <div class="eyebrow">Executive Lounge</div>
-  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, and Concierge AI.</p>
+  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, RWA creator signals, and Concierge AI.</p>
 
   <nav class="toc" aria-label="Table of contents">
     <div class="toc-title">On this page</div>
@@ -79,6 +79,7 @@
       <li><a href="#x402">x402 payments</a></li>
       <li><a href="#x402scan">x402scan listing</a></li>
       <li><a href="#concierge">Concierge AI</a></li>
+      <li><a href="#rwa">RWA (Real World Assets)</a></li>
       <li><a href="#signals">Creator signals</a></li>
       <li><a href="#config">Configuration</a></li>
       <li><a href="#security">Security</a></li>
@@ -89,7 +90,7 @@
   <section id="overview">
     <h2>Overview &amp; pricing</h2>
     <div class="card">
-      <p>Executive Lounge is a private intelligence terminal: live market wire, creator signals, and paid Concierge AI. The UI is English; Concierge mirrors the user’s language when clear from their messages.</p>
+      <p>Executive Lounge is a private intelligence terminal: live market wire, <strong>RWA-tokenized</strong> creator signals (optional Solana NFT), and paid Concierge AI. The UI is English; Concierge mirrors the user’s language when clear from their messages.</p>
       <table>
         <thead><tr><th>Action</th><th>Price</th></tr></thead>
         <tbody>
@@ -100,7 +101,7 @@
           <tr><td>Publish creator signal</td><td>1 USDC</td></tr>
         </tbody>
       </table>
-      <p class="note">Reader unlock fees split 50% creator / 50% merchant. The creator half is sent on-chain to the publisher wallet after each unlock. Publish fee is 100% merchant.</p>
+      <p class="note">Reader unlock fees split 50% creator / 50% merchant. Publish fee is 100% merchant. Solana publish also requires ~0.03 SOL in Phantom for NFT mint gas (after 1 USDC).</p>
     </div>
   </section>
 
@@ -112,7 +113,8 @@
         <li><strong>APIs</strong> — Vercel Edge functions under <code>/api/*</code></li>
         <li><strong>AI</strong> — Google Gemini</li>
         <li><strong>Payments</strong> — x402 v2 via PayAI facilitator (on-chain settlement)</li>
-        <li><strong>Storage</strong> — Redis/KV for signals, ledger, and Concierge lounge memory</li>
+        <li><strong>Storage</strong> — Redis/KV for signals, RWA certificates, badges, ledger, Concierge memory</li>
+        <li><strong>RWA mint</strong> — <code>mint-signal.mjs</code> + <code>/api/solana-rpc-send</code> (Phantom, Metaplex)</li>
       </ul>
     </div>
   </section>
@@ -131,8 +133,16 @@
       <ul>
         <li><code>POST /api/news-open</code> — unlock article URL</li>
         <li><code>POST /api/concierge</code> — AI chat / enhance / image</li>
-        <li><code>POST /api/signal-publish</code> — publish signal (1 USDC)</li>
-        <li><code>POST /api/signal-open</code> — unlock signal body (0.1 USDC)</li>
+        <li><code>POST /api/lounge-signal-publish</code> — publish signal + RWA cert (1 USDC)</li>
+        <li><code>POST /api/lounge-signal-open</code> — unlock signal body (0.1 USDC)</li>
+      </ul>
+      <h3>RWA (free reads)</h3>
+      <ul>
+        <li><code>GET /api/rwa-token?signalId=</code> — certificate</li>
+        <li><code>GET /api/rwa-metadata?signalId=</code> — NFT JSON metadata</li>
+        <li><code>GET /api/rwa-badges?wallet=</code> — reader badges</li>
+        <li><code>POST /api/lounge-rwa-record-mint</code> — save Phantom mint result</li>
+        <li><code>POST /api/solana-rpc-send</code> — Solana RPC proxy for browser mint</li>
       </ul>
       <p>Without payment, paid routes return <strong>402</strong> with <code>PAYMENT-REQUIRED</code>. <code>GET</code> on paid routes also returns 402 for marketplace probes.</p>
     </div>
@@ -173,10 +183,20 @@
     </div>
   </section>
 
+  <section id="rwa">
+    <h2>RWA (Real World Assets)</h2>
+    <div class="card">
+      <p>Each published signal is an <strong>RWA intelligence certificate</strong> (off-chain <code>tokenId</code> + content hash). Solana creators mint a <strong>Metaplex NFT</strong> to their own Phantom wallet after paying 1 USDC — gas in SOL (~0.03).</p>
+      <p><strong>Mint flow:</strong> publish → approve USDC → approve NFT in Phantom → <code>POST /api/lounge-rwa-record-mint</code>. RPC for mint uses <code>/api/solana-rpc-send</code> (set <code>SOLANA_RPC_URL</code> to Helius on Vercel).</p>
+      <p>Readers earn <strong>off-chain badges</strong> (Intel Scout → Sovereign Intel) when unlocking signals. On-chain name is limited to <strong>32 UTF-8 bytes</strong> — shorten long titles if mint fails with error <code>0xb</code>.</p>
+      <p class="note">Full operator guide: repository <code>docs/rwa.md</code> and <code>docs/rwa-solana-setup.md</code>.</p>
+    </div>
+  </section>
+
   <section id="signals">
     <h2>Creator signals</h2>
     <div class="card">
-      <p>Publish stores a signal in KV and surfaces it on the market feed. Unlock shows the full summary in a modal.</p>
+      <p><strong>Mint &amp; Publish</strong> stores a signal + RWA cert in KV and surfaces it on the market feed (⬡ RWA chip). Unlock shows the full summary in a modal.</p>
       <p>Requires <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> (or Upstash equivalents) in production.</p>
     </div>
   </section>
@@ -190,8 +210,10 @@
           <tr><td><code>GEMINI_API_KEY</code></td><td>Concierge AI</td></tr>
           <tr><td><code>X402_EVM_PAY_TO</code></td><td>Base USDC receive address</td></tr>
           <tr><td><code>X402_SOL_PAY_TO</code></td><td>Solana USDC receive (optional)</td></tr>
-          <tr><td><code>KV_REST_*</code></td><td>Signals + memory</td></tr>
-          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL for discovery docs</td></tr>
+          <tr><td><code>KV_REST_*</code></td><td>Signals, RWA, memory</td></tr>
+          <tr><td><code>SOLANA_RPC_URL</code></td><td>Server RPC for NFT mint proxy (Helius recommended)</td></tr>
+          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL + RWA metadata</td></tr>
+          <tr><td><code>RWA_SIGNAL_CONTRACT_SOL</code></td><td>Optional Metaplex collection mint</td></tr>
           <tr><td><code>ALLOWED_ORIGINS</code></td><td>Extra CORS origins</td></tr>
         </tbody>
       </table>
@@ -216,7 +238,7 @@
     <h2>Deployment</h2>
     <div class="card">
       <p>Deploy via <strong>Git → Vercel</strong> on the correct team and project. Avoid <code>vercel deploy</code> from a personal account that lacks production env vars.</p>
-      <p>After deploy, verify: site loads, <code>/api/x402-config</code> shows <code>enabled: true</code>, and <code>/api/concierge</code> returns 402 without payment.</p>
+      <p>After deploy, verify: site loads, <code>/deploy-version.txt</code> matches your commit, <code>/api/x402-config</code> shows <code>enabled: true</code>, and paid routes return 402 without payment.</p>
     </div>
   </section>
 

@@ -20,6 +20,8 @@ Flow per paid request:
 
 Settlements are **on-chain**; transaction hashes are visible to explorers and indexers such as [x402scan](x402scan.md).
 
+**Note:** Solana **NFT mint** after signal publish is separate from x402 — creators pay **SOL** gas in Phantom. See [rwa.md](rwa.md).
+
 ## Pricing (atomic units)
 
 USDC uses 6 decimals. Defined in `api/lib/x402-pricing.ts`:
@@ -27,7 +29,7 @@ USDC uses 6 decimals. Defined in `api/lib/x402-pricing.ts`:
 | Resource | USDC | Atomic `amount` |
 |----------|------|-----------------|
 | news-open, concierge, signal-open | 0.10 | `100000` |
-| signal-publish | 1.00 | `1000000` |
+| signal-publish (`/api/lounge-signal-publish`) | 1.00 | `1000000` |
 
 ## Networks
 

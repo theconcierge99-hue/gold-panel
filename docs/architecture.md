@@ -5,41 +5,67 @@
 | Layer | Technology |
 |-------|------------|
 | UI | Static HTML/CSS/JS — `public/executive-lounge.html`, `public/about.html` |
-| Client payments | Bundled `public/js/x402-pay.mjs` (from `lib/x402-browser-client.ts`) |
-| Dev server | Vite + `lib/concierge-dev-plugin.ts` (proxies `/api/*` in local dev) |
-| API routes | Vercel **Edge** functions under `api/` |
+| Client payments | `public/js/x402-pay.mjs` ← `lib/x402-browser-client.ts` |
+| Client Solana NFT mint | `public/js/mint-signal.mjs` ← `lib/mint-signal-browser.ts` |
+| Dev server | Vite + `lib/concierge-dev-plugin.ts` |
+| API routes | Vercel **Edge** (`runtime: "edge"`) under `api/`; some **Node** routes for payouts / legacy mint |
 | AI | Google Gemini (`api/lib/concierge-gemini.ts`) |
-| Payments | x402 v2 via PayAI HTTP facilitator (`api/lib/x402-server.ts`) |
-| Signals + memory | Upstash Redis / Vercel KV (`api/lib/signal-store.ts`, `api/lib/lounge-memory.ts`) |
-| TanStack Start | Present under `src/` for scaffold/build; production lounge is primarily static + Edge APIs |
+| Payments | x402 v2 via PayAI (`api/lib/x402-server.ts`) |
+| Signals + RWA + memory | Vercel KV / Upstash (`signal-store`, `rwa-store`, `lounge-memory`) |
+| TanStack Start | `src/` scaffold; production lounge is static HTML + Edge APIs |
 
 ## Repository layout
 
 ```
-api/                          # Vercel Edge handlers
-  concierge.ts                # Concierge AI
-  market.ts                   # Free feed
-  news-open.ts                # Paid article unlock
-  signal-publish.ts           # Paid publish
-  signal-open.ts              # Paid signal unlock
-  x402-config.ts              # Public x402 config
-  well-known-x402.ts          # /.well-known/x402
-  openapi.ts                  # /openapi.json
+api/
+  concierge.ts                 # Concierge AI (Edge)
+  market.ts                    # Free feed
+  news-open.ts                 # Paid article unlock
+  lounge-signal-publish.ts     # Paid publish + RWA cert + mintParams
+  lounge-signal-open.ts        # Paid unlock + reader badge
+  lounge-rwa-record-mint.ts    # Persist Phantom mint result
+  solana-rpc-send.ts           # HTTP Solana JSON-RPC proxy (browser mint)
+  rwa-token.ts, rwa-badges.ts, rwa-metadata.ts
+  lounge-rwa-mint-sol.ts       # Optional server mint (Node)
+  lounge-creator-payout.ts     # Creator USDC payout (Node)
+  x402-config.ts, well-known-x402.ts, openapi.ts
   lib/
-    x402-server.ts            # Payment gate + 402 responses
-    x402-discovery.ts         # x402scan discovery documents
-    concierge-brain.ts        # System prompts + language detection
-    concierge-gemini.ts       # Gemini calls
-    signal-store.ts             # KV persistence
-    lounge-memory.ts            # Concierge context ingest
-    lounge-market.ts            # Feed merge (RSS + signals)
-public/
-  executive-lounge.html       # Main SPA
-  js/x402-pay.mjs             # Built payment client
+    signal-publish-handler.ts, signal-open-handler.ts
+    rwa-token.ts, rwa-store.ts, rwa-solana-mint.ts
+    x402-server.ts, x402-solana-rpc.ts
+    lounge-market.ts, lounge-memory.ts
 lib/
-  x402-browser-client.ts      # Wallet + x402 fetch wrapper
-  concierge-dev-plugin.ts     # Local API emulation
-vercel.json                   # Rewrites, headers, build output
+  mint-signal-browser.ts       # Metaplex createNft + Phantom
+  on-chain-meta.ts             # 32-byte name truncation
+  x402-browser-client.ts
+public/
+  executive-lounge.html
+  js/x402-pay.mjs, js/mint-signal.mjs
+  deploy-version.txt           # Written at build time
+vercel.json
+```
+
+## RWA data flow
+
+```mermaid
+flowchart LR
+  subgraph publish [Publish]
+    A[lounge-signal-publish] --> B[signal-store]
+    A --> C[rwa-store certificate]
+    A --> D[mintParams to browser]
+  end
+  subgraph mint [Solana mint]
+    D --> E[mint-signal.mjs]
+    E --> F[solana-rpc-send]
+    F --> G[Helius / publicnode]
+    E --> H[Phantom sign]
+    H --> I[lounge-rwa-record-mint]
+    I --> C
+  end
+  subgraph unlock [Unlock]
+    J[lounge-signal-open] --> K[reader badge]
+    J --> L[unlock ledger]
+  end
 ```
 
 ## Request flow (paid API)
@@ -55,40 +81,39 @@ sequenceDiagram
   API-->>Browser: 402 + PAYMENT-REQUIRED
   Browser->>Chain: Sign USDC transfer
   Browser->>API: POST + PAYMENT-SIGNATURE
-  API->>PayAI: /verify
-  PayAI-->>API: valid
-  API->>PayAI: /settle
-  PayAI->>Chain: On-chain settlement
-  PayAI-->>API: tx hash
+  API->>PayAI: verify + settle
   API-->>Browser: 200 + PAYMENT-RESPONSE
 ```
 
+Publish may return **200** with `mintParams` before a separate Phantom SOL mint (not part of x402).
+
 ## Payment gate order
 
-All paid routes use `guardPaidX402Api()` in `api/lib/x402-server.ts`:
+`guardPaidX402Api()` in `api/lib/x402-server.ts`:
 
 1. `OPTIONS` → `204`
-2. `GET` / `HEAD` without payment → **402** (for [x402scan](x402scan.md) probes)
+2. `GET` / `HEAD` without payment → **402** (x402scan probes)
 3. `POST` without payment → **402**
-4. `POST` with valid payment → origin check → handler logic
+4. `POST` with valid payment → origin check → handler
 
-This ensures registrars and agents see a valid x402 challenge instead of `405 Method Not Allowed`.
-
-## Discovery flow (x402scan)
-
-1. Scanner fetches `https://your-domain/openapi.json` or `/.well-known/x402`
-2. Obtains four resource URLs
-3. Probes each with `GET` and `POST` → expects **402** with `PAYMENT-REQUIRED` and non-empty `accepts`
-4. After real payments, facilitator settlements appear in the x402scan transaction index
+Resource kinds map to URLs in `api/lib/x402-server.ts` (`signal-publish` → `/api/lounge-signal-publish`, etc.).
 
 ## Data stores
 
 | Store | Content |
 |-------|---------|
-| Redis/KV — signals | Published creator signals |
-| Redis/KV — ledger | Reader unlock revenue attribution (off-chain settlement) |
-| Redis/KV — memory | Headlines + signal snippets for Concierge prompts |
+| KV — signals | Published creator signals |
+| KV — RWA | Certificates, badges, wallet indexes |
+| KV — ledger | Unlock revenue attribution |
+| KV — memory | Headlines + signals for Concierge |
 
-Exact key namespaces are defined in server code only—not duplicated in public docs.
+Requires `KV_REST_*` in production.
 
-Requires `KV_REST_API_URL` + `KV_REST_API_TOKEN` (or Upstash equivalents) in production.
+## Build pipeline
+
+`npm run build`:
+
+1. Vite → `dist/client`
+2. `scripts/write-deploy-version.mjs` → `public/deploy-version.txt`
+3. `scripts/build-x402-client.mjs` → `public/js/x402-pay.mjs`
+4. `scripts/build-mint-signal.mjs` → `public/js/mint-signal.mjs`

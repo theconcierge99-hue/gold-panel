@@ -115,9 +115,9 @@ Concierge AI turn.
 
 ---
 
-### `POST /api/signal-publish`
+### `POST /api/lounge-signal-publish`
 
-Publish a creator signal to the lounge feed.
+Publish a creator signal and register an **RWA certificate**. For `creatorChain: "sol"`, response includes `mintParams` for a follow-up **Phantom NFT mint** (not part of x402).
 
 **Body:**
 
@@ -126,27 +126,48 @@ Publish a creator signal to the lounge feed.
   "title": "Signal headline",
   "summary": "At least 40 characters of thesis...",
   "categories": ["Crypto", "Macro"],
-  "creatorWallet": "0x...",
-  "creatorChain": "evm"
+  "creatorWallet": "7hum...",
+  "creatorChain": "sol"
 }
 ```
 
-**Success (200):**
+**Success (200)** (abbreviated):
 
 ```json
 {
   "ok": true,
-  "signal": { "id": "sig_...", "title": "...", "publishedAt": "..." }
+  "signal": { "id": "sig_...", "title": "...", "publishedAt": "..." },
+  "publishFeeUsdc": 1,
+  "readerUnlockUsdc": 0.1,
+  "rwa": {
+    "tokenId": "rwa_...",
+    "contentHash": "...",
+    "standard": "concierge-lounge-rwa-v1",
+    "targetChain": "sol",
+    "onChainMintStatus": "pending"
+  },
+  "solanaNft": {
+    "status": "pending",
+    "reason": "Confirm NFT mint in Phantom (~0.02 SOL network fee)"
+  },
+  "mintParams": {
+    "signalId": "sig_...",
+    "uri": "https://your-domain/api/rwa-metadata?signalId=sig_...",
+    "name": "Short on-chain title",
+    "collectionMint": "optionalCollectionMint"
+  }
 }
 ```
+
+After Phantom mint, client calls `POST /api/lounge-rwa-record-mint`.
 
 **Price:** 1 USDC. Requires KV. **100% merchant** revenue.
 
 ---
 
-### `POST /api/signal-open`
+### `POST /api/lounge-signal-open`
 
-Unlock full signal summary.
+Unlock full signal summary; awards **reader badge**.
 
 **Body:**
 
@@ -156,9 +177,48 @@ Unlock full signal summary.
 }
 ```
 
-**Success (200):** Signal object with full `summary`, categories, metadata.
+**Success (200):** Signal object with full `summary`, categories, RWA/badge fields when applicable.
 
-**Price:** 0.1 USDC. **50/50** reader split; creator half paid on-chain when payout wallets are configured. Response may include `creatorPayout` and `revenueShare`.
+**Price:** 0.1 USDC. **50/50** reader split; creator half paid on-chain when payout wallets are configured.
+
+---
+
+## RWA endpoints (mostly free)
+
+See [rwa.md](rwa.md).
+
+### `GET /api/rwa-token`
+
+Query: `signalId=sig_...` — RWA certificate JSON.
+
+### `GET /api/rwa-badges`
+
+Query: `wallet=` — reader badges for wallet.
+
+### `GET /api/rwa-metadata`
+
+Query: `signalId=sig_...` — NFT metadata JSON (`uri` target for Metaplex).
+
+### `POST /api/lounge-rwa-record-mint`
+
+Persist client mint (no x402). **Body:**
+
+```json
+{
+  "signalId": "sig_...",
+  "mintAddress": "...",
+  "tx": "...",
+  "creatorWallet": "7hum..."
+}
+```
+
+### `POST /api/solana-rpc-send`
+
+Solana JSON-RPC proxy for browser mint. **Body:** `{ "method": "getLatestBlockhash", "params": [], "id": 1 }`. Returns JSON-RPC result. Blocks `requestAirdrop`. Used only from same-origin lounge UI.
+
+### `POST /api/lounge-rwa-mint-sol` (optional)
+
+Server-side Metaplex mint (Node). Requires internal auth header. Prefer client mint in production.
 
 ## Payment headers (x402 v2)
 
@@ -172,8 +232,10 @@ Unlock full signal summary.
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/solana-rpc` | POST | Server-side Solana RPC proxy |
+| `/api/solana-rpc` | POST | Legacy/server Solana RPC helper |
+| `/api/solana-rpc-send` | POST | Browser NFT mint RPC proxy (Edge) |
 | `/api/sol-usdc-balance` | POST | USDC balance check for payment modal |
+| `/deploy-version.txt` | GET | Git commit id baked at build time |
 
 ## Error codes
 
