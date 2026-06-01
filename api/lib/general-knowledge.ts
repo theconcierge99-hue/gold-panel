@@ -182,27 +182,65 @@ async function fetchWorldNews(maxPerFeed = 2): Promise<{ source: string; title: 
   return results.flat().slice(0, 8);
 }
 
+export type GeneralKnowledgeMode = "full" | "lite" | "trading";
+
 function isMarketFocusedQuery(message: string): boolean {
-  return /\b(trading plan|trade plan|btc|eth|sol|crypto|macro|entry|stop|target|funding|oi|bias)\b/i.test(
+  return /\b(trading plan|trade plan|btc|eth|sol|crypto|macro|entry|stop|target|funding|oi|bias|saham|stock|nvda|aapl)\b/i.test(
     message,
   );
+}
+
+function resolveKnowledgeMode(
+  message: string,
+  options?: { lite?: boolean; mode?: GeneralKnowledgeMode },
+): GeneralKnowledgeMode {
+  if (options?.mode) return options.mode;
+  if (options?.lite) return "lite";
+  if (
+    /\b(trading plan|trade plan|rencana trading|analisa|analisis|fundamental|teknikal|geopolit|outlook|bias|entry|stop|target|r:r|saham|stock)\b/i.test(
+      message,
+    )
+  ) {
+    return "trading";
+  }
+  if (isMarketFocusedQuery(message)) return "lite";
+  return "full";
 }
 
 /** Aggregate general knowledge for Concierge (runs in parallel with market data). */
 export async function fetchGeneralKnowledgeSnapshot(
   userMessage: string,
-  options?: { lite?: boolean },
+  options?: { lite?: boolean; mode?: GeneralKnowledgeMode },
 ): Promise<GeneralKnowledgeSnapshot> {
   const queries = extractKnowledgeQueries(userMessage);
-  const lite = options?.lite ?? isMarketFocusedQuery(userMessage);
+  const mode = resolveKnowledgeMode(userMessage, options);
 
-  if (lite) {
+  if (mode === "lite") {
     const instantAnswer = await fetchDuckDuckGoInstant(queries[0]);
     const sources = instantAnswer ? ["DuckDuckGo"] : [];
     return {
       fetchedAt: new Date().toISOString(),
       wikipedia: [],
       worldNews: [],
+      instantAnswer: instantAnswer ?? undefined,
+      sources,
+    };
+  }
+
+  if (mode === "trading") {
+    const [instantAnswer, worldNews] = await Promise.all([
+      fetchDuckDuckGoInstant(queries[0]),
+      fetchWorldNews(2),
+    ]);
+    const sources: string[] = [];
+    if (instantAnswer) sources.push("DuckDuckGo");
+    if (worldNews.length) {
+      sources.push(`World news (${[...new Set(worldNews.map((n) => n.source))].join(", ")})`);
+    }
+    return {
+      fetchedAt: new Date().toISOString(),
+      wikipedia: [],
+      worldNews,
       instantAnswer: instantAnswer ?? undefined,
       sources,
     };
@@ -253,7 +291,10 @@ export function formatGeneralKnowledgeForPrompt(snap: GeneralKnowledgeSnapshot):
   }
 
   if (snap.worldNews.length) {
-    lines.push("\n[WORLD NEWS HEADLINES]");
+    lines.push(
+      "\n[WORLD NEWS & GEOPOLITICAL HEADLINES]",
+      "Use for regime narrative, sanctions/conflict/election risk, and cross-asset transmission (energy, gold, DXY, risk assets).",
+    );
     for (const n of snap.worldNews) {
       lines.push(`- [${n.source}]: ${n.title}`);
     }

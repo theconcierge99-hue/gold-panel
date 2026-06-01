@@ -276,24 +276,28 @@ async function yahooQuote(
   };
 }
 
-/** Lighter snapshot for Concierge (avoids Vercel FUNCTION_INVOCATION_TIMEOUT). */
+/** Lighter snapshot for Concierge — crypto + equities macro + key single names. */
 export async function fetchConciergeMarketSnapshot(): Promise<LiveMarketSnapshot> {
   const ms = CONCIERGE_FETCH_MS;
-  const [spot, derivs, btcPositioning, spx, dxy, vix, globalCrypto, sentiment, headlines] =
+  const [spot, derivs, btcPositioning, spx, ndx, dxy, vix, gold, nvda, aapl, globalCrypto, sentiment, headlines] =
     await Promise.all([
       binanceSpot(ms),
       binanceFutures(ms),
       binancePositioning("BTCUSDT", "BTC", ms),
       yahooQuote("^GSPC", "SPX", ms),
+      yahooQuote("^IXIC", "NDX", ms),
       yahooQuote("DX-Y.NYB", "DXY", ms),
       yahooQuote("^VIX", "VIX", ms),
+      yahooQuote("GC=F", "GOLD", ms),
+      yahooQuote("NVDA", "NVDA", ms),
+      yahooQuote("AAPL", "AAPL", ms),
       fetchCoinGeckoGlobal(),
       fetchFearGreed(),
-      fetchMarketHeadlines(1),
+      fetchMarketHeadlines(3),
     ]);
 
   const ticks: MarketTick[] = [...spot];
-  for (const t of [spx, dxy, vix]) {
+  for (const t of [spx, ndx, dxy, vix, gold, nvda, aapl]) {
     if (t) ticks.push(t);
   }
 
@@ -301,7 +305,7 @@ export async function fetchConciergeMarketSnapshot(): Promise<LiveMarketSnapshot
   if (spot.length) sources.push("Binance");
   if (derivs.length) sources.push("Binance futures");
   if (btcPositioning) sources.push("Binance positioning");
-  if (spx || dxy || vix) sources.push("Yahoo Finance");
+  if (spx || ndx || dxy || vix || gold || nvda || aapl) sources.push("Yahoo Finance");
   if (globalCrypto) sources.push("CoinGecko");
   if (sentiment) sources.push("Alternative.me Fear & Greed");
   if (headlines.length) {

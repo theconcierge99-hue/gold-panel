@@ -196,7 +196,9 @@ async function resolveIntelligenceContext(
     worldNews: [],
     sources: [] as string[],
   };
-  const liteGeneral = wantsTradingPlan(userMessage, detectTopics(userMessage));
+  const topics = detectTopics(userMessage);
+  const tradingPlan = wantsTradingPlan(userMessage, topics);
+  const knowledgeMode = tradingPlan ? ("trading" as const) : undefined;
 
   const [snapshot, general, loungeMemoryBlock] = await Promise.all([
     liveSnapshot
@@ -210,8 +212,11 @@ async function resolveIntelligenceContext(
           sources: [],
         }),
     withTimeout(
-      fetchGeneralKnowledgeSnapshot(userMessage, { lite: liteGeneral }),
-      4_000,
+      fetchGeneralKnowledgeSnapshot(
+        userMessage,
+        knowledgeMode ? { mode: knowledgeMode } : { lite: true },
+      ),
+      5_000,
       emptyGeneral,
     ),
     withTimeout(buildLoungeMemoryContextBlock(userMessage), 4_000, ""),
@@ -366,10 +371,10 @@ export async function runConciergeGemini(options: {
       ),
       generationConfig: {
         temperature: 0.55,
-        maxOutputTokens: requireTradingPlan ? 1536 : 1024,
+        maxOutputTokens: requireTradingPlan ? 2048 : 1024,
       },
     },
-    { models: requireTradingPlan ? TEXT_MODELS.slice(0, 1) : TEXT_MODELS.slice(0, 2) },
+    { models: requireTradingPlan ? TEXT_MODELS.slice(0, 2) : TEXT_MODELS.slice(0, 2) },
   );
 
   return { reply: wrapHtmlParagraphs(reply), topics, ...meta };

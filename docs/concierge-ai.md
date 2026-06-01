@@ -19,11 +19,28 @@ Detection: `api/lib/concierge-brain.ts` (`wantsImage`, `wantsTradingPlan`, topic
 
 Each turn combines:
 
-1. **Live market snapshot** — Binance marks, indices, positioning proxies (`api/lib/market-data.ts`)
-2. **General knowledge** — Wikipedia, DuckDuckGo, public news RSS (`api/lib/general-knowledge.ts`)
+1. **Live market snapshot** — Binance crypto marks, SPX/NDX/VIX/DXY/gold, key stocks (e.g. NVDA, AAPL), derivatives positioning, Fear & Greed, headlines (`fetchConciergeMarketSnapshot` in `api/lib/market-data.ts`)
+2. **General knowledge** — mode `full` | `lite` | `trading` (`api/lib/general-knowledge.ts`):
+   - **trading** (trading-plan requests): DuckDuckGo + world-news RSS for geopolitical narrative
+   - **lite**: DuckDuckGo only (fast path)
+   - **full**: Wikipedia + world news + DuckDuckGo
 3. **Lounge memory** — Recent wire headlines and published creator signals (`api/lib/lounge-memory.ts`)
 
 Wire headlines are ingested asynchronously after market fetch for future Concierge context.
+
+## Trading plan depth (crypto + stocks)
+
+When the user asks for a trading plan, outlook with levels, or comparable intent, Concierge produces an **institutional brief**:
+
+1. Executive summary (bias, conviction, thesis)
+2. Geopolitical & macro regime
+3. Fundamental analysis (crypto and/or equities lens)
+4. Technical analysis (structure, levels, positioning)
+5. Trading plan (entry, stop, targets, R:R)
+6. Risks & catalysts (24–72h)
+7. **Agent handoff** — one-line `A2A|...` metadata for future agent-to-agent workflows
+
+Prompt logic: `api/lib/concierge-brain.ts` (`CONCIERGE_SUPER_AGENT`, `TRADING_PLAN_FRAMEWORK`, `wantsTradingPlan`).
 
 ## Topic playbooks
 
