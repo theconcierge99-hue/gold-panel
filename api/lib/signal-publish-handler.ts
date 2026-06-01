@@ -9,8 +9,6 @@ import { guardPaidX402Api } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
-import { solanaRwaMintConfigured } from "./creator-payout-env";
-import { internalAuthHeaders, loungeApiOrigin } from "./lounge-internal-auth";
 import { rwaMetadataUri } from "./rwa-metadata-json";
 import { mintSignalRwaToken, siteOrigin } from "./rwa-token";
 import type { SolanaRwaMintResult } from "./rwa-types";
@@ -21,32 +19,7 @@ function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
 }
 
-/** Trigger Metaplex mint on a separate route (Edge publish must not load mpl-token-metadata). */
-function queueSolanaNftMint(signalId: string): void {
-  const origin = loungeApiOrigin();
-  const job = async () => {
-    try {
-      const res = await fetch(`${origin}/api/lounge-rwa-mint-sol`, {
-        method: "POST",
-        headers: internalAuthHeaders(),
-        body: JSON.stringify({ signalId }),
-      });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        console.error("[signal-publish] rwa-mint-sol", res.status, text.slice(0, 200));
-      }
-    } catch (e) {
-      console.error("[signal-publish] bg sol mint", e instanceof Error ? e.message : e);
-    }
-  };
-  void import("@vercel/functions")
-    .then((m) => m.waitUntil(job()))
-    .catch(() => {
-      void job();
-    });
-}
-
-/** Paid POST body only — import dynamically from api/signal-publish.ts so cold start can return 402. */
+/** Paid POST body only — import dynamically from api/lounge-signal-publish.ts so cold start can return 402. */
 export async function runSignalPublishAfterPayment(
   request: Request,
   { cors, gate }: PaidX402RouteContinue,
@@ -101,10 +74,9 @@ export async function runSignalPublishAfterPayment(
       await savePublishedSignal(signal);
 
       if (signal.creatorChain === "sol") {
-        const origin = siteOrigin();
         mintParams = {
           signalId: signal.id,
-          uri: rwaMetadataUri(signal.id, origin),
+          uri: rwaMetadataUri(signal.id, siteOrigin()),
           name: rwaToken.metadata.name,
           collectionMint: process.env.RWA_SIGNAL_CONTRACT_SOL?.trim() || undefined,
         };
@@ -112,9 +84,6 @@ export async function runSignalPublishAfterPayment(
           status: "pending",
           reason: "Confirm NFT mint in Phantom (~0.02 SOL network fee)",
         };
-        if (solanaRwaMintConfigured()) {
-          queueSolanaNftMint(signal.id);
-        }
       }
 
       await ingestCreatorSignalMemory(signal);

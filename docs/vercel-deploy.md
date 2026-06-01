@@ -1,6 +1,8 @@
 # Vercel deploy stuck on old commit?
 
-If **GitHub `main` is ahead** (e.g. `2e0840b`) but Vercel Production still shows **`1e03d96`**, Git auto-deploy is disconnected.
+If **GitHub `main` is ahead** but Vercel Production still shows **`1e03d96`**, Git auto-deploy is disconnected.
+
+**Important:** A manual redeploy of **`1e03d96`** does **not** include Phantom NFT mint (`2e0840b+`). Always deploy the **latest commit on `main`** (check `public/deploy-version.txt` after deploy).
 
 ## Quick fix (no code)
 

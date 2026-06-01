@@ -541,6 +541,7 @@
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-3"></script>
+<link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body>
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div></div>
@@ -908,6 +909,10 @@
     return { sol: s.sol || null, evm: s.evm || null };
   }
 
+  function getSolanaProvider(){
+    return window.phantom?.solana || window.solana || null;
+  }
+
   const PAYMENT_CURRENCY = 'USDC';
 
   function resolveCreatorPaymentChain(){
@@ -1231,7 +1236,7 @@
               document.head.appendChild(s);
             });
           }
-          const provider=window.solana;
+          const provider=getSolanaProvider();
           if(!provider?.publicKey) throw new Error('Reconnect Phantom on Solana');
           const mintRes=await window.mintLoungeSignalNft({
             uri:data.mintParams.uri,
@@ -1255,6 +1260,7 @@
           data.rwa={...(data.rwa||{}),onChainMintAddress:mintRes.mintAddress};
         }catch(mintErr){
           console.warn('client nft mint',mintErr);
+          toast(String(mintErr?.message||mintErr||'NFT mint failed')+'. Add ~0.02 SOL in Phantom, then try publishing again.');
         }
       }
       closeModal();
