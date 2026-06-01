@@ -35,13 +35,6 @@ export type CreatorPayoutResult = {
   reason?: string;
 };
 
-export function creatorPayoutWalletsConfigured(): { sol: boolean; evm: boolean } {
-  return {
-    sol: !!loadSolanaPayoutKeypair(),
-    evm: !!loadEvmPayoutAccount(),
-  };
-}
-
 function loadSolanaPayoutKeypair(): Keypair | null {
   const raw = process.env.CREATOR_PAYOUT_SOL_SECRET?.trim();
   if (!raw) return null;

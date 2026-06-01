@@ -6,7 +6,6 @@ import {
 } from "./concierge-security";
 import { guardPaidX402Api } from "./x402-server";
 import { X402_READ_PRICE_ATOMIC, X402_READ_PRICE_USDC } from "./x402-pricing";
-import { disburseCreatorInstantShare } from "./creator-instant-payout";
 import {
   SIGNAL_CREATOR_SHARE_BPS,
   SIGNAL_MERCHANT_SHARE_BPS,
@@ -42,6 +41,7 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
 
     if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
       const split = splitReaderUnlockAtomic(X402_READ_PRICE_ATOMIC);
+      const { disburseCreatorInstantShare } = await import("./creator-instant-payout");
       const payout = await disburseCreatorInstantShare({
         creatorWallet: signal.creatorWallet,
         creatorChain: signal.creatorChain,
