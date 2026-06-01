@@ -56,3 +56,12 @@ export type ReaderBadgeProfile = {
   tier: ReaderBadgeTier;
   badges: ReaderBadge[];
 };
+
+export type SolanaRwaMintStatus = "sent" | "skipped" | "failed" | "pending";
+
+export type SolanaRwaMintResult = {
+  status: SolanaRwaMintStatus;
+  mintAddress?: string;
+  transaction?: string;
+  reason?: string;
+};

@@ -14,7 +14,7 @@ Mint a **Metaplex NFT** to the creator's Solana wallet when they publish a signa
 ## Step 1 — Create mint wallet
 
 1. New Phantom wallet (or dedicated keypair) — **not** your main treasury if you can avoid it.
-2. Export secret → store only in **Vercel** as `RWA_MINT_SOL_SECRET` (base58 or JSON `[64 bytes]`).
+2. Export secret → store only in **Vercel** as `RWA_MINT_SOL_SECRET` (base58 or JSON `[64 bytes]`). This is your **mint authority** wallet (e.g. Phantom label “ConcEx NFT”) — it pays SOL gas; the **creator** wallet receives the NFT.
 3. Send **SOL** on mainnet (or devnet if `X402_NETWORK_MODE=testnet`) to that address.
 
 ## Step 2 — Vercel environment

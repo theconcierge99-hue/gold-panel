@@ -10,7 +10,7 @@ import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { solanaRwaMintConfigured } from "./creator-payout-env";
 import { mintSignalRwaToken } from "./rwa-token";
-import type { SolanaRwaMintResult } from "./rwa-solana-mint";
+import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 
@@ -18,15 +18,23 @@ function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
 }
 
-/** Metaplex loads only inside waitUntil — never block the publish HTTP response. */
-function queueSolanaNftMint(signal: CreatorSignal): void {
+/** Trigger Metaplex mint on a separate route (Edge publish must not load mpl-token-metadata). */
+function queueSolanaNftMint(signalId: string): void {
+  const origin = process.env.X402_SITE_ORIGIN?.trim().replace(/\/$/, "") || "https://conc-exe.xyz";
+  const secret = process.env.RWA_MINT_INTERNAL_KEY?.trim();
   const job = async () => {
     try {
-      const { getSignalRwaToken } = await import("./rwa-store");
-      const { mintSolanaSignalNft } = await import("./rwa-solana-mint");
-      const token = await getSignalRwaToken(signal.id);
-      if (!token) return;
-      await mintSolanaSignalNft(signal, token);
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (secret) headers.Authorization = `Bearer ${secret}`;
+      const res = await fetch(`${origin}/api/rwa-mint-sol`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ signalId }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("[signal-publish] rwa-mint-sol", res.status, text.slice(0, 200));
+      }
     } catch (e) {
       console.error("[signal-publish] bg sol mint", e instanceof Error ? e.message : e);
     }
@@ -94,7 +102,7 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
           status: "pending",
           reason: "NFT mint queued — check your Solana wallet in ~1 minute",
         };
-        queueSolanaNftMint(signal);
+        queueSolanaNftMint(signal.id);
       }
 
       await ingestCreatorSignalMemory(signal);

@@ -1,9 +1,11 @@
 import { handleSignalPublish } from "./lib/signal-publish-handler";
 
-/** Node — Metaplex NFT mint (background) + KV */
+/** Edge — publish + KV; Solana NFT mint runs on /api/rwa-mint-sol (Node) */
 export const config = {
-  runtime: "nodejs",
+  runtime: "edge",
   maxDuration: 60,
 };
 
-export default handleSignalPublish;
+export default async function handler(request: Request): Promise<Response> {
+  return handleSignalPublish(request);
+}

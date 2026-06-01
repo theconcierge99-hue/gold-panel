@@ -1,8 +1,11 @@
 import { handleSignalOpen } from "./lib/signal-open-handler";
 
-/** Node — Solana SPL + viem USDC transfers for instant creator payout */
+/** Edge — x402 + KV; creator payout loads @solana/web3.js only after payment settles */
 export const config = {
-  runtime: "nodejs",
+  runtime: "edge",
+  maxDuration: 60,
 };
 
-export default handleSignalOpen;
+export default async function handler(request: Request): Promise<Response> {
+  return handleSignalOpen(request);
+}

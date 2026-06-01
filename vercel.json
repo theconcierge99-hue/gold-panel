@@ -6,6 +6,12 @@
   "functions": {
     "api/signal-publish.ts": {
       "maxDuration": 60
+    },
+    "api/signal-open.ts": {
+      "maxDuration": 60
+    },
+    "api/rwa-mint-sol.ts": {
+      "maxDuration": 60
     }
   },
   "headers": [

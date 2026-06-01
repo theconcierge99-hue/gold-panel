@@ -19,7 +19,7 @@ import { normalizeSolPayTo } from "./x402-address";
 import { rwaMetadataUri } from "./rwa-metadata-json";
 import { siteOrigin } from "./rwa-token";
 import type { CreatorSignal } from "./signals-types";
-import type { SignalRwaToken } from "./rwa-types";
+import type { SignalRwaToken, SolanaRwaMintResult, SolanaRwaMintStatus } from "./rwa-types";
 import { getSignalRwaToken, saveSignalRwaToken } from "./rwa-store";
 import { isSolanaKeypairEnvSet, loadSolanaKeypairFromEnv } from "./solana-keypair";
 
@@ -29,14 +29,7 @@ function txSignatureToString(signature: Uint8Array): string {
   return bs58.encode(signature);
 }
 
-export type SolanaRwaMintStatus = "sent" | "skipped" | "failed" | "pending";
-
-export type SolanaRwaMintResult = {
-  status: SolanaRwaMintStatus;
-  mintAddress?: string;
-  transaction?: string;
-  reason?: string;
-};
+export type { SolanaRwaMintResult, SolanaRwaMintStatus } from "./rwa-types";
 
 export function isSolanaRwaMintConfigured(): boolean {
   return isSolanaKeypairEnvSet(MINT_SECRET_ENV);
