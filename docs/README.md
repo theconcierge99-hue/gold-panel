@@ -15,7 +15,8 @@ Full technical documentation for the **gold-panel** project (**Executive Lounge*
 7. **[API reference](api-reference.md)** — Routes, methods, response shapes  
 8. **[x402 payments](x402-payments.md)** — PayAI facilitator, client pay flow, networks  
 9. **[x402scan](x402scan.md)** — Discovery documents and marketplace registration  
-10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory  
+10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory
+11. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry)  
 11. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
 12. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
 13. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  

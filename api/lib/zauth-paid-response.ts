@@ -1,0 +1,33 @@
+import { resourceUrlForOrigin, resolveX402SiteOrigin } from "./x402-discovery";
+import type { X402ResourceKind } from "./x402-pricing";
+import { scheduleZauthProviderReport } from "./zauth";
+
+const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
+  concierge:
+    "JSON with HTML reply field (institutional trading analysis or chat); topics and marketLive optional",
+  news: "JSON with article URL or redirect target after successful unlock",
+  "signal-publish": "JSON with published signal id, RWA metadata, optional mintParams for Solana NFT",
+  "signal-open": "JSON with signalId and full intelligence summary fields",
+};
+
+/** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */
+export function reportPaidRouteToZauth(
+  request: Request,
+  kind: X402ResourceKind,
+  statusCode: number,
+  responseBody: unknown,
+  startedAt: number,
+  payMeta?: { payer?: string; transaction?: string; paymentResponseHeader?: string | null },
+): void {
+  scheduleZauthProviderReport({
+    request,
+    resourceUrl: resourceUrlForOrigin(resolveX402SiteOrigin(request), kind),
+    statusCode,
+    responseBody,
+    responseTimeMs: Math.max(0, Date.now() - startedAt),
+    payer: payMeta?.payer,
+    transaction: payMeta?.transaction,
+    paymentResponseHeader: payMeta?.paymentResponseHeader,
+    expectedResponse: EXPECTED_BY_KIND[kind],
+  });
+}

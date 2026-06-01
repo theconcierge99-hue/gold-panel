@@ -15,6 +15,7 @@ import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 import { truncateOnChainMetaName } from "../../lib/on-chain-meta";
+import { reportPaidRouteToZauth } from "./zauth-paid-response";
 
 function newSignalId(): string {
   return `sig_${crypto.randomUUID().replace(/-/g, "")}`;
@@ -31,6 +32,7 @@ export async function runSignalPublishAfterPayment(
   request: Request,
   { cors, gate }: PaidX402RouteContinue,
 ): Promise<Response> {
+  const startedAt = Date.now();
   try {
     assertAllowedOrigin(request);
 
@@ -105,33 +107,36 @@ export async function runSignalPublishAfterPayment(
     };
     if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        signal: {
-          id: signal.id,
-          title: signal.title,
-          categories: signal.categories,
-          publishedAt: signal.publishedAt,
-        },
-        publishFeeUsdc: X402_SIGNAL_PUBLISH_USDC,
-        readerUnlockUsdc: 0.1,
-        rwa: rwaToken
-          ? {
-              tokenId: rwaToken.tokenId,
-              contentHash: rwaToken.contentHash,
-              standard: rwaToken.standard,
-              targetChain: rwaToken.targetChain,
-              onChainMintAddress: rwaToken.onChainMintAddress,
-              onChainMintTx: rwaToken.onChainMintTx,
-              onChainMintStatus: rwaToken.onChainMintStatus ?? solanaMint?.status,
-            }
-          : undefined,
-        solanaNft: solanaMint,
-        mintParams,
-      }),
-      { status: 200, headers },
-    );
+    const payload = {
+      ok: true,
+      signal: {
+        id: signal.id,
+        title: signal.title,
+        categories: signal.categories,
+        publishedAt: signal.publishedAt,
+      },
+      publishFeeUsdc: X402_SIGNAL_PUBLISH_USDC,
+      readerUnlockUsdc: 0.1,
+      rwa: rwaToken
+        ? {
+            tokenId: rwaToken.tokenId,
+            contentHash: rwaToken.contentHash,
+            standard: rwaToken.standard,
+            targetChain: rwaToken.targetChain,
+            onChainMintAddress: rwaToken.onChainMintAddress,
+            onChainMintTx: rwaToken.onChainMintTx,
+            onChainMintStatus: rwaToken.onChainMintStatus ?? solanaMint?.status,
+          }
+        : undefined,
+      solanaNft: solanaMint,
+      mintParams,
+    };
+    reportPaidRouteToZauth(request, "signal-publish", 200, payload, startedAt, {
+      payer: gate.payer,
+      transaction: gate.transaction,
+      paymentResponseHeader: gate.paymentResponseHeader,
+    });
+    return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch (e) {
     console.error("[signal-publish]", e instanceof Error ? e.stack || e.message : e);
     const msg = sanitizePublicError(e);

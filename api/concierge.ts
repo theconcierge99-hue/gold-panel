@@ -6,6 +6,7 @@ import {
   sanitizePublicError,
   validateConciergeRequest,
 } from "./lib/concierge-security";
+import { reportPaidRouteToZauth } from "./lib/zauth-paid-response";
 import { guardPaidX402Api } from "./lib/x402-server";
 
 /** Edge — Gemini + x402 only (no Solana / Metaplex imports). Wall time capped at 30s by Vercel Edge. */
@@ -35,6 +36,8 @@ export default async function handler(request: Request): Promise<Response> {
   if ("response" in routed) return routed.response;
   const { cors, gate: payGate } = routed.continue;
 
+  const startedAt = Date.now();
+
   try {
     assertAllowedOrigin(request);
 
@@ -54,6 +57,11 @@ export default async function handler(request: Request): Promise<Response> {
     if (payGate.ok && payGate.paymentResponseHeader) {
       extraHeaders["PAYMENT-RESPONSE"] = payGate.paymentResponseHeader;
     }
+    reportPaidRouteToZauth(request, "concierge", 200, result, startedAt, {
+      payer: payGate.payer,
+      transaction: payGate.transaction,
+      paymentResponseHeader: payGate.paymentResponseHeader,
+    });
     return jsonResponse(request, result, 200, extraHeaders);
   } catch (e) {
     const msg = sanitizePublicError(e);

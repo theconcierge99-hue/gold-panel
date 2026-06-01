@@ -4,6 +4,7 @@ import {
   readBodyWithLimit,
   sanitizeNewsOpenError,
 } from "./lib/concierge-security";
+import { reportPaidRouteToZauth } from "./lib/zauth-paid-response";
 import { guardPaidX402Api } from "./lib/x402-server";
 
 /** Edge + PayAI HTTP facilitator (no Node-only @x402 server SDK) */
@@ -51,6 +52,7 @@ export default async function handler(request: Request): Promise<Response> {
   const routed = await guardPaidX402Api(request, "news");
   if ("response" in routed) return routed.response;
   const { cors, gate } = routed.continue;
+  const startedAt = Date.now();
 
   try {
     assertAllowedOrigin(request);
@@ -68,16 +70,19 @@ export default async function handler(request: Request): Promise<Response> {
     };
     if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        url: article.url,
-        title: article.title,
-        source: article.source,
-        priceUsdc: 0.1,
-      }),
-      { status: 200, headers },
-    );
+    const payload = {
+      ok: true,
+      url: article.url,
+      title: article.title,
+      source: article.source,
+      priceUsdc: 0.1,
+    };
+    reportPaidRouteToZauth(request, "news", 200, payload, startedAt, {
+      payer: gate.payer,
+      transaction: gate.transaction,
+      paymentResponseHeader: gate.paymentResponseHeader,
+    });
+    return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch (e) {
     const msg = sanitizeNewsOpenError(e);
     const status =

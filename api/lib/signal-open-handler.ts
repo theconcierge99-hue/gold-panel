@@ -18,6 +18,7 @@ import type { CreatorPayoutResult } from "./creator-payout-types";
 import { awardReaderBadge } from "./rwa-badge";
 import { getSignalRwaToken } from "./rwa-store";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
+import { reportPaidRouteToZauth } from "./zauth-paid-response";
 
 async function requestCreatorInstantPayout(opts: {
   creatorWallet: string;
@@ -49,6 +50,7 @@ export async function runSignalOpenAfterPayment(
   request: Request,
   { cors, gate }: PaidX402RouteContinue,
 ): Promise<Response> {
+  const startedAt = Date.now();
   try {
     assertAllowedOrigin(request);
 
@@ -133,41 +135,44 @@ export async function runSignalOpenAfterPayment(
     };
     if (gate.paymentResponseHeader) headers["PAYMENT-RESPONSE"] = gate.paymentResponseHeader;
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        priceUsdc: X402_READ_PRICE_USDC,
-        signal: {
-          id: signal.id,
-          title: signal.title,
-          summary: signal.summary,
-          categories: signal.categories,
-          creatorWallet: signal.creatorWallet,
-          creatorChain: signal.creatorChain,
-          publishedAt: signal.publishedAt,
-        },
-        revenueShare: {
-          creatorPercent: 50,
-          merchantPercent: 50,
-          creatorShareUsdc: 0.05,
-        },
-        creatorPayout: creatorPayoutStatus
-          ? { status: creatorPayoutStatus, transaction: creatorPayoutTx }
+    const payload = {
+      ok: true,
+      priceUsdc: X402_READ_PRICE_USDC,
+      signal: {
+        id: signal.id,
+        title: signal.title,
+        summary: signal.summary,
+        categories: signal.categories,
+        creatorWallet: signal.creatorWallet,
+        creatorChain: signal.creatorChain,
+        publishedAt: signal.publishedAt,
+      },
+      revenueShare: {
+        creatorPercent: 50,
+        merchantPercent: 50,
+        creatorShareUsdc: 0.05,
+      },
+      creatorPayout: creatorPayoutStatus
+        ? { status: creatorPayoutStatus, transaction: creatorPayoutTx }
+        : undefined,
+      rwa: rwaToken
+        ? {
+            tokenId: rwaToken.tokenId,
+            contentHash: rwaToken.contentHash,
+            standard: rwaToken.standard,
+            onChainMintAddress: rwaToken.onChainMintAddress,
+          }
+        : signal.rwaTokenId
+          ? { tokenId: signal.rwaTokenId }
           : undefined,
-        rwa: rwaToken
-          ? {
-              tokenId: rwaToken.tokenId,
-              contentHash: rwaToken.contentHash,
-              standard: rwaToken.standard,
-              onChainMintAddress: rwaToken.onChainMintAddress,
-            }
-          : signal.rwaTokenId
-            ? { tokenId: signal.rwaTokenId }
-            : undefined,
-        readerBadge,
-      }),
-      { status: 200, headers },
-    );
+      readerBadge,
+    };
+    reportPaidRouteToZauth(request, "signal-open", 200, payload, startedAt, {
+      payer: gate.payer,
+      transaction: gate.transaction,
+      paymentResponseHeader: gate.paymentResponseHeader,
+    });
+    return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch (e) {
     const msg = sanitizePublicError(e);
     const status =

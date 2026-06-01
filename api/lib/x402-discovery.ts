@@ -14,6 +14,7 @@ import {
   X402_SERVICE_TAGS,
   x402ServiceListingMeta,
 } from "./x402-service-meta";
+import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
 export const X402SCAN_EXPLORE_URL = "https://www.x402scan.com/";
@@ -124,6 +125,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
       x402scan: X402SCAN_EXPLORE_URL,
+      zauth: zauthMetaLinks(origin),
     },
   };
 }
@@ -384,6 +386,7 @@ export function discoveryMetaForConfig(origin: string) {
     resourceUrls: listDiscoveryResourceUrls(base),
     x402scanRegisterUrl: X402SCAN_REGISTER_URL,
     x402scanExploreUrl: X402SCAN_EXPLORE_URL,
+    zauth: zauthMetaLinks(base),
     ownershipProofs: ownershipProofs(),
     resources: X402_DISCOVERY_RESOURCES.map((r) => ({
       kind: r.kind,

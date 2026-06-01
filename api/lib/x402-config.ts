@@ -15,6 +15,7 @@ import {
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
 import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
+import { isZauthProviderEnabled } from "./zauth";
 import { creatorPayoutWalletsConfigured, solanaRwaMintConfigured } from "./creator-payout-env";
 import {
   SIGNAL_CREATOR_SHARE_PERCENT,
@@ -203,6 +204,7 @@ export function getPublicX402Config() {
     readerBadgesEnabled: true,
     solanaRwaMintReady: solanaRwaMintConfigured(),
     discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
+    zauthTelemetryEnabled: isZauthProviderEnabled(),
   };
 }
 
