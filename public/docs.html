@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Documentation — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, RWA signals, Solana NFT mint, Concierge AI." />
+<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, zauth trust layer, RWA signals, Solana NFT mint, Concierge AI." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs" />
@@ -68,7 +68,7 @@
     <h1>Documentation</h1>
   </div>
   <div class="eyebrow">Executive Lounge</div>
-  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, RWA creator signals, and Concierge AI.</p>
+  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, <a href="#zauth" style="color:var(--gold)">zauth</a> trust layer, RWA creator signals, and Concierge AI.</p>
 
   <nav class="toc" aria-label="Table of contents">
     <div class="toc-title">On this page</div>
@@ -77,6 +77,7 @@
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#api">API reference</a></li>
       <li><a href="#x402">x402 payments</a></li>
+      <li><a href="#zauth">zauth integration</a></li>
       <li><a href="#x402scan">x402scan listing</a></li>
       <li><a href="#concierge">Concierge AI</a></li>
       <li><a href="#rwa">RWA (Real World Assets)</a></li>
@@ -113,6 +114,7 @@
         <li><strong>APIs</strong> — Vercel Edge functions under <code>/api/*</code></li>
         <li><strong>AI</strong> — Google Gemini</li>
         <li><strong>Payments</strong> — x402 v2 via PayAI facilitator (on-chain settlement)</li>
+        <li><strong>Trust</strong> — optional <a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth.inc</a> directory + Provider Hub telemetry</li>
         <li><strong>Storage</strong> — Redis/KV for signals, RWA certificates, badges, ledger, Concierge memory</li>
         <li><strong>RWA mint</strong> — <code>mint-signal.mjs</code> + <code>/api/solana-rpc-send</code> (Phantom, Metaplex)</li>
       </ul>
@@ -125,7 +127,9 @@
       <h3>Free</h3>
       <ul>
         <li><code>GET /api/market</code> — headline feed + ticks</li>
-        <li><code>GET /api/x402-config</code> — public payment config</li>
+        <li><code>GET /api/x402-config</code> — public payment config (<code>zauthTelemetryEnabled</code>, <code>discovery.zauth</code> links)</li>
+        <li><code>GET /api/zauth-directory</code> — proxy to zauth x402 endpoint directory (CORS for agents)</li>
+        <li><code>GET /api/zauth-status</code> — this site’s directory slice + verification checks</li>
         <li><code>GET /.well-known/x402</code> — x402 discovery fan-out</li>
         <li><code>GET /openapi.json</code> — OpenAPI + payment metadata</li>
       </ul>
@@ -159,6 +163,57 @@
         <li>Server verifies and settles; response includes <code>PAYMENT-RESPONSE</code> with transaction hash</li>
       </ol>
       <p class="note">Set <code>X402_EVM_PAY_TO</code> and/or <code>X402_SOL_PAY_TO</code> in your host environment. Never commit keys or RPC URLs with embedded secrets.</p>
+    </div>
+  </section>
+
+  <section id="zauth">
+    <h2>zauth integration</h2>
+    <div class="card">
+      <p><a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth</a> is the security and trust layer for paid x402 APIs — endpoint directory, uptime, verification badges, and optional Provider Hub telemetry. It does <strong>not</strong> replace PayAI settlement or wallet signing; payments still use the normal x402 client (<code>x402-pay.mjs</code>).</p>
+
+      <h3>What Lounge exposes</h3>
+      <table>
+        <thead><tr><th>Route / field</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /api/zauth-directory</code></td><td>Proxy to zauth Database — agents query before paying third-party APIs</td></tr>
+          <tr><td><code>GET /api/zauth-status</code></td><td>Endpoints for this deployment + live verification when configured</td></tr>
+          <tr><td><code>discovery.zauth</code> in <code>/api/x402-config</code></td><td>Hub, database, and docs URLs</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Provider Hub (operators)</h3>
+      <ol style="padding-left:18px;color:var(--text-secondary);font-size:14px">
+        <li style="margin-bottom:8px">Create an API key at <a href="https://zauth.inc/provider-hub" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth.inc/provider-hub</a></li>
+        <li style="margin-bottom:8px">Set <code>ZAUTH_API_KEY</code> in Vercel (never commit it)</li>
+        <li style="margin-bottom:8px">Redeploy; complete real paid traffic on Concierge, news-open, signal routes</li>
+        <li>Check <code>GET /api/zauth-status</code> — <code>providerTelemetryEnabled: true</code></li>
+      </ol>
+      <p>After each successful paid <strong>200</strong>, the server sends async telemetry (request, response, payment) to zauth. Failures are logged only; user responses are unchanged.</p>
+
+      <h3>Paid routes that report</h3>
+      <ul>
+        <li><code>POST /api/concierge</code></li>
+        <li><code>POST /api/news-open</code></li>
+        <li><code>POST /api/lounge-signal-publish</code></li>
+        <li><code>POST /api/lounge-signal-open</code></li>
+      </ul>
+
+      <h3>Agents &amp; Concierge</h3>
+      <p>Before recommending external x402 APIs, agents should prefer <strong>verified</strong> endpoints with high <code>successRate</code>:</p>
+      <p><code>GET /api/zauth-directory?verified=true&amp;search=example.com&amp;limit=20</code></p>
+      <p>Concierge is instructed to use this directory when suggesting third-party paid services.</p>
+
+      <h3>Environment</h3>
+      <table>
+        <thead><tr><th>Variable</th><th>Required</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>ZAUTH_API_KEY</code></td><td>No</td><td>Provider Hub key — enables telemetry + verification</td></tr>
+          <tr><td><code>ZAUTH_API_ENDPOINT</code></td><td>No</td><td>Default <code>https://back.zauthx402.com</code></td></tr>
+          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Recommended</td><td>Canonical URL for status/directory filtering</td></tr>
+        </tbody>
+      </table>
+
+      <p class="note">Implementation: <code>api/lib/zauth.ts</code>, <code>api/lib/zauth-paid-response.ts</code>. Edge-safe HTTP reporter — not the Express <code>@zauthx402/sdk</code> middleware. Full operator guide: repository <code>docs/zauth.md</code>.</p>
     </div>
   </section>
 
@@ -212,7 +267,9 @@
           <tr><td><code>X402_SOL_PAY_TO</code></td><td>Solana USDC receive (optional)</td></tr>
           <tr><td><code>KV_REST_*</code></td><td>Signals, RWA, memory</td></tr>
           <tr><td><code>SOLANA_RPC_URL</code></td><td>Server RPC for NFT mint proxy (Helius recommended)</td></tr>
-          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL + RWA metadata</td></tr>
+          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL + RWA metadata + zauth status</td></tr>
+          <tr><td><code>ZAUTH_API_KEY</code></td><td>zauth Provider Hub telemetry (optional)</td></tr>
+          <tr><td><code>ZAUTH_API_ENDPOINT</code></td><td>zauth backend override (optional)</td></tr>
           <tr><td><code>RWA_SIGNAL_CONTRACT_SOL</code></td><td>Optional Metaplex collection mint</td></tr>
           <tr><td><code>ALLOWED_ORIGINS</code></td><td>Extra CORS origins</td></tr>
         </tbody>
