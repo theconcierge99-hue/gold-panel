@@ -7,7 +7,13 @@ export const config = { runtime: "edge" };
 
 const BLOCKED = new Set(["requestAirdrop"]);
 
-const SLOW_METHODS = new Set(["simulateTransaction", "sendTransaction", "getLatestBlockhash"]);
+const SLOW_METHODS = new Set([
+  "simulateTransaction",
+  "sendTransaction",
+  "getLatestBlockhash",
+  "getSignatureStatuses",
+  "getBlockHeight",
+]);
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
