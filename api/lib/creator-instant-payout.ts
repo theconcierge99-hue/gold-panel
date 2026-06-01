@@ -22,18 +22,13 @@ import { base, baseSepolia } from "viem/chains";
 import bs58 from "bs58";
 import { getSolanaRpcUrlForServer, getUsdcAssetForNetwork, getX402NetworkProfile } from "./x402-config";
 import { normalizeEvmPayTo, normalizeSolPayTo } from "./x402-address";
+import type { CreatorPayoutResult } from "./creator-payout-types";
+
+export type { CreatorPayoutResult, CreatorPayoutStatus } from "./creator-payout-types";
 
 const ERC20_TRANSFER_ABI = parseAbi([
   "function transfer(address to, uint256 amount) returns (bool)",
 ]);
-
-export type CreatorPayoutStatus = "sent" | "skipped" | "failed";
-
-export type CreatorPayoutResult = {
-  status: CreatorPayoutStatus;
-  tx?: string;
-  reason?: string;
-};
 
 function loadSolanaPayoutKeypair(): Keypair | null {
   const raw = process.env.CREATOR_PAYOUT_SOL_SECRET?.trim();

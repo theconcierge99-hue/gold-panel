@@ -10,6 +10,7 @@ import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { solanaRwaMintConfigured } from "./creator-payout-env";
+import { internalAuthHeaders, loungeApiOrigin } from "./lounge-internal-auth";
 import { mintSignalRwaToken } from "./rwa-token";
 import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
@@ -21,15 +22,12 @@ function newSignalId(): string {
 
 /** Trigger Metaplex mint on a separate route (Edge publish must not load mpl-token-metadata). */
 function queueSolanaNftMint(signalId: string): void {
-  const origin = process.env.X402_SITE_ORIGIN?.trim().replace(/\/$/, "") || "https://conc-exe.xyz";
-  const secret = process.env.RWA_MINT_INTERNAL_KEY?.trim();
+  const origin = loungeApiOrigin();
   const job = async () => {
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (secret) headers.Authorization = `Bearer ${secret}`;
-      const res = await fetch(`${origin}/api/concierge?__lounge_resource=rwa-mint-sol`, {
+      const res = await fetch(`${origin}/api/lounge-rwa-mint-sol`, {
         method: "POST",
-        headers,
+        headers: internalAuthHeaders(),
         body: JSON.stringify({ signalId }),
       });
       if (!res.ok) {

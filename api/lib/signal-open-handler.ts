@@ -12,10 +12,38 @@ import {
   SIGNAL_MERCHANT_SHARE_BPS,
   splitReaderUnlockAtomic,
 } from "./signal-revenue";
+import { internalAuthHeaders, loungeApiOrigin } from "./lounge-internal-auth";
 import { parseSignalOpenBody } from "./signal-validation";
+import type { CreatorPayoutResult } from "./creator-payout-types";
 import { awardReaderBadge } from "./rwa-badge";
 import { getSignalRwaToken } from "./rwa-store";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
+
+async function requestCreatorInstantPayout(opts: {
+  creatorWallet: string;
+  creatorChain: "sol" | "evm";
+  shareAtomic: string;
+}): Promise<CreatorPayoutResult> {
+  try {
+    const res = await fetch(`${loungeApiOrigin()}/api/lounge-creator-payout`, {
+      method: "POST",
+      headers: internalAuthHeaders(),
+      body: JSON.stringify(opts),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      payout?: CreatorPayoutResult;
+      error?: string;
+    };
+    if (!res.ok || !data.payout) {
+      return { status: "failed", reason: data.error || `Payout HTTP ${res.status}` };
+    }
+    return data.payout;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[signal-open] creator payout fetch", msg);
+    return { status: "failed", reason: "Creator payout unavailable" };
+  }
+}
 
 export async function runSignalOpenAfterPayment(
   request: Request,
@@ -53,8 +81,7 @@ export async function runSignalOpenAfterPayment(
 
     if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
       const split = splitReaderUnlockAtomic(X402_READ_PRICE_ATOMIC);
-      const { disburseCreatorInstantShare } = await import("./creator-instant-payout");
-      const payout = await disburseCreatorInstantShare({
+      const payout = await requestCreatorInstantPayout({
         creatorWallet: signal.creatorWallet,
         creatorChain: signal.creatorChain,
         shareAtomic: split.creatorAtomic,

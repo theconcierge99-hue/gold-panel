@@ -3,6 +3,10 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "outputDirectory": "dist/client",
+  "functions": {
+    "api/lounge-rwa-mint-sol.ts": { "maxDuration": 60 },
+    "api/lounge-creator-payout.ts": { "maxDuration": 60 }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -48,18 +52,6 @@
     {
       "source": "/docs",
       "destination": "/docs.html"
-    },
-    {
-      "source": "/api/lounge-signal-publish",
-      "destination": "/api/concierge?__lounge_resource=signal-publish"
-    },
-    {
-      "source": "/api/lounge-signal-open",
-      "destination": "/api/concierge?__lounge_resource=signal-open"
-    },
-    {
-      "source": "/api/rwa-mint-sol",
-      "destination": "/api/concierge?__lounge_resource=rwa-mint-sol"
     },
     {
       "source": "/",
