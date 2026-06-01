@@ -1221,7 +1221,9 @@
       document.getElementById('sigSummary').value='';
       document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
       let msg = 'Signal published & tokenized ✓';
-      if(data.rwa?.onChainMintAddress){
+      if(data.solanaNft?.status==='pending'){
+        msg = 'Signal live ✓ Solana NFT minting to your wallet (~1 min)';
+      } else if(data.rwa?.onChainMintAddress){
         msg = 'NFT minted to your Solana wallet · '+String(data.rwa.onChainMintAddress).slice(0,8)+'… ✓';
       } else if(data.rwa?.tokenId){
         msg = 'Signal published · RWA '+String(data.rwa.tokenId).slice(0,14)+'… ✓';

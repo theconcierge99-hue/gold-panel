@@ -29,7 +29,7 @@ function txSignatureToString(signature: Uint8Array): string {
   return bs58.encode(signature);
 }
 
-export type SolanaRwaMintStatus = "sent" | "skipped" | "failed";
+export type SolanaRwaMintStatus = "sent" | "skipped" | "failed" | "pending";
 
 export type SolanaRwaMintResult = {
   status: SolanaRwaMintStatus;
@@ -136,4 +136,33 @@ export async function mintSolanaSignalNftForSignal(
     return { status: "skipped", reason: "RWA certificate missing" };
   }
   return mintSolanaSignalNft(signal, token);
+}
+
+/** Run Metaplex mint after HTTP response (avoids Vercel 10s timeout on publish). */
+export function scheduleBackgroundSolanaMint(
+  signal: CreatorSignal,
+  token: SignalRwaToken,
+): SolanaRwaMintResult {
+  if (signal.creatorChain !== "sol") {
+    return { status: "skipped", reason: "Creator not on Solana" };
+  }
+  if (!isSolanaRwaMintConfigured()) {
+    return { status: "skipped", reason: `${MINT_SECRET_ENV} not configured` };
+  }
+
+  const run = () =>
+    mintSolanaSignalNft(signal, token).catch((e) => {
+      console.error("[rwa-solana-mint:bg]", e instanceof Error ? e.message : e);
+    });
+
+  void import("@vercel/functions")
+    .then(({ waitUntil }) => waitUntil(run()))
+    .catch(() => {
+      void run();
+    });
+
+  return {
+    status: "pending",
+    reason: "NFT mint submitted — check your Solana wallet in ~1 minute",
+  };
 }

@@ -9,7 +9,6 @@ import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { mintSignalRwaToken } from "./rwa-token";
-import { getSignalRwaToken } from "./rwa-store";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 
@@ -57,23 +56,32 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
       publishPayer: gate.payer !== "dev-bypass" ? gate.payer : undefined,
     };
 
+    // Persist first — user already paid via x402; never lose the signal on slow NFT mint
+    await savePublishedSignal(signal);
+
     let rwaToken: Awaited<ReturnType<typeof mintSignalRwaToken>> | undefined;
     let solanaMint:
-      | Awaited<ReturnType<typeof import("./rwa-solana-mint").mintSolanaSignalNft>>
+      | Awaited<ReturnType<typeof import("./rwa-solana-mint").scheduleBackgroundSolanaMint>>
       | undefined;
+
     try {
       rwaToken = await mintSignalRwaToken(signal);
       signal.rwaTokenId = rwaToken.tokenId;
-      if (signal.creatorChain === "sol") {
-        const { mintSolanaSignalNft } = await import("./rwa-solana-mint");
-        solanaMint = await mintSolanaSignalNft(signal, rwaToken);
-        rwaToken = (await getSignalRwaToken(signal.id)) ?? rwaToken;
-      }
       await savePublishedSignal(signal);
     } catch (e) {
-      console.error("[signal-publish] rwa mint", e instanceof Error ? e.message : e);
-      await savePublishedSignal(signal);
+      console.error("[signal-publish] rwa cert", e instanceof Error ? e.message : e);
     }
+
+    if (rwaToken && signal.creatorChain === "sol") {
+      try {
+        const { scheduleBackgroundSolanaMint } = await import("./rwa-solana-mint");
+        solanaMint = scheduleBackgroundSolanaMint(signal, rwaToken);
+      } catch (e) {
+        console.error("[signal-publish] sol mint schedule", e instanceof Error ? e.message : e);
+        solanaMint = { status: "skipped", reason: "Solana mint module unavailable" };
+      }
+    }
+
     try {
       await ingestCreatorSignalMemory(signal);
     } catch (e) {
@@ -114,6 +122,7 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
       { status: 200, headers },
     );
   } catch (e) {
+    console.error("[signal-publish]", e instanceof Error ? e.stack || e.message : e);
     const msg = sanitizePublicError(e);
     const status =
       msg.includes("not allowed") || msg.includes("too large")
