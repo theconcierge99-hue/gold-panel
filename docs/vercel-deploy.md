@@ -8,8 +8,11 @@ If **GitHub `main` is ahead** but Vercel Production still shows **`1e03d96`**, G
 
 1. Open [Vercel → lounge → Deployments](https://vercel.com).
 2. Click **Create Deployment** (top right).
-3. Branch: **main**, pick the latest commit (e.g. `2e0840b`).
-4. Environment: **Production** → **Deploy**.
+3. Choose branch **`main`** from the dropdown (do **not** paste a GitHub URL in the text field).
+4. Select the latest commit (e.g. `0d6cd42`).
+5. Environment: **Production** → **Deploy**.
+
+**Hobby plan:** function memory must stay ≤ 2048 MB (this repo no longer sets 3008 MB in `vercel.json`).
 
 After **Ready**, hard-refresh https://conc-exe.xyz and check  
 https://conc-exe.xyz/deploy-version.txt — it should match the new commit.

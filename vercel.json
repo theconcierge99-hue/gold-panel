@@ -3,10 +3,6 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "outputDirectory": "dist/client",
-  "functions": {
-    "api/lounge-rwa-mint-sol.ts": { "maxDuration": 60, "memory": 3008 },
-    "api/lounge-creator-payout.ts": { "maxDuration": 60, "memory": 1024 }
-  },
   "headers": [
     {
       "source": "/(.*)",
