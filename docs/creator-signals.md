@@ -19,7 +19,7 @@ Creator signals let wallet-connected users publish short intelligence notes to t
 2. Pays **0.1 USDC** (`POST /api/signal-open`).
 3. Modal shows full summary (no external URL).
 
-**Reader fee split:** 80% creator / 20% merchant (`api/lib/signal-revenue.ts`), recorded in ledger for monthly off-chain settlement.
+**Reader fee split:** 50% creator / 50% merchant (`api/lib/signal-revenue.ts`). After each unlock, the creator’s half (0.05 USDC) is sent on-chain to their registered wallet via `api/lib/creator-instant-payout.ts` when `CREATOR_PAYOUT_*` env keys are configured.
 
 ## API
 
@@ -48,10 +48,11 @@ Without KV, publish returns **503** with setup instructions.
 
 On each successful unlock, `appendUnlockLedger()` records atomic amounts split via `splitReaderUnlockAtomic()`:
 
-- Creator share: 8000 bps (80%)
-- Merchant share: 2000 bps (20%)
+- Creator share: 5000 bps (50%)
+- Merchant share: 5000 bps (50%)
+- `creatorPayoutTx` / `creatorPayoutStatus` when instant payout runs
 
-Monthly payout is operational (not automated in this repo).
+Configure `CREATOR_PAYOUT_EVM_PRIVATE_KEY` and/or `CREATOR_PAYOUT_SOL_SECRET` in Vercel (treasury wallets with USDC balance). Without them, unlocks still succeed; ledger records the split but on-chain creator transfer is skipped.
 
 ## Categories
 

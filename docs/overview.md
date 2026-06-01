@@ -40,7 +40,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 
 - **Publish:** **1 USDC** one-time anti-spam fee; signal stored in Redis/KV and surfaced on the market feed.
 - **Unlock:** **0.1 USDC** per reader; full summary shown in-app (not an external URL).
-- **Revenue:** 80% of reader unlock fees attributed to creator wallet in ledger; 20% merchant; settled monthly off-chain.
+- **Revenue:** 50% of reader unlock fees sent on-chain to the creator wallet; 50% merchant (via x402 to merchant address).
 
 ### Wallet & payments
 
@@ -66,5 +66,5 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 ## What is not in scope (today)
 
 - On-chain NFT mint for signals (publish is storage + x402 payment only).
-- Automated monthly payout execution (ledger is recorded; settlement is operational).
+- Treasury float monitoring / alerts for `CREATOR_PAYOUT_*` wallets.
 - Per-creator custom unlock pricing (flat 0.1 USDC platform standard).

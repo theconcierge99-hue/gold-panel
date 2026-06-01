@@ -17,10 +17,13 @@ export type SignalLedgerEntry = {
   payer: string;
   /** Gross reader unlock (0.1 USDC) */
   amountAtomic: string;
-  /** Creator 80% of reader unlock */
+  /** Creator 50% of reader unlock */
   creatorShareAtomic: string;
-  /** Merchant 20% of reader unlock */
+  /** Merchant 50% of reader unlock */
   merchantShareAtomic: string;
+  /** On-chain USDC transfer to creator wallet (when payout wallet configured) */
+  creatorPayoutTx?: string;
+  creatorPayoutStatus?: "sent" | "skipped" | "failed";
   creatorShareBps: number;
   merchantShareBps: number;
   transaction: string;

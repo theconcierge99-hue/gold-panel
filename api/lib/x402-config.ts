@@ -15,6 +15,7 @@ import {
   X402_SIGNAL_PUBLISH_USDC,
 } from "./x402-pricing";
 import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
+import { creatorPayoutWalletsConfigured } from "./creator-instant-payout";
 import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
@@ -193,9 +194,11 @@ export function getPublicX402Config() {
     signalReaderRevenueShare: {
       creatorPercent: SIGNAL_CREATOR_SHARE_PERCENT,
       merchantPercent: SIGNAL_MERCHANT_SHARE_PERCENT,
-      settledMonthly: true,
-      note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) split 80/20.",
+      instantCreatorPayout: true,
+      settledMonthly: false,
+      note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) splits 50/50 — creator half sent on-chain to their wallet after each unlock when payout wallets are configured.",
     },
+    creatorInstantPayoutReady: creatorPayoutWalletsConfigured(),
     discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
   };
 }

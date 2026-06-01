@@ -158,7 +158,7 @@ Unlock full signal summary.
 
 **Success (200):** Signal object with full `summary`, categories, metadata.
 
-**Price:** 0.1 USDC. **80/20** reader split recorded in ledger.
+**Price:** 0.1 USDC. **50/50** reader split; creator half paid on-chain when payout wallets are configured. Response may include `creatorPayout` and `revenueShare`.
 
 ## Payment headers (x402 v2)
 

@@ -38,6 +38,18 @@ Upstash may instead provide:
 
 Without KV in production, `POST /api/signal-publish` returns **503**.
 
+### Instant creator payout (50% of unlock)
+
+| Variable | Description |
+|----------|-------------|
+| `CREATOR_PAYOUT_EVM_PRIVATE_KEY` | Treasury wallet on Base — sends 0.05 USDC to EVM creators after each unlock. `0x` + 64 hex. **Secret — Vercel only.** |
+| `CREATOR_PAYOUT_SOL_SECRET` | Treasury keypair on Solana — sends 0.05 USDC to Solana creators. Base58 secret or JSON byte array (64 bytes). **Secret — Vercel only.** |
+| `BASE_RPC_URL` | Optional RPC for EVM payouts (defaults to public Base RPC). |
+
+Fund treasury wallets with USDC. Reader payment (0.1 USDC) still settles to merchant via x402; the platform wallet forwards the creator half on the creator’s registered chain.
+
+Check readiness: `GET /api/x402-config` → `creatorInstantPayoutReady`.
+
 ## CORS
 
 | Variable | Description |

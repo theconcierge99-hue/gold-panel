@@ -48,7 +48,7 @@ Open the dev URL shown in the terminal (typically port 5173). The lounge UI is s
 | Unlock creator signal | 0.1 USDC |
 | Publish creator signal | 1 USDC (anti-spam) |
 
-Reader unlock fees on creator signals split **80% creator / 20% merchant** (monthly off-chain settlement). The publish fee is **100% merchant**.
+Reader unlock fees on creator signals split **50% creator / 50% merchant**; the creator half is sent on-chain to their wallet after each unlock. The publish fee is **100% merchant**.
 
 ## Scripts
 
