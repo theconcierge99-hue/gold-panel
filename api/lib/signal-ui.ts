@@ -7,6 +7,7 @@ export function creatorSignalToUiHeadline(signal: CreatorSignal): UiHeadline & {
   signalId: string;
   kind: "creator";
   creatorWallet: string;
+  rwaTokenId?: string;
 } {
   const primaryCat = signal.categories[0] ?? "Markets";
   const { label, color } = categorizeHeadline(`${signal.title} ${primaryCat}`, CREATOR_SOURCE);
@@ -26,11 +27,12 @@ export function creatorSignalToUiHeadline(signal: CreatorSignal): UiHeadline & {
     signalId: signal.id,
     kind: "creator",
     creatorWallet: signal.creatorWallet,
+    rwaTokenId: signal.rwaTokenId,
   };
 }
 
 export async function listCreatorHeadlinesForUi(): Promise<
-  (UiHeadline & { signalId: string; kind: "creator"; creatorWallet: string })[]
+  (UiHeadline & { signalId: string; kind: "creator"; creatorWallet: string; rwaTokenId?: string })[]
 > {
   const { listPublishedSignals } = await import("./signal-store");
   const signals = await listPublishedSignals(24);

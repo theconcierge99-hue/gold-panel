@@ -8,6 +8,7 @@ import { guardPaidX402Api } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
+import { mintSignalRwaToken } from "./rwa-token";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
 
@@ -55,7 +56,15 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
       publishPayer: gate.payer !== "dev-bypass" ? gate.payer : undefined,
     };
 
-    await savePublishedSignal(signal);
+    let rwaToken: Awaited<ReturnType<typeof mintSignalRwaToken>> | undefined;
+    try {
+      rwaToken = await mintSignalRwaToken(signal);
+      signal.rwaTokenId = rwaToken.tokenId;
+      await savePublishedSignal(signal);
+    } catch (e) {
+      console.error("[signal-publish] rwa mint", e instanceof Error ? e.message : e);
+      await savePublishedSignal(signal);
+    }
     try {
       await ingestCreatorSignalMemory(signal);
     } catch (e) {
@@ -80,6 +89,14 @@ export async function handleSignalPublish(request: Request): Promise<Response> {
         },
         publishFeeUsdc: X402_SIGNAL_PUBLISH_USDC,
         readerUnlockUsdc: 0.1,
+        rwa: rwaToken
+          ? {
+              tokenId: rwaToken.tokenId,
+              contentHash: rwaToken.contentHash,
+              standard: rwaToken.standard,
+              targetChain: rwaToken.targetChain,
+            }
+          : undefined,
       }),
       { status: 200, headers },
     );

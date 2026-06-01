@@ -199,6 +199,8 @@ export function getPublicX402Config() {
       note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) splits 50/50 — creator half sent on-chain to their wallet after each unlock when payout wallets are configured.",
     },
     creatorInstantPayoutReady: creatorPayoutWalletsConfigured(),
+    rwaSignalsEnabled: true,
+    readerBadgesEnabled: true,
     discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
   };
 }

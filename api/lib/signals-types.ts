@@ -8,6 +8,8 @@ export type CreatorSignal = {
   publishedAt: string;
   publishTx?: string;
   publishPayer?: string;
+  /** RWA certificate id (minted at publish) */
+  rwaTokenId?: string;
 };
 
 export type SignalLedgerEntry = {

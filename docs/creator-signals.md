@@ -76,9 +76,11 @@ Technology, Macro, Micro, Geopolitics, Crypto, Stocks, Energy, Equities, Oil, Go
 - `data-signal-id` drives unlock modal in `executive-lounge.html`.
 - RSS articles still use `data-url` → `news-open`.
 
-## On-chain mint
+## RWA tokenization & reader badges
 
-The UI label **Mint & Publish** reflects product language; current backend is **payment + KV storage** only (Option A). On-chain NFT mint (Option C) is not implemented.
+Each published signal receives an **RWA certificate** (`tokenId`, content hash, metadata). Each paid unlock awards a **reader badge** to the payer wallet. See [rwa.md](rwa.md).
+
+On-chain ERC-1155 / SPL mint from a deployed contract is optional (env `RWA_SIGNAL_CONTRACT_*`) and not required for certificates to appear in the Lounge.
 
 ## x402scan
 

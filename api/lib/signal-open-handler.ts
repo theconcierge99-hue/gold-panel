@@ -12,6 +12,8 @@ import {
   splitReaderUnlockAtomic,
 } from "./signal-revenue";
 import { parseSignalOpenBody } from "./signal-validation";
+import { awardReaderBadge } from "./rwa-badge";
+import { getSignalRwaToken } from "./rwa-store";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
 
 export async function handleSignalOpen(request: Request): Promise<Response> {
@@ -38,6 +40,16 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
 
     let creatorPayoutTx: string | undefined;
     let creatorPayoutStatus: "sent" | "skipped" | "failed" | undefined;
+    let readerBadge:
+      | {
+          badgeId: string;
+          badgeLabel: string;
+          badgeSlug: string;
+          tier: number;
+          isNew: boolean;
+          totalUnlocks: number;
+        }
+      | undefined;
 
     if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
       const split = splitReaderUnlockAtomic(X402_READ_PRICE_ATOMIC);
@@ -65,7 +77,27 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
         creatorPayoutStatus,
         at: new Date().toISOString(),
       });
+
+      try {
+        const award = await awardReaderBadge({
+          readerWallet: gate.payer,
+          signal,
+          unlockTx: gate.transaction,
+        });
+        readerBadge = {
+          badgeId: award.badge.badgeId,
+          badgeLabel: award.badge.badgeLabel,
+          badgeSlug: award.badge.badgeSlug,
+          tier: award.badge.tier,
+          isNew: award.isNew,
+          totalUnlocks: award.profile.totalUnlocks,
+        };
+      } catch (e) {
+        console.error("[signal-open] reader badge", e instanceof Error ? e.message : e);
+      }
     }
+
+    const rwaToken = await getSignalRwaToken(signal.id);
 
     const headers: Record<string, string> = {
       ...cors,
@@ -95,6 +127,12 @@ export async function handleSignalOpen(request: Request): Promise<Response> {
         creatorPayout: creatorPayoutStatus
           ? { status: creatorPayoutStatus, transaction: creatorPayoutTx }
           : undefined,
+        rwa: rwaToken
+          ? { tokenId: rwaToken.tokenId, contentHash: rwaToken.contentHash, standard: rwaToken.standard }
+          : signal.rwaTokenId
+            ? { tokenId: signal.rwaTokenId }
+            : undefined,
+        readerBadge,
       }),
       { status: 200, headers },
     );
