@@ -1,34 +1,29 @@
-import { corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { authorizeInternalApi } from "./lib/lounge-internal-auth";
 import type { CreatorPayoutResult } from "./lib/creator-payout-types";
 
-/** Node — SPL / ERC-20 creator share (not compatible with Edge) */
-export const config = {
-  runtime: "nodejs",
-  maxDuration: 60,
-};
-
-export default async function handler(request: Request): Promise<Response> {
-  const cors = corsHeadersFor(request);
-
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
+/** Node + @vercel/node handler — SPL / ERC-20 transfers. */
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
   }
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
-  if (!authorizeInternalApi(request)) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+
+  const pseudoRequest = new Request("https://internal/lounge-creator-payout", {
+    method: "POST",
+    headers: { authorization: String(req.headers.authorization ?? "") },
+  });
+  if (!authorizeInternalApi(pseudoRequest)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
 
   try {
-    const body = (await request.json()) as {
+    const body = (typeof req.body === "object" && req.body ? req.body : {}) as {
       creatorWallet?: string;
       creatorChain?: "sol" | "evm";
       shareAtomic?: string;
@@ -38,10 +33,8 @@ export default async function handler(request: Request): Promise<Response> {
     const shareAtomic = String(body.shareAtomic ?? "").trim();
 
     if (!creatorWallet || (creatorChain !== "sol" && creatorChain !== "evm") || !shareAtomic) {
-      return new Response(JSON.stringify({ error: "Invalid payout body" }), {
-        status: 400,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
+      res.status(400).json({ error: "Invalid payout body" });
+      return;
     }
 
     const { disburseCreatorInstantShare } = await import("./lib/creator-instant-payout");
@@ -51,15 +44,10 @@ export default async function handler(request: Request): Promise<Response> {
       shareAtomic,
     });
 
-    return new Response(JSON.stringify({ ok: true, payout }), {
-      status: 200,
-      headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
-    });
+    res.status(200).json({ ok: true, payout });
   } catch (e) {
-    console.error("[lounge-creator-payout]", e instanceof Error ? e.stack || e.message : e);
-    return new Response(JSON.stringify({ error: sanitizePublicError(e) }), {
-      status: 500,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[lounge-creator-payout]", e instanceof Error ? e.stack || msg : msg);
+    res.status(500).json({ error: msg.slice(0, 200) || "Payout failed" });
   }
 }

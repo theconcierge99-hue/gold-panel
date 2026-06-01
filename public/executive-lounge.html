@@ -1222,14 +1222,20 @@
       document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
       let msg = 'Signal published & tokenized ✓';
       if(data.solanaNft?.status==='pending'){
-        msg = 'Signal live ✓ Solana NFT minting to your wallet (~1 min)';
+        msg = 'Signal live ✓ Solana NFT minting to your wallet (~1–2 min)';
       } else if(data.rwa?.onChainMintAddress){
         msg = 'NFT minted to your Solana wallet · '+String(data.rwa.onChainMintAddress).slice(0,8)+'… ✓';
       } else if(data.rwa?.tokenId){
         msg = 'Signal published · RWA '+String(data.rwa.tokenId).slice(0,14)+'… ✓';
       }
+      if(data.solanaNft?.status==='failed'||data.rwa?.onChainMintStatus==='failed'){
+        msg = 'Signal published ✓ — on-chain NFT mint failed; refresh Collectibles in ~2 min or retry publish';
+      }
       if(data.solanaNft?.status==='skipped' && data.rwa?.targetChain==='sol'){
         console.info('Solana NFT mint skipped:', data.solanaNft.reason);
+        if(!data.rwa?.onChainMintAddress){
+          msg = 'Signal published ✓ (off-chain RWA only — Solana NFT mint not configured)';
+        }
       }
       toast(msg);
       await refreshMarket();

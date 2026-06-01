@@ -1,62 +1,50 @@
-import { corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { authorizeInternalApi } from "./lib/lounge-internal-auth";
 
-/** Node — Metaplex mint (not compatible with Edge) */
-export const config = {
-  runtime: "nodejs",
-  maxDuration: 60,
-};
-
-export default async function handler(request: Request): Promise<Response> {
-  const cors = corsHeadersFor(request);
-
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
+/** Node + @vercel/node handler — Metaplex (not Edge-compatible). */
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
   }
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
-  if (!authorizeInternalApi(request)) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+
+  const pseudoRequest = new Request("https://internal/lounge-rwa-mint-sol", {
+    method: "POST",
+    headers: { authorization: String(req.headers.authorization ?? "") },
+  });
+  if (!authorizeInternalApi(pseudoRequest)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
 
   try {
-    const body = (await request.json()) as { signalId?: string };
+    const body = (typeof req.body === "object" && req.body ? req.body : {}) as {
+      signalId?: string;
+    };
     const signalId = String(body.signalId ?? "").trim();
     if (!signalId) {
-      return new Response(JSON.stringify({ error: "signalId required" }), {
-        status: 400,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
+      res.status(400).json({ error: "signalId required" });
+      return;
     }
 
     const { getSignalById } = await import("./lib/signal-store");
     const signal = await getSignalById(signalId);
     if (!signal) {
-      return new Response(JSON.stringify({ error: "Signal not found" }), {
-        status: 404,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
+      res.status(404).json({ error: "Signal not found" });
+      return;
     }
 
     const { mintSolanaSignalNftForSignal } = await import("./lib/rwa-solana-mint");
     const solanaNft = await mintSolanaSignalNftForSignal(signal);
 
-    return new Response(JSON.stringify({ ok: true, solanaNft }), {
-      status: 200,
-      headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
-    });
+    res.status(200).json({ ok: true, solanaNft });
   } catch (e) {
-    console.error("[lounge-rwa-mint-sol]", e instanceof Error ? e.stack || e.message : e);
-    return new Response(JSON.stringify({ error: sanitizePublicError(e) }), {
-      status: 500,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[lounge-rwa-mint-sol]", e instanceof Error ? e.stack || msg : msg);
+    res.status(500).json({ error: msg.slice(0, 200) || "Mint failed" });
   }
 }
