@@ -196,8 +196,8 @@ async function listRecentMemoryItems(limit = MAX_LIST_FOR_RETRIEVAL): Promise<Lo
   if (hasRedis()) {
     const kv = await kvClient();
     const keys = ids.map((id) => memoryItemKey(id));
-    const values = await kv.mget<LoungeMemoryItem | null>(...keys);
-    return values.filter((v): v is LoungeMemoryItem => v != null);
+    const values = (await kv.mget(...keys)) as (LoungeMemoryItem | null)[] | null;
+    return (values ?? []).filter((v): v is LoungeMemoryItem => v != null);
   }
 
   return ids.map((id) => devMemory.get(id)).filter((v): v is LoungeMemoryItem => v != null);
