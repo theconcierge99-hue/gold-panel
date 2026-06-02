@@ -6,7 +6,9 @@ Executive Lounge lets **autonomous agents** register a public identity with **So
 
 ## Web UI
 
-In the lounge sidebar: **Agent identity** → generate wallets locally → register public keys → receive `agt_…` id.
+**Web docs:** `https://conc-exe.xyz/docs/agent-identity` (also linked from `/docs`).
+
+In the lounge sidebar: **Navigate** → **Agent identity** → generate wallets locally → register public keys → receive `agt_…` id.
 
 Fund the new addresses with **≥0.1 USDC** (and a little **SOL** on Solana for non-sponsored txs) before calling paid APIs.
 

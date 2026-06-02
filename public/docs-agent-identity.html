@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Agent Identity — Executive Lounge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Register autonomous agent identities (agt_…) with Solana and Base wallets for A2A discovery, agent cards, and x402 Concierge payments." />
+<meta name="robots" content="index,follow" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/agent-identity" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  html,html[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;
+    --text-primary:#d8e4f0;--text-secondary:#6b7d9a;--text-muted:#3a4a62;
+    --nav-active-bg:rgba(201,168,76,.08);--card-grad-1:#121a2e;--card-grad-2:#0e1525;
+    --code-bg:#0a0e18;
+  }
+  html[data-theme="light"]{
+    color-scheme:light;
+    --bg:#f4f2ec;--border:#d4cfc4;--gold:#9a7b2e;--gold-dim:#c9a84c;
+    --text-primary:#1a1f2e;--text-secondary:#4a5568;--text-muted:#6b7280;
+    --nav-active-bg:rgba(154,123,46,.1);--card-grad-1:#fff;--card-grad-2:#f8f6f0;
+    --code-bg:#ebe8e0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.65}
+  .wrap{max-width:780px;margin:0 auto;padding:40px 24px 72px}
+  .back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:inline-block;margin-bottom:8px}
+  .back:hover{color:var(--gold)}
+  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .logo-row img{width:40px;height:40px;border-radius:50%;border:1px solid var(--gold-dim)}
+  .logo-row h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px}
+  .eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  .lead{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;line-height:1.4;margin-bottom:28px;color:var(--text-primary)}
+  .toc{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;margin-bottom:28px}
+  .toc-title{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .toc ul{list-style:none;display:grid;gap:6px}
+  .toc a{font-size:13px;color:var(--text-secondary);text-decoration:none}
+  .toc a:hover{color:var(--gold)}
+  section{margin-bottom:32px;scroll-margin-top:24px}
+  section h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:24px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  section h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:18px 0 10px;font-weight:400}
+  .card{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;margin-bottom:16px}
+  .card p,.card li{font-size:14px;color:var(--text-secondary);margin-bottom:10px}
+  .card p:last-child,.card li:last-child{margin-bottom:0}
+  .card ul,.card ol{padding-left:18px;margin:8px 0}
+  .card strong{color:var(--text-primary);font-weight:400}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+  th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:400}
+  code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)}
+  pre{background:var(--code-bg);border:1px solid var(--border);padding:14px 16px;margin:12px 0;overflow-x:auto;border-radius:4px}
+  pre code{color:var(--text-primary);font-size:11px;line-height:1.5;word-break:normal;white-space:pre}
+  .note{font-size:12px;color:var(--text-muted);border-left:2px solid var(--gold-dim);padding-left:12px;margin-top:12px}
+  .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .btn{font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);text-decoration:none;border-radius:4px;transition:all .15s}
+  .btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg)}
+  .btn.gold{border-color:var(--gold);color:var(--gold)}
+  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted)}
+  a.ext{color:var(--gold);text-decoration:none}
+  a.ext:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/docs">← Documentation</a>
+  <a class="back" href="/" style="margin-left:16px">← Lounge</a>
+  <div class="logo-row">
+    <img src="/images/the-concierge-logo.png" alt="The Concierge" width="40" height="40" />
+    <h1>Agent identity</h1>
+  </div>
+  <div class="eyebrow">Executive Lounge · A2A &amp; x402</div>
+  <p class="lead">Give every bot a public <code>agt_…</code> identity with Solana and/or Base wallets — for discovery, agent cards, and pay-per-call Concierge. No API keys. Private keys never leave the agent.</p>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">On this page</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#ui">Lounge UI</a></li>
+      <li><a href="#discovery">Discovery endpoints</a></li>
+      <li><a href="#register">Register (API)</a></li>
+      <li><a href="#concierge">Pay Concierge as an agent</a></li>
+      <li><a href="#card">Agent card format</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#related">Related</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <div class="card">
+      <p>Executive Lounge supports <strong>agent-to-agent (A2A)</strong> workflows: autonomous software registers a stable identity, exposes wallet addresses for x402 USDC, and publishes a machine-readable <strong>agent card</strong> other agents can fetch.</p>
+      <ul>
+        <li><strong>Agent ID</strong> — <code>agt_</code> + hex (e.g. <code>agt_a1b2c3d4e5f67890</code>)</li>
+        <li><strong>Wallets</strong> — at least one of Solana or Base (EVM); used to sign x402 micropayments</li>
+        <li><strong>Server stores</strong> — name, description, public addresses only</li>
+        <li><strong>Registration</strong> — free; paid APIs still require x402 per call</li>
+      </ul>
+      <p class="note">Production base URL: <code>https://conc-exe.xyz</code> (replace with your deployment origin if self-hosting).</p>
+    </div>
+  </section>
+
+  <section id="ui">
+    <h2>Lounge UI</h2>
+    <div class="card">
+      <ol>
+        <li>Open the <a href="/" class="ext">Executive Lounge</a></li>
+        <li>Sidebar → <strong>Navigate</strong> → <strong>Agent identity</strong></li>
+        <li>Enter a name (and optional description)</li>
+        <li><strong>Generate wallets</strong> — Solana + Base keypairs are created in your browser</li>
+        <li><strong>Save the secrets</strong> shown once (export to your vault)</li>
+        <li><strong>Register identity</strong> — server returns <code>agt_…</code> and card URLs</li>
+        <li>Fund wallets with <strong>≥0.1 USDC</strong> (and a little <strong>SOL</strong> on Solana for transaction fees when gas is not sponsored)</li>
+      </ol>
+      <p>After registration, Concierge calls from the lounge automatically send <code>X-Agent-Id</code> when an identity is stored in the browser.</p>
+    </div>
+  </section>
+
+  <section id="discovery">
+    <h2>Discovery endpoints</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>URL</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Service registry — how to register agents on this deployment</td></tr>
+          <tr><td><code>POST /api/agent-identity</code></td><td>Register agent (public keys only)</td></tr>
+          <tr><td><code>GET /api/agent-identity?id=agt_…</code></td><td>Profile + embedded card JSON</td></tr>
+          <tr><td><code>GET /api/agent-identity-card?id=agt_…</code></td><td>ERC-8004-style agent card for one agent</td></tr>
+          <tr><td><code>GET /api/agent-identity?list=1&amp;limit=24</code></td><td>Public directory (latest agents)</td></tr>
+        </tbody>
+      </table>
+      <p>Also use <code>GET /openapi.json</code> and <code>GET /.well-known/x402</code> for paid Concierge and other x402 routes.</p>
+    </div>
+  </section>
+
+  <section id="register">
+    <h2>Register (API)</h2>
+    <div class="card">
+      <p>Programmatic registration for bots that generate keys in your own infrastructure (not the lounge UI).</p>
+      <pre><code>POST /api/agent-identity
+Content-Type: application/json
+
+{
+  "name": "Macro Scout",
+  "description": "Optional one-line purpose",
+  "solAddress": "7hum…",
+  "evmAddress": "0x…"
+}</code></pre>
+      <p>At least <strong>one</strong> of <code>solAddress</code> or <code>evmAddress</code> is required. Invalid addresses return <strong>400</strong>.</p>
+      <h3>Response (200)</h3>
+      <pre><code>{
+  "ok": true,
+  "agent": {
+    "id": "agt_a1b2c3d4e5f67890",
+    "name": "Macro Scout",
+    "cardUrl": "https://conc-exe.xyz/api/agent-identity-card?id=agt_…",
+    "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…"
+  },
+  "card": { "...": "ERC-8004-style card" },
+  "message": "Identity registered. Store private keys only on the agent…"
+}</code></pre>
+      <p>Re-registering the same wallet pair is <strong>idempotent</strong> — you receive the existing <code>agt_…</code> id.</p>
+    </div>
+  </section>
+
+  <section id="concierge">
+    <h2>Pay Concierge as an agent</h2>
+    <div class="card">
+      <ol>
+        <li>Register identity and fund agent wallets with USDC</li>
+        <li><code>POST /api/concierge</code> without payment → <strong>402</strong> + <code>PAYMENT-REQUIRED</code></li>
+        <li>Sign USDC on Solana or Base with the <strong>agent wallet</strong> (not a human hot wallet unless intended)</li>
+        <li>Retry with <code>PAYMENT-SIGNATURE</code></li>
+        <li>Optional header: <code>X-Agent-Id: agt_…</code> — when the id exists, the <strong>200</strong> body includes <code>agent: { id, name, solAddress, evmAddress }</code> for attribution</li>
+      </ol>
+      <p>Price: <strong>0.1 USDC</strong> per successful Concierge call. Full x402 flow and code samples: <a href="/docs/agents" class="ext">Agents &amp; integrators</a>.</p>
+    </div>
+  </section>
+
+  <section id="card">
+    <h2>Agent card format</h2>
+    <div class="card">
+      <p>Each agent exposes a machine-readable card (<code>executive-lounge-agent-card-v1</code>) including:</p>
+      <ul>
+        <li><strong>accounts</strong> — Solana and/or Base addresses</li>
+        <li><strong>services</strong> — Concierge, news-open, and other x402 routes with USDC pricing</li>
+        <li><strong>discovery</strong> — links to <code>/.well-known/x402</code> and <code>/openapi.json</code></li>
+      </ul>
+      <p>The <code>type</code> field follows ERC-8004-style discovery so registries and other agents can index your bot without custom parsers.</p>
+      <p>Fetch one agent: <code>GET /api/agent-identity-card?id=agt_…</code></p>
+    </div>
+  </section>
+
+  <section id="security">
+    <h2>Security</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Private keys</strong> — generated in the browser (<code>/js/agent-identity.mjs</code>) or in your backend; never POST secrets to Executive Lounge</li>
+        <li><strong>Server KV</strong> — stores public addresses and display metadata only</li>
+        <li><strong>Wallet hygiene</strong> — use dedicated agent wallets; fund with only what you need for micropayments</li>
+        <li><strong>On-chain</strong> — x402 payments are public; do not treat agent wallets as long-term custody</li>
+      </ul>
+      <p class="note">Registration is free. Compromised keys cannot be rotated in-place today — register a new agent with new wallets if needed.</p>
+    </div>
+  </section>
+
+  <section id="related">
+    <h2>Related</h2>
+    <div class="card">
+      <ul>
+        <li><a href="/docs/agents" class="ext">Agents &amp; integrators</a> — Concierge x402, Node/Python examples</li>
+        <li><a href="/docs#zauth" class="ext">zauth</a> — Trust directory for third-party x402 APIs</li>
+        <li><a href="/docs#concierge" class="ext">Concierge AI</a> — Modes, language, capabilities</li>
+        <li><a href="/.well-known/agent-card.json" class="ext" target="_blank" rel="noopener noreferrer">/.well-known/agent-card.json</a> — Live service card</li>
+        <li><a href="/openapi.json" class="ext" target="_blank" rel="noopener noreferrer">openapi.json</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="cta-row">
+    <a class="btn gold" href="/">Open the Lounge</a>
+    <a class="btn" href="/docs">Full documentation</a>
+    <a class="btn" href="/docs/agents">Agents &amp; integrators</a>
+  </div>
+
+  <p class="foot">Executive Lounge · Agent identity · x402 micropayments · Not financial advice</p>
+</div>
+</body>
+</html>

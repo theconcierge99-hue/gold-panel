@@ -7,7 +7,7 @@ Integrate **Executive Lounge Concierge** from any bot, backend, or workflow usin
 
 ## Agent identity (A2A)
 
-Each agent can register **`agt_…`** with Solana/Base wallets for discovery and x402. See [agent-identity.md](agent-identity.md) · Lounge UI → **Agent identity** · `POST /api/agent-identity` · `GET /.well-known/agent-card.json`.
+Each agent can register **`agt_…`** with Solana/Base wallets for discovery and x402. **Web:** `https://conc-exe.xyz/docs/agent-identity` · [agent-identity.md](agent-identity.md) · Lounge → **Navigate** → **Agent identity** · `POST /api/agent-identity` · `GET /.well-known/agent-card.json`.
 
 ## Quick reference
 

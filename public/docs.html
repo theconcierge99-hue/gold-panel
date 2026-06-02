@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Documentation — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, zauth trust layer, RWA signals, Solana NFT mint, Concierge AI." />
+<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, agent identity, zauth trust layer, RWA signals, Solana NFT mint, Concierge AI." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs" />
@@ -68,7 +68,7 @@
     <h1>Documentation</h1>
   </div>
   <div class="eyebrow">Executive Lounge</div>
-  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, <a href="#zauth" style="color:var(--gold)">zauth</a> trust layer, RWA creator signals, and Concierge AI.</p>
+  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, <a href="/docs/agent-identity" style="color:var(--gold)">agent identity</a>, <a href="#zauth" style="color:var(--gold)">zauth</a> trust layer, RWA creator signals, and Concierge AI.</p>
 
   <nav class="toc" aria-label="Table of contents">
     <div class="toc-title">On this page</div>
@@ -80,6 +80,7 @@
       <li><a href="#zauth">zauth integration</a></li>
       <li><a href="#x402scan">x402scan listing</a></li>
       <li><a href="#concierge">Concierge AI</a></li>
+      <li><a href="/docs/agent-identity">Agent identity ↗</a></li>
       <li><a href="/docs/agents">Agents &amp; integrators ↗</a></li>
       <li><a href="#rwa">RWA (Real World Assets)</a></li>
       <li><a href="#signals">Creator signals</a></li>
@@ -133,6 +134,10 @@
         <li><code>GET /api/zauth-status</code> — this site’s directory slice + verification checks</li>
         <li><code>GET /.well-known/x402</code> — x402 discovery fan-out</li>
         <li><code>GET /openapi.json</code> — OpenAPI + payment metadata</li>
+        <li><code>GET /.well-known/agent-card.json</code> — agent registry / how to register <code>agt_…</code></li>
+        <li><code>POST /api/agent-identity</code> — register agent (public keys)</li>
+        <li><code>GET /api/agent-identity</code> — profile, directory (<code>?list=1</code>), or card</li>
+        <li><code>GET /api/agent-identity-card</code> — ERC-8004-style card per agent</li>
       </ul>
       <h3>Paid (POST, x402)</h3>
       <ul>
@@ -237,6 +242,7 @@
       <p>Uses live market data, general-knowledge feeds, and lounge memory (recent headlines + creator signals).</p>
       <p><strong>Language:</strong> defaults to English; replies in Indonesian or other languages when the user’s message (or recent user turns for short replies) is clearly in that language.</p>
       <p><strong>External agents:</strong> integrate via x402 without source access — see <a href="/docs/agents" style="color:var(--gold)">Agents &amp; integrators</a> (<code>POST /api/concierge</code>, 0.1 USDC, OpenAPI + Node/Python examples).</p>
+      <p><strong>Agent identity:</strong> register <code>agt_…</code> + Solana/Base wallets for A2A discovery — see <a href="/docs/agent-identity" style="color:var(--gold)">Agent identity</a> (Lounge → Navigate → Agent identity, or <code>POST /api/agent-identity</code>). Optional header <code>X-Agent-Id</code> on paid Concierge calls.</p>
     </div>
   </section>
 

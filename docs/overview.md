@@ -12,6 +12,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/about` | About page |
 | `https://your-domain.com/docs` | Documentation (web) |
 | `https://your-domain.com/docs/agents` | Concierge API for agents & integrators (x402) |
+| `https://your-domain.com/docs/agent-identity` | Agent identity (`agt_…`), wallets, agent cards |
 | `https://your-domain.com/deploy-version.txt` | Deployed git commit (verify production build) |
 | `https://your-domain.com/api/market` | Free headline + signal feed (JSON) |
 | `https://your-domain.com/api/x402-config` | Public payment + RWA readiness flags |

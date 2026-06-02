@@ -55,7 +55,7 @@
     },
     {
       "source": "/docs/agent-identity",
-      "destination": "/docs-agents.html"
+      "destination": "/docs-agent-identity.html"
     },
     {
       "source": "/.well-known/agent-card.json",
