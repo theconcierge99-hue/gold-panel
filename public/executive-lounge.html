@@ -566,9 +566,9 @@
     <div class="logo brand-mark">
       <img class="brand-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="38" height="38" />
       <div class="brand-text">
-        <span class="name">Executive Lounge</span>
+      <span class="name">Executive Lounge</span>
         <span class="sub">Private Intelligence Lobby</span>
-      </div>
+    </div>
     </div>
     <button type="button" class="header-menu-btn" id="menuBtn" aria-label="Open menu" onclick="toggleNavDrawer()">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -597,9 +597,6 @@
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
-    </div>
-    <div class="nav-group">
-      <div class="nav-h">Concierge Agent</div>
       <a class="nav-i" href="/agent" target="_blank" rel="noopener noreferrer">Concierge Agent</a>
     </div>
     <div class="nav-group">
@@ -668,9 +665,9 @@
         <div class="conc-body">
           <div class="conc-hero" id="concHero">
             <h2 class="conc-greeting">What's on the agenda today?</h2>
-          </div>
-          <div class="chat" id="chat"></div>
         </div>
+        <div class="chat" id="chat"></div>
+          </div>
         <div class="conc-footer">
           <div class="conc-input-wrap">
             <button type="button" class="conc-icon-btn" title="Quick prompts" onclick="document.querySelector('.conc-suggestions')?.scrollIntoView({behavior:'smooth',block:'nearest'})" aria-label="Suggestions">
@@ -717,7 +714,7 @@
       <div class="r-h">Trending Narratives</div>
       <div id="trendingNarratives">
         <div class="intel-loading" style="padding:12px 0;border:none">Analyzing narrative clusters…</div>
-      </div>
+    </div>
     </div>
 
     <div class="r-section">
@@ -1445,7 +1442,7 @@
           toast(String(mintErr?.message||mintErr||'NFT mint failed')+'. Add ~0.02 SOL in Phantom, then try publishing again.');
         }
       }
-      closeModal();
+    closeModal();
       document.getElementById('sigTitle').value='';
       document.getElementById('sigSummary').value='';
       document.querySelectorAll('#chips .cat-chip.sel').forEach(el=>el.classList.remove('sel'));
@@ -2392,7 +2389,7 @@
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
     if(trackSession!==false){
       window._sessionMessages.push({ role:'model', html:inner, text:stripTags(html), images:imgs.length?imgs:undefined });
-    }
+  }
     syncConciergeLayout();
   }
   function addUser(text, trackSession){
