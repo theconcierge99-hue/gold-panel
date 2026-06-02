@@ -71,6 +71,29 @@ Directory slice and optional Provider Hub verification for **this** deployment o
 
 `/api/x402-config` also returns `zauthTelemetryEnabled` and `discovery.zauth` link bundle.
 
+### `GET /.well-known/agent-card.json`
+
+Service-level agent registry metadata (register URL, docs, payment networks). See [agent-identity.md](agent-identity.md).
+
+### `POST /api/agent-identity`
+
+Register an autonomous agent identity (public keys only — **no private keys**).
+
+**Body:** `name` (required), `description` (optional), `solAddress` and/or `evmAddress` (at least one).
+
+**Response (200):** `agent` with `id` (`agt_…`), `cardUrl`, `profileUrl`, plus `card` JSON.
+
+### `GET /api/agent-identity`
+
+- `?id=agt_…` — profile + card  
+- `?list=1&limit=24` — public directory of registered agents  
+
+### `GET /api/agent-identity-card`
+
+`?id=agt_…` — ERC-8004-style agent card for one agent.
+
+Paid Concierge accepts optional header **`X-Agent-Id`** when the id exists.
+
 ## Paid endpoints
 
 Probed by x402scan with **GET** (returns 402) and **POST** (402 without payment, 200 with payment).

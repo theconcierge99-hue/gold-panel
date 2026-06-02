@@ -17,12 +17,13 @@ Full technical documentation for the **gold-panel** project (**Executive Lounge*
 9. **[x402scan](x402scan.md)** — Discovery documents and marketplace registration  
 10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory  
 11. **[Agents & integrators](agents.md)** — Call Concierge via x402 (no repo); web `/docs/agents`  
-12. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
-13. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
-14. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
-15. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
-16. **[Security](security.md)** — What must never appear in docs or commits  
-17. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
+12. **[Agent identity](agent-identity.md)** — Register `agt_…` + Solana/Base wallets for A2A  
+13. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
+14. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
+15. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
+16. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
+17. **[Security](security.md)** — What must never appear in docs or commits  
+18. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
 
 ## External references
 

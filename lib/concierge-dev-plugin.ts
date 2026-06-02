@@ -9,6 +9,9 @@ import {
 import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
 import { handleSignalOpen } from "../api/lib/signal-open-handler";
 import { handleSignalPublish } from "../api/lib/signal-publish-handler";
+import handleAgentIdentity from "../api/agent-identity";
+import handleAgentIdentityCard from "../api/agent-identity-card";
+import handleWellKnownAgentCard from "../api/well-known-agent-card";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,6 +110,8 @@ export function conciergeDevPlugin(): Plugin {
           "/api/lounge-signal-open": handleSignalOpen,
           "/api/signal-publish": handleSignalPublish,
           "/api/signal-open": handleSignalOpen,
+          "/api/agent-identity": handleAgentIdentity,
+          "/api/agent-identity-card": handleAgentIdentityCard,
         };
         if (url && signalRoutes[url]) {
           const chunks: Buffer[] = [];
@@ -128,6 +133,16 @@ export function conciergeDevPlugin(): Plugin {
             res.statusCode = status;
             res.end(JSON.stringify(json));
           });
+          return;
+        }
+
+        if (url === "/.well-known/agent-card.json" && req.method === "GET") {
+          const res2 = await handleWellKnownAgentCard(
+            new Request("http://localhost/.well-known/agent-card.json", { method: "GET" }),
+          );
+          for (const [k, v] of Object.entries(jsonHeaders)) res.setHeader(k, v);
+          res.statusCode = res2.status;
+          res.end(await res2.text());
           return;
         }
 

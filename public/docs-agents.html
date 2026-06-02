@@ -80,6 +80,7 @@
   <nav class="toc" aria-label="Table of contents">
     <div class="toc-title">On this page</div>
     <ul>
+      <li><a href="#identity">Agent identity</a></li>
       <li><a href="#quick">Quick start</a></li>
       <li><a href="#discovery">Discovery</a></li>
       <li><a href="#payment">x402 payment flow</a></li>
@@ -91,6 +92,21 @@
       <li><a href="#limits">Limits</a></li>
     </ul>
   </nav>
+
+  <section id="identity">
+    <h2>Agent identity</h2>
+    <div class="card">
+      <p>Each bot can register a public <strong>agent ID</strong> (<code>agt_…</code>) with <strong>Solana and/or Base wallets</strong> — similar to <a class="ext" href="https://hyreagent.fun/" target="_blank" rel="noopener noreferrer">HYRE</a> identity, without sharing source code.</p>
+      <ul>
+        <li><strong>UI:</strong> Lounge sidebar → <em>Agent identity</em> → generate wallets → register</li>
+        <li><code>POST /api/agent-identity</code> — register public keys (secrets stay on your side)</li>
+        <li><code>GET /.well-known/agent-card.json</code> — service registry</li>
+        <li><code>GET /api/agent-identity-card?id=agt_…</code> — ERC-8004-style card per agent</li>
+      </ul>
+      <p>When calling Concierge, send optional header <code>X-Agent-Id: agt_…</code> after registration.</p>
+      <p>More detail in this page (section above) and operator notes in repository <code>docs/agent-identity.md</code>.</p>
+    </div>
+  </section>
 
   <section id="quick">
     <h2>Quick start</h2>

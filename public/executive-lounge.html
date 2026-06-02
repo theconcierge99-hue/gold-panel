@@ -320,7 +320,14 @@
   .overlay{position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;animation:fadeUp .25s}
   .overlay.show{display:flex}
   /* Payment + wallet must sit above Create Signal / reader modals (same default z-index) */
-  #payOverlay,#walletOverlay{z-index:70}
+  #payOverlay,#walletOverlay,#agentOverlay{z-index:70}
+  .agent-field{margin-bottom:12px}
+  .agent-field label{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+  .agent-field input,.agent-field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);background:var(--gcard-bg);color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:13px;border-radius:4px}
+  .agent-field textarea{min-height:56px;resize:vertical}
+  .agent-secrets{font-family:'DM Mono',monospace;font-size:10px;line-height:1.5;color:var(--text-secondary);background:var(--code-bg,#0a0e18);border:1px solid var(--border);padding:12px;border-radius:4px;word-break:break-all;max-height:140px;overflow:auto}
+  .agent-warn{font-size:11px;color:var(--signal-amber);margin:10px 0;line-height:1.45}
+  .agent-id-row{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:8px}
   .modal{width:600px;max-width:92vw;background:var(--graphite);border:1px solid var(--border);position:relative;padding:28px 30px;max-height:90vh;overflow-y:auto}
   .modal::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
   .modal h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;margin-bottom:4px}
@@ -547,6 +554,7 @@
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
+<script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body>
@@ -605,7 +613,9 @@
     </div>
     </div>
     <div class="sidebar-footer">
+      <a class="sidebar-about-link" href="#" onclick="openAgentIdentityModal();return false">Agent identity</a>
       <a class="sidebar-about-link" href="/docs" target="_blank" rel="noopener noreferrer">Documentation</a>
+      <a class="sidebar-about-link" href="/docs/agents" target="_blank" rel="noopener noreferrer">API for agents</a>
       <a class="sidebar-about-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
       <div class="sidebar-social-row">
         <a class="sidebar-social" href="https://x.com/Th3concierge_" target="_blank" rel="noopener noreferrer" aria-label="Follow on X @Th3concierge_">
@@ -776,6 +786,43 @@
         <button class="btn" onclick="disconnectAllWallets()">Disconnect all</button>
         <button class="btn gold" onclick="closeWalletModal()">Done</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT IDENTITY -->
+<div class="overlay" id="agentOverlay" onclick="if(event.target===this)closeAgentIdentityModal()">
+  <div class="modal wallet-modal" style="max-width:480px" onclick="event.stopPropagation()">
+    <button class="close" onclick="closeAgentIdentityModal()">×</button>
+    <h2>Agent identity</h2>
+    <p class="wallet-intro">Create a public agent ID + Solana/Base wallets for A2A and x402 — like a mini <a href="https://hyreagent.fun/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">HYRE</a> identity layer. Keys stay in your browser until you export them.</p>
+    <div id="agentIdentityPanel">
+      <div id="agentExisting" hidden>
+        <p class="agent-id-row" id="agentExistingId"></p>
+        <p class="wallet-intro" id="agentExistingMeta"></p>
+        <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border)">
+          <button type="button" class="btn" onclick="copyAgentCardUrl()">Copy card URL</button>
+          <button type="button" class="btn gold" onclick="closeAgentIdentityModal()">Done</button>
+        </div>
+      </div>
+      <div id="agentCreate">
+        <div class="agent-field">
+          <label for="agentName">Agent name</label>
+          <input id="agentName" type="text" placeholder="e.g. Macro Scout Bot" maxlength="64" />
+        </div>
+        <div class="agent-field">
+          <label for="agentDesc">Description (optional)</label>
+          <textarea id="agentDesc" placeholder="What this agent does…" maxlength="280"></textarea>
+        </div>
+        <p class="agent-warn" id="agentWarn" hidden>Save these secrets now — they cannot be recovered from the server.</p>
+        <div class="agent-secrets" id="agentSecrets" hidden></div>
+        <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border)">
+          <button type="button" class="btn" onclick="closeAgentIdentityModal()">Cancel</button>
+          <button type="button" class="btn" id="agentGenBtn" onclick="generateAgentWalletsUi()">Generate wallets</button>
+          <button type="button" class="btn gold" id="agentRegBtn" onclick="registerAgentUi()" disabled>Register identity</button>
+        </div>
+      </div>
+      <div class="wallet-status" id="agentStatus"></div>
     </div>
   </div>
 </div>
@@ -1090,6 +1137,120 @@
   window.openWalletModal = openWalletModal;
   window.closeWalletModal = closeWalletModal;
   renderWalletUI();
+
+  let _pendingAgentWallets = null;
+
+  function renderAgentIdentityPanel(){
+    const existing = typeof window.elLoadAgentIdentity === 'function' ? window.elLoadAgentIdentity() : null;
+    const exEl = document.getElementById('agentExisting');
+    const crEl = document.getElementById('agentCreate');
+    if(existing?.agentId){
+      exEl.hidden = false;
+      crEl.hidden = true;
+      document.getElementById('agentExistingId').textContent = existing.agentId;
+      document.getElementById('agentExistingMeta').textContent =
+        (existing.name||'') +
+        (existing.solAddress ? ' · SOL '+shortAddr(existing.solAddress,'sol') : '') +
+        (existing.evmAddress ? ' · EVM '+shortAddr(existing.evmAddress,'evm') : '');
+      window._agentCardUrl = existing.cardUrl;
+    }else{
+      exEl.hidden = true;
+      crEl.hidden = false;
+      _pendingAgentWallets = null;
+      document.getElementById('agentSecrets').hidden = true;
+      document.getElementById('agentWarn').hidden = true;
+      document.getElementById('agentRegBtn').disabled = true;
+    }
+  }
+
+  function openAgentIdentityModal(){
+    document.getElementById('agentStatus').textContent = '';
+    document.getElementById('agentStatus').classList.remove('err');
+    renderAgentIdentityPanel();
+    document.getElementById('agentOverlay').classList.add('show');
+  }
+  function closeAgentIdentityModal(){
+    document.getElementById('agentOverlay').classList.remove('show');
+  }
+  window.openAgentIdentityModal = openAgentIdentityModal;
+  window.closeAgentIdentityModal = closeAgentIdentityModal;
+
+  function generateAgentWalletsUi(){
+    const st = document.getElementById('agentStatus');
+    st.classList.remove('err');
+    if(typeof window.elGenerateAgentWallets !== 'function'){
+      st.textContent = 'Agent module loading — hard refresh (Ctrl+F5)';
+      st.classList.add('err');
+      return;
+    }
+    try{
+      _pendingAgentWallets = window.elGenerateAgentWallets();
+      if(typeof window.elSaveAgentWalletSecrets === 'function'){
+        window.elSaveAgentWalletSecrets(_pendingAgentWallets);
+      }
+      const box = document.getElementById('agentSecrets');
+      box.hidden = false;
+      box.textContent =
+        'Solana: '+_pendingAgentWallets.solAddress+'\n'+
+        'Solana secret (base58): '+_pendingAgentWallets.solSecretBase58+'\n\n'+
+        'EVM: '+_pendingAgentWallets.evmAddress+'\n'+
+        'EVM private key: '+_pendingAgentWallets.evmPrivateKey;
+      document.getElementById('agentWarn').hidden = false;
+      document.getElementById('agentRegBtn').disabled = false;
+      st.textContent = 'Wallets generated locally — fund with USDC + a little SOL on Solana for fees.';
+    }catch(e){
+      st.textContent = e?.message || 'Could not generate wallets';
+      st.classList.add('err');
+    }
+  }
+  window.generateAgentWalletsUi = generateAgentWalletsUi;
+
+  async function registerAgentUi(){
+    const st = document.getElementById('agentStatus');
+    st.classList.remove('err');
+    if(!_pendingAgentWallets){
+      st.textContent = 'Generate wallets first';
+      st.classList.add('err');
+      return;
+    }
+    const name = String(document.getElementById('agentName').value||'').trim();
+    if(name.length < 2){
+      st.textContent = 'Enter an agent name (2+ characters)';
+      st.classList.add('err');
+      return;
+    }
+    if(typeof window.elRegisterAgentIdentity !== 'function'){
+      st.textContent = 'Agent module not loaded';
+      st.classList.add('err');
+      return;
+    }
+    st.textContent = 'Registering…';
+    try{
+      const origin = window.location.origin;
+      const out = await window.elRegisterAgentIdentity(origin, {
+        name,
+        description: String(document.getElementById('agentDesc').value||'').trim() || undefined,
+        solAddress: _pendingAgentWallets.solAddress,
+        evmAddress: _pendingAgentWallets.evmAddress,
+      });
+      if(!out.ok) throw new Error(out.error||'Registration failed');
+      toast('Agent registered · '+out.agent.agentId);
+      _pendingAgentWallets = null;
+      renderAgentIdentityPanel();
+      st.textContent = 'Registered. Concierge calls will send X-Agent-Id automatically.';
+    }catch(e){
+      st.textContent = e?.message || 'Registration failed';
+      st.classList.add('err');
+    }
+  }
+  window.registerAgentUi = registerAgentUi;
+
+  function copyAgentCardUrl(){
+    const url = window._agentCardUrl || (typeof window.elLoadAgentIdentity==='function' && window.elLoadAgentIdentity()?.cardUrl);
+    if(!url){ toast('No card URL'); return; }
+    navigator.clipboard.writeText(url).then(()=>toast('Card URL copied')).catch(()=>toast(url));
+  }
+  window.copyAgentCardUrl = copyAgentCardUrl;
 
   function syncConciergeLayout(){
     const shell=document.getElementById('conciergeShell');
@@ -1767,11 +1928,16 @@
     );
     const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
+    const agentId = typeof window.elGetStoredAgentId === 'function' ? window.elGetStoredAgentId() : null;
+    const baseOpts = options || {};
+    const headers = Object.assign({}, baseOpts.headers || {});
+    if(agentId) headers['X-Agent-Id'] = agentId;
+    const fetchOpts = Object.assign({}, baseOpts, { headers });
     if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
     else if(u.includes('/api/lounge-signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
     try{
-      return await paidFetch(url, options || {});
+      return await paidFetch(url, fetchOpts);
     }catch(e){
       throw new Error(formatPaymentError(e, preferredChain) || (e?.message || String(e)));
     }
