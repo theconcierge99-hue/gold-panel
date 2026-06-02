@@ -10,12 +10,23 @@ renderAgentTopNav("endpoints");
 
 const listEl = document.getElementById("endpoint-catalog");
 const filtersEl = document.getElementById("agent-filters");
-const statsEl = document.getElementById("agent-stats");
+const chipsEl = document.getElementById("res-chips");
+const baseUrlEl = document.getElementById("res-base-url");
 let activeSegment = "all";
 
 const c = countBySegment();
-if (statsEl) {
-  statsEl.textContent = `${c.total} endpoints · x402 · Pay per call · ${CONCIERGE_AGENT_ORIGIN.replace(/^https?:\/\//, "")}`;
+const origin = CONCIERGE_AGENT_ORIGIN.replace(/\/$/, "");
+
+if (baseUrlEl) baseUrlEl.textContent = origin;
+
+if (chipsEl) {
+  chipsEl.innerHTML = [
+    `<span><strong>${c.total}</strong> Endpoints</span>`,
+    `<span class="dot">·</span><span>x402</span>`,
+    `<span class="dot">·</span><span>Pay per call</span>`,
+    `<span class="dot">·</span><span>Solana · Base</span>`,
+    `<span class="dot">·</span><span>AI-enhanced</span>`,
+  ].join("");
 }
 
 const SEGMENT_LABELS = {
@@ -24,11 +35,16 @@ const SEGMENT_LABELS = {
   lounge: "Lounge",
 };
 
-function renderFilters() {
+function segmentCounts() {
   const counts = { all: CONCIERGE_AGENT_ENDPOINTS.length };
   for (const ep of CONCIERGE_AGENT_ENDPOINTS) {
     counts[ep.segment] = (counts[ep.segment] || 0) + 1;
   }
+  return counts;
+}
+
+function renderFilters() {
+  const counts = segmentCounts();
   const segments = [
     { id: "all", label: "All" },
     { id: "concierge", label: "Concierge" },
@@ -39,16 +55,37 @@ function renderFilters() {
     .map((s) => {
       const n = counts[s.id] ?? 0;
       const active = s.id === activeSegment ? " active" : "";
-      return `<button type="button" class="agent-filter${active}" data-seg="${s.id}">${s.label} (${n})</button>`;
+      return `<button type="button" class="res-filter${active}" data-seg="${s.id}">${s.label}<span class="res-filter-n">${n}</span></button>`;
     })
     .join("");
-  filtersEl.querySelectorAll(".agent-filter").forEach((btn) => {
+  filtersEl.querySelectorAll(".res-filter").forEach((btn) => {
     btn.addEventListener("click", () => {
       activeSegment = btn.dataset.seg || "all";
       renderFilters();
       renderCatalog();
     });
   });
+}
+
+function endpointCard(ep) {
+  const price = ep.priceUsd.startsWith("$") ? ep.priceUsd : `$${ep.priceUsd}`;
+  return `<a class="res-ep" href="/agent/playground?ep=${encodeURIComponent(ep.id)}">
+    <div class="res-ep-head">
+      <span class="res-ep-route"><span class="res-method">${ep.method}</span><span class="res-path">${ep.path}</span></span>
+      <span class="res-ep-price">${price}</span>
+    </div>
+    <p class="res-ep-desc">${ep.description}</p>
+    <code class="res-ep-url">${endpointUrl(ep.path)}</code>
+  </a>`;
+}
+
+function segmentHeading(seg, n) {
+  const label = SEGMENT_LABELS[seg] || seg;
+  const unit = n === 1 ? "endpoint" : "endpoints";
+  return `<header class="res-seg-head">
+    <h2>${label}</h2>
+    <span class="res-seg-count"><span class="res-seg-n">(${n})</span>${n} ${unit}</span>
+  </header>`;
 }
 
 function renderCatalog() {
@@ -62,21 +99,8 @@ function renderCatalog() {
   listEl.innerHTML = order
     .filter((seg) => grouped[seg]?.length)
     .map((seg) => {
-      const items = grouped[seg]
-        .map(
-          (ep) => `
-        <a class="agent-ep" href="/agent/playground?ep=${encodeURIComponent(ep.id)}">
-          <div>
-            <div class="agent-ep-method">${ep.method}</div>
-            <div class="agent-ep-path">${ep.path}</div>
-            <div class="agent-ep-desc">${ep.name} — ${ep.description}</div>
-            <div class="agent-ep-url">${endpointUrl(ep.path)}</div>
-          </div>
-          <div class="agent-ep-price">$${ep.priceUsd}</div>
-        </a>`,
-        )
-        .join("");
-      return `<section class="agent-segment"><h2 class="agent-segment-h">${SEGMENT_LABELS[seg] || seg} <span>(${grouped[seg].length})</span></h2><div class="agent-endpoint-list">${items}</div></section>`;
+      const items = grouped[seg].map(endpointCard).join("");
+      return `<section class="res-seg">${segmentHeading(seg, grouped[seg].length)}<div class="res-ep-list">${items}</div></section>`;
     })
     .join("");
 }

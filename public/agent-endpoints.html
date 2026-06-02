@@ -8,22 +8,42 @@
 <meta name="description" content="Concierge Agent API catalog — 9 x402 endpoints for chat, DeFi intel, and Lounge. Pay per call, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent/endpoints" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/agent-playground.css" />
-<link rel="stylesheet" href="/css/agent-hub.css" />
+<link rel="stylesheet" href="/css/agent-resources.css" />
 </head>
-<body data-agent-page="endpoints" style="background:var(--pg-bg);min-height:100vh">
-<div class="pg-shell" style="min-height:100vh;height:auto">
+<body class="res-page" data-agent-page="endpoints">
+<div class="pg-shell res-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
-  <main class="agent-main" style="max-width:900px;margin:0 auto;padding:28px 20px 48px">
-    <div class="agent-hero">
-      <div class="agent-eyebrow">API catalog</div>
-      <h1 class="agent-title">Concierge Agent Endpoints</h1>
-      <p class="agent-lead">Nine intelligence endpoints paid via x402 on Solana and Base. No API keys. No subscriptions. Payment is the only gate.</p>
-      <p class="agent-stats" id="agent-stats"></p>
+  <main class="res-main">
+    <div class="res-term-line" aria-hidden="true">
+      <span class="res-prompt">$</span><span class="res-cmd">concierge --list-endpoints</span><span class="res-cursor">▌</span>
     </div>
-    <div class="agent-filters" id="agent-filters"></div>
+    <div class="res-chips" id="res-chips"></div>
+
+    <header class="res-hero">
+      <h1>Concierge Agent Endpoints</h1>
+      <p class="res-lead">Nine intelligence endpoints paid via x402 on Solana and Base. No API keys. No subscriptions. Payment is the only gate.</p>
+      <p class="res-base">Base URL: <code id="res-base-url"></code></p>
+    </header>
+
+    <div class="res-filter-row">
+      <span class="res-filter-prompt" aria-hidden="true">❯</span>
+      <div class="res-filters" id="agent-filters"></div>
+    </div>
+
     <div id="endpoint-catalog"></div>
+
+    <aside class="res-integrate">
+      <div class="res-integrate-eyebrow">Ready to integrate</div>
+      <h3>Try Concierge in the Playground</h3>
+      <p>Execute any endpoint, see the x402 payment challenge, and learn how to integrate with any x402-compatible agent or wallet.</p>
+      <div class="res-integrate-actions">
+        <a class="primary" href="/agent/playground">Open Playground →</a>
+        <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI Spec ↗</a>
+        <a href="/docs">Documentation</a>
+      </div>
+    </aside>
   </main>
 </div>
 <script type="module" src="/js/agent-endpoints-page.mjs"></script>
