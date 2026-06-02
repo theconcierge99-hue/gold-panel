@@ -22,7 +22,7 @@ export function initConciergeLogoParticles(canvas) {
 
   function buildParticles() {
     particles = [];
-    const size = 220;
+    const size = 360;
     const off = document.createElement("canvas");
     off.width = size;
     off.height = size;
@@ -30,7 +30,7 @@ export function initConciergeLogoParticles(canvas) {
     if (!octx) return;
     octx.drawImage(img, 0, 0, size, size);
     const data = octx.getImageData(0, 0, size, size).data;
-    const step = 3;
+    const step = 2;
     for (let y = 0; y < size; y += step) {
       for (let x = 0; x < size; x += step) {
         const i = (y * size + x) * 4;
@@ -39,23 +39,27 @@ export function initConciergeLogoParticles(canvas) {
         const g = data[i + 1];
         const b = data[i + 2];
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        if (a < 60 || lum < 45) continue;
-        const goldish = r > 140 && g > 100 && b < 160;
+        if (a < 50 || lum < 38) continue;
+        const goldish = r > 120 && g > 85 && b < 170;
         const tx = x - size / 2;
         const ty = y - size / 2;
-        const spread = 280 + Math.random() * 120;
+        const spread = 340 + Math.random() * 160;
         const ang = Math.random() * Math.PI * 2;
         particles.push({
           tx,
           ty,
           x: Math.cos(ang) * spread,
           y: Math.sin(ang) * spread,
-          size: goldish ? 2.2 : 1.6,
-          gold: goldish || lum > 160,
+          size: goldish ? 3.4 : 2.4,
+          gold: goldish || lum > 140,
           phase: Math.random() * Math.PI * 2,
         });
       }
     }
+  }
+
+  function drawScale(w, h) {
+    return Math.min(w * 0.62, h * 0.78, 520) / 180;
   }
 
   function draw(now) {
@@ -64,23 +68,27 @@ export function initConciergeLogoParticles(canvas) {
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
-    const cy = h / 2 - 8;
+    const cy = h / 2 - 24;
+    const scale = drawScale(w, h);
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
     const ease = 1 - (1 - assemble) ** 3;
 
     for (const p of particles) {
-      const jx = Math.sin(elapsed * 1.2 + p.phase) * (1 - ease) * 2;
-      const jy = Math.cos(elapsed * 0.9 + p.phase) * (1 - ease) * 2;
-      const x = cx + p.x * (1 - ease) + p.tx * ease + jx;
-      const y = cy + p.y * (1 - ease) + p.ty * ease + jy;
-      const pulse = 0.75 + 0.25 * Math.sin(elapsed * 2 + p.phase);
+      const jx = Math.sin(elapsed * 1.2 + p.phase) * (1 - ease) * 2.5;
+      const jy = Math.cos(elapsed * 0.9 + p.phase) * (1 - ease) * 2.5;
+      const tx = p.tx * scale;
+      const ty = p.ty * scale;
+      const x = cx + p.x * (1 - ease) * scale + tx * ease + jx;
+      const y = cy + p.y * (1 - ease) * scale + ty * ease + jy;
+      const pulse = 0.78 + 0.22 * Math.sin(elapsed * 2 + p.phase);
+      const dotR = p.size * scale * 0.42 * pulse;
       ctx.beginPath();
-      ctx.arc(x, y, p.size * pulse, 0, Math.PI * 2);
+      ctx.arc(x, y, dotR, 0, Math.PI * 2);
       if (p.gold) {
-        ctx.fillStyle = `rgba(201,168,76,${0.55 + 0.4 * pulse})`;
+        ctx.fillStyle = `rgba(201,168,76,${0.62 + 0.38 * pulse})`;
       } else {
-        ctx.fillStyle = `rgba(200,210,225,${0.25 + 0.35 * pulse})`;
+        ctx.fillStyle = `rgba(210,218,230,${0.32 + 0.42 * pulse})`;
       }
       ctx.fill();
     }
