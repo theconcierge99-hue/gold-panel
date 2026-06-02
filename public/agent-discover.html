@@ -8,21 +8,46 @@
 <meta name="description" content="Discover Concierge Agent x402 resources, OpenAPI, agent cards, and trust directory." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent/discover" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/agent-playground.css" />
-<link rel="stylesheet" href="/css/agent-hub.css" />
+<link rel="stylesheet" href="/css/agent-resources.css" />
 </head>
-<body data-agent-page="discover" style="background:var(--pg-bg);min-height:100vh">
-<div class="pg-shell" style="min-height:100vh;height:auto">
+<body class="res-page" data-agent-page="discover">
+<div class="pg-shell res-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
-  <main class="agent-main" style="max-width:900px;margin:0 auto;padding:28px 20px 48px">
-    <div class="agent-hero">
-      <div class="agent-eyebrow">Machine discovery</div>
-      <h1 class="agent-title">Discover</h1>
-      <p class="agent-lead">x402 fan-out, OpenAPI, agent cards, and trust signals — everything an autonomous agent needs before paying.</p>
-      <p class="agent-stats" id="discover-status">Loading discovery…</p>
+  <main class="res-main">
+    <div class="res-term-line" aria-hidden="true">
+      <span class="res-prompt">$</span><span class="res-cmd">concierge --discover</span><span class="res-cursor">▌</span>
     </div>
-    <div class="agent-disc-grid" id="discover-grid"></div>
+    <div class="res-chips" id="disc-chips">
+      <span><strong>Machine discovery</strong></span>
+      <span class="dot">·</span><span>x402 fan-out</span>
+      <span class="dot">·</span><span>Agent cards</span>
+      <span class="dot">·</span><span>Trust signals</span>
+    </div>
+
+    <header class="res-hero">
+      <h1>Discover</h1>
+      <p class="res-lead">x402 fan-out, OpenAPI, agent cards, and trust signals — everything an autonomous agent needs before paying.</p>
+      <p class="res-status" id="discover-status">Loading discovery…</p>
+    </header>
+
+    <div class="res-disc-grid" id="discover-grid">
+      <div class="res-disc-skeleton"><div class="bar"></div><div class="bar wide"></div></div>
+      <div class="res-disc-skeleton"><div class="bar"></div><div class="bar wide"></div></div>
+      <div class="res-disc-skeleton"><div class="bar"></div><div class="bar wide"></div></div>
+    </div>
+
+    <aside class="res-integrate">
+      <div class="res-integrate-eyebrow">Next steps</div>
+      <h3>Explore the Concierge Agent API</h3>
+      <p>Browse paid routes, test calls in the playground, or register an <code>agt_…</code> identity for agent-to-agent x402.</p>
+      <div class="res-integrate-actions">
+        <a class="primary" href="/agent/endpoints">Endpoint catalog →</a>
+        <a href="/agent/playground">Playground</a>
+        <a href="/agent/identity">Agent identity</a>
+      </div>
+    </aside>
   </main>
 </div>
 <script type="module" src="/js/agent-discover.mjs"></script>
