@@ -25,7 +25,7 @@ Each turn combines:
    - **lite**: DuckDuckGo only (fast path)
    - **full**: Wikipedia + world news + DuckDuckGo
 3. **Lounge memory** — Recent wire headlines and published creator signals (`api/lib/lounge-memory.ts`)
-4. **DeFi desk intelligence** (crypto/DeFi questions or keywords: TVL, whales, yields, verdict, wallet) — `api/lib/concierge-defi-intel.ts`:
+4. **DeFi desk intelligence** (crypto/DeFi questions or keywords: TVL, whales, yields, verdict, wallet) — `api/lib/concierge-defi-intel.ts` (also exposed as separate x402 APIs — see [concierge-intel.md](concierge-intel.md)):
    - **TVL** — chain snapshot + top protocols (DeFi Llama)
    - **Yields** — screened pools on Solana/EVM (Jupiter, Meteora, DLMM, Raydium, Kamino, major lending/DEX venues via DeFi Llama yields API)
    - **Whales** — Binance top-trader long/short/taker ratios (derivatives desk proxy)

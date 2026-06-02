@@ -18,6 +18,7 @@ Full technical documentation for the **gold-panel** project (**Executive Lounge*
 10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory  
 11. **[Agents & integrators](agents.md)** — Call Concierge via x402 (no repo); web `/docs/agents`  
 12. **[Agent identity](agent-identity.md)** — Register `agt_…` + Solana/Base wallets for A2A  
+12b. **[Concierge Intel API](concierge-intel.md)** — TVL, yields, whales, wallet, verdict endpoints; web `/docs/intel`  
 13. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
 14. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
 15. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  

@@ -7,13 +7,26 @@ export const X402_SERVICE_TAGS = ["AI", "Trading", "Search", "Crypto", "RWA"] as
 
 /** Per-route OpenAPI operation tags — explorers union these for the server Tags row. */
 export const X402_OPERATION_TAGS: Record<
-  "news" | "concierge" | "signal-publish" | "signal-open",
+  | "news"
+  | "concierge"
+  | "signal-publish"
+  | "signal-open"
+  | "intel-tvl"
+  | "intel-yields"
+  | "intel-whales"
+  | "intel-wallet"
+  | "intel-verdict",
   readonly string[]
 > = {
   news: ["Search", "Trading", "RWA"],
   concierge: ["AI", "Trading", "RWA"],
   "signal-publish": ["Crypto", "RWA"],
   "signal-open": ["Crypto", "RWA"],
+  "intel-tvl": ["AI", "Crypto", "Trading"],
+  "intel-yields": ["AI", "Crypto", "Trading"],
+  "intel-whales": ["AI", "Crypto", "Trading"],
+  "intel-wallet": ["AI", "Crypto", "Trading"],
+  "intel-verdict": ["AI", "Crypto", "Trading", "RWA"],
 };
 
 export const X402_SERVICE_NAME = "Executive Lounge";

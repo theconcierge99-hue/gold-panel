@@ -123,7 +123,7 @@ async function fetchSolanaWalletSummary(address: string): Promise<string | null>
   return `SOL ${sol.toFixed(4)}${tokens.length ? ` · tokens: ${tokens.join(", ")}` : ""} (Helius snapshot — not full PnL history)`;
 }
 
-async function fetchChainTvl(): Promise<ChainTvlRow[]> {
+export async function fetchChainTvl(): Promise<ChainTvlRow[]> {
   const chains = await fetchJson<{ name?: string; tvl?: number }[]>("https://api.llama.fi/v2/chains");
   if (!chains?.length) return [];
   const focus = new Set(["Solana", "Ethereum", "Base", "Arbitrum", "BSC", "Tron"]);
@@ -133,7 +133,7 @@ async function fetchChainTvl(): Promise<ChainTvlRow[]> {
     .map((c) => ({ name: c.name!, tvlUsd: fmtUsd(c.tvl!) }));
 }
 
-async function fetchTopProtocols(): Promise<{ name: string; tvlUsd: string }[]> {
+export async function fetchTopProtocols(): Promise<{ name: string; tvlUsd: string }[]> {
   const protocols = await fetchJson<{ name: string; tvl: number; category?: string }[]>(
     "https://api.llama.fi/protocols",
   );
@@ -146,7 +146,11 @@ async function fetchTopProtocols(): Promise<{ name: string; tvlUsd: string }[]> 
     .map((p) => ({ name: p.name, tvlUsd: fmtUsd(p.tvl) }));
 }
 
-async function fetchTopYields(): Promise<YieldPoolRow[]> {
+export async function fetchTopYields(options?: {
+  chain?: string;
+  projectHint?: string;
+  limit?: number;
+}): Promise<YieldPoolRow[]> {
   const pools = await fetchJson<
     {
       chain?: string;
@@ -172,10 +176,17 @@ async function fetchTopYields(): Promise<YieldPoolRow[]> {
       }
       return false;
     })
-    .sort((a, b) => (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0))
-    .slice(0, 12);
+    .sort((a, b) => (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0));
 
-  return ranked.map((p) => ({
+  const chainFilter = options?.chain?.trim().toLowerCase();
+  const projectFilter = options?.projectHint?.trim().toLowerCase();
+  const filtered = ranked.filter((p) => {
+    if (chainFilter && (p.chain ?? "").toLowerCase() !== chainFilter) return false;
+    if (projectFilter && !(p.project ?? "").toLowerCase().includes(projectFilter)) return false;
+    return true;
+  });
+
+  return filtered.slice(0, options?.limit ?? 12).map((p) => ({
     project: p.project ?? "—",
     symbol: p.symbol ?? "—",
     chain: p.chain ?? "—",
@@ -184,7 +195,7 @@ async function fetchTopYields(): Promise<YieldPoolRow[]> {
   }));
 }
 
-function buildWhaleLines(positioning: PositioningSnap[]): string[] {
+export function buildWhaleLines(positioning: PositioningSnap[]): string[] {
   const lines: string[] = [];
   for (const p of positioning) {
     lines.push(
@@ -199,7 +210,7 @@ function buildWhaleLines(positioning: PositioningSnap[]): string[] {
   return lines;
 }
 
-function formatInsiderFromMemory(items: LoungeMemoryItem[]): string[] {
+export function formatInsiderFromMemory(items: LoungeMemoryItem[]): string[] {
   return items
     .filter((i) => i.kind === "creator_signal")
     .slice(0, 6)
@@ -215,7 +226,7 @@ function parsePctChange(change: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function buildVerdict(input: {
+export function buildVerdict(input: {
   btcChange?: string;
   sentiment?: SentimentContext | null;
   positioning: PositioningSnap[];
@@ -303,6 +314,36 @@ function buildVerdict(input: {
   return { signal, confidence, headline, rationale };
 }
 
+export async function fetchWalletIntel(body: {
+  message?: string;
+  solAddress?: string;
+  evmAddress?: string;
+}): Promise<WalletIntelRow | null> {
+  const fromMsg = extractWalletAddresses(body.message ?? "");
+  const sol = (body.solAddress ?? fromMsg.solana)?.trim();
+  const evm = (body.evmAddress ?? fromMsg.evm)?.trim();
+
+  if (sol) {
+    const summary = await fetchSolanaWalletSummary(sol);
+    return {
+      chain: "solana",
+      address: sol,
+      summary:
+        summary ??
+        "Wallet detected — set SOLANA_RPC_URL to a Helius endpoint with api-key for token snapshot; full PnL requires external indexer.",
+    };
+  }
+  if (evm && /^0x[a-fA-F0-9]{40}$/.test(evm)) {
+    return {
+      chain: "evm",
+      address: evm,
+      summary:
+        "EVM wallet — use live marks + user cost basis; no public historical PnL API in this deployment.",
+    };
+  }
+  return null;
+}
+
 export async function fetchConciergeDeFiIntel(options: {
   message: string;
   positioning?: PositioningSnap[];
@@ -314,11 +355,15 @@ export async function fetchConciergeDeFiIntel(options: {
   const wallets = extractWalletAddresses(options.message);
   const insiderLines = formatInsiderFromMemory(options.insiderItems ?? []);
 
-  const [chains, topProtocols, yields, walletSol] = await Promise.all([
+  const [chains, topProtocols, yields, walletRow] = await Promise.all([
     options.lite ? Promise.resolve([] as ChainTvlRow[]) : fetchChainTvl(),
     options.lite ? Promise.resolve([]) : fetchTopProtocols(),
     fetchTopYields(),
-    wallets.solana ? fetchSolanaWalletSummary(wallets.solana) : Promise.resolve(null),
+    fetchWalletIntel({
+      message: options.message,
+      solAddress: wallets.solana,
+      evmAddress: wallets.evm,
+    }),
   ]);
 
   const positioning = options.positioning ?? [];
@@ -332,27 +377,10 @@ export async function fetchConciergeDeFiIntel(options: {
   });
 
   const sources = ["DeFi Llama (TVL/yields)", "Binance positioning"];
-  if (walletSol) sources.push("Helius balances");
+  if (walletRow?.summary.includes("Helius")) sources.push("Helius balances");
   if (insiderLines.length) sources.push("Lounge creator signals (insider)");
 
-  let wallet: WalletIntelRow | undefined;
-  if (wallets.solana && walletSol) {
-    wallet = { chain: "solana", address: wallets.solana, summary: walletSol };
-  } else if (wallets.solana) {
-    wallet = {
-      chain: "solana",
-      address: wallets.solana,
-      summary:
-        "Wallet detected — set SOLANA_RPC_URL to a Helius endpoint with api-key for token snapshot; full PnL requires external indexer.",
-    };
-  } else if (wallets.evm) {
-    wallet = {
-      chain: "evm",
-      address: wallets.evm,
-      summary:
-        "EVM wallet detected — use live marks + user cost basis; no public PnL API in this deployment (cite DEX/CEX activity qualitatively).",
-    };
-  }
+  const wallet = walletRow ?? undefined;
 
   return {
     fetchedAt: new Date().toISOString(),

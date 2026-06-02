@@ -58,6 +58,10 @@
       "destination": "/docs-agent-identity.html"
     },
     {
+      "source": "/docs/intel",
+      "destination": "/docs-intel.html"
+    },
+    {
       "source": "/.well-known/agent-card.json",
       "destination": "/api/well-known-agent-card"
     },

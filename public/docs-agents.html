@@ -81,6 +81,7 @@
     <div class="toc-title">On this page</div>
     <ul>
       <li><a href="#identity">Agent identity</a></li>
+      <li><a href="#intel">Concierge Intel APIs</a></li>
       <li><a href="#quick">Quick start</a></li>
       <li><a href="#discovery">Discovery</a></li>
       <li><a href="#payment">x402 payment flow</a></li>
@@ -108,11 +109,26 @@
     </div>
   </section>
 
+  <section id="intel">
+    <h2>Concierge Intel APIs</h2>
+    <div class="card">
+      <p>Five separate endpoints for structured DeFi data (no Gemini) — <strong>0.1 USDC</strong> each, same x402 flow:</p>
+      <ul>
+        <li><code>POST /api/concierge-intel-tvl</code> — TVL by chain + top protocols</li>
+        <li><code>POST /api/concierge-intel-yields</code> — Jupiter, Meteora, DLMM, lending pools</li>
+        <li><code>POST /api/concierge-intel-whales</code> — BTC/ETH/SOL top-trader ratios</li>
+        <li><code>POST /api/concierge-intel-wallet</code> — wallet snapshot (Helius on Solana)</li>
+        <li><code>POST /api/concierge-intel-verdict</code> — snipe/watch/follow/avoid/rebalance + insider signals</li>
+      </ul>
+      <p>Full reference: <a href="/docs/intel" class="ext">Concierge Intel documentation</a>.</p>
+    </div>
+  </section>
+
   <section id="quick">
     <h2>Quick start</h2>
     <div class="card">
       <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code></p>
-      <p><strong>Endpoint:</strong> <code>POST /api/concierge</code></p>
+      <p><strong>Endpoint:</strong> <code>POST /api/concierge</code> (chat) or Intel routes above (JSON)</p>
       <p><strong>Price:</strong> <strong>0.1 USDC</strong> per request (6 decimals → amount <code>100000</code> on-chain)</p>
       <p><strong>Networks:</strong> Base (EVM) and/or Solana USDC — see <code>accepts</code> in the 402 response</p>
       <ol>

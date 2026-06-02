@@ -47,6 +47,36 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "creator", "signals", "rwa"],
   },
+  "intel-tvl": {
+    name: "Concierge Intel — TVL",
+    description: "DeFi TVL by chain and top protocols (DeFi Llama)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "tvl"],
+  },
+  "intel-yields": {
+    name: "Concierge Intel — Yields",
+    description: "Screened yield pools (Jupiter, Meteora, DLMM, major DEX/lending venues)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "yield"],
+  },
+  "intel-whales": {
+    name: "Concierge Intel — Whales",
+    description: "Top-trader long/short positioning proxy (Binance futures)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "whales"],
+  },
+  "intel-wallet": {
+    name: "Concierge Intel — Wallet",
+    description: "Solana wallet token snapshot (Helius when configured) or EVM address ack",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "wallet"],
+  },
+  "intel-verdict": {
+    name: "Concierge Intel — Verdict",
+    description: "Desk verdict (snipe/watch/follow/avoid/rebalance) with insider creator-signal overlay",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "verdict"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -110,6 +140,18 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/lounge-signal-publish";
     case "signal-open":
       return "/api/lounge-signal-open";
+    case "intel-tvl":
+      return "/api/concierge-intel-tvl";
+    case "intel-yields":
+      return "/api/concierge-intel-yields";
+    case "intel-whales":
+      return "/api/concierge-intel-whales";
+    case "intel-wallet":
+      return "/api/concierge-intel-wallet";
+    case "intel-verdict":
+      return "/api/concierge-intel-verdict";
+    default:
+      return `/api/${kind}`;
   }
 }
 

@@ -1,6 +1,15 @@
 /** x402 USDC amounts (6 decimal atomic units). */
 
-export type X402ResourceKind = "news" | "concierge" | "signal-publish" | "signal-open";
+export type X402CoreKind = "news" | "concierge" | "signal-publish" | "signal-open";
+
+export type X402IntelKind =
+  | "intel-tvl"
+  | "intel-yields"
+  | "intel-whales"
+  | "intel-wallet"
+  | "intel-verdict";
+
+export type X402ResourceKind = X402CoreKind | X402IntelKind;
 
 export const X402_READ_PRICE_USDC = 0.1;
 export const X402_READ_PRICE_ATOMIC = "100000";
@@ -14,14 +23,23 @@ export function usdcToAtomic(usdc: number): string {
   return String(Math.round(usdc * 1_000_000));
 }
 
-export function atomicAmountForResource(
-  kind: "news" | "concierge" | "signal-open" | "signal-publish",
-): string {
-  return kind === "signal-publish" ? X402_SIGNAL_PUBLISH_ATOMIC : X402_READ_PRICE_ATOMIC;
+function isReadPriceKind(
+  kind: X402ResourceKind,
+): kind is X402CoreKind | X402IntelKind {
+  return kind !== "signal-publish";
 }
 
-export function priceUsdcForResource(
-  kind: "news" | "concierge" | "signal-open" | "signal-publish",
-): number {
-  return kind === "signal-publish" ? X402_SIGNAL_PUBLISH_USDC : X402_READ_PRICE_USDC;
+export function atomicAmountForResource(kind: X402ResourceKind): string {
+  if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
+  if (isReadPriceKind(kind)) return X402_READ_PRICE_ATOMIC;
+  return X402_READ_PRICE_ATOMIC;
+}
+
+export function priceUsdcForResource(kind: X402ResourceKind): number {
+  if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
+  return X402_READ_PRICE_USDC;
+}
+
+export function isIntelResourceKind(kind: X402ResourceKind): kind is X402IntelKind {
+  return kind.startsWith("intel-");
 }

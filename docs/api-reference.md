@@ -94,6 +94,18 @@ Register an autonomous agent identity (public keys only — **no private keys**)
 
 Paid Concierge accepts optional header **`X-Agent-Id`** when the id exists.
 
+### Concierge Intel (paid, 0.1 USDC each)
+
+Structured JSON for agents — see [concierge-intel.md](concierge-intel.md) · web `/docs/intel`.
+
+| POST | Purpose |
+|------|---------|
+| `/api/concierge-intel-tvl` | Chain + protocol TVL (DeFi Llama) |
+| `/api/concierge-intel-yields` | Yield pools (Jupiter, Meteora, DLMM, …) |
+| `/api/concierge-intel-whales` | Top-trader positioning (Binance) |
+| `/api/concierge-intel-wallet` | Wallet snapshot (Solana/Helius) |
+| `/api/concierge-intel-verdict` | Desk verdict + Lounge insider signals |
+
 ## Paid endpoints
 
 Probed by x402scan with **GET** (returns 402) and **POST** (402 without payment, 200 with payment).

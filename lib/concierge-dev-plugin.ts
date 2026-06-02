@@ -12,6 +12,7 @@ import { handleSignalPublish } from "../api/lib/signal-publish-handler";
 import handleAgentIdentity from "../api/agent-identity";
 import handleAgentIdentityCard from "../api/agent-identity-card";
 import handleWellKnownAgentCard from "../api/well-known-agent-card";
+import { handleConciergeIntelRoute } from "../api/lib/concierge-intel-handler";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,6 +113,11 @@ export function conciergeDevPlugin(): Plugin {
           "/api/signal-open": handleSignalOpen,
           "/api/agent-identity": handleAgentIdentity,
           "/api/agent-identity-card": handleAgentIdentityCard,
+          "/api/concierge-intel-tvl": (r) => handleConciergeIntelRoute(r, "intel-tvl"),
+          "/api/concierge-intel-yields": (r) => handleConciergeIntelRoute(r, "intel-yields"),
+          "/api/concierge-intel-whales": (r) => handleConciergeIntelRoute(r, "intel-whales"),
+          "/api/concierge-intel-wallet": (r) => handleConciergeIntelRoute(r, "intel-wallet"),
+          "/api/concierge-intel-verdict": (r) => handleConciergeIntelRoute(r, "intel-verdict"),
         };
         if (url && signalRoutes[url]) {
           const chunks: Buffer[] = [];

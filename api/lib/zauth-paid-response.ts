@@ -8,6 +8,11 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   news: "JSON with article URL or redirect target after successful unlock",
   "signal-publish": "JSON with published signal id, RWA metadata, optional mintParams for Solana NFT",
   "signal-open": "JSON with signalId and full intelligence summary fields",
+  "intel-tvl": "JSON with chains[] and topProtocols[] TVL snapshot",
+  "intel-yields": "JSON with pools[] screened yield rows",
+  "intel-whales": "JSON with positioning[] top-trader ratios",
+  "intel-wallet": "JSON with wallet chain, address, summary",
+  "intel-verdict": "JSON with verdict signal, confidence, rationale, optional insider[]",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

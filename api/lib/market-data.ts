@@ -247,13 +247,25 @@ async function binancePositioning(
 }
 
 async function binancePositioningAll(): Promise<PositioningSnap[]> {
-  const pairs = [
-    ["BTCUSDT", "BTC"],
-    ["ETHUSDT", "ETH"],
-    ["SOLUSDT", "SOL"],
-  ] as const;
+  return fetchBinanceTopTraderPositioning(["BTC", "ETH", "SOL"]);
+}
+
+const BINANCE_SYMBOL_MAP: Record<string, string> = {
+  BTC: "BTCUSDT",
+  ETH: "ETHUSDT",
+  SOL: "SOLUSDT",
+};
+
+/** Public export for Concierge intel API (whale positioning). */
+export async function fetchBinanceTopTraderPositioning(
+  labels: ("BTC" | "ETH" | "SOL")[] = ["BTC", "ETH", "SOL"],
+  timeoutMs = FETCH_MS,
+): Promise<PositioningSnap[]> {
   const rows = await Promise.all(
-    pairs.map(([sym, label]) => binancePositioning(sym, label)),
+    labels.map((label) => {
+      const sym = BINANCE_SYMBOL_MAP[label];
+      return sym ? binancePositioning(sym, label, timeoutMs) : Promise.resolve(null);
+    }),
   );
   return rows.filter((r): r is PositioningSnap => r !== null);
 }

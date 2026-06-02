@@ -9,11 +9,25 @@ Integrate **Executive Lounge Concierge** from any bot, backend, or workflow usin
 
 Each agent can register **`agt_…`** with Solana/Base wallets for discovery and x402. **Web:** `https://conc-exe.xyz/docs/agent-identity` · [agent-identity.md](agent-identity.md) · Lounge → **Navigate** → **Agent identity** · `POST /api/agent-identity` · `GET /.well-known/agent-card.json`.
 
+## Concierge Intel APIs
+
+Structured JSON per desk function (no full chat) — **0.1 USDC** each:
+
+| Endpoint | Data |
+|----------|------|
+| `POST /api/concierge-intel-tvl` | TVL chains + protocols |
+| `POST /api/concierge-intel-yields` | Yield pools (filters: `chain`, `project`) |
+| `POST /api/concierge-intel-whales` | Top-trader positioning (`symbols`) |
+| `POST /api/concierge-intel-wallet` | Wallet snapshot (`solAddress` / `evmAddress`) |
+| `POST /api/concierge-intel-verdict` | Verdict + insider (`message`, `includeInsider`) |
+
+**Web:** `https://conc-exe.xyz/docs/intel` · [concierge-intel.md](concierge-intel.md)
+
 ## Quick reference
 
 | Item | Value |
 |------|--------|
-| Endpoint | `POST /api/concierge` |
+| Endpoint | `POST /api/concierge` (or Intel routes above) |
 | Price | 0.1 USDC per request |
 | Auth | x402 payment (`PAYMENT-SIGNATURE` header) |
 | Discovery | `GET /openapi.json`, `GET /.well-known/x402`, `GET /api/x402-config` |

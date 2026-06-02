@@ -66,6 +66,51 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["signal-open"]],
   },
+  {
+    kind: "intel-tvl",
+    method: "POST",
+    path: "/api/concierge-intel-tvl",
+    name: "Concierge Intel — TVL",
+    description: "Chain TVL snapshot and top DeFi protocols (DeFi Llama). JSON for agents.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-tvl"]],
+  },
+  {
+    kind: "intel-yields",
+    method: "POST",
+    path: "/api/concierge-intel-yields",
+    name: "Concierge Intel — Yields",
+    description: "Screened yield pools on Solana/EVM (Jupiter, Meteora, DLMM, major venues).",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-yields"]],
+  },
+  {
+    kind: "intel-whales",
+    method: "POST",
+    path: "/api/concierge-intel-whales",
+    name: "Concierge Intel — Whales",
+    description: "Binance top-trader long/short ratios (BTC/ETH/SOL derivatives proxy).",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-whales"]],
+  },
+  {
+    kind: "intel-wallet",
+    method: "POST",
+    path: "/api/concierge-intel-wallet",
+    name: "Concierge Intel — Wallet",
+    description: "Wallet snapshot for Solana (Helius) or EVM address acknowledgment.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-wallet"]],
+  },
+  {
+    kind: "intel-verdict",
+    method: "POST",
+    path: "/api/concierge-intel-verdict",
+    name: "Concierge Intel — Verdict",
+    description: "Structured desk verdict with Fear & Greed, positioning, yields, and optional Lounge insider signals.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-verdict"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */
@@ -228,6 +273,60 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
           ["signalId"],
         ),
       },
+      "intel-tvl": {
+        body: {},
+        schema: jsonSchemaBody(
+          { message: { type: "string", description: "Optional context for logging" } },
+          [],
+        ),
+      },
+      "intel-yields": {
+        body: { chain: "solana", project: "meteora" },
+        schema: jsonSchemaBody(
+          {
+            chain: { type: "string", description: "solana | ethereum | base | arbitrum" },
+            project: { type: "string", description: "Filter project id substring" },
+            message: { type: "string" },
+          },
+          [],
+        ),
+      },
+      "intel-whales": {
+        body: { symbols: ["BTC", "ETH", "SOL"] },
+        schema: jsonSchemaBody(
+          {
+            symbols: {
+              type: "array",
+              items: { type: "string", enum: ["BTC", "ETH", "SOL"] },
+            },
+          },
+          [],
+        ),
+      },
+      "intel-wallet": {
+        body: { solAddress: "7hum…", message: "optional context" },
+        schema: jsonSchemaBody(
+          {
+            solAddress: { type: "string" },
+            evmAddress: { type: "string" },
+            message: { type: "string" },
+          },
+          [],
+        ),
+      },
+      "intel-verdict": {
+        body: { message: "DeFi outlook on Solana", includeInsider: true },
+        schema: jsonSchemaBody(
+          {
+            message: { type: "string", description: "Question or theme for verdict" },
+            includeInsider: {
+              type: "boolean",
+              description: "Include Lounge creator signals (default true)",
+            },
+          },
+          ["message"],
+        ),
+      },
     };
 
   const ex = examples[kind];
@@ -252,7 +351,20 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
                 ? { reply: "<p>Analysis…</p>", topics: ["crypto"] }
                 : kind === "signal-publish"
                   ? { id: "sig_…", published: true }
-                  : { signalId: "sig_…", summary: "Full thesis…" },
+                  : kind === "signal-open"
+                    ? { signalId: "sig_…", summary: "Full thesis…" }
+                    : kind === "intel-tvl"
+                      ? { ok: true, chains: [], topProtocols: [] }
+                      : kind === "intel-yields"
+                        ? { ok: true, pools: [] }
+                        : kind === "intel-whales"
+                          ? { ok: true, positioning: [] }
+                          : kind === "intel-wallet"
+                            ? { ok: true, wallet: { chain: "solana", address: "…" } }
+                            : {
+                                ok: true,
+                                verdict: { signal: "watch", confidence: "medium" },
+                              },
         },
       },
       schema: {
@@ -350,7 +462,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Executive Lounge — Private Intelligence Lobby",
       version: "2.0.1",
       description:
-        "Micropayment-gated resources for Executive Lounge: market wire, RWA creator signals (Solana NFT), and Concierge AI. Discoverable on x402scan.com. USDC on Base and Solana via PayAI facilitator.",
+        "Micropayment-gated resources for Executive Lounge: market wire, RWA creator signals, Concierge AI, and Concierge Intel APIs (TVL, yields, whales, wallet, verdict). Discoverable on x402scan.com. USDC on Base and Solana via PayAI facilitator.",
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
     },
     servers: [{ url: base, description: "Executive Lounge" }],
@@ -366,6 +478,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
     tags: [
       { name: "news", description: "Wire article unlock" },
       { name: "concierge", description: "Concierge AI" },
+      { name: "intel", description: "Concierge DeFi intelligence APIs" },
       { name: "creator", description: "Creator signals & RWA" },
       { name: "rwa", description: "Real World Asset intelligence certificates" },
     ],
