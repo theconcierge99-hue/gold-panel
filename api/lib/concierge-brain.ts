@@ -278,9 +278,23 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "aave",
     "lending",
     "yield",
+    "yields",
+    "apy",
+    "apr",
     "restaking",
     "lst",
     "amm",
+    "meteora",
+    "jupiter",
+    "dlmm",
+    "kamino",
+    "raydium",
+    "orca",
+    "whale",
+    "whales",
+    "wallet pnl",
+    "pnl",
+    "verdict",
   ],
   strategy: [
     "trading plan",
@@ -447,8 +461,11 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Positioning: funding, OI, ETF flows narrative where relevant.`,
 
   defi: `DEFI PLAYBOOK:
-- Protocol economics: TVL quality, fee revenue, token accrual, utilization, bad debt risk.
-- Compare AMM vs orderbook, restaking risks, stablecoin depeg vectors.`,
+- Use DEFI DESK INTELLIGENCE when present: TVL (chains + protocols), YIELDS (Jupiter, Meteora, DLMM, lending), WHALES (Binance top-trader proxy), WALLET snapshot, DESK VERDICT (snipe/watch/follow/avoid/rebalance + confidence).
+- Cross-check INSIDER creator signals from Lounge with public TVL/yield data — insider is tactical overlay, not sole truth.
+- Protocol economics: TVL quality, fee revenue, token accrual, utilization, bad debt risk; flag unrealistic APY.
+- Compare AMM vs orderbook, restaking risks, stablecoin depeg vectors.
+- For wallet PnL questions: use WALLET block if present; otherwise explain limits and use positioning + marks qualitatively.`,
 
   strategy: `TRADING STRATEGY PLAYBOOK (crypto + equities):
 - Synthesize geopolitical regime, fundamentals, technicals, and derivatives positioning before any entry.
@@ -628,9 +645,15 @@ The user is communicating in a non-English language (from this message or their 
 The user is communicating in English (or language is not yet established — default English). Write your entire response in English.`;
 }
 
+const DEFI_INTEL_RESPONSE = `DEFI / YIELD / WHALE / VERDICT QUESTIONS (when DEFI DESK INTELLIGENCE is in the prompt):
+- Lead with DESK VERDICT signal + confidence, then TVL/yield/whale evidence in separate <p> blocks.
+- Name specific pools (project, chain, APY, TVL) from YIELDS — do not invent venues.
+- For "verdict" on a token/protocol: combine VERDICT, funding/positioning, and any INSIDER creator signals.
+- End with one line: <code>Verdict|signal=[snipe|watch|follow|avoid|rebalance]|confidence=[low|medium|high]</code>.`;
+
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (standard market Q&A — no full trading plan):
 1. <p>Direct answer — addresses the user's exact question first (2–3 sentences).</p>
-2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, indices, headlines).</p>
+2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, indices, headlines, DEFI DESK block if present).</p>
 3. <p>Implications — positioning and 24–72h regime.</p>
 4. <p>Optional mini setup — only if user implied levels; otherwise skip.</p>
 5. <p>Optional: one clarifying question only if asset, timeframe, or intent was genuinely unclear.</p>`;
@@ -786,7 +809,10 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 
 ${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : RESPONSE_STRUCTURE}
 
+${DEFI_INTEL_RESPONSE}
+
 LOUNGE MEMORY (when provided below):
+- Creator signals in LOUNGE MEMORY are **insider/tactical intelligence** from the Lounge desk — weigh alongside DEFI DESK INTELLIGENCE (TVL, yields, verdict) when both appear.
 - These are real headlines and creator signals that appeared on the Executive Lounge feed (stored for continuity).
 - When the user asks about "the lounge", recent stories, a headline, or creator content, prioritize LOUNGE MEMORY and name the publisher or "Lounge Signal".
 - Do not claim you read a paid unlock unless the summary is present in LOUNGE MEMORY; wire items may be headline-only.

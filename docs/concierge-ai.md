@@ -25,6 +25,12 @@ Each turn combines:
    - **lite**: DuckDuckGo only (fast path)
    - **full**: Wikipedia + world news + DuckDuckGo
 3. **Lounge memory** — Recent wire headlines and published creator signals (`api/lib/lounge-memory.ts`)
+4. **DeFi desk intelligence** (crypto/DeFi questions or keywords: TVL, whales, yields, verdict, wallet) — `api/lib/concierge-defi-intel.ts`:
+   - **TVL** — chain snapshot + top protocols (DeFi Llama)
+   - **Yields** — screened pools on Solana/EVM (Jupiter, Meteora, DLMM, Raydium, Kamino, major lending/DEX venues via DeFi Llama yields API)
+   - **Whales** — Binance top-trader long/short/taker ratios (derivatives desk proxy)
+   - **Wallet** — optional Solana token snapshot when user pastes an address and `SOLANA_RPC_URL` uses a Helius `api-key` (not full historical PnL)
+   - **Verdict** — desk signal (`snipe` | `watch` | `follow` | `avoid` | `rebalance`) + confidence, blended with Fear & Greed, BTC tape, positioning, and **creator signals as insider overlay**
 
 Wire headlines are ingested asynchronously after market fetch for future Concierge context.
 

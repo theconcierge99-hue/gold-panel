@@ -12,8 +12,14 @@ import {
   formatGeneralKnowledgeForPrompt,
 } from "./general-knowledge";
 import {
-  buildLoungeMemoryContextBlock,
+  fetchConciergeDeFiIntel,
+  formatDeFiIntelForPrompt,
+  wantsDeFiIntel,
+} from "./concierge-defi-intel";
+import {
+  formatLoungeMemoryForPrompt,
   ingestWireHeadlinesAsync,
+  selectRelevantLoungeMemory,
 } from "./lounge-memory";
 import {
   fetchConciergeMarketSnapshot,
@@ -201,7 +207,13 @@ async function resolveIntelligenceContext(
   const marketTimeout = tradingPlan ? 5_000 : 7_000;
   const generalTimeout = tradingPlan ? 2_500 : 4_000;
 
-  const [snapshot, general, loungeMemoryBlock] = await Promise.all([
+  const topicsForIntel = detectTopics(userMessage);
+  const needDeFiIntel =
+    wantsDeFiIntel(userMessage) ||
+    topicsForIntel.includes("defi") ||
+    topicsForIntel.includes("crypto");
+
+  const [snapshot, general, memoryItems] = await Promise.all([
     liveSnapshot
       ? Promise.resolve(liveSnapshot)
       : withTimeout(
@@ -226,11 +238,36 @@ async function resolveIntelligenceContext(
       emptyGeneral,
     ),
     tradingPlan
-      ? Promise.resolve("")
-      : withTimeout(buildLoungeMemoryContextBlock(userMessage), 3_000, ""),
+      ? Promise.resolve([])
+      : withTimeout(selectRelevantLoungeMemory(userMessage), 3_000, []),
   ]);
+
+  const loungeMemoryBlock = formatLoungeMemoryForPrompt(memoryItems);
+
+  let defiIntelBlock = "";
+  if (needDeFiIntel) {
+    const btcTick = snapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
+    const defiIntel = await withTimeout(
+      fetchConciergeDeFiIntel({
+        message: userMessage,
+        positioning: snapshot.positioning,
+        sentiment: snapshot.sentiment ?? null,
+        btcChange: btcTick?.change,
+        insiderItems: memoryItems,
+        lite: tradingPlan,
+      }),
+      tradingPlan ? 2_500 : 4_000,
+      null,
+    );
+    if (defiIntel) defiIntelBlock = formatDeFiIntelForPrompt(defiIntel);
+  }
+
   ingestWireHeadlinesAsync(snapshot.headlines);
-  const intelBlock = [formatLiveMarketForPrompt(snapshot), formatGeneralKnowledgeForPrompt(general)]
+  const intelBlock = [
+    formatLiveMarketForPrompt(snapshot),
+    formatGeneralKnowledgeForPrompt(general),
+    defiIntelBlock,
+  ]
     .filter(Boolean)
     .join("\n\n");
   const ticks = snapshot.ticks.length ? snapshot.ticks : market;
