@@ -175,5 +175,11 @@ html[data-theme="light"] .pg-ep-row:hover{background:rgba(0,0,0,.03)}
   .pg-terminal-area{min-height:50vh}
   body.pg-page{overflow:auto;height:auto}
   .pg-shell{height:auto;min-height:100vh}
-  .pg-nav{display:none}
+  .pg-topnav{padding:0 12px;gap:10px}
+  .pg-nav{
+    overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:min(62vw,360px);
+  }
+  .pg-nav::-webkit-scrollbar{display:none}
+  .pg-nav a{padding:8px 10px;font-size:10px;white-space:nowrap;flex-shrink:0}
 }

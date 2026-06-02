@@ -10,7 +10,7 @@ export function renderAgentTopNav(activeId) {
     { id: "discover", href: "/agent/discover", label: "Discover" },
     { id: "identity", href: "/agent/identity", label: "Identity" },
     { id: "docs", href: "/docs", label: "Docs" },
-    { id: "lounge", href: "/", label: "Lounge" },
+    { id: "concierge", href: "/#concierge", label: "Concierge AI" },
   ];
 
   el.innerHTML = `

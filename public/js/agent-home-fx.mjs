@@ -68,7 +68,7 @@ export function initConciergeLogoParticles(canvas) {
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
-    const cy = h / 2 - 24;
+    const cy = h * 0.34;
     const scale = drawScale(w, h);
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
