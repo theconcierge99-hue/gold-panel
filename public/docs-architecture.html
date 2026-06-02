@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Architecture — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/architecture" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="architecture">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Product</div>
+      <h1 class="docs-title">Architecture</h1>
+      <p class="docs-lead">How Concierge runs on Executive Lounge.</p>
+
+      <div class="card">
+        <ul>
+          <li><strong>UI</strong> — <code>executive-lounge.html</code>, <code>x402-pay.mjs</code>, <code>agent-identity.mjs</code></li>
+          <li><strong>APIs</strong> — Vercel Edge <code>/api/*</code></li>
+          <li><strong>AI</strong> — Google Gemini 2.5 Flash (text + image models)</li>
+          <li><strong>Payments</strong> — x402 v2 · PayAI facilitator · USDC on Base / Solana</li>
+          <li><strong>Storage</strong> — Redis/KV (signals, RWA, agent registry, lounge memory)</li>
+          <li><strong>Trust</strong> — optional <a class="ext" href="https://zauth.inc/" target="_blank" rel="noopener">zauth</a> directory + Provider Hub telemetry</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Data sources</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Source</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td>DeFi Llama</td><td>TVL, EVM/Solana yield pools</td></tr>
+            <tr><td>Meteora DLMM API</td><td>Live DLMM pools, APY, TVL (<code>dlmm.datapi.meteora.ag</code>)</td></tr>
+            <tr><td>Binance futures</td><td>Top-trader positioning (whale proxy)</td></tr>
+            <tr><td>Fear &amp; Greed</td><td>Sentiment in verdict</td></tr>
+            <tr><td>Helius</td><td>Solana wallet snapshot (when RPC has api-key)</td></tr>
+            <tr><td>Wire RSS + Lounge KV</td><td>Headlines, creator signals (insider)</td></tr>
+            <tr><td>Wikipedia / news</td><td>General knowledge block in chat</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Concierge pipeline</h2>
+      <div class="card">
+        <ol>
+          <li>Validate origin + body · x402 gate</li>
+          <li>Fetch market snapshot, DeFi intel (parallel, timeouts)</li>
+          <li>Build system prompt (category playbooks + live blocks)</li>
+          <li>Gemini generateContent → HTML <code>reply</code></li>
+          <li>Report paid route to zauth (async, optional)</li>
+        </ol>
+      </div>
+
+      <h2 class="docs-h2">Configuration</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>GEMINI_API_KEY</code></td><td>Concierge AI</td></tr>
+            <tr><td><code>X402_EVM_PAY_TO</code> / <code>X402_SOL_PAY_TO</code></td><td>USDC receive addresses</td></tr>
+            <tr><td><code>KV_REST_*</code></td><td>Signals, agents, memory</td></tr>
+            <tr><td><code>SOLANA_RPC_URL</code></td><td>Helius for wallet + NFT mint proxy</td></tr>
+            <tr><td><code>ZAUTH_API_KEY</code></td><td>Provider Hub telemetry (optional)</td></tr>
+            <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL for discovery</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Operator markdown: repository <code>docs/</code> folder. Never commit secrets.</p>
+      </div>
+
+      <h2 class="docs-h2">zauth &amp; x402scan</h2>
+      <div class="card">
+        <p><code>GET /api/zauth-directory</code> · <code>GET /api/zauth-status</code> — agents query verified endpoints before paying third parties.</p>
+        <p>List this deployment on <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com</a>.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/api/overview">API Overview</a>
+        <a class="btn" href="/deploy-version.txt" target="_blank" rel="noopener">Deploy version</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

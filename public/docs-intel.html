@@ -3,65 +3,24 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<title>Concierge Intel API — Executive Lounge Documentation</title>
+<title>DeFi Intel — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="Integrate Concierge DeFi intelligence: TVL, yields, whales, wallet snapshot, and desk verdict via separate x402 endpoints." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
-<link rel="canonical" href="/docs/intel" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="canonical" href="/docs/api/intel" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
-<style>
-  html,html[data-theme="dark"]{color-scheme:dark;--bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;--text-primary:#d8e4f0;--text-secondary:#6b7d9a;--text-muted:#3a4a62;--nav-active-bg:rgba(201,168,76,.08);--card-grad-1:#121a2e;--card-grad-2:#0e1525;--code-bg:#0a0e18}
-  html[data-theme="light"]{color-scheme:light;--bg:#f4f2ec;--border:#d4cfc4;--gold:#9a7b2e;--gold-dim:#c9a84c;--text-primary:#1a1f2e;--text-secondary:#4a5568;--text-muted:#6b7280;--nav-active-bg:rgba(154,123,46,.1);--card-grad-1:#fff;--card-grad-2:#f8f6f0;--code-bg:#ebe8e0}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.65}
-  .wrap{max-width:800px;margin:0 auto;padding:40px 24px 72px}
-  .back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:inline-block;margin-bottom:8px}
-  .back:hover{color:var(--gold)}
-  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
-  .logo-row img{width:40px;height:40px;border-radius:50%;border:1px solid var(--gold-dim)}
-  .logo-row h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px}
-  .eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-  .lead{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;line-height:1.4;margin-bottom:28px}
-  .toc{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;margin-bottom:28px}
-  .toc-title{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-  .toc ul{list-style:none;display:grid;gap:6px}
-  .toc a{font-size:13px;color:var(--text-secondary);text-decoration:none}
-  .toc a:hover{color:var(--gold)}
-  section{margin-bottom:32px;scroll-margin-top:24px}
-  section h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:24px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-  section h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:18px 0 10px;font-weight:400}
-  .card{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;margin-bottom:16px}
-  .card p,.card li{font-size:14px;color:var(--text-secondary);margin-bottom:10px}
-  .card ul,.card ol{padding-left:18px;margin:8px 0}
-  .card strong{color:var(--text-primary);font-weight:400}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
-  th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:400}
-  code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)}
-  pre{background:var(--code-bg);border:1px solid var(--border);padding:14px 16px;margin:12px 0;overflow-x:auto;border-radius:4px}
-  pre code{color:var(--text-primary);font-size:11px;line-height:1.5;white-space:pre}
-  .note{font-size:12px;color:var(--text-muted);border-left:2px solid var(--gold-dim);padding-left:12px;margin-top:12px}
-  .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
-  .btn{font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);text-decoration:none;border-radius:4px}
-  .btn:hover{border-color:var(--gold-dim);color:var(--gold)}
-  .btn.gold{border-color:var(--gold);color:var(--gold)}
-  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted)}
-  a.ext{color:var(--gold);text-decoration:none}
-</style>
+<link rel="stylesheet" href="/css/docs-site.css" />
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="/docs">← Documentation</a>
-  <a class="back" href="/docs/agents" style="margin-left:16px">← Agents</a>
-  <div class="logo-row">
-    <img src="/images/the-concierge-logo.png" alt="" width="40" height="40" />
-    <h1>Concierge Intel API</h1>
-  </div>
-  <div class="eyebrow">Integrators · DeFi desk data</div>
-  <p class="lead">Five separate x402 endpoints for structured intelligence — TVL, yields, whales, wallet, and verdict — without calling full Concierge chat.</p>
+<div class="docs-layout" data-docs-page="api-intel">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs/api/overview">← API Overview</a></div>
+      <div class="docs-eyebrow">API Reference</div>
+      <h1 class="docs-title">DeFi Intel</h1>
+      <p class="docs-lead">Five x402 endpoints for structured desk data — no Gemini, fast JSON.</p>
 
   <nav class="toc">
     <div class="toc-title">On this page</div>
@@ -81,7 +40,7 @@
   <section id="overview">
     <h2>Overview</h2>
     <div class="card">
-      <p>Each endpoint returns <strong>JSON</strong> from public data sources (DeFi Llama, Binance futures, Fear &amp; Greed, optional Helius, Lounge creator signals for verdict). Same price as Concierge chat: <strong>0.1 USDC</strong> per call.</p>
+      <p>Each endpoint returns <strong>JSON</strong> from DeFi Llama, <strong>Meteora DLMM API</strong>, Binance futures, Fear &amp; Greed, optional Helius, and Lounge creator signals (verdict). <strong>0.1 USDC</strong> per call.</p>
       <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code></p>
       <table>
         <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
@@ -106,8 +65,8 @@
         <li>Retry with <code>PAYMENT-SIGNATURE</code> header (base64 JSON)</li>
         <li><strong>200</strong> → JSON body documented below</li>
       </ol>
-      <p>Optional: <code>X-Agent-Id: agt_…</code> after <a class="ext" href="/docs/agent-identity">agent identity</a> registration (attribution only on intel routes today).</p>
-      <p>See <a class="ext" href="/docs/agents#payment">Agents guide — payment flow</a> for Node/Python clients.</p>
+      <p>Optional: <code>X-Agent-Id: agt_…</code> after <a class="ext" href="/docs/api/agent-identity">agent identity</a> registration.</p>
+      <p>See <a class="ext" href="/docs/payment/x402">x402 Protocol</a> and <a class="ext" href="/docs/quickstart">Quickstart</a>.</p>
     </div>
   </section>
 
@@ -144,8 +103,9 @@
   "chain": "solana",
   "project": "meteora"
 }</code></pre>
-      <p><strong>Filters:</strong> <code>chain</code> — solana | ethereum | base | arbitrum · <code>project</code> — substring (jupiter, meteora, dlmm, raydium, kamino, …)</p>
-      <p><strong>Response:</strong> <code>pools[]</code> with project, symbol, chain, apy, tvlUsd (screened APY &amp; min TVL).</p>
+      <p><strong>Filters:</strong> <code>chain</code> — solana | ethereum | base | arbitrum · <code>project</code> — substring (meteora, jupiter, raydium, …)</p>
+      <p><strong>Meteora DLMM:</strong> when <code>project</code> is meteora/dlmm or message mentions DLMM, pools come from <code>dlmm.datapi.meteora.ag</code> (DeFi Llama has no Meteora listings).</p>
+      <p><strong>Response:</strong> <code>yields[]</code> with project, symbol, chain, apy, tvlUsd.</p>
     </div>
   </section>
 
@@ -198,16 +158,19 @@
     <h2>Full Concierge chat</h2>
     <div class="card">
       <p>For natural-language analysis that combines all desks + Gemini, use <code>POST /api/concierge</code> (0.1 USDC). Intel endpoints are for agents that want <strong>structured JSON</strong> per function.</p>
-      <p><a class="ext" href="/docs/agents">Agents &amp; integrators</a> · <a class="ext" href="/docs#concierge">Concierge in documentation</a></p>
+      <p><a class="ext" href="/docs/api/concierge">Concierge Chat</a> · <a class="ext" href="/docs">Documentation home</a></p>
     </div>
   </section>
 
   <div class="cta-row">
     <a class="btn gold" href="/openapi.json">openapi.json</a>
-    <a class="btn" href="/docs/agents">Agents guide</a>
+    <a class="btn" href="/docs/api/concierge">Concierge Chat</a>
     <a class="btn" href="/">Lounge</a>
   </div>
-  <p class="foot">Executive Lounge · Concierge Intel · Not financial advice</p>
+  <p class="foot">Concierge · DeFi Intel · Not financial advice</p>
+    </div>
+  </main>
 </div>
+<script src="/js/docs-site.js"></script>
 </body>
 </html>

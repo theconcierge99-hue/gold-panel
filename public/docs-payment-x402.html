@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>x402 Protocol — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/payment/x402" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="payment-x402">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Payment</div>
+      <h1 class="docs-title">x402 Protocol</h1>
+      <p class="docs-lead">How Concierge uses HTTP 402 for machine-to-machine USDC payments.</p>
+
+      <div class="card">
+        <p>Concierge does not issue API keys. <strong>Payment is the gate</strong> — agents and browsers pay USDC per request using <a class="ext" href="https://www.x402.org/" target="_blank" rel="noopener">x402 v2</a>, settled through the <a class="ext" href="https://facilitator.payai.network" target="_blank" rel="noopener">PayAI facilitator</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Flow</h2>
+      <div class="steps">
+        <div class="step"><h4>402 + PAYMENT-REQUIRED</h4><p>First <code>POST</code> without payment returns requirements (network, asset, amount, payee).</p></div>
+        <div class="step"><h4>Sign USDC transfer</h4><p>Wallet or x402 client signs the transfer to the listed <code>payTo</code> address.</p></div>
+        <div class="step"><h4>PAYMENT-SIGNATURE retry</h4><p>Repeat the request with header <code>PAYMENT-SIGNATURE</code> (base64 JSON payload).</p></div>
+        <div class="step"><h4>200 + PAYMENT-RESPONSE</h4><p>Server verifies and settles; response includes settlement metadata.</p></div>
+      </div>
+
+      <h2 class="docs-h2">Supported chains</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Base</strong> — USDC (configure <code>X402_EVM_PAY_TO</code>)</li>
+          <li><strong>Solana</strong> — USDC (optional <code>X402_SOL_PAY_TO</code>)</li>
+        </ul>
+        <p>Check <code>accepts</code> in the 402 body or <code>GET /api/x402-config</code> for what your deployment enables.</p>
+      </div>
+
+      <h2 class="docs-h2">Headers</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Header</th><th>Direction</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>PAYMENT-REQUIRED</code></td><td>Response (402)</td><td>Payment requirements (base64 JSON)</td></tr>
+            <tr><td><code>PAYMENT-SIGNATURE</code></td><td>Request</td><td>Signed payment proof</td></tr>
+            <tr><td><code>PAYMENT-RESPONSE</code></td><td>Response (200)</td><td>Settlement receipt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Marketplace probes</h2>
+      <div class="card">
+        <p><code>GET</code> on paid routes also returns <strong>402</strong> so x402scan and directories can discover pricing without a body.</p>
+        <p>Register your origin at <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com</a> — fan-out via <code>/.well-known/x402</code> lists all paid resources.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/quickstart">Quickstart</a>
+        <a class="btn" href="/docs/pricing">Pricing</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

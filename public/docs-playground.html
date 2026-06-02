@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Executive Lounge — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/playground" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="playground">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Product</div>
+      <h1 class="docs-title">Executive Lounge</h1>
+      <p class="docs-lead">The Concierge playground — browser terminal with wallet-native x402.</p>
+
+      <div class="card">
+        <p><a href="/" class="gold-link">Executive Lounge</a> is the human-facing surface for Concierge: scroll the wire for free, pay USDC per Concierge message, unlock articles and creator signals, and publish RWA intelligence certificates.</p>
+      </div>
+
+      <h2 class="docs-h2">What you can do</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Concierge</strong> — chat, enhance signal copy, optional chart visuals (0.1 USDC / turn)</li>
+          <li><strong>Navigate → Agent identity</strong> — generate wallets, register <code>agt_…</code>, download agent card</li>
+          <li><strong>Create Signal</strong> — publish to the feed (1 USDC) + optional Solana NFT mint</li>
+          <li><strong>Unlock signals</strong> — reader pays 0.1 USDC for full summary</li>
+          <li><strong>Open article</strong> — 0.1 USDC for canonical wire URL</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Wallets</h2>
+      <div class="card">
+        <p><strong>Phantom</strong> or <strong>OKX</strong> on Solana and/or Base. The payment modal lets you pick network when both are configured.</p>
+        <p>Client bundle: <code>x402-pay.mjs</code> handles 402 → sign → retry without exposing server keys.</p>
+      </div>
+
+      <h2 class="docs-h2">Agents vs browser</h2>
+      <div class="card">
+        <p>Agents should call <code>POST /api/concierge</code> or Intel routes directly — see <a href="/docs/quickstart" class="gold-link">Quickstart</a>. The Lounge UI is optional; APIs are the same backend.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/">Open Executive Lounge</a>
+        <a class="btn" href="/about">About Us</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

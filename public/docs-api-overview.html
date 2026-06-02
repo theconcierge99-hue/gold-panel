@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>API Overview — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/api/overview" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="api-overview">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">API Reference</div>
+      <h1 class="docs-title">API Overview</h1>
+      <p class="docs-lead">Base URL, authentication, discovery, and response conventions.</p>
+
+      <div class="card">
+        <p><strong>Production base:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Runtime:</strong> Vercel Edge · <code>/api/*</code></p>
+        <p><strong>Auth:</strong> None — x402 USDC per paid route. Optional <code>X-Agent-Id: agt_…</code> after <a href="/docs/api/agent-identity" class="gold-link">agent registration</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Endpoint map</h2>
+      <div class="card-grid cols-2" style="margin-bottom:20px">
+        <a class="doc-card" href="/docs/api/concierge"><h4>Concierge</h4><p>POST /api/concierge — Gemini chat, enhance, image</p></a>
+        <a class="doc-card" href="/docs/api/intel"><h4>DeFi Intel</h4><p>POST /api/concierge-intel-* — structured desk data</p></a>
+        <a class="doc-card" href="/docs/api/agent-identity"><h4>Agent Identity</h4><p>agt_ registry, agent cards, well-known</p></a>
+        <a class="doc-card" href="/docs/api/lounge"><h4>Lounge</h4><p>Market feed, signals, RWA, news unlock</p></a>
+      </div>
+
+      <h2 class="docs-h2">Discovery</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Resource</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1, x-payment-info, Bazaar input schemas</td></tr>
+            <tr><td><code>GET /.well-known/x402</code></td><td>All paid routes for x402 clients</td></tr>
+            <tr><td><code>GET /.well-known/agent-card.json</code></td><td>How to register agents and call Concierge</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>enabled, networks, zauth links (no secrets)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Verdict signals (Intel)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>signal</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>snipe</code></td><td>Tactical — insider + market align; small size</td></tr>
+            <tr><td><code>watch</code></td><td>Mixed — wait for clearer edge</td></tr>
+            <tr><td><code>follow</code></td><td>Constructive — quality liquidity / trend</td></tr>
+            <tr><td><code>avoid</code></td><td>Defensive — reduce chase risk</td></tr>
+            <tr><td><code>rebalance</code></td><td>Rotate — trim winners, add quality beta</td></tr>
+          </tbody>
+        </table>
+        <p><code>confidence</code>: <code>low</code> · <code>medium</code> · <code>high</code></p>
+      </div>
+
+      <h2 class="docs-h2">CORS</h2>
+      <div class="card">
+        <p>Browser calls from the Lounge origin are allowed. Agents on other origins may need a server-side proxy or configured <code>ALLOWED_ORIGINS</code>.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/openapi.json" target="_blank" rel="noopener">OpenAPI JSON</a>
+        <a class="btn" href="/docs/quickstart">Quickstart</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

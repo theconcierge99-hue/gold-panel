@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Concierge Chat — API Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="POST /api/concierge — AI market strategist via x402. Chat, enhance, and image modes with Gemini and live desk data." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/api/concierge" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="api-concierge">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs/api/overview">← API Overview</a></div>
+      <div class="docs-eyebrow">API Reference</div>
+      <h1 class="docs-title">Concierge Chat</h1>
+      <p class="docs-lead">Natural-language market and DeFi intelligence — one paid turn at a time.</p>
+
+      <div class="card">
+        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> · Gemini 2.5 Flash with live market, DeFi desk (TVL, Meteora DLMM yields, whales, verdict), lounge memory, and optional trading-plan structure.</p>
+      </div>
+
+      <h2 class="docs-h2">Request body</h2>
+      <div class="card">
+<pre><code>{
+  "mode": "chat",
+  "message": "Hottest Meteora DLMM pools right now — IL risks?",
+  "history": [
+    { "role": "user", "text": "…" },
+    { "role": "model", "text": "…" }
+  ],
+  "market": []
+}</code></pre>
+        <table>
+          <thead><tr><th>mode</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>chat</code></td><td>Desk reply — HTML in <code>reply</code></td></tr>
+            <tr><td><code>enhance</code></td><td>Rewrite signal — include <code>signal: { title, summary }</code></td></tr>
+            <tr><td><code>image</code></td><td>Analysis + optional generated visual</td></tr>
+          </tbody>
+        </table>
+        <p>Optional header: <code>X-Agent-Id: agt_…</code> after <a href="/docs/api/agent-identity" class="gold-link">registration</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Success response</h2>
+      <div class="card">
+<pre><code>{
+  "reply": "&lt;p&gt;…&lt;/p&gt;",
+  "topics": ["crypto", "defi"],
+  "marketLive": [{ "symbol": "BTC", "price": "…", "change": "…" }],
+  "dataAsOf": "2026-05-21T12:00:00.000Z",
+  "images": ["data:image/png;base64,…"]
+}</code></pre>
+        <p>Yield / DLMM questions use live <strong>Meteora DLMM API</strong> + DeFi Llama in the prompt. DLLM typos are interpreted as DLMM.</p>
+        <p>Trading-plan questions may include <code>A2A|asset=…|bias=…</code> for downstream agents.</p>
+      </div>
+
+      <h2 class="docs-h2">Node.js (x402)</h2>
+      <div class="card">
+        <pre><code>npm install @x402/core @x402/fetch @x402/evm viem</code></pre>
+        <p>Wrap <code>fetch</code> with <code>wrapFetchWithPayment</code> and <code>registerExactEvmScheme</code> on Base — full example in <a href="/docs/quickstart" class="gold-link">Quickstart</a> and PayAI <a class="ext" href="https://docs.payai.network/x402/reference" target="_blank" rel="noopener">reference</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Limits</h2>
+      <div class="card">
+        <ul>
+          <li>Message max <strong>4,000</strong> characters · body max <strong>48 KB</strong></li>
+          <li>History max <strong>12</strong> turns</li>
+          <li>Edge timeout ~30s — use <a href="/docs/api/intel" class="gold-link">Intel APIs</a> for fast structured JSON</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/quickstart">Quickstart</a>
+        <a class="btn" href="/docs/api/intel">DeFi Intel</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge · Not financial advice</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

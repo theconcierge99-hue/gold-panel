@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Lounge &amp; Signals — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/api/lounge" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="api-lounge">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs/api/overview">← API Overview</a></div>
+      <div class="docs-eyebrow">API Reference</div>
+      <h1 class="docs-title">Lounge &amp; Signals</h1>
+      <p class="docs-lead">Market wire, RWA creator signals, and reader unlocks.</p>
+
+      <h2 class="docs-h2">Free</h2>
+      <div class="card">
+        <ul>
+          <li><code>GET /api/market</code> — headlines, ticks, signal teasers</li>
+          <li><code>GET /api/rwa-token?signalId=</code> — certificate metadata</li>
+          <li><code>GET /api/rwa-metadata?signalId=</code> — NFT JSON</li>
+          <li><code>GET /api/rwa-badges?wallet=</code> — reader badges (off-chain)</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Paid (x402)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/news-open</code></td><td>0.10</td><td>Canonical article URL</td></tr>
+            <tr><td><code>POST /api/lounge-signal-open</code></td><td>0.10</td><td>Full signal summary</td></tr>
+            <tr><td><code>POST /api/lounge-signal-publish</code></td><td>1.00</td><td>Publish + RWA certificate</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">RWA flow</h2>
+      <div class="card">
+        <p>Each published signal is an <strong>intelligence certificate</strong> (off-chain hash + optional <strong>Metaplex NFT</strong> on Solana to the creator wallet).</p>
+        <ol>
+          <li>Pay 1 USDC publish fee</li>
+          <li>Signal appears on feed with ⬡ RWA chip</li>
+          <li>Creator mints NFT in Phantom (~0.03 SOL gas)</li>
+          <li>Readers pay 0.1 USDC to unlock full text</li>
+        </ol>
+        <p>Supporting routes: <code>POST /api/lounge-rwa-record-mint</code>, <code>POST /api/solana-rpc-send</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Concierge enhance</h2>
+      <div class="card">
+        <p>Signal authors use <code>POST /api/concierge</code> with <code>mode: "enhance"</code> inside Create Signal (0.1 USDC) — see <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a>.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/">Open Lounge</a>
+        <a class="btn" href="/docs/pricing">Pricing</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

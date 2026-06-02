@@ -50,6 +50,46 @@
       "destination": "/docs.html"
     },
     {
+      "source": "/docs/quickstart",
+      "destination": "/docs-quickstart.html"
+    },
+    {
+      "source": "/docs/pricing",
+      "destination": "/docs-pricing.html"
+    },
+    {
+      "source": "/docs/payment/x402",
+      "destination": "/docs-payment-x402.html"
+    },
+    {
+      "source": "/docs/api/overview",
+      "destination": "/docs-api-overview.html"
+    },
+    {
+      "source": "/docs/api/concierge",
+      "destination": "/docs-api-concierge.html"
+    },
+    {
+      "source": "/docs/api/intel",
+      "destination": "/docs-intel.html"
+    },
+    {
+      "source": "/docs/api/agent-identity",
+      "destination": "/docs-agent-identity.html"
+    },
+    {
+      "source": "/docs/api/lounge",
+      "destination": "/docs-api-lounge.html"
+    },
+    {
+      "source": "/docs/playground",
+      "destination": "/docs-playground.html"
+    },
+    {
+      "source": "/docs/architecture",
+      "destination": "/docs-architecture.html"
+    },
+    {
       "source": "/docs/agents",
       "destination": "/docs-agents.html"
     },

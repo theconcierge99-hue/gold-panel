@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Pricing — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/pricing" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="pricing">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Payment</div>
+      <h1 class="docs-title">Pricing</h1>
+      <p class="docs-lead">Pay per query. No subscriptions. No API keys.</p>
+
+      <div class="card">
+        <p>All Concierge and Intel routes use <strong>USDC micropayments</strong> via x402 on <strong>Base</strong> and optionally <strong>Solana</strong>. Amounts are fixed per route (not dynamic quotes).</p>
+      </div>
+
+      <h2 class="docs-h2">Concierge &amp; Intel</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Atomic (6 dp)</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-yields</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-whales</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/news-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/lounge-signal-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Lounge creator economy</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /api/market</code></td><td>Free</td><td>Headlines + feed</td></tr>
+            <tr><td><code>POST /api/lounge-signal-publish</code></td><td>1.00</td><td>Anti-spam publish fee (100% merchant)</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Signal unlock fees split 50% creator / 50% merchant when payout treasuries are configured. Solana NFT mint after publish requires ~0.03 SOL in Phantom for gas.</p>
+      </div>
+
+      <h2 class="docs-h2">Free discovery</h2>
+      <div class="card">
+        <ul>
+          <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
+          <li><code>POST /api/agent-identity</code> · <code>GET /api/agent-identity</code></li>
+          <li><code>GET /api/zauth-directory</code> · <code>GET /api/zauth-status</code></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/payment/x402">x402 Protocol</a>
+        <a class="btn" href="/docs/quickstart">Quickstart</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

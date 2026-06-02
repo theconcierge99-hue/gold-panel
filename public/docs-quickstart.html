@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Quickstart — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Make your first paid Concierge API call via x402 in under two minutes." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/quickstart" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="quickstart">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Get started</div>
+      <h1 class="docs-title">Quickstart</h1>
+      <p class="docs-lead">Your first paid Concierge call in under two minutes.</p>
+
+      <div class="card">
+        <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code> (or your deployment origin)</p>
+        <p><strong>Endpoint:</strong> <code>POST /api/concierge</code></p>
+        <p><strong>Price:</strong> 0.1 USDC · atomic amount <code>100000</code> (6 decimals)</p>
+      </div>
+
+      <h2 class="docs-h2">1. Probe without payment</h2>
+      <div class="card">
+<pre><code>curl -s -X POST "https://conc-exe.xyz/api/concierge" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"chat","message":"BTC outlook 24h"}' \
+  -D - -o /dev/null | head -20</code></pre>
+        <p>Expect <strong>402</strong> and a <code>PAYMENT-REQUIRED</code> header (base64 JSON with <code>accepts</code> for Base and/or Solana USDC).</p>
+      </div>
+
+      <h2 class="docs-h2">2. Sign and pay (x402 client)</h2>
+      <div class="card">
+        <p>Use an x402-capable HTTP client from the <a class="ext" href="https://docs.payai.network/x402/reference" target="_blank" rel="noopener">PayAI / x402 ecosystem</a> — it decodes requirements, signs USDC, and retries automatically.</p>
+        <p class="note">Facilitator: <code>facilitator.payai.network</code>. Protocol: <a class="ext" href="https://www.x402.org/" target="_blank" rel="noopener">x402 v2</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">3. Retry with PAYMENT-SIGNATURE</h2>
+      <div class="card">
+        <p>Second <code>POST</code> with the same JSON body plus header:</p>
+        <p><code>PAYMENT-SIGNATURE: &lt;base64 payment payload&gt;</code></p>
+        <p>On success: <strong>200</strong>, JSON with <code>reply</code> (HTML), <code>topics</code>, <code>marketLive</code>, <code>dataAsOf</code>, and header <code>PAYMENT-RESPONSE</code> with settlement hash.</p>
+      </div>
+
+      <h2 class="docs-h2">Structured DeFi (no chat)</h2>
+      <div class="card">
+        <p>Same x402 flow on Intel routes — example hottest Meteora DLMM yields:</p>
+<pre><code>POST /api/concierge-intel-yields
+{ "chain": "solana", "project": "meteora" }</code></pre>
+        <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> for all five endpoints.</p>
+      </div>
+
+      <h2 class="docs-h2">Discovery</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>URL</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + payment metadata</td></tr>
+            <tr><td><code>GET /.well-known/x402</code></td><td>x402 resource fan-out</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>Public payment flags (no secrets)</td></tr>
+            <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/api/concierge">Concierge Chat API</a>
+        <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

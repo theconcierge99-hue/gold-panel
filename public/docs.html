@@ -3,318 +3,146 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<title>Documentation — Executive Lounge</title>
+<title>Welcome to Concierge — Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Technical documentation for Executive Lounge: APIs, x402 payments, agent identity, zauth trust layer, RWA signals, Solana NFT mint, Concierge AI." />
+<meta name="description" content="Concierge — AI-powered market and DeFi intelligence for Executive Lounge. Pay per query via x402. No API keys, no subscriptions." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
-<style>
-  html,html[data-theme="dark"]{
-    color-scheme:dark;
-    --bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;
-    --text-primary:#d8e4f0;--text-secondary:#6b7d9a;--text-muted:#3a4a62;
-    --nav-active-bg:rgba(201,168,76,.08);--card-grad-1:#121a2e;--card-grad-2:#0e1525;
-  }
-  html[data-theme="light"]{
-    color-scheme:light;
-    --bg:#f4f2ec;--border:#d4cfc4;--gold:#9a7b2e;--gold-dim:#c9a84c;
-    --text-primary:#1a1f2e;--text-secondary:#4a5568;--text-muted:#6b7280;
-    --nav-active-bg:rgba(154,123,46,.1);--card-grad-1:#fff;--card-grad-2:#f8f6f0;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.65}
-  .wrap{max-width:720px;margin:0 auto;padding:40px 24px 72px}
-  .back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:inline-block;margin-bottom:24px}
-  .back:hover{color:var(--gold)}
-  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
-  .logo-row img{width:40px;height:40px;border-radius:50%;border:1px solid var(--gold-dim)}
-  .logo-row h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px}
-  .eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-  .lead{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;line-height:1.4;margin-bottom:28px;color:var(--text-primary)}
-  .toc{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;margin-bottom:28px}
-  .toc-title{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-  .toc ul{list-style:none;display:grid;gap:6px}
-  .toc a{font-size:13px;color:var(--text-secondary);text-decoration:none}
-  .toc a:hover{color:var(--gold)}
-  section{margin-bottom:32px;scroll-margin-top:24px}
-  section h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:24px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-  section h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:18px 0 10px;font-weight:400}
-  .card{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;margin-bottom:16px}
-  .card p,.card li{font-size:14px;color:var(--text-secondary);margin-bottom:10px}
-  .card p:last-child,.card li:last-child{margin-bottom:0}
-  .card ul{padding-left:18px;margin:8px 0}
-  .card strong{color:var(--text-primary);font-weight:400}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
-  th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:400}
-  code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);word-break:break-all}
-  .note{font-size:12px;color:var(--text-muted);border-left:2px solid var(--gold-dim);padding-left:12px;margin-top:12px}
-  .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
-  .btn{font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);text-decoration:none;border-radius:4px;transition:all .15s}
-  .btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg)}
-  .btn.gold{border-color:var(--gold);color:var(--gold)}
-  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted)}
-</style>
+<link rel="stylesheet" href="/css/docs-site.css" />
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="/">← Back to Lounge</a>
-  <div class="logo-row">
-    <img src="/images/the-concierge-logo.png" alt="The Concierge" width="40" height="40" />
-    <h1>Documentation</h1>
-  </div>
-  <div class="eyebrow">Executive Lounge</div>
-  <p class="lead">Technical guide for the lounge UI, Edge APIs, x402 micropayments, <a href="/docs/agent-identity" style="color:var(--gold)">agent identity</a>, <a href="#zauth" style="color:var(--gold)">zauth</a> trust layer, RWA creator signals, and Concierge AI.</p>
+<div class="docs-layout" data-docs-page="introduction">
+  <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation navigation"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar">
+        <a href="/">← Executive Lounge</a>
+        <span style="color:var(--border)">·</span>
+        <a href="/openapi.json" class="ext" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
 
-  <nav class="toc" aria-label="Table of contents">
-    <div class="toc-title">On this page</div>
-    <ul>
-      <li><a href="#overview">Overview &amp; pricing</a></li>
-      <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#api">API reference</a></li>
-      <li><a href="#x402">x402 payments</a></li>
-      <li><a href="#zauth">zauth integration</a></li>
-      <li><a href="#x402scan">x402scan listing</a></li>
-      <li><a href="#concierge">Concierge AI</a></li>
-      <li><a href="/docs/agent-identity">Agent identity ↗</a></li>
-      <li><a href="/docs/intel">Concierge Intel API ↗</a></li>
-      <li><a href="/docs/agents">Agents &amp; integrators ↗</a></li>
-      <li><a href="#rwa">RWA (Real World Assets)</a></li>
-      <li><a href="#signals">Creator signals</a></li>
-      <li><a href="#config">Configuration</a></li>
-      <li><a href="#security">Security</a></li>
-      <li><a href="#deploy">Deployment</a></li>
-    </ul>
-  </nav>
+      <div class="docs-eyebrow">Documentation</div>
+      <h1 class="docs-title">Welcome to Concierge</h1>
+      <p class="docs-lead">
+        <strong>AI-powered market and DeFi intelligence.</strong>
+        Pay per query via x402 — no API keys, no subscriptions.
+      </p>
 
-  <section id="overview">
-    <h2>Overview &amp; pricing</h2>
-    <div class="card">
-      <p>Executive Lounge is a private intelligence terminal: live market wire, <strong>RWA-tokenized</strong> creator signals (optional Solana NFT), and paid Concierge AI. The UI is English; Concierge mirrors the user’s language when clear from their messages.</p>
-      <table>
-        <thead><tr><th>Action</th><th>Price</th></tr></thead>
-        <tbody>
-          <tr><td>Browse headlines</td><td>Free</td></tr>
-          <tr><td>Open RSS article</td><td>0.1 USDC</td></tr>
-          <tr><td>Concierge message</td><td>0.1 USDC</td></tr>
-          <tr><td>Unlock creator signal</td><td>0.1 USDC</td></tr>
-          <tr><td>Publish creator signal</td><td>1 USDC</td></tr>
-        </tbody>
-      </table>
-      <p class="note">Reader unlock fees split 50% creator / 50% merchant. Publish fee is 100% merchant. Solana publish also requires ~0.03 SOL in Phantom for NFT mint gas (after 1 USDC).</p>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px">
+        Concierge is the research desk of <strong style="color:var(--text-primary);font-weight:400">Executive Lounge</strong> — a private terminal for live wire headlines, creator signals, and institutional-style analysis. Agents and humans call the same Edge APIs: natural-language chat with Gemini, or structured DeFi intel (TVL, yields, whales, wallet, verdict) on Solana and EVM.
+      </p>
+
+      <h2 class="docs-h2">Get started</h2>
+      <div class="card-grid cols-2">
+        <a class="doc-card" href="/docs/quickstart">
+          <div class="card-icon">⚡</div>
+          <h4>Quickstart</h4>
+          <p>Make your first paid API call in under two minutes.</p>
+        </a>
+        <a class="doc-card" href="/docs/playground">
+          <div class="card-icon">◆</div>
+          <h4>Executive Lounge</h4>
+          <p>Use Concierge in the browser — Phantom or OKX wallet, x402 USDC.</p>
+        </a>
+      </div>
+
+      <h2 class="docs-h2">Explore endpoints</h2>
+      <div class="card-grid cols-3">
+        <a class="doc-card" href="/docs/api/concierge">
+          <div class="card-icon">◎</div>
+          <h4>Concierge Chat</h4>
+          <p>Multi-turn strategist: macro, geo, technicals, DeFi desk, trading plans.</p>
+        </a>
+        <a class="doc-card" href="/docs/api/intel">
+          <div class="card-icon">◇</div>
+          <h4>DeFi Intel</h4>
+          <p>TVL, yields (Meteora DLMM), whales, wallet snapshot, desk verdict.</p>
+        </a>
+        <a class="doc-card" href="/docs/api/agent-identity">
+          <div class="card-icon">⬡</div>
+          <h4>Agent Identity</h4>
+          <p>Register <code>agt_…</code> IDs, wallets, and discovery cards for A2A.</p>
+        </a>
+        <a class="doc-card" href="/docs/api/lounge">
+          <div class="card-icon">▣</div>
+          <h4>Lounge &amp; Signals</h4>
+          <p>Wire unlock, RWA creator signals, publish and reader unlock.</p>
+        </a>
+        <a class="doc-card" href="/docs/api/overview">
+          <div class="card-icon">≡</div>
+          <h4>API Overview</h4>
+          <p>Base URL, discovery, response shapes, signal vocabulary.</p>
+        </a>
+        <a class="doc-card" href="/docs/payment/x402">
+          <div class="card-icon">$</div>
+          <h4>x402 Payments</h4>
+          <p>HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.</p>
+        </a>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <h4>Send a request</h4>
+          <p><code>POST</code> to any paid endpoint with your JSON body. No <code>Authorization</code> header — identity is optional via <code>X-Agent-Id</code> after registration.</p>
+        </div>
+        <div class="step">
+          <h4>Pay via x402</h4>
+          <p>The server returns <strong>402 Payment Required</strong> with pricing in <code>PAYMENT-REQUIRED</code>. Your agent or wallet signs USDC and retries with <code>PAYMENT-SIGNATURE</code>.</p>
+        </div>
+        <div class="step">
+          <h4>Get intelligence</h4>
+          <p>Receive structured JSON (Intel APIs) or HTML analysis in <code>reply</code> (Concierge chat), plus live market metadata and optional agent attribution.</p>
+        </div>
+      </div>
+
+      <h2 class="docs-h2">Standard responses</h2>
+
+      <h3 class="docs-h3">Concierge chat</h3>
+      <div class="card">
+        <p>After payment, <code>POST /api/concierge</code> returns:</p>
+<pre><code>{
+  "reply": "&lt;p&gt;Executive summary…&lt;/p&gt;",
+  "topics": ["crypto", "defi"],
+  "marketLive": [{ "symbol": "BTC", "price": "…", "change": "…" }],
+  "dataAsOf": "2026-05-21T12:00:00.000Z",
+  "agent": { "id": "agt_…", "name": "…", "solAddress": "…" }
+}</code></pre>
+        <p class="note"><code>agent</code> appears only when <code>X-Agent-Id</code> matches a registered profile.</p>
+      </div>
+
+      <h3 class="docs-h3">DeFi Intel (structured)</h3>
+      <div class="card">
+<pre><code>{
+  "ok": true,
+  "kind": "intel-yields",
+  "dataAsOf": "2026-05-21T12:00:00.000Z",
+  "sources": ["Meteora DLMM API", "DeFi Llama"],
+  "yields": [
+    { "project": "Meteora DLMM", "symbol": "SOL-USDC", "chain": "Solana", "apy": "127.62%", "tvlUsd": "$5.15M" }
+  ]
+}</code></pre>
+        <p>Desk verdict endpoint adds <code>verdict.signal</code>: <code>snipe</code> · <code>watch</code> · <code>follow</code> · <code>avoid</code> · <code>rebalance</code>.</p>
+      </div>
+
+      <div class="note">
+        Prefer the full terminal? Open <a href="/" class="gold-link">Executive Lounge</a> — browse headlines free, pay 0.1 USDC per Concierge turn or Intel call. See <a href="/docs/pricing" class="gold-link">Pricing</a> for all routes.
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/quickstart">Quickstart</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+        <a class="btn" href="/">Open Lounge</a>
+      </div>
+
+      <p class="docs-foot">Concierge · Executive Lounge · Payments via <a href="https://www.x402.org/" class="ext" target="_blank" rel="noopener">x402</a> · Not financial advice</p>
     </div>
-  </section>
-
-  <section id="architecture">
-    <h2>Architecture</h2>
-    <div class="card">
-      <ul>
-        <li><strong>UI</strong> — <code>executive-lounge.html</code> + <code>x402-pay.mjs</code> client bundle</li>
-        <li><strong>APIs</strong> — Vercel Edge functions under <code>/api/*</code></li>
-        <li><strong>AI</strong> — Google Gemini</li>
-        <li><strong>Payments</strong> — x402 v2 via PayAI facilitator (on-chain settlement)</li>
-        <li><strong>Trust</strong> — optional <a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth.inc</a> directory + Provider Hub telemetry</li>
-        <li><strong>Storage</strong> — Redis/KV for signals, RWA certificates, badges, ledger, Concierge memory</li>
-        <li><strong>RWA mint</strong> — <code>mint-signal.mjs</code> + <code>/api/solana-rpc-send</code> (Phantom, Metaplex)</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="api">
-    <h2>API reference</h2>
-    <div class="card">
-      <h3>Free</h3>
-      <ul>
-        <li><code>GET /api/market</code> — headline feed + ticks</li>
-        <li><code>GET /api/x402-config</code> — public payment config (<code>zauthTelemetryEnabled</code>, <code>discovery.zauth</code> links)</li>
-        <li><code>GET /api/zauth-directory</code> — proxy to zauth x402 endpoint directory (CORS for agents)</li>
-        <li><code>GET /api/zauth-status</code> — this site’s directory slice + verification checks</li>
-        <li><code>GET /.well-known/x402</code> — x402 discovery fan-out</li>
-        <li><code>GET /openapi.json</code> — OpenAPI + payment metadata</li>
-        <li><code>GET /.well-known/agent-card.json</code> — agent registry / how to register <code>agt_…</code></li>
-        <li><code>POST /api/agent-identity</code> — register agent (public keys)</li>
-        <li><code>GET /api/agent-identity</code> — profile, directory (<code>?list=1</code>), or card</li>
-        <li><code>GET /api/agent-identity-card</code> — ERC-8004-style card per agent</li>
-      </ul>
-      <h3>Paid (POST, x402)</h3>
-      <ul>
-        <li><code>POST /api/news-open</code> — unlock article URL</li>
-        <li><code>POST /api/concierge</code> — AI chat / enhance / image</li>
-        <li><code>POST /api/lounge-signal-publish</code> — publish signal + RWA cert (1 USDC)</li>
-        <li><code>POST /api/lounge-signal-open</code> — unlock signal body (0.1 USDC)</li>
-      </ul>
-      <h3>RWA (free reads)</h3>
-      <ul>
-        <li><code>GET /api/rwa-token?signalId=</code> — certificate</li>
-        <li><code>GET /api/rwa-metadata?signalId=</code> — NFT JSON metadata</li>
-        <li><code>GET /api/rwa-badges?wallet=</code> — reader badges</li>
-        <li><code>POST /api/lounge-rwa-record-mint</code> — save Phantom mint result</li>
-        <li><code>POST /api/solana-rpc-send</code> — Solana RPC proxy for browser mint</li>
-      </ul>
-      <p>Without payment, paid routes return <strong>402</strong> with <code>PAYMENT-REQUIRED</code>. <code>GET</code> on paid routes also returns 402 for marketplace probes.</p>
-    </div>
-  </section>
-
-  <section id="x402">
-    <h2>x402 payments</h2>
-    <div class="card">
-      <p>USDC on <strong>Base</strong> and optionally <strong>Solana</strong>. Facilitator: PayAI (<code>facilitator.payai.network</code>).</p>
-      <ol style="padding-left:18px;color:var(--text-secondary);font-size:14px">
-        <li style="margin-bottom:8px">Client receives 402 + payment requirements</li>
-        <li style="margin-bottom:8px">Wallet signs USDC transfer</li>
-        <li style="margin-bottom:8px">Client retries with <code>PAYMENT-SIGNATURE</code></li>
-        <li>Server verifies and settles; response includes <code>PAYMENT-RESPONSE</code> with transaction hash</li>
-      </ol>
-      <p class="note">Set <code>X402_EVM_PAY_TO</code> and/or <code>X402_SOL_PAY_TO</code> in your host environment. Never commit keys or RPC URLs with embedded secrets.</p>
-    </div>
-  </section>
-
-  <section id="zauth">
-    <h2>zauth integration</h2>
-    <div class="card">
-      <p><a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth</a> is the security and trust layer for paid x402 APIs — endpoint directory, uptime, verification badges, and optional Provider Hub telemetry. It does <strong>not</strong> replace PayAI settlement or wallet signing; payments still use the normal x402 client (<code>x402-pay.mjs</code>).</p>
-
-      <h3>What Lounge exposes</h3>
-      <table>
-        <thead><tr><th>Route / field</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td><code>GET /api/zauth-directory</code></td><td>Proxy to zauth Database — agents query before paying third-party APIs</td></tr>
-          <tr><td><code>GET /api/zauth-status</code></td><td>Endpoints for this deployment + live verification when configured</td></tr>
-          <tr><td><code>discovery.zauth</code> in <code>/api/x402-config</code></td><td>Hub, database, and docs URLs</td></tr>
-        </tbody>
-      </table>
-
-      <h3>Provider Hub (operators)</h3>
-      <ol style="padding-left:18px;color:var(--text-secondary);font-size:14px">
-        <li style="margin-bottom:8px">Create an API key at <a href="https://zauth.inc/provider-hub" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">zauth.inc/provider-hub</a></li>
-        <li style="margin-bottom:8px">Set <code>ZAUTH_API_KEY</code> in Vercel (never commit it)</li>
-        <li style="margin-bottom:8px">Redeploy; complete real paid traffic on Concierge, news-open, signal routes</li>
-        <li>Check <code>GET /api/zauth-status</code> — <code>providerTelemetryEnabled: true</code></li>
-      </ol>
-      <p>After each successful paid <strong>200</strong>, the server sends async telemetry (request, response, payment) to zauth. Failures are logged only; user responses are unchanged.</p>
-
-      <h3>Paid routes that report</h3>
-      <ul>
-        <li><code>POST /api/concierge</code></li>
-        <li><code>POST /api/news-open</code></li>
-        <li><code>POST /api/lounge-signal-publish</code></li>
-        <li><code>POST /api/lounge-signal-open</code></li>
-      </ul>
-
-      <h3>Agents &amp; Concierge</h3>
-      <p>Before recommending external x402 APIs, agents should prefer <strong>verified</strong> endpoints with high <code>successRate</code>:</p>
-      <p><code>GET /api/zauth-directory?verified=true&amp;search=example.com&amp;limit=20</code></p>
-      <p>Concierge is instructed to use this directory when suggesting third-party paid services.</p>
-
-      <h3>Environment</h3>
-      <table>
-        <thead><tr><th>Variable</th><th>Required</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td><code>ZAUTH_API_KEY</code></td><td>No</td><td>Provider Hub key — enables telemetry + verification</td></tr>
-          <tr><td><code>ZAUTH_API_ENDPOINT</code></td><td>No</td><td>Default <code>https://back.zauthx402.com</code></td></tr>
-          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Recommended</td><td>Canonical URL for status/directory filtering</td></tr>
-        </tbody>
-      </table>
-
-      <p class="note">Implementation: <code>api/lib/zauth.ts</code>, <code>api/lib/zauth-paid-response.ts</code>. Edge-safe HTTP reporter — not the Express <code>@zauthx402/sdk</code> middleware. Full operator guide: repository <code>docs/zauth.md</code>.</p>
-    </div>
-  </section>
-
-  <section id="x402scan">
-    <h2>x402scan listing</h2>
-    <div class="card">
-      <p>List this server on <a href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">x402scan.com</a> for public discovery and transaction indexing.</p>
-      <ul>
-        <li>Register your production origin (fan-out discovers all four paid routes)</li>
-        <li>If batch registration fails, register each <code>/api/...</code> URL separately</li>
-        <li>Complete a real micropayment so settlements appear on-chain</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="concierge">
-    <h2>Concierge AI</h2>
-    <div class="card">
-      <p><strong>Modes:</strong> <code>chat</code>, <code>enhance</code> (signal editor), <code>image</code> (analysis + optional visual).</p>
-      <p>Uses live market data, general-knowledge feeds, lounge memory (recent headlines + creator signals), and an internal <strong>DeFi desk</strong> block (TVL, yields, whales, wallet snapshot, verdict) when the question is on-chain / DeFi.</p>
-      <p><strong>Language:</strong> defaults to English; replies in Indonesian or other languages when the user’s message (or recent user turns for short replies) is clearly in that language.</p>
-      <p><strong>External agents:</strong> integrate via x402 without source access — see <a href="/docs/agents" style="color:var(--gold)">Agents &amp; integrators</a> (<code>POST /api/concierge</code>, 0.1 USDC, OpenAPI + Node/Python examples).</p>
-      <p><strong>Concierge Intel APIs</strong> (integrators): separate paid endpoints per function — <a href="/docs/intel" style="color:var(--gold)">TVL · Yields · Whales · Wallet · Verdict</a> at 0.1 USDC each (<code>POST /api/concierge-intel-*</code>).</p>
-      <p><strong>Agent identity:</strong> register <code>agt_…</code> + Solana/Base wallets for A2A discovery — see <a href="/docs/agent-identity" style="color:var(--gold)">Agent identity</a> (Lounge → Navigate → Agent identity, or <code>POST /api/agent-identity</code>). Optional header <code>X-Agent-Id</code> on paid Concierge calls.</p>
-    </div>
-  </section>
-
-  <section id="rwa">
-    <h2>RWA (Real World Assets)</h2>
-    <div class="card">
-      <p>Each published signal is an <strong>RWA intelligence certificate</strong> (off-chain <code>tokenId</code> + content hash). Solana creators mint a <strong>Metaplex NFT</strong> to their own Phantom wallet after paying 1 USDC — gas in SOL (~0.03).</p>
-      <p><strong>Mint flow:</strong> publish → approve USDC → approve NFT in Phantom → <code>POST /api/lounge-rwa-record-mint</code>. RPC for mint uses <code>/api/solana-rpc-send</code> (set <code>SOLANA_RPC_URL</code> to Helius on Vercel).</p>
-      <p>Readers earn <strong>off-chain badges</strong> (Intel Scout → Sovereign Intel) when unlocking signals. On-chain name is limited to <strong>32 UTF-8 bytes</strong> — shorten long titles if mint fails with error <code>0xb</code>.</p>
-      <p class="note">Full operator guide: repository <code>docs/rwa.md</code> and <code>docs/rwa-solana-setup.md</code>.</p>
-    </div>
-  </section>
-
-  <section id="signals">
-    <h2>Creator signals</h2>
-    <div class="card">
-      <p><strong>Mint &amp; Publish</strong> stores a signal + RWA cert in KV and surfaces it on the market feed (⬡ RWA chip). Unlock shows the full summary in a modal.</p>
-      <p>Requires <code>KV_REST_API_URL</code> and <code>KV_REST_API_TOKEN</code> (or Upstash equivalents) in production.</p>
-    </div>
-  </section>
-
-  <section id="config">
-    <h2>Configuration</h2>
-    <div class="card">
-      <table>
-        <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td><code>GEMINI_API_KEY</code></td><td>Concierge AI</td></tr>
-          <tr><td><code>X402_EVM_PAY_TO</code></td><td>Base USDC receive address</td></tr>
-          <tr><td><code>X402_SOL_PAY_TO</code></td><td>Solana USDC receive (optional)</td></tr>
-          <tr><td><code>KV_REST_*</code></td><td>Signals, RWA, memory</td></tr>
-          <tr><td><code>SOLANA_RPC_URL</code></td><td>Server RPC for NFT mint proxy (Helius recommended)</td></tr>
-          <tr><td><code>X402_SITE_ORIGIN</code></td><td>Canonical URL + RWA metadata + zauth status</td></tr>
-          <tr><td><code>ZAUTH_API_KEY</code></td><td>zauth Provider Hub telemetry (optional)</td></tr>
-          <tr><td><code>ZAUTH_API_ENDPOINT</code></td><td>zauth backend override (optional)</td></tr>
-          <tr><td><code>RWA_SIGNAL_CONTRACT_SOL</code></td><td>Optional Metaplex collection mint</td></tr>
-          <tr><td><code>ALLOWED_ORIGINS</code></td><td>Extra CORS origins</td></tr>
-        </tbody>
-      </table>
-      <p class="note">Copy <code>.env.example</code> to <code>.env.local</code> for local development. Operators set secrets only in the hosting dashboard.</p>
-    </div>
-  </section>
-
-  <section id="security">
-    <h2>Security</h2>
-    <div class="card">
-      <ul>
-        <li>Never commit API keys, KV tokens, private keys, or RPC URLs with keys</li>
-        <li>Do not paste full <code>/api/x402-config</code> responses in public support threads</li>
-        <li>Restrict Gemini keys by HTTP referrer in Google AI Studio</li>
-        <li>Rotate any credential that was exposed</li>
-      </ul>
-      <p>Extended markdown docs for operators live in the repository <code>docs/</code> folder (same content, security-reviewed).</p>
-    </div>
-  </section>
-
-  <section id="deploy">
-    <h2>Deployment</h2>
-    <div class="card">
-      <p>Deploy via <strong>Git → Vercel</strong> on the correct team and project. Avoid <code>vercel deploy</code> from a personal account that lacks production env vars.</p>
-      <p>After deploy, verify: site loads, <code>/deploy-version.txt</code> matches your commit, <code>/api/x402-config</code> shows <code>enabled: true</code>, and paid routes return 402 without payment.</p>
-    </div>
-  </section>
-
-  <div class="cta-row">
-    <a class="btn gold" href="/">Open the Lounge</a>
-    <a class="btn" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
-  </div>
-
-  <p class="foot">Executive Lounge · Documentation · Payments via x402 · Not financial advice</p>
+  </main>
 </div>
+<script src="/js/docs-site.js"></script>
 </body>
 </html>

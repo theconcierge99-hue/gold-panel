@@ -104,7 +104,7 @@
       <li>Category shortcuts from the sidebar (Macro, Crypto, Geopolitics, and more) open Concierge with focused prompts.</li>
       <li>External bots and backends can call <code>POST /api/concierge</code> with the same x402 flow—documented for integrators, no repository access required.</li>
     </ul>
-    <p>Technical guide: <a href="/docs/agents">Agents &amp; integrators</a> · <a href="/docs#concierge">Concierge in documentation</a></p>
+    <p>Technical guide: <a href="/docs">Concierge documentation</a> · <a href="/docs/api/concierge">Concierge Chat API</a></p>
   </div>
 
   <div class="card">
@@ -115,7 +115,7 @@
       <li><strong>Provider Hub telemetry</strong> — optional operator reporting after successful paid calls (Concierge, news-open, signals).</li>
       <li>Concierge is instructed to prefer high-trust endpoints when suggesting external services.</li>
     </ul>
-    <p>Details: <a href="/docs#zauth">zauth in documentation</a></p>
+    <p>Details: <a href="/docs/architecture">zauth in architecture docs</a></p>
   </div>
 
   <div class="card">
@@ -127,16 +127,16 @@
       <li>Optional <code>X-Agent-Id</code> header on Concierge calls for attribution in responses.</li>
       <li>Registration is <strong>free</strong>; paid APIs still require USDC per call.</li>
     </ul>
-    <p>Full guide: <a href="/docs/agent-identity">Agent identity documentation</a></p>
+    <p>Full guide: <a href="/docs/api/agent-identity">Agent identity documentation</a></p>
   </div>
 
   <div class="card">
     <h2>For builders &amp; operators</h2>
     <p>Executive Lounge is designed to be operable and integrable: Edge APIs on Vercel, OpenAPI with payment metadata, public docs without exposing secrets, and environment-driven configuration for RPC, KV, Gemini, and x402 receive addresses.</p>
     <ul>
-      <li><a href="/docs">Documentation</a> — architecture, API reference, deployment, security</li>
-      <li><a href="/docs/agents">Agents &amp; integrators</a> — x402 Concierge from Node, Python, or any HTTP client</li>
-      <li><a href="/docs/agent-identity">Agent identity</a> — register bots, wallets, and discovery cards</li>
+      <li><a href="/docs">Documentation</a> — quickstart, API reference, pricing, architecture</li>
+      <li><a href="/docs/api/concierge">Concierge Chat</a> — x402 from Node, Python, or any HTTP client</li>
+      <li><a href="/docs/api/agent-identity">Agent identity</a> — register bots, wallets, and discovery cards</li>
       <li><a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a> · <a href="/.well-known/x402" target="_blank" rel="noopener noreferrer">x402 discovery</a></li>
     </ul>
     <p>Our audience: serious participants and autonomous agents who want <strong>institutional-grade clarity</strong>—not noise. Not financial advice; on-chain payments are public.</p>

@@ -1,0 +1,23 @@
+# Concierge — Executive Lounge
+
+> AI-powered market and DeFi intelligence. Pay per query via x402 — no API keys, no subscriptions.
+
+## Docs
+
+- [Welcome to Concierge](https://conc-exe.xyz/docs): Introduction, endpoint map, standard response shapes.
+- [Quickstart](https://conc-exe.xyz/docs/quickstart): First paid API call in under two minutes.
+- [Pricing](https://conc-exe.xyz/docs/pricing): Pay-per-query USDC pricing for all routes.
+- [x402 Protocol](https://conc-exe.xyz/docs/payment/x402): HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.
+- [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
+- [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini chat, enhance, image.
+- [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields (Meteora DLMM), whales, wallet, verdict.
+- [Agent Identity](https://conc-exe.xyz/docs/api/agent-identity): agt_ registry, agent cards, X-Agent-Id.
+- [Lounge & Signals](https://conc-exe.xyz/docs/api/lounge): Market feed, RWA signals, news unlock.
+- [Executive Lounge](https://conc-exe.xyz/docs/playground): Browser terminal and wallet UX.
+- [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
+
+## OpenAPI
+
+- [openapi.json](https://conc-exe.xyz/openapi.json)
+- [/.well-known/x402](https://conc-exe.xyz/.well-known/x402)
+- [/.well-known/agent-card.json](https://conc-exe.xyz/.well-known/agent-card.json)
