@@ -16,6 +16,7 @@ import {
   formatDeFiIntelForPrompt,
   normalizeConciergeDeFiMessage,
   wantsDeFiIntel,
+  wantsDeFiYieldQuestion,
 } from "./concierge-defi-intel";
 import {
   formatLoungeMemoryForPrompt,
@@ -263,7 +264,7 @@ async function resolveIntelligenceContext(
         insiderItems: memoryItems,
         lite: tradingPlan,
       }),
-      tradingPlan ? 2_500 : 4_000,
+      tradingPlan ? 2_500 : 6_000,
       null,
     );
     if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
@@ -301,11 +302,14 @@ export async function runConciergeGemini(options: {
 > {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
   const { message, history = [], signal, market = [] } = options;
-  const topics = detectTopics(message);
-  const requireTradingPlan = wantsTradingPlan(message, topics);
+  const queryMessage = normalizeConciergeDeFiMessage(message);
+  const topics = detectTopics(queryMessage);
+  const deFiYieldQuestion = wantsDeFiYieldQuestion(queryMessage);
+  const requireTradingPlan =
+    !deFiYieldQuestion && wantsTradingPlan(queryMessage, topics);
   const { intelBlock, ticks, snapshot, loungeMemoryBlock } = await resolveIntelligenceContext(
     market,
-    message,
+    queryMessage,
     options.liveSnapshot,
     requireTradingPlan,
   );

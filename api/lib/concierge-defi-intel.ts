@@ -7,7 +7,9 @@ import type { SentimentContext } from "./market-sources";
 import type { LoungeMemoryItem } from "./lounge-memory";
 
 const FETCH_MS = 3_200;
+const METEORA_FETCH_MS = 4_500;
 const YIELD_MIN_TVL_USD = 75_000;
+const METEORA_MIN_TVL_USD = 50_000;
 const YIELD_MAX_APY = 250;
 
 export type YieldPoolRow = {
@@ -77,6 +79,9 @@ async function fetchJson<T>(url: string, timeoutMs = FETCH_MS): Promise<T | null
 const YIELD_PROJECT_HINTS =
   /jupiter|meteora|dlmm|raydium|orca|kamino|marinade|marginfi|drift|save|lido|aave|uniswap|curve|pendle|morpho|compound/i;
 
+const LLAMA_SOLANA_YIELD_HINTS =
+  /jupiter|raydium|orca|kamino|marinade|marginfi|drift|save/i;
+
 export function normalizeConciergeDeFiMessage(message: string): string {
   return message
     .replace(/\bdllm\b/gi, "DLMM")
@@ -106,6 +111,16 @@ export function inferYieldIntelFocus(message: string): {
     return { chain: "solana", sortByApy };
   }
   return { sortByApy };
+}
+
+export function wantsDeFiYieldQuestion(message: string): boolean {
+  const t = normalizeConciergeDeFiMessage(message).toLowerCase();
+  if (!/\b(dlmm|dllm|meteora|yield|yields|apy|apr|farm|pool|liquidity|tvl|aped|ape into|hottest|hot)\b/.test(t)) {
+    return false;
+  }
+  return /\b(hot|hottest|best|top|highest|yield|yields|apy|dlmm|dllm|meteora|farm|pool|ape|aped|where|which)\b/.test(
+    t,
+  );
 }
 
 export function wantsDeFiIntel(message: string): boolean {
@@ -228,6 +243,99 @@ export async function fetchTopYields(options?: {
     apy: `${(p.apy ?? 0).toFixed(2)}%`,
     tvlUsd: fmtUsd(p.tvlUsd ?? NaN),
   }));
+}
+
+type MeteoraDlmmPool = {
+  name?: string;
+  apy?: number;
+  apr?: number;
+  tvl?: number;
+  is_blacklisted?: boolean;
+};
+
+/** Meteora DLMM pools — DeFi Llama does not list Meteora; use Meteora datapi directly. */
+export async function fetchMeteoraDlmmYields(options?: {
+  limit?: number;
+  sortByApy?: boolean;
+  minTvlUsd?: number;
+}): Promise<YieldPoolRow[]> {
+  const data = await fetchJson<{ data?: MeteoraDlmmPool[] }>(
+    "https://dlmm.datapi.meteora.ag/pools?page=1&limit=60&sort_by=tvl:desc",
+    METEORA_FETCH_MS,
+  );
+  if (!data?.data?.length) return [];
+
+  const minTvl = options?.minTvlUsd ?? METEORA_MIN_TVL_USD;
+  const screened = data.data.filter((p) => {
+    if (p.is_blacklisted) return false;
+    const tvl = p.tvl ?? 0;
+    const apy = p.apy ?? p.apr ?? 0;
+    if (tvl < minTvl) return false;
+    if (apy <= 0 || apy > YIELD_MAX_APY) return false;
+    return true;
+  });
+
+  const ranked = options?.sortByApy
+    ? [...screened].sort((a, b) => (b.apy ?? b.apr ?? 0) - (a.apy ?? a.apr ?? 0))
+    : screened;
+
+  return ranked.slice(0, options?.limit ?? 12).map((p) => ({
+    project: "Meteora DLMM",
+    symbol: p.name ?? "—",
+    chain: "Solana",
+    apy: `${(p.apy ?? p.apr ?? 0).toFixed(2)}%`,
+    tvlUsd: fmtUsd(p.tvl ?? NaN),
+  }));
+}
+
+async function fetchSolanaLlamaYields(options?: {
+  projectHint?: string;
+  limit?: number;
+  sortByApy?: boolean;
+}): Promise<YieldPoolRow[]> {
+  const hint = options?.projectHint?.trim().toLowerCase();
+  const llamaHint =
+    hint === "meteora" || hint === "dlmm" ? undefined : hint;
+  let rows = await fetchTopYields({
+    chain: "solana",
+    projectHint: llamaHint,
+    limit: options?.limit ?? 12,
+    sortByApy: options?.sortByApy,
+  });
+  if (!rows.length && llamaHint) {
+    rows = await fetchTopYields({
+      chain: "solana",
+      limit: options?.limit ?? 12,
+      sortByApy: options?.sortByApy,
+    });
+  }
+  if (!rows.length) {
+    const pools = await fetchJson<
+      { chain?: string; project?: string; symbol?: string; tvlUsd?: number; apy?: number }[]
+    >("https://yields.llama.fi/pools");
+    if (pools?.length) {
+      rows = pools
+        .filter((p) => {
+          const tvl = p.tvlUsd ?? 0;
+          const apy = p.apy ?? 0;
+          if ((p.chain ?? "").toLowerCase() !== "solana") return false;
+          if (tvl < YIELD_MIN_TVL_USD || apy <= 0 || apy > YIELD_MAX_APY) return false;
+          return LLAMA_SOLANA_YIELD_HINTS.test(p.project ?? "");
+        })
+        .sort((a, b) =>
+          options?.sortByApy ? (b.apy ?? 0) - (a.apy ?? 0) : (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0),
+        )
+        .slice(0, options?.limit ?? 12)
+        .map((p) => ({
+          project: p.project ?? "—",
+          symbol: p.symbol ?? "—",
+          chain: "Solana",
+          apy: `${(p.apy ?? 0).toFixed(2)}%`,
+          tvlUsd: fmtUsd(p.tvlUsd ?? NaN),
+        }));
+    }
+  }
+  return rows;
 }
 
 export function buildWhaleLines(positioning: PositioningSnap[]): string[] {
@@ -395,12 +503,23 @@ export async function fetchConciergeDeFiIntel(options: {
   const [chains, topProtocols, yields, walletRow] = await Promise.all([
     options.lite ? Promise.resolve([] as ChainTvlRow[]) : fetchChainTvl(),
     options.lite ? Promise.resolve([]) : fetchTopProtocols(),
-    fetchTopYields({
-      chain: yieldFocus.chain,
-      projectHint: yieldFocus.projectHint,
-      limit: yieldFocus.projectHint ? 16 : 12,
-      sortByApy: yieldFocus.sortByApy,
-    }),
+    (async () => {
+      const wantsMeteora =
+        yieldFocus.projectHint === "meteora" ||
+        /\b(dlmm|dllm)\b/i.test(msgNorm);
+      if (wantsMeteora) {
+        const meteora = await fetchMeteoraDlmmYields({
+          limit: 12,
+          sortByApy: yieldFocus.sortByApy ?? true,
+        });
+        if (meteora.length) return meteora;
+      }
+      return fetchSolanaLlamaYields({
+        projectHint: yieldFocus.projectHint,
+        limit: yieldFocus.projectHint ? 16 : 12,
+        sortByApy: yieldFocus.sortByApy,
+      });
+    })(),
     fetchWalletIntel({
       message: options.message,
       solAddress: wallets.solana,
@@ -419,6 +538,9 @@ export async function fetchConciergeDeFiIntel(options: {
   });
 
   const sources = ["DeFi Llama (TVL/yields)", "Binance positioning"];
+  if (yields.some((y) => y.project === "Meteora DLMM")) {
+    sources.push("Meteora DLMM API");
+  }
   if (walletRow?.summary.includes("Helius")) sources.push("Helius balances");
   if (insiderLines.length) sources.push("Lounge creator signals (insider)");
 
@@ -442,6 +564,7 @@ export function formatDeFiIntelForPrompt(intel: ConciergeDeFiIntel): string {
     `DEFI DESK INTELLIGENCE (fetched ${intel.fetchedAt}):`,
     `Sources: ${intel.sources.join(" · ")}`,
     "Rules: Use this block for TVL, yields (Jupiter/Meteora/DLMM/etc.), whale positioning, wallet snapshot, and VERDICT. Cross-check with MULTI-SOURCE MARKET INTELLIGENCE and LOUNGE MEMORY insider lines. Do not invent APY/TVL figures outside this block.",
+    "If the user typed DLLM, treat it as DLMM (Meteora on Solana) — never as an unknown ticker. For hottest/best DLMM questions, cite YIELDS rows directly (project, pair, APY, TVL) and warn on IL, scam APY, and sizing.",
     "",
     `[DESK VERDICT — ${intel.verdict.confidence} confidence]`,
     `Signal: ${intel.verdict.signal.toUpperCase()} — ${intel.verdict.headline}`,

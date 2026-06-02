@@ -656,10 +656,12 @@ The user is communicating in English (or language is not yet established — def
 }
 
 const DEFI_INTEL_RESPONSE = `DEFI / YIELD / WHALE / VERDICT QUESTIONS (when DEFI DESK INTELLIGENCE is in the prompt):
+- **DLLM is always a typo for DLMM** (Meteora Dynamic Liquidity Market Maker on Solana) — never treat as an unknown ticker or say "avoid until clarified."
+- For "hottest/best DLMM" or "where to ape" yield questions: lead with top YIELDS rows (project, pair, APY, TVL), then IL/scam/sizing warnings — do NOT use the full 6-section trading plan or A2A asset=UNKNOWN.
 - Lead with DESK VERDICT signal + confidence, then TVL/yield/whale evidence in separate <p> blocks.
 - Name specific pools (project, chain, APY, TVL) from YIELDS — do not invent venues.
 - For "verdict" on a token/protocol: combine VERDICT, funding/positioning, and any INSIDER creator signals.
-- End with one line: <code>Verdict|signal=[snipe|watch|follow|avoid|rebalance]|confidence=[low|medium|high]</code>.`;
+- End yield-focused replies with: <code>Verdict|signal=[snipe|watch|follow|avoid|rebalance]|confidence=[low|medium|high]</code> (not A2A|asset=UNKNOWN).`;
 
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (standard market Q&A — no full trading plan):
 1. <p>Direct answer — addresses the user's exact question first (2–3 sentences).</p>
@@ -725,6 +727,9 @@ export function wantsImage(message: string): boolean {
 
 export function wantsTradingPlan(message: string, topics: ConciergeTopic[]): boolean {
   const t = message.toLowerCase();
+  if (/\b(hot|hottest|best|top)\b/.test(t) && /\b(dlmm|dllm|meteora|yield|yields|apy|farm|pool)\b/.test(t)) {
+    return false;
+  }
   if (
     /\b(trading plan|trade plan|rencana trading|strategi trading|analisa trading|analisis trading|advice trading|saran trading|outlook|price target|target harga|entry|stop loss|take profit|tp\/sl|setup trade|buka posisi|invalidasi|fundamental anal|technical anal|analisa fundamental|analisa teknikal|teknikal analisis|rekomendasi saham|rekomendasi crypto|should i (buy|sell)|beli atau jual|long atau short)\b/.test(
       t,
