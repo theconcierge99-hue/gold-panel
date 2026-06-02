@@ -269,6 +269,10 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "stablecoin",
     "altcoin",
     "memecoin",
+    "dlmm",
+    "dllm",
+    "meteora",
+    "jupiter",
   ],
   defi: [
     "defi",
@@ -287,6 +291,7 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "meteora",
     "jupiter",
     "dlmm",
+    "dllm",
     "kamino",
     "raydium",
     "orca",
@@ -295,6 +300,9 @@ const TOPIC_KEYWORDS: Record<ConciergeTopic, string[]> = {
     "wallet pnl",
     "pnl",
     "verdict",
+    "aped",
+    "ape into",
+    "hottest",
   ],
   strategy: [
     "trading plan",
@@ -461,11 +469,13 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Positioning: funding, OI, ETF flows narrative where relevant.`,
 
   defi: `DEFI PLAYBOOK:
-- Use DEFI DESK INTELLIGENCE when present: TVL (chains + protocols), YIELDS (Jupiter, Meteora, DLMM, lending), WHALES (Binance top-trader proxy), WALLET snapshot, DESK VERDICT (snipe/watch/follow/avoid/rebalance + confidence).
-- Cross-check INSIDER creator signals from Lounge with public TVL/yield data — insider is tactical overlay, not sole truth.
-- Protocol economics: TVL quality, fee revenue, token accrual, utilization, bad debt risk; flag unrealistic APY.
-- Compare AMM vs orderbook, restaking risks, stablecoin depeg vectors.
-- For wallet PnL questions: use WALLET block if present; otherwise explain limits and use positioning + marks qualitatively.`,
+- **DLMM** = Dynamic Liquidity Market Maker (Solana: Meteora, etc.) — NOT a mystery token ticker. Users often typo **DLLM** → always interpret as **DLMM**.
+- **"ape / aped"** = slang for deploying capital aggressively — not ApeCoin unless explicitly named.
+- For "hottest DLMM / best yield" questions: use DEFI DESK **YIELDS** (Meteora DLMM, Jupiter, Raydium) — cite project, pair, APY, TVL from live data; warn on IL, rug/scam APY, and size.
+- Use DEFI DESK INTELLIGENCE when present: TVL, YIELDS, WHALES, WALLET, VERDICT.
+- Cross-check INSIDER creator signals with public TVL/yield data.
+- Protocol economics: TVL quality, fee revenue, utilization; flag unrealistic APY.
+- For wallet PnL: use WALLET block if present; otherwise explain limits qualitatively.`,
 
   strategy: `TRADING STRATEGY PLAYBOOK (crypto + equities):
 - Synthesize geopolitical regime, fundamentals, technicals, and derivatives positioning before any entry.

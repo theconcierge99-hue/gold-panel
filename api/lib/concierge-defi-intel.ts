@@ -77,9 +77,40 @@ async function fetchJson<T>(url: string, timeoutMs = FETCH_MS): Promise<T | null
 const YIELD_PROJECT_HINTS =
   /jupiter|meteora|dlmm|raydium|orca|kamino|marinade|marginfi|drift|save|lido|aave|uniswap|curve|pendle|morpho|compound/i;
 
-export function wantsDeFiIntel(message: string): boolean {
+export function normalizeConciergeDeFiMessage(message: string): string {
+  return message
+    .replace(/\bdllm\b/gi, "DLMM")
+    .replace(/\baped\b/gi, "ape into")
+    .replace(/\bape into into\b/gi, "ape into");
+}
+
+/** Common user intent for yield API filters (Meteora DLMM, Jupiter, etc.). */
+export function inferYieldIntelFocus(message: string): {
+  chain?: string;
+  projectHint?: string;
+  sortByApy?: boolean;
+} {
   const t = message.toLowerCase();
-  return /\b(tvl|defi|whale|whales|wallet|pnl|p&l|profit|yield|yields|apy|apr|verdict|meteora|jupiter|dlmm|liquidity|pool|farming|restaking|lst|aave|uniswap|kamino|raydium|orca|drift|marginfi)\b/.test(
+  const sortByApy = /\b(hot|hottest|best|top|highest)\b/.test(t) && /\b(yield|apy|dlmm|pool|farm)\b/.test(t);
+
+  if (/\bdlmm\b|\bdllm\b|meteora/.test(t)) {
+    return { chain: "solana", projectHint: "meteora", sortByApy };
+  }
+  if (/\bjupiter\b|\bjup\b/.test(t)) {
+    return { chain: "solana", projectHint: "jupiter", sortByApy };
+  }
+  if (/\braydium\b/.test(t)) {
+    return { chain: "solana", projectHint: "raydium", sortByApy };
+  }
+  if (sortByApy || /\byield|\bapy|\bfarm|\bpool/.test(t)) {
+    return { chain: "solana", sortByApy };
+  }
+  return { sortByApy };
+}
+
+export function wantsDeFiIntel(message: string): boolean {
+  const t = normalizeConciergeDeFiMessage(message).toLowerCase();
+  return /\b(tvl|defi|whale|whales|wallet|pnl|p&l|profit|yield|yields|apy|apr|verdict|meteora|jupiter|dlmm|dllm|liquidity|pool|farming|restaking|lst|aave|uniswap|kamino|raydium|orca|drift|marginfi|aped|ape into|hottest)\b/.test(
     t,
   );
 }
@@ -150,6 +181,7 @@ export async function fetchTopYields(options?: {
   chain?: string;
   projectHint?: string;
   limit?: number;
+  sortByApy?: boolean;
 }): Promise<YieldPoolRow[]> {
   const pools = await fetchJson<
     {
@@ -176,7 +208,10 @@ export async function fetchTopYields(options?: {
       }
       return false;
     })
-    .sort((a, b) => (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0));
+    .sort((a, b) => {
+      if (options?.sortByApy) return (b.apy ?? 0) - (a.apy ?? 0);
+      return (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0);
+    });
 
   const chainFilter = options?.chain?.trim().toLowerCase();
   const projectFilter = options?.projectHint?.trim().toLowerCase();
@@ -353,12 +388,19 @@ export async function fetchConciergeDeFiIntel(options: {
   lite?: boolean;
 }): Promise<ConciergeDeFiIntel> {
   const wallets = extractWalletAddresses(options.message);
+  const msgNorm = normalizeConciergeDeFiMessage(options.message);
+  const yieldFocus = inferYieldIntelFocus(msgNorm);
   const insiderLines = formatInsiderFromMemory(options.insiderItems ?? []);
 
   const [chains, topProtocols, yields, walletRow] = await Promise.all([
     options.lite ? Promise.resolve([] as ChainTvlRow[]) : fetchChainTvl(),
     options.lite ? Promise.resolve([]) : fetchTopProtocols(),
-    fetchTopYields(),
+    fetchTopYields({
+      chain: yieldFocus.chain,
+      projectHint: yieldFocus.projectHint,
+      limit: yieldFocus.projectHint ? 16 : 12,
+      sortByApy: yieldFocus.sortByApy,
+    }),
     fetchWalletIntel({
       message: options.message,
       solAddress: wallets.solana,

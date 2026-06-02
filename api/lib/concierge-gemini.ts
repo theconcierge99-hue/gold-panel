@@ -14,6 +14,7 @@ import {
 import {
   fetchConciergeDeFiIntel,
   formatDeFiIntelForPrompt,
+  normalizeConciergeDeFiMessage,
   wantsDeFiIntel,
 } from "./concierge-defi-intel";
 import {
@@ -207,11 +208,17 @@ async function resolveIntelligenceContext(
   const marketTimeout = tradingPlan ? 5_000 : 7_000;
   const generalTimeout = tradingPlan ? 2_500 : 4_000;
 
-  const topicsForIntel = detectTopics(userMessage);
+  const queryMessage = normalizeConciergeDeFiMessage(userMessage);
+  const topicsForIntel = detectTopics(queryMessage);
   const needDeFiIntel =
-    wantsDeFiIntel(userMessage) ||
+    wantsDeFiIntel(queryMessage) ||
     topicsForIntel.includes("defi") ||
     topicsForIntel.includes("crypto");
+
+  const deFiQueryNote =
+    /\bdllm\b/i.test(userMessage) && !/\bdlmm\b/i.test(userMessage)
+      ? "USER QUERY NOTE: User typed \"DLLM\" — interpret as DLMM (Dynamic Liquidity Market Maker, e.g. Meteora on Solana), not an unknown acronym.\n\n"
+      : "";
 
   const [snapshot, general, memoryItems] = await Promise.all([
     liveSnapshot
@@ -220,7 +227,7 @@ async function resolveIntelligenceContext(
           fetchConciergeMarketSnapshot({
             mode: tradingPlan ? "trading" : "standard",
             clientTicks: market,
-            message: userMessage,
+            message: queryMessage,
           }),
           marketTimeout,
           {
@@ -233,13 +240,13 @@ async function resolveIntelligenceContext(
           },
         ),
     withTimeout(
-      fetchGeneralKnowledgeSnapshot(userMessage, { mode: "lite" }),
+      fetchGeneralKnowledgeSnapshot(queryMessage, { mode: "lite" }),
       generalTimeout,
       emptyGeneral,
     ),
     tradingPlan
       ? Promise.resolve([])
-      : withTimeout(selectRelevantLoungeMemory(userMessage), 3_000, []),
+      : withTimeout(selectRelevantLoungeMemory(queryMessage), 3_000, []),
   ]);
 
   const loungeMemoryBlock = formatLoungeMemoryForPrompt(memoryItems);
@@ -249,7 +256,7 @@ async function resolveIntelligenceContext(
     const btcTick = snapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
     const defiIntel = await withTimeout(
       fetchConciergeDeFiIntel({
-        message: userMessage,
+        message: queryMessage,
         positioning: snapshot.positioning,
         sentiment: snapshot.sentiment ?? null,
         btcChange: btcTick?.change,
@@ -259,7 +266,7 @@ async function resolveIntelligenceContext(
       tradingPlan ? 2_500 : 4_000,
       null,
     );
-    if (defiIntel) defiIntelBlock = formatDeFiIntelForPrompt(defiIntel);
+    if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
   }
 
   ingestWireHeadlinesAsync(snapshot.headlines);
