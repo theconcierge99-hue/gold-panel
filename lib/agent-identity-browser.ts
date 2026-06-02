@@ -68,6 +68,12 @@ export function loadWalletSecretsLocal(): {
   }
 }
 
+export function clearAgentIdentityLocal(): void {
+  if (typeof localStorage === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(WALLET_STORAGE_KEY);
+}
+
 export function saveAgentIdentityLocal(identity: StoredAgentIdentity): void {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
@@ -135,6 +141,7 @@ declare global {
     elLoadAgentIdentity?: typeof loadAgentIdentityLocal;
     elGetStoredAgentId?: typeof getStoredAgentId;
     elSaveAgentWalletSecrets?: typeof saveWalletSecretsLocal;
+    elClearAgentIdentity?: typeof clearAgentIdentityLocal;
   }
 }
 
@@ -144,4 +151,5 @@ if (typeof window !== "undefined") {
   window.elLoadAgentIdentity = loadAgentIdentityLocal;
   window.elGetStoredAgentId = getStoredAgentId;
   window.elSaveAgentWalletSecrets = saveWalletSecretsLocal;
+  window.elClearAgentIdentity = clearAgentIdentityLocal;
 }

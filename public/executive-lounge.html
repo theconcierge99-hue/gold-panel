@@ -800,8 +800,10 @@
       <div id="agentExisting" hidden>
         <p class="agent-id-row" id="agentExistingId"></p>
         <p class="wallet-intro" id="agentExistingMeta"></p>
-        <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border)">
+        <p class="wallet-intro" style="font-size:11px;margin-top:8px;color:var(--text-muted)">Saved in this browser only — separate from Connect wallet. Disconnecting your wallet does not remove this agent.</p>
+        <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
           <button type="button" class="btn" onclick="copyAgentCardUrl()">Copy card URL</button>
+          <button type="button" class="btn" onclick="resetAgentIdentityUi()">Create new identity</button>
           <button type="button" class="btn gold" onclick="closeAgentIdentityModal()">Done</button>
         </div>
       </div>
@@ -1261,6 +1263,23 @@
     navigator.clipboard.writeText(url).then(()=>toast('Card URL copied')).catch(()=>toast(url));
   }
   window.copyAgentCardUrl = copyAgentCardUrl;
+
+  function resetAgentIdentityUi(){
+    if(!confirm('Remove this agent identity from this browser? You will need your saved private keys to recover the same wallets. Continue?')) return;
+    if(typeof window.elClearAgentIdentity === 'function') window.elClearAgentIdentity();
+    _pendingAgentWallets = null;
+    const nameEl = document.getElementById('agentName');
+    const descEl = document.getElementById('agentDesc');
+    if(nameEl) nameEl.value = '';
+    if(descEl) descEl.value = '';
+    renderAgentIdentityPanel();
+    const st = document.getElementById('agentStatus');
+    if(st){
+      st.classList.remove('err');
+      st.textContent = 'Previous identity cleared — generate new wallets to register.';
+    }
+  }
+  window.resetAgentIdentityUi = resetAgentIdentityUi;
 
   function syncConciergeLayout(){
     const shell=document.getElementById('conciergeShell');
