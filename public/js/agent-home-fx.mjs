@@ -43,7 +43,7 @@ export function initConciergeLogoParticles(canvas) {
         const goldish = r > 120 && g > 85 && b < 170;
         const tx = x - size / 2;
         const ty = y - size / 2;
-        const spread = 340 + Math.random() * 160;
+        const spread = 200 + Math.random() * 90;
         const ang = Math.random() * Math.PI * 2;
         particles.push({
           tx,
@@ -59,7 +59,7 @@ export function initConciergeLogoParticles(canvas) {
   }
 
   function drawScale(w, h) {
-    return Math.min(w * 0.62, h * 0.78, 520) / 180;
+    return (Math.min(w, h) * 0.86) / 360;
   }
 
   function draw(now) {
@@ -68,7 +68,7 @@ export function initConciergeLogoParticles(canvas) {
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
-    const cy = h * 0.34;
+    const cy = h / 2;
     const scale = drawScale(w, h);
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
