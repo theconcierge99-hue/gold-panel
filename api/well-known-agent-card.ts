@@ -3,7 +3,7 @@ import { corsHeadersFor } from "./lib/concierge-security";
 
 export const config = { runtime: "edge" };
 
-/** Service-level agent registry card (like HYRE agent-card / ERC-8004 discovery). */
+/** Service-level agent registry card (ERC-8004-style discovery). */
 export default async function handler(request: Request): Promise<Response> {
   const cors = {
     ...corsHeadersFor(request),

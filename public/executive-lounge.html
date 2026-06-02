@@ -596,6 +596,7 @@
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
+      <div class="nav-i" role="button" tabindex="0" onclick="openAgentIdentityModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAgentIdentityModal();}">Agent identity</div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -613,9 +614,7 @@
     </div>
     </div>
     <div class="sidebar-footer">
-      <a class="sidebar-about-link" href="#" onclick="openAgentIdentityModal();return false">Agent identity</a>
       <a class="sidebar-about-link" href="/docs" target="_blank" rel="noopener noreferrer">Documentation</a>
-      <a class="sidebar-about-link" href="/docs/agents" target="_blank" rel="noopener noreferrer">API for agents</a>
       <a class="sidebar-about-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
       <div class="sidebar-social-row">
         <a class="sidebar-social" href="https://x.com/Th3concierge_" target="_blank" rel="noopener noreferrer" aria-label="Follow on X @Th3concierge_">
@@ -795,7 +794,7 @@
   <div class="modal wallet-modal" style="max-width:480px" onclick="event.stopPropagation()">
     <button class="close" onclick="closeAgentIdentityModal()">×</button>
     <h2>Agent identity</h2>
-    <p class="wallet-intro">Create a public agent ID + Solana/Base wallets for A2A and x402 — like a mini <a href="https://hyreagent.fun/" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">HYRE</a> identity layer. Keys stay in your browser until you export them.</p>
+    <p class="wallet-intro">Create a public agent ID and Solana/Base wallets for agent-to-agent discovery and x402 payments. Private keys are generated in your browser and are never sent to our servers.</p>
     <div id="agentIdentityPanel">
       <div id="agentExisting" hidden>
         <p class="agent-id-row" id="agentExistingId"></p>
