@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Playground — Concierge Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Execute Concierge Agent endpoints, see the x402 402 payment challenge, and learn integration." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent/playground" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-hub.css" />
+</head>
+<body data-agent-page="playground">
+<div class="agent-shell">
+  <header class="agent-header">
+    <a class="agent-back" href="/">← Executive Lounge</a>
+    <a class="agent-header-brand" href="/agent/endpoints">
+      <img src="/images/the-concierge-logo.png" alt="" width="32" height="32" />
+      <div><span>Concierge Agent</span><small>API Playground</small></div>
+    </a>
+    <nav class="agent-subnav" id="agent-subnav"></nav>
+  </header>
+  <main class="agent-main">
+    <div class="agent-hero">
+      <div class="agent-eyebrow">Live probe</div>
+      <h1 class="agent-title">API Playground</h1>
+      <p class="agent-lead">Execute any paid endpoint without signing first — see the x402 <strong>402</strong> challenge. Complete payment with your agent wallet or Executive Lounge to receive data.</p>
+    </div>
+    <div class="agent-play-grid">
+      <div class="agent-panel">
+        <div class="agent-panel-h">Select endpoint</div>
+        <div id="ep-pick-list"></div>
+      </div>
+      <div class="agent-panel">
+        <div class="agent-panel-h">Request</div>
+        <div class="agent-field"><label>Method</label><input id="play-method" readonly /></div>
+        <div class="agent-field"><label>Path</label><input id="play-path" readonly /></div>
+        <div class="agent-field"><label>Cost</label><input id="play-price" readonly /></div>
+        <div class="agent-field"><label>Description</label><input id="play-desc" readonly /></div>
+        <div class="agent-field"><label>Resolved URL</label><input id="play-url" readonly /></div>
+        <div class="agent-field"><label>JSON body</label><textarea id="play-body"></textarea></div>
+        <button type="button" class="agent-btn" id="play-exec">Execute request</button>
+        <button type="button" class="agent-btn secondary" id="play-clear" style="margin-left:8px">Clear log</button>
+        <div class="agent-term" id="play-terminal" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="agent-cta" style="margin-top:24px">
+      <a class="gold" href="/">Pay via Executive Lounge →</a>
+      <a href="/docs/quickstart">Quickstart</a>
+      <a href="/docs/payment/x402">x402 Protocol</a>
+    </div>
+  </main>
+</div>
+<script type="module" src="/js/agent-playground.mjs"></script>
+</body>
+</html>

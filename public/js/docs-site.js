@@ -15,6 +15,11 @@
       { id: "api-agent-identity", href: "/docs/api/agent-identity", title: "Agent Identity" },
       { id: "api-lounge", href: "/docs/api/lounge", title: "Lounge & Signals" },
     ]},
+    { label: "Concierge Agent", items: [
+      { id: "agent-endpoints", href: "/agent/endpoints", title: "Endpoints" },
+      { id: "agent-playground", href: "/agent/playground", title: "Playground" },
+      { id: "agent-discover", href: "/agent/discover", title: "Discover" },
+    ]},
     { label: "Product", items: [
       { id: "playground", href: "/docs/playground", title: "Executive Lounge" },
       { id: "architecture", href: "/docs/architecture", title: "Architecture" },

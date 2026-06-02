@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Discover — Concierge Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Discover Concierge Agent x402 resources, OpenAPI, agent cards, and trust directory." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent/discover" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-hub.css" />
+</head>
+<body data-agent-page="discover">
+<div class="agent-shell">
+  <header class="agent-header">
+    <a class="agent-back" href="/">← Executive Lounge</a>
+    <a class="agent-header-brand" href="/agent/endpoints">
+      <img src="/images/the-concierge-logo.png" alt="" width="32" height="32" />
+      <div><span>Concierge Agent</span><small>Discovery</small></div>
+    </a>
+    <nav class="agent-subnav" id="agent-subnav"></nav>
+  </header>
+  <main class="agent-main">
+    <div class="agent-hero">
+      <div class="agent-eyebrow">Machine discovery</div>
+      <h1 class="agent-title">Discover</h1>
+      <p class="agent-lead">x402 fan-out, OpenAPI, agent cards, and trust signals — everything an autonomous agent needs before paying.</p>
+      <p class="agent-stats" id="discover-status">Loading discovery…</p>
+    </div>
+    <div class="agent-disc-grid" id="discover-grid"></div>
+    <div class="agent-cta">
+      <a class="gold" href="/agent/endpoints">Endpoint catalog →</a>
+      <a href="/agent/playground">Playground</a>
+      <a href="/docs/api/agent-identity">Agent identity docs</a>
+    </div>
+  </main>
+</div>
+<script type="module" src="/js/agent-discover.mjs"></script>
+</body>
+</html>
