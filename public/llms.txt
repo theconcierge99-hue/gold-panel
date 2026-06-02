@@ -14,7 +14,7 @@
 - [Agent Identity](https://conc-exe.xyz/docs/api/agent-identity): agt_ registry, agent cards, X-Agent-Id.
 - [Lounge & Signals](https://conc-exe.xyz/docs/api/lounge): Market feed, RWA signals, news unlock.
 - [Executive Lounge](https://conc-exe.xyz/docs/playground): Browser terminal and wallet UX.
-- [Endpoints catalog](https://conc-exe.xyz/agent/endpoints): Pay-per-call API catalog for agents.
+- [Concierge Agent home](https://conc-exe.xyz/agent): Hero hub — market intelligence as a service.
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
 - [Discover](https://conc-exe.xyz/agent/discover): x402 fan-out, OpenAPI, agent cards.
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.

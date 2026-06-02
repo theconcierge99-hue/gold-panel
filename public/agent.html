@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Concierge Agent — Market Intelligence as a Service</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent — AI market and DeFi intelligence via x402 pay-per-call. Endpoints, playground, discovery, and agent identity." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-home.css" />
+<link rel="stylesheet" href="/css/agent-playground.css" />
+</head>
+<body class="agent-home-page" data-agent-page="home">
+<div class="agent-home-shell">
+  <header class="pg-topnav" id="agent-topnav"></header>
+
+  <section class="agent-hero-wrap">
+    <canvas id="agent-matrix-canvas" aria-hidden="true"></canvas>
+    <canvas id="agent-logo-canvas" aria-hidden="true"></canvas>
+
+    <div class="agent-hero-content">
+      <div class="agent-badge">
+        <span class="agent-badge-dot"></span>
+        <span><strong>9</strong> Live Endpoints</span>
+        <span>·</span>
+        <span>x402</span>
+        <span>·</span>
+        <span>Solana · Base</span>
+      </div>
+
+      <h1 class="agent-headline">
+        <span class="line1">Market Intelligence</span>
+        <span class="line2">As A Service</span>
+      </h1>
+
+      <p class="agent-subline">
+        AI-powered Concierge desk via pay-per-call. No API keys. No signup.
+        Payment is the only gate.
+      </p>
+
+      <div class="agent-terminal" aria-live="polite">
+        <span class="prompt">&gt; </span><span id="agent-typewriter"></span><span class="cursor" aria-hidden="true"></span>
+      </div>
+
+      <div class="agent-cta-row">
+        <a class="agent-cta-btn primary" href="/agent/playground">Open Playground</a>
+        <a class="agent-cta-btn" href="/agent/endpoints">Endpoints</a>
+        <a class="agent-cta-btn" href="/">Try Concierge Chat</a>
+        <a class="agent-cta-btn" href="/docs">Docs</a>
+      </div>
+    </div>
+
+    <footer class="agent-home-foot">
+      <a href="/openapi.json" target="_blank" rel="noopener">openapi.json</a>
+      <span>Concierge Agent · Executive Lounge</span>
+    </footer>
+  </section>
+</div>
+<script type="module" src="/js/agent-home.mjs"></script>
+</body>
+</html>

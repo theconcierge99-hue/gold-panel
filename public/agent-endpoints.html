@@ -2,25 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Endpoints — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Concierge Agent API catalog — 9 x402 endpoints for chat, DeFi intel, and Lounge. Pay per call, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent/endpoints" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-playground.css" />
 <link rel="stylesheet" href="/css/agent-hub.css" />
 </head>
-<body data-agent-page="endpoints">
-<div class="agent-shell">
-  <header class="agent-header">
-    <a class="agent-back" href="/">← Executive Lounge</a>
-    <a class="agent-header-brand" href="/agent/endpoints">
-      <img src="/images/the-concierge-logo.png" alt="" width="32" height="32" />
-      <div><span>Concierge Agent</span><small>Pay-per-call · x402</small></div>
-    </a>
-    <nav class="agent-subnav" id="agent-subnav" aria-label="Concierge Agent"></nav>
-  </header>
-  <main class="agent-main">
+<body data-agent-page="endpoints" style="background:var(--pg-bg);min-height:100vh">
+<div class="pg-shell" style="min-height:100vh;height:auto">
+  <header class="pg-topnav" id="agent-topnav"></header>
+  <main class="agent-main" style="max-width:900px;margin:0 auto;padding:28px 20px 48px">
     <div class="agent-hero">
       <div class="agent-eyebrow">API catalog</div>
       <h1 class="agent-title">Concierge Agent Endpoints</h1>
@@ -31,6 +26,7 @@
     <div id="endpoint-catalog"></div>
     <div class="agent-cta">
       <a class="gold" href="/agent/playground">Open Playground →</a>
+      <a href="/agent">Home</a>
       <a href="/docs">Documentation</a>
       <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
     </div>

@@ -2,12 +2,21 @@ import {
   CONCIERGE_AGENT_ENDPOINTS,
   CONCIERGE_AGENT_ORIGIN,
   endpointUrl,
+  countBySegment,
 } from "./concierge-agent-endpoints.mjs";
-import "./agent-hub.mjs";
+import { renderAgentTopNav } from "./agent-nav.mjs";
+
+renderAgentTopNav("endpoints");
 
 const listEl = document.getElementById("endpoint-catalog");
 const filtersEl = document.getElementById("agent-filters");
+const statsEl = document.getElementById("agent-stats");
 let activeSegment = "all";
+
+const c = countBySegment();
+if (statsEl) {
+  statsEl.textContent = `${c.total} endpoints · x402 · Pay per call · ${CONCIERGE_AGENT_ORIGIN.replace(/^https?:\/\//, "")}`;
+}
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",

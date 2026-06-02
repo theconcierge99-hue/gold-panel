@@ -1,5 +1,7 @@
 import { CONCIERGE_AGENT_ORIGIN, countBySegment } from "./concierge-agent-endpoints.mjs";
-import "./agent-hub.mjs";
+import { renderAgentTopNav } from "./agent-nav.mjs";
+
+renderAgentTopNav("discover");
 
 const grid = document.getElementById("discover-grid");
 const statusEl = document.getElementById("discover-status");

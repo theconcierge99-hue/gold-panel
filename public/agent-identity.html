@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Agent Identity — Concierge Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent/identity" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-playground.css" />
+<link rel="stylesheet" href="/css/agent-home.css" />
+</head>
+<body data-agent-page="identity">
+<div class="pg-shell" style="min-height:100vh;height:auto">
+  <header class="pg-topnav" id="agent-topnav"></header>
+  <main class="agent-main" style="max-width:760px;padding-top:32px">
+    <div class="agent-eyebrow">Concierge Agent</div>
+    <h1 class="agent-title" style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:36px">Agent Identity</h1>
+    <p class="agent-lead" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--pg-muted);margin-bottom:24px">
+      Public <code style="color:var(--pg-accent)">agt_…</code> IDs, Solana/Base wallets, and discovery cards for agent-to-agent x402.
+    </p>
+
+    <div class="card" style="border:1px solid var(--pg-panel-border);padding:22px;margin-bottom:16px;background:var(--pg-panel)">
+      <h3 style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--pg-accent);margin-bottom:12px">Register in Executive Lounge</h3>
+      <p style="font-size:14px;color:var(--pg-muted);margin-bottom:14px">Generate wallets in-browser, register your agent, and use <code>X-Agent-Id</code> on paid Concierge calls.</p>
+      <a class="agent-cta-btn primary" href="/#agent-identity" style="display:inline-block">Open Agent identity →</a>
+    </div>
+
+    <div class="card" style="border:1px solid var(--pg-panel-border);padding:22px;margin-bottom:16px;background:var(--pg-panel)">
+      <h3 style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--pg-accent);margin-bottom:12px">API</h3>
+      <ul style="font-size:13px;color:var(--pg-muted);padding-left:18px;line-height:1.8">
+        <li><code style="color:var(--pg-accent)">POST /api/agent-identity</code> — register (public keys only)</li>
+        <li><code style="color:var(--pg-accent)">GET /.well-known/agent-card.json</code> — service registry</li>
+        <li><code style="color:var(--pg-accent)">GET /api/agent-identity-card?id=agt_…</code> — ERC-8004-style card</li>
+      </ul>
+    </div>
+
+    <div class="agent-cta-row" style="margin-top:24px">
+      <a class="agent-cta-btn" href="/docs/api/agent-identity">Full documentation</a>
+      <a class="agent-cta-btn" href="/agent/playground">Playground</a>
+    </div>
+  </main>
+</div>
+<script type="module">
+import { renderAgentTopNav } from "/js/agent-nav.mjs";
+renderAgentTopNav("identity");
+</script>
+</body>
+</html>

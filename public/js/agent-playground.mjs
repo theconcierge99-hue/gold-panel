@@ -1,8 +1,11 @@
+import { renderAgentTopNav } from "./agent-nav.mjs";
 import {
   CONCIERGE_AGENT_ENDPOINTS,
   CONCIERGE_AGENT_ORIGIN,
   endpointUrl,
 } from "./concierge-agent-endpoints.mjs";
+
+renderAgentTopNav("playground");
 
 const pickList = document.getElementById("ep-pick-list");
 const methodEl = document.getElementById("play-method");
@@ -18,7 +21,6 @@ const entryCountEl = document.getElementById("pg-entry-count");
 const execBtn = document.getElementById("play-exec");
 const clearBtn = document.getElementById("play-clear");
 const footOrigin = document.getElementById("pg-foot-origin");
-const themeBtn = document.getElementById("pg-theme-toggle");
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",
@@ -28,16 +30,6 @@ const SEGMENT_LABELS = {
 
 let selected = CONCIERGE_AGENT_ENDPOINTS[0];
 let entryCount = 0;
-
-function setTheme(next) {
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("el-theme", next);
-}
-
-themeBtn?.addEventListener("click", () => {
-  const cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-  setTheme(cur === "light" ? "dark" : "light");
-});
 
 const origin = CONCIERGE_AGENT_ORIGIN.replace(/\/$/, "");
 const host = origin.replace(/^https?:\/\//, "");

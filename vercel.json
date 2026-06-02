@@ -46,6 +46,14 @@
       "destination": "/about.html"
     },
     {
+      "source": "/agent",
+      "destination": "/agent.html"
+    },
+    {
+      "source": "/agent/identity",
+      "destination": "/agent-identity.html"
+    },
+    {
       "source": "/agent/endpoints",
       "destination": "/agent-endpoints.html"
     },
