@@ -20,6 +20,25 @@ export function initConciergeLogoParticles(canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  const LOGO_SRC = 360;
+  const LOGO_HALF = LOGO_SRC / 2;
+
+  /** Fit assembled logo circle fully above the text block. */
+  function logoMetrics(w, h) {
+    const padX = 36;
+    const padTop = 44;
+    const textBlock = Math.min(300, h * 0.36);
+    const footer = 52;
+    const availW = w - padX * 2;
+    const availH = h - padTop - textBlock - footer;
+    const maxDiam = Math.min(availW * 0.9, availH * 0.96, 460);
+    const scale = maxDiam / LOGO_SRC;
+    const radius = LOGO_HALF * scale;
+    const cx = w / 2;
+    const cy = padTop + radius;
+    return { cx, cy, scale, maxDiam };
+  }
+
   function buildParticles() {
     particles = [];
     const size = 360;
@@ -43,7 +62,7 @@ export function initConciergeLogoParticles(canvas) {
         const goldish = r > 120 && g > 85 && b < 170;
         const tx = x - size / 2;
         const ty = y - size / 2;
-        const spread = 200 + Math.random() * 90;
+        const spread = 320 + Math.random() * 140;
         const ang = Math.random() * Math.PI * 2;
         particles.push({
           tx,
@@ -58,18 +77,12 @@ export function initConciergeLogoParticles(canvas) {
     }
   }
 
-  function drawScale(w, h) {
-    return (Math.min(w, h) * 0.86) / 360;
-  }
-
   function draw(now) {
     const rect = canvas.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
-    const cx = w / 2;
-    const cy = h / 2;
-    const scale = drawScale(w, h);
+    const { cx, cy, scale } = logoMetrics(w, h);
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
     const ease = 1 - (1 - assemble) ** 3;
