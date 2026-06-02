@@ -164,6 +164,8 @@
   main{overflow-y:auto;padding:26px 32px 60px;-webkit-overflow-scrolling:touch}
   .view{display:none;animation:fadeUp .35s ease-out}
   .view.show{display:block}
+  .token-soon-wrap{display:flex;align-items:center;justify-content:center;min-height:min(480px,58vh);text-align:center}
+  .token-soon{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,6vw,52px);font-weight:300;letter-spacing:.42em;text-indent:.42em;color:var(--text-muted)}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
   .section-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
@@ -598,6 +600,7 @@
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <a class="nav-i" href="/agent" target="_blank" rel="noopener noreferrer">Concierge Agent</a>
+      <div class="nav-i" data-nav="token" onclick="showView('token')">Token</div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -706,6 +709,13 @@
       <div id="walletAccountList"></div>
       <div class="section-h" style="margin-top:28px"><h2>Reader badges</h2><div class="meta">Proof-of-read · RWA lounge</div></div>
       <div id="readerBadgePanel"><div class="intel-empty" style="border:none">Connect wallet to view your badges</div></div>
+    </section>
+
+    <!-- TOKEN (placeholder) -->
+    <section class="view" id="view-token">
+      <div class="token-soon-wrap">
+        <p class="token-soon">SOON</p>
+      </div>
     </section>
   </main>
 
