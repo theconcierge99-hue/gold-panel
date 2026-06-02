@@ -171,13 +171,14 @@
 
   /* Featured cards */
   .featured{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:34px}
-  .fcard{position:relative;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;cursor:pointer;transition:all .2s;overflow:hidden}
+  .fcard{position:relative;display:flex;flex-direction:column;min-height:168px;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;cursor:pointer;transition:all .2s;overflow:hidden}
   .fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
   .fcard:hover{border-color:var(--gold-dim);transform:translateY(-1px)}
-  .tag{display:inline-flex;gap:8px;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-  .tag .sep{color:var(--text-muted)}
-  .fcard h3{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;line-height:1.25;color:var(--text-primary);margin-bottom:10px}
-  .fcard p{font-size:12.5px;line-height:1.6;color:var(--text-secondary);margin-bottom:18px}
+  .fcard h3{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;line-height:1.28;color:var(--text-primary);margin-bottom:12px}
+  .fcard .news-teaser,.gcard .news-teaser{font-size:13px;line-height:1.62;color:var(--text-secondary);margin:0;flex:1;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+  .fcard .news-teaser{-webkit-line-clamp:4}
+  .card-read-hint{flex-shrink:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dim)}
+  .fcard:hover .card-read-hint,.gcard:hover .card-read-hint{color:var(--gold)}
   .meta-row{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text-secondary);padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap}
   .avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Cormorant Garamond',serif;color:#fff;letter-spacing:.04em}
   .av-g1{background:linear-gradient(135deg,#3b7dd8,#1d8f7a)}
@@ -193,13 +194,11 @@
 
   /* Grid cards */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .gcard{position:relative;background:var(--gcard-bg);border:1px solid var(--border);padding:16px 18px 22px;cursor:pointer;transition:all .18s;overflow:hidden}
+  .gcard{position:relative;display:flex;flex-direction:column;background:var(--gcard-bg);border:1px solid var(--border);padding:18px 18px 16px;min-height:140px;cursor:pointer;transition:all .18s;overflow:hidden}
   .gcard:hover{border-color:var(--chrome);background:var(--gcard-hover)}
-  .gcat{font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center}
-  .gcard h4{font-family:'Outfit',sans-serif;font-weight:400;font-size:13.5px;line-height:1.4;color:var(--text-primary);margin-bottom:14px;letter-spacing:.005em}
-  .gmeta{display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--text-secondary)}
-  .gmeta .who{flex:1;color:var(--chrome)}
-  .gbar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
+  .gcard h4{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:17px;line-height:1.32;color:var(--text-primary);margin-bottom:10px;letter-spacing:.01em}
+  .gcard .news-teaser{-webkit-line-clamp:3;font-size:12.5px}
+  .gcat,.gmeta,.gbar{display:none}
   .intel-loading,.intel-empty{padding:28px 20px;border:1px dashed var(--border);color:var(--text-muted);font-size:12px;letter-spacing:.12em;text-align:center}
   .fcard.is-live,.gcard.is-live{text-decoration:none;color:inherit;display:block}
   .fcard.news-card,.gcard.news-card{cursor:pointer}
@@ -2043,6 +2042,29 @@
   }
   function avatarClass(i){ return 'av-g'+((i%5)+1); }
 
+  function stripHtml(s){
+    return String(s||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  function newsTeaser(h, maxLen){
+    const isCreator=h.signalId||h.kind==='creator';
+    const raw=stripHtml(h.summary);
+    if(raw){
+      if(raw.length<=maxLen) return raw;
+      const cut=raw.slice(0,maxLen);
+      const dot=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('! '),cut.lastIndexOf('? '));
+      if(dot>maxLen*0.45) return cut.slice(0,dot+1).trim()+'…';
+      return cut.trim()+'…';
+    }
+    if(isCreator) return 'A locked intelligence brief from the Lounge — open to read the full thesis, levels, and positioning.';
+    return 'The headline is only the hook. Open for the full wire story, context, and what it may mean for risk.';
+  }
+
+  function readHint(h){
+    const isCreator=h.signalId||h.kind==='creator';
+    return isCreator?'Unlock full thesis':'Read full story';
+  }
+
   function renderFeaturedHeadlines(items){
     const el=document.getElementById('featuredSignals');
     if(!el) return;
@@ -2050,11 +2072,8 @@
       el.innerHTML='<div class="intel-empty">No headlines available — retry shortly.</div>';
       return;
     }
-    el.innerHTML=items.slice(0,2).map((h,i)=>{
+    el.innerHTML=items.slice(0,2).map((h)=>{
       const isCreator=h.signalId||h.kind==='creator';
-      const summary=h.summary?escapeHtml(h.summary):(isCreator?'Creator intelligence — unlock to read full thesis.':'Live headline from '+escapeHtml(h.source)+'. Tap to read — 0.1 USDC.');
-      const rwaChip=isCreator&&h.rwaTokenId?' <span class="rwa-chip">⬡ RWA</span>':'';
-      const tag=escapeHtml(h.category)+' <span class="sep">/</span> '+escapeHtml(h.source)+(isCreator?' <span class="sep">/</span> Creator':'')+rwaChip;
       const urlAttr=h.url?escapeHtml(h.url):'';
       const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
       const noUrl=!h.url&&!h.signalId?' data-no-url="1"':'';
@@ -2062,16 +2081,9 @@
       return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
-        <div class="tag">${tag}</div>
         <h3>${escapeHtml(h.title)}</h3>
-        <p>${summary}</p>
-        <div class="meta-row">
-          <div class="avatar ${avatarClass(i)}">${sourceInitials(h.source)}</div>
-          <span class="src-badge">${escapeHtml(h.source)}</span>
-          <span class="score">◆ ${h.score}</span>
-          <span class="chain">${isCreator?'◆ unlock · 0.1 USDC':'↗ read · 0.1 USDC'}</span>
-          <div class="spacer"><span>${escapeHtml(h.ageLabel)}</span></div>
-        </div>
+        <p class="news-teaser">${escapeHtml(newsTeaser(h,300))}</p>
+        <div class="card-read-hint">${readHint(h)} →</div>
       </article>`;
     }).join('');
   }
@@ -2084,7 +2096,7 @@
       el.innerHTML='<div class="intel-empty">Waiting for additional wire stories…</div>';
       return;
     }
-    el.innerHTML=grid.map((h,i)=>{
+    el.innerHTML=grid.map((h)=>{
       const isCreator=h.signalId||h.kind==='creator';
       const urlAttr=h.url?escapeHtml(h.url):'';
       const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
@@ -2093,10 +2105,9 @@
       return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
-        <div class="gcat"><span class="cat-dot" style="background:${h.categoryColor}"></span>${escapeHtml(h.category)}${isCreator&&h.rwaTokenId?' <span class="rwa-chip">⬡ RWA</span>':''}</div>
         <h4>${escapeHtml(h.title)}</h4>
-        <div class="gmeta"><span class="who">${escapeHtml(h.source)}</span><span>${escapeHtml(h.ageLabel)}</span><span class="score">◆ ${h.score}</span></div>
-        <div class="gbar" style="width:${Math.min(98,h.score)}%"></div>
+        <p class="news-teaser">${escapeHtml(newsTeaser(h,200))}</p>
+        <div class="card-read-hint">${readHint(h)} →</div>
       </article>`;
     }).join('');
   }
