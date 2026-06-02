@@ -126,13 +126,17 @@ export default async function handler(request: Request): Promise<Response> {
     });
 
     const view = toPublicView(origin, agent);
-    return json(request, {
-      ok: true,
-      agent: view,
-      card: buildAgentCard(origin, agent),
-      message:
-        "Identity registered. Store private keys only on the agent — this server never receives secrets.",
-    });
+    return json(
+      request,
+      {
+        ok: true,
+        agent: view,
+        card: buildAgentCard(origin, agent),
+        message:
+          "Identity registered. Store private keys only on the agent — this server never receives secrets.",
+      },
+      200,
+    );
   } catch (e) {
     const msg = sanitizePublicError(e);
     return json(request, { error: msg }, msg.includes("too large") ? 413 : 500);
