@@ -78,13 +78,12 @@ function parseSymbols(raw: unknown): ("BTC" | "ETH" | "SOL")[] {
   return out.length ? out : ["BTC", "ETH", "SOL"];
 }
 
-export function validateIntelRequest(raw: string): IntelRequestBody {
-  if (!raw.trim()) return {};
-  const parsed = JSON.parse(raw) as IntelRequestBody;
-  if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
+export function validateIntelRequest(raw: unknown): IntelRequestBody {
+  if (raw == null) return {};
+  if (typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error("Invalid JSON body");
   }
-  return parsed;
+  return raw as IntelRequestBody;
 }
 
 async function runIntel(
