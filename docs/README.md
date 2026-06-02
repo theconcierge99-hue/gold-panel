@@ -15,13 +15,14 @@ Full technical documentation for the **gold-panel** project (**Executive Lounge*
 7. **[API reference](api-reference.md)** — Routes, methods, response shapes  
 8. **[x402 payments](x402-payments.md)** — PayAI facilitator, client pay flow, networks  
 9. **[x402scan](x402scan.md)** — Discovery documents and marketplace registration  
-10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory
-11. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
-12. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
-13. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
-14. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
-15. **[Security](security.md)** — What must never appear in docs or commits  
-16. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
+10. **[Concierge AI](concierge-ai.md)** — Modes, prompts, language, memory  
+11. **[Agents & integrators](agents.md)** — Call Concierge via x402 (no repo); web `/docs/agents`  
+12. **[zauth](zauth.md)** — x402 trust layer (Provider Hub, directory, telemetry, A2A)  
+13. **[Creator signals](creator-signals.md)** — Publish, unlock, NFT mint, revenue  
+14. **[Deployment](deployment.md)** — Vercel, Git deploy, production checks  
+15. **[Vercel deploy notes](vercel-deploy.md)** — Team project, deploy hooks, version file  
+16. **[Security](security.md)** — What must never appear in docs or commits  
+17. **[SECURITY.md](../SECURITY.md)** — Repo root checklist and reporting
 
 ## External references
 

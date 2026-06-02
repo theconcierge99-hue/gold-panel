@@ -107,6 +107,16 @@ Configured in `api/lib/concierge-gemini.ts` with fallback list:
 - `gemini-2.5-flash-lite`
 - `gemini-2.0-flash`
 
+## External integration (agents)
+
+Other projects can call Concierge over HTTPS with **x402 payment only** — no API key, no repository access.
+
+| Resource | URL |
+|----------|-----|
+| Integrator guide (web) | `https://conc-exe.xyz/docs/agents` |
+| Markdown | [agents.md](agents.md) |
+| OpenAPI | `/openapi.json` |
+
 ## Related files
 
 | File | Role |

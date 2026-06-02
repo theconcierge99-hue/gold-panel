@@ -50,6 +50,10 @@
       "destination": "/docs.html"
     },
     {
+      "source": "/docs/agents",
+      "destination": "/docs-agents.html"
+    },
+    {
       "source": "/",
       "destination": "/executive-lounge.html"
     }
