@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>About Us — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Executive Lounge is a private intelligence terminal for markets and the onchain economy." />
+<meta name="description" content="Executive Lounge: private market intelligence, RWA creator signals, x402 micropayments, Concierge AI, zauth trust layer, and agent identity for the onchain economy." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/about" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +26,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.6}
-  .wrap{max-width:640px;margin:0 auto;padding:48px 24px 64px}
+  .wrap{max-width:680px;margin:0 auto;padding:48px 24px 64px}
   .back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:inline-block;margin-bottom:28px}
   .back:hover{color:var(--gold)}
   .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:32px}
@@ -35,11 +35,16 @@
   .eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
   .hook{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,4vw,28px);font-weight:300;font-style:italic;line-height:1.35;color:var(--text-primary);margin-bottom:28px}
   .card{background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:28px 26px;margin-bottom:20px}
+  .card h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--text-primary);margin-bottom:12px}
   .card p{font-size:14px;color:var(--text-secondary);margin-bottom:14px}
   .card p:last-child{margin-bottom:0}
   .card strong{color:var(--text-primary);font-weight:400}
-  .card ul{margin:14px 0 0;padding-left:18px;font-size:14px;color:var(--text-secondary)}
+  .card ul{margin:10px 0 0;padding-left:18px;font-size:14px;color:var(--text-secondary)}
   .card li{margin-bottom:8px}
+  .card a{color:var(--gold);text-decoration:none}
+  .card a:hover{text-decoration:underline}
+  .card .sub{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block}
+  .pricing{font-size:13px;color:var(--text-muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
   .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
   .btn{font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;text-decoration:none;border-radius:4px;transition:all .15s}
   .btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg)}
@@ -58,22 +63,83 @@
   <p class="hook">Markets move fast. Your edge should not depend on scattered tabs and noisy feeds.</p>
 
   <div class="card">
-    <p><strong>Executive Lounge</strong> is a private intelligence terminal for participants in the onchain economy—live wire, market telemetry, creator signals, and an AI Concierge in one disciplined surface.</p>
-    <p>We built the Lounge for readers who want <strong>research-desk context</strong>: clear headlines, paid depth when it matters, and answers that remember what has already appeared here.</p>
+    <p><strong>Executive Lounge</strong> is a private intelligence terminal for participants in the onchain economy—live wire, market telemetry, tokenized creator intelligence, and an AI Concierge in one disciplined surface.</p>
+    <p>We built the Lounge for readers who want <strong>research-desk context</strong>: clear headlines, paid depth when it matters, and answers that remember what has already appeared here. The same platform also serves <strong>autonomous agents</strong> that pay per call over HTTPS—no signup wall, no API keys for core access.</p>
   </div>
 
   <div class="card">
-    <p class="eyebrow" style="margin-bottom:10px">What you get</p>
+    <span class="sub">Core experience</span>
     <ul>
-      <li><strong>Lounge</strong> — browse global wire free; unlock full reads with transparent USDC micropayments.</li>
-      <li><strong>Concierge AI</strong> — trading plans, macro, crypto, and category insight; recalls Lounge memory for continuity.</li>
-      <li><strong>Creator Signals</strong> — publish with an anti-spam fee; readers unlock at a flat rate; quality over volume.</li>
+      <li><strong>Lounge</strong> — browse global wire free; unlock full article reads with transparent USDC micropayments.</li>
+      <li><strong>Concierge AI</strong> — macro, crypto, equities, and category insight; trading-style plans; mirrors your language when clear from context; uses live market data and Lounge memory.</li>
+      <li><strong>Creator Signals</strong> — publish structured intelligence with an anti-spam fee; readers unlock at a flat rate; quality over volume.</li>
     </ul>
   </div>
 
   <div class="card">
-    <p>Payments run on <strong>Solana or Base</strong> via x402—small, intentional, and spam-resistant. Creators pay a one-time publish fee; readers unlock at a flat rate. No engagement bait. No infinite scroll trap.</p>
-    <p>Our audience: serious participants who want institutional-grade clarity—not noise.</p>
+    <h2>RWA intelligence certificates</h2>
+    <p>Every published <strong>Creator Signal</strong> is backed by an off-chain <strong>Real World Asset (RWA) intelligence certificate</strong>: a stable <code>tokenId</code>, content hash, and metadata other systems can verify.</p>
+    <ul>
+      <li>Signals appear on the market feed with an <strong>RWA</strong> indicator when certified.</li>
+      <li>Solana creators can mint an optional <strong>Metaplex NFT</strong> to their own Phantom wallet after the publish fee—gas in SOL; you custody the asset.</li>
+      <li>Readers earn <strong>off-chain badges</strong> (Intel Scout → Sovereign Intel) as they unlock signals over time.</li>
+    </ul>
+    <p class="pricing">Publish signal: <strong>1 USDC</strong> · Unlock signal: <strong>0.1 USDC</strong> (50% creator / 50% platform on unlocks)</p>
+  </div>
+
+  <div class="card">
+    <h2>x402 micropayments</h2>
+    <p>Payments run on <strong>Solana and/or Base</strong> via the <strong>x402</strong> protocol—small, intentional, and spam-resistant. You approve USDC in your wallet; the server verifies settlement through a facilitator. No subscription required for paid reads or Concierge.</p>
+    <ul>
+      <li>Discoverable via <code>openapi.json</code> and <code>/.well-known/x402</code> for agents and marketplaces.</li>
+      <li>Listed for public discovery on x402scan and similar registries when operators complete registration.</li>
+    </ul>
+    <p class="pricing">Open article · Concierge message · Unlock signal: <strong>0.1 USDC</strong> each</p>
+  </div>
+
+  <div class="card">
+    <h2>Concierge AI</h2>
+    <p><strong>Concierge</strong> is the paid intelligence layer: chat, signal enhancement, and image analysis modes. It combines Gemini models with live headline feeds, category context, and recent Lounge memory so replies stay grounded in what is on the wire—not generic boilerplate.</p>
+    <ul>
+      <li>Category shortcuts from the sidebar (Macro, Crypto, Geopolitics, and more) open Concierge with focused prompts.</li>
+      <li>External bots and backends can call <code>POST /api/concierge</code> with the same x402 flow—documented for integrators, no repository access required.</li>
+    </ul>
+    <p>Technical guide: <a href="/docs/agents">Agents &amp; integrators</a> · <a href="/docs#concierge">Concierge in documentation</a></p>
+  </div>
+
+  <div class="card">
+    <h2>zauth trust layer</h2>
+    <p>We integrate <strong><a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer">zauth</a></strong> as a trust and discovery layer for the broader x402 ecosystem—not a replacement for wallet signing or PayAI settlement.</p>
+    <ul>
+      <li><strong>Directory proxy</strong> — query verified x402 endpoints before recommending third-party paid APIs.</li>
+      <li><strong>Provider Hub telemetry</strong> — optional operator reporting after successful paid calls (Concierge, news-open, signals).</li>
+      <li>Concierge is instructed to prefer high-trust endpoints when suggesting external services.</li>
+    </ul>
+    <p>Details: <a href="/docs#zauth">zauth in documentation</a></p>
+  </div>
+
+  <div class="card">
+    <h2>Agent identity</h2>
+    <p>Software agents can register a public <strong><code>agt_…</code> identity</strong> with <strong>Solana and/or Base wallets</strong> for agent-to-agent discovery and pay-per-call Concierge. Private keys are generated in the browser and are <strong>never</strong> sent to our servers—we store public addresses and display metadata only.</p>
+    <ul>
+      <li>Lounge → <strong>Navigate</strong> → <strong>Agent identity</strong> to generate wallets, register, and fund for x402.</li>
+      <li>Machine-readable <strong>agent cards</strong> (ERC-8004-style) at <code>/api/agent-identity-card</code> and service registry at <code>/.well-known/agent-card.json</code>.</li>
+      <li>Optional <code>X-Agent-Id</code> header on Concierge calls for attribution in responses.</li>
+      <li>Registration is <strong>free</strong>; paid APIs still require USDC per call.</li>
+    </ul>
+    <p>Full guide: <a href="/docs/agent-identity">Agent identity documentation</a></p>
+  </div>
+
+  <div class="card">
+    <h2>For builders &amp; operators</h2>
+    <p>Executive Lounge is designed to be operable and integrable: Edge APIs on Vercel, OpenAPI with payment metadata, public docs without exposing secrets, and environment-driven configuration for RPC, KV, Gemini, and x402 receive addresses.</p>
+    <ul>
+      <li><a href="/docs">Documentation</a> — architecture, API reference, deployment, security</li>
+      <li><a href="/docs/agents">Agents &amp; integrators</a> — x402 Concierge from Node, Python, or any HTTP client</li>
+      <li><a href="/docs/agent-identity">Agent identity</a> — register bots, wallets, and discovery cards</li>
+      <li><a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a> · <a href="/.well-known/x402" target="_blank" rel="noopener noreferrer">x402 discovery</a></li>
+    </ul>
+    <p>Our audience: serious participants and autonomous agents who want <strong>institutional-grade clarity</strong>—not noise. Not financial advice; on-chain payments are public.</p>
   </div>
 
   <div class="cta-row">
@@ -83,7 +149,7 @@
     <a class="btn" href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram</a>
   </div>
 
-  <p class="foot">© Executive Lounge · Private intelligence for the onchain economy</p>
+  <p class="foot">© Executive Lounge · Private intelligence for the onchain economy · Payments via x402 · Not financial advice</p>
 </div>
 </body>
 </html>
