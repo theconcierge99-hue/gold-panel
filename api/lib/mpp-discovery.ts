@@ -16,7 +16,6 @@ const PAYAI_FACILITATOR = "https://facilitator.payai.network";
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
 export const MPP_PAYMENT_PROTOCOLS: Record<string, unknown>[] = [
   { x402: { network: "solana", facilitator: PAYAI_FACILITATOR } },
-  { x402: { network: "base", facilitator: PAYAI_FACILITATOR } },
   { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
 ];
 
@@ -368,9 +367,10 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
             additionalProperties: false,
             properties: {
               type: { const: "json" },
+              example: outputBodySchema,
               body: outputBodySchema,
             },
-            required: ["type", "body"],
+            required: ["type", "example"],
           },
         },
         required: ["input", "output"],
