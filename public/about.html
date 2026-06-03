@@ -89,12 +89,25 @@
 
   <div class="card">
     <h2>x402 micropayments</h2>
-    <p>Payments run on <strong>Solana and/or Base</strong> via the <strong>x402</strong> protocol—small, intentional, and spam-resistant. You approve USDC in your wallet; the server verifies settlement through a facilitator. No subscription required for paid reads or Concierge.</p>
+    <p>Payments run on <strong>Solana and/or Base</strong> via the <strong>x402</strong> protocol—small, intentional, and spam-resistant. You approve USDC in your wallet; the server verifies settlement through PayAI. No subscription required for paid reads or Concierge.</p>
     <ul>
       <li>Discoverable via <code>openapi.json</code> and <code>/.well-known/x402</code> for agents and marketplaces.</li>
-      <li>Listed for public discovery on x402scan and similar registries when operators complete registration.</li>
+      <li>Listed on <strong><a href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">x402scan</a></strong> and <strong><a href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener noreferrer">MPPscan</a></strong> (Machine Payments Protocol).</li>
     </ul>
     <p class="pricing">Open article · Concierge message · Unlock signal: <strong>0.1 USDC</strong> each</p>
+  </div>
+
+  <div class="card">
+    <span class="sub">MPP · Agent marketplace</span>
+    <h2>Concierge Agent on MPPscan</h2>
+    <p><strong>Concierge Agent API</strong> is a pay-per-call market intelligence service—nine routes (Concierge AI, five DeFi intel endpoints, Lounge wire and RWA signals). <strong>MPP</strong> handles discovery and agent tooling; <strong>x402</strong> handles USDC settlement—the same pattern used by leading MPP-listed agent APIs.</p>
+    <ul>
+      <li><strong>Install:</strong> <code>npx agentcash add https://conc-exe.xyz</code></li>
+      <li><strong>Intel:</strong> TVL, yields, whales, wallet, verdict — <strong>$0.10</strong> per call</li>
+      <li><strong>Concierge chat</strong> and wire unlock — <strong>$0.10</strong> · publish signal — <strong>$1.00</strong></li>
+      <li>OpenAPI advertises <code>x402</code> + <code>mpp</code> protocols; Bazaar schemas on every <code>402</code> challenge</li>
+    </ul>
+    <p>Docs: <a href="/docs/payment/mpp">MPP &amp; AgentCash</a> · <a href="/integrations">Integrations</a> · <a href="/agent/endpoints">Endpoint catalog</a></p>
   </div>
 
   <div class="card">
@@ -137,7 +150,7 @@
       <li><a href="/docs">Documentation</a> — quickstart, API reference, pricing, architecture</li>
       <li><a href="/docs/api/concierge">Concierge Chat</a> — x402 from Node, Python, or any HTTP client</li>
       <li><a href="/docs/api/agent-identity">Agent identity</a> — register bots, wallets, and discovery cards</li>
-      <li><a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a> · <a href="/.well-known/x402" target="_blank" rel="noopener noreferrer">x402 discovery</a></li>
+      <li><a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a> · <a href="/.well-known/x402" target="_blank" rel="noopener noreferrer">x402 discovery</a> · <a href="/docs/payment/mpp">MPP structure</a></li>
     </ul>
     <p>Our audience: serious participants and autonomous agents who want <strong>institutional-grade clarity</strong>—not noise. Not financial advice; on-chain payments are public.</p>
   </div>

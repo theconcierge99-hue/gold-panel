@@ -29,7 +29,7 @@
       <h1 class="docs-title">Welcome to Concierge</h1>
       <p class="docs-lead">
         <strong>AI-powered market and DeFi intelligence.</strong>
-        Pay per query via x402 — no API keys, no subscriptions.
+        Pay per query via x402 — MPP-discoverable on MPPscan — no API keys, no subscriptions.
       </p>
 
       <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px">
@@ -87,10 +87,26 @@
           <h4>x402 Payments</h4>
           <p>HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.</p>
         </a>
+        <a class="doc-card" href="/docs/payment/mpp">
+          <div class="card-icon">⬡</div>
+          <h4>MPP &amp; AgentCash</h4>
+          <p>MPPscan listing, nine routes, <code>agentcash add</code> install.</p>
+        </a>
+      </div>
+
+      <h2 class="docs-h2">MPP &amp; agent install</h2>
+      <div class="card">
+        <p>Concierge Agent is listed on <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan</a>. Install all nine paid skills:</p>
+<pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
+        <p>See <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> for route table, OpenAPI discovery, and registry links.</p>
       </div>
 
       <h2 class="docs-h2">How it works</h2>
       <div class="steps">
+        <div class="step">
+          <h4>Discover (MPP / OpenAPI)</h4>
+          <p>Read <code>/openapi.json</code> or use AgentCash — prices and JSON schemas for all nine routes before you pay.</p>
+        </div>
         <div class="step">
           <h4>Send a request</h4>
           <p><code>POST</code> to any paid endpoint with your JSON body. No <code>Authorization</code> header — identity is optional via <code>X-Agent-Id</code> after registration.</p>

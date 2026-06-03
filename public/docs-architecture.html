@@ -74,10 +74,16 @@
         <p class="note">Operator markdown: repository <code>docs/</code> folder. Never commit secrets.</p>
       </div>
 
-      <h2 class="docs-h2">zauth &amp; x402scan</h2>
+      <h2 class="docs-h2">Discovery &amp; registries</h2>
       <div class="card">
-        <p><code>GET /api/zauth-directory</code> · <code>GET /api/zauth-status</code> — agents query verified endpoints before paying third parties.</p>
-        <p>List this deployment on <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com</a>.</p>
+        <p><strong>Implementation:</strong> <code>api/lib/mpp-discovery.ts</code> · <code>api/lib/x402-discovery.ts</code> · Edge handlers <code>openapi.ts</code>, <code>well-known-x402.ts</code></p>
+        <ul>
+          <li><strong>MPPscan</strong> — <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">listed server</a> · OpenAPI <code>x402</code> + <code>mpp</code> protocols</li>
+          <li><strong>AgentCash</strong> — <code>npx agentcash add https://conc-exe.xyz</code></li>
+          <li><strong>x402scan</strong> — <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">optional registration</a></li>
+          <li><strong>zauth</strong> — <code>GET /api/zauth-directory</code> · <code>GET /api/zauth-status</code></li>
+        </ul>
+        <p>Docs: <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
       </div>
 
       <div class="cta-row">

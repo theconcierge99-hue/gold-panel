@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Integrations — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Data sources and distribution partners powering Executive Lounge — Gemini, DeFi Llama, Meteora, x402, PayAI, zauth, x402scan, and more." />
+<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, MPPscan, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/integrations" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -89,9 +89,21 @@
       <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
     </header>
     <p class="int-lead" style="margin-bottom:24px">
-      Paid routes are discoverable via machine-readable specs. Optional zauth telemetry reports successful settlements for trust scoring in the public directory.
+      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (Machine Payments Protocol) — install skills with AgentCash. Optional zauth telemetry reports settlements for trust scoring.
     </p>
     <div class="int-grid">
+      <a class="int-card" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <div class="int-card-brand">
+            <img class="int-partner-logo int-partner-logo--card" src="/images/integrations/mppscan.svg" alt="" width="28" height="28" />
+            <h3>MPPscan</h3>
+          </div>
+          <span class="int-tag">MPP</span>
+        </div>
+        <p class="int-card-sub">Agent marketplace</p>
+        <p>Concierge Agent API — nine pay-per-call routes (Concierge AI, DeFi intel, Lounge). Listed on the MPP explorer with x402 + MPP discovery.</p>
+        <span class="int-card-link">View server ↗</span>
+      </a>
       <a class="int-card" href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">
         <div class="int-card-top">
           <div class="int-card-brand">
@@ -173,7 +185,7 @@
           <span class="int-tag">9 routes</span>
         </div>
         <p class="int-card-sub">This deployment</p>
-        <p>Chat, DeFi intel, Lounge signals — catalog, playground, and live x402 on conc-exe.xyz.</p>
+        <p>Chat, DeFi intel, Lounge signals — catalog, playground, live x402, and MPPscan listing on conc-exe.xyz.</p>
         <span class="int-card-link">Endpoint catalog →</span>
       </a>
       <a class="int-card" href="https://www.metaplex.com/" target="_blank" rel="noopener noreferrer">
@@ -189,9 +201,27 @@
         <span class="int-card-link">Metaplex ↗</span>
       </a>
     </div>
+
+    <aside class="int-install" aria-labelledby="int-install-h">
+      <p class="int-install-eyebrow" id="int-install-h">Install on your agent</p>
+      <p class="int-install-lead">Add Concierge Agent API skills to any AgentCash-compatible client (same flow as MPPscan server page).</p>
+      <div class="int-install-cmd">
+        <code>npx agentcash add https://conc-exe.xyz</code>
+        <button type="button" class="int-install-copy" data-copy="npx agentcash add https://conc-exe.xyz" aria-label="Copy install command">Copy</button>
+      </div>
+      <p class="int-install-meta">
+        <a href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener noreferrer">MPPscan server profile ↗</a>
+        ·
+        <a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a>
+        ·
+        <a href="/agent/endpoints">9 routes</a>
+      </p>
+    </aside>
+
     <div class="int-payments">
       <span class="int-pill">USDC · Base</span>
       <span class="int-pill">USDC · Solana</span>
+      <span class="int-pill">MPP · AgentCash</span>
       <span class="int-pill">$0.10 / call</span>
       <span class="int-pill">9 live endpoints</span>
       <span class="int-pill">Free wire browse</span>
@@ -205,5 +235,20 @@
     <a class="int-btn" href="/about">About</a>
   </footer>
 </div>
+<script>
+(function () {
+  document.querySelectorAll(".int-install-copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy") || "";
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var prev = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(function () { btn.textContent = prev; }, 1600);
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>

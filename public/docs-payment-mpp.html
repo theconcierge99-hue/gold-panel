@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>MPP &amp; AgentCash — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent on MPPscan — Machine Payments Protocol discovery, AgentCash install, nine pay-per-call routes, x402 settlement." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/payment/mpp" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="payment-mpp">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Payment</div>
+      <h1 class="docs-title">MPP &amp; AgentCash</h1>
+      <p class="docs-lead">
+        Concierge Agent is listed on <strong>MPPscan</strong> (Machine Payments Protocol). Settlement stays <strong>x402 USDC</strong> via PayAI — MPP is discovery and agent tooling, not a separate payment rail.
+      </p>
+
+      <div class="card">
+        <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Service:</strong> Concierge Agent API · nine pay-per-call routes</p>
+        <p><strong>Protocols advertised:</strong> <code>x402</code> + <code>mpp</code> in <code>/openapi.json</code></p>
+        <p><strong>Live profile:</strong> <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan server page ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Install on your agent</h2>
+      <div class="card">
+        <p>Same command shown on the MPPscan server dashboard — add all Concierge skills to an AgentCash client:</p>
+<pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
+        <p>Discover pricing and schemas without paying:</p>
+<pre><code>npx -y @agentcash/discovery@latest discover https://conc-exe.xyz
+npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-intel-tvl</code></pre>
+      </div>
+
+      <h2 class="docs-h2">MPP structure (nine routes)</h2>
+      <div class="card">
+        <p>All routes use <strong>POST</strong> with JSON after payment. Intel routes also advertise <strong>GET</strong> for marketplace probes (returns 402 until paid POST).</p>
+        <table>
+          <thead><tr><th>Route</th><th>Price</th><th>Category</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge</code></td><td>$0.10</td><td>Concierge AI</td></tr>
+            <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-yields</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-whales</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/news-open</code></td><td>$0.10</td><td>Lounge · wire</td></tr>
+            <tr><td><code>POST /api/lounge-signal-open</code></td><td>$0.10</td><td>Lounge · RWA</td></tr>
+            <tr><td><code>POST /api/lounge-signal-publish</code></td><td>$1.00</td><td>Lounge · RWA</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Full catalog: <a href="/agent/endpoints" class="gold-link">Concierge Agent endpoints</a> · <a href="/openapi.json" class="gold-link" target="_blank" rel="noopener">openapi.json</a></p>
+      </div>
+
+      <h2 class="docs-h2">Discovery documents</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>URL</th><th>Role in MPP</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /openapi.json</code></td><td>Canonical — <code>info.x-guidance</code>, <code>x-payment-info</code> (x402 + mpp), input/output schemas, <code>402</code> responses</td></tr>
+            <tr><td><code>GET /.well-known/x402</code></td><td>Resource fan-out + links to MPPscan / x402scan</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>Runtime networks, <code>discovery.protocols</code>, pricing flags</td></tr>
+            <tr><td><code>402 PAYMENT-REQUIRED</code></td><td>Bazaar <code>extensions.bazaar</code> input + output schemas for agent invocation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">How MPP relates to x402</h2>
+      <div class="steps">
+        <div class="step"><h4>Discovery (MPP / AgentCash)</h4><p>Agents read <code>/openapi.json</code> and MPPscan to learn routes, prices, and JSON shapes before calling.</p></div>
+        <div class="step"><h4>Challenge (x402 v2)</h4><p>Runtime <code>402</code> + <code>PAYMENT-REQUIRED</code> with USDC requirements on Solana and/or Base.</p></div>
+        <div class="step"><h4>Settlement (PayAI)</h4><p><code>PAYMENT-SIGNATURE</code> → verify/settle → <code>200</code> + JSON intelligence.</p></div>
+      </div>
+
+      <h2 class="docs-h2">Registries</h2>
+      <div class="card">
+        <ul>
+          <li><a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan</a> — Machine Payments Protocol explorer (listed)</li>
+          <li><a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan</a> — x402 ecosystem registry (optional second listing)</li>
+          <li><a href="/integrations" class="gold-link">Integrations</a> — partner stack and install command</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/payment/x402">x402 Protocol</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · MPP discovery · x402 settlement · <a href="https://mpp.dev/" class="ext" target="_blank" rel="noopener">mpp.dev</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

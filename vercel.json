@@ -94,6 +94,10 @@
       "destination": "/docs-payment-x402.html"
     },
     {
+      "source": "/docs/payment/mpp",
+      "destination": "/docs-payment-mpp.html"
+    },
+    {
       "source": "/docs/api/overview",
       "destination": "/docs-api-overview.html"
     },

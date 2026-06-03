@@ -57,12 +57,19 @@
         <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> for all five endpoints.</p>
       </div>
 
+      <h2 class="docs-h2">MPP / AgentCash (optional)</h2>
+      <div class="card">
+        <p>Install all nine Concierge skills from the <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan</a> listing:</p>
+<pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
+        <p>Validate discovery: <code>npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></p>
+      </div>
+
       <h2 class="docs-h2">Discovery</h2>
       <div class="card">
         <table>
           <thead><tr><th>URL</th><th>Purpose</th></tr></thead>
           <tbody>
-            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + payment metadata</td></tr>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402/mpp payment metadata</td></tr>
             <tr><td><code>GET /.well-known/x402</code></td><td>x402 resource fan-out</td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Public payment flags (no secrets)</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry</td></tr>
@@ -72,6 +79,7 @@
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/api/concierge">Concierge Chat API</a>
+        <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
       </div>
       <p class="docs-foot">Concierge · Executive Lounge</p>

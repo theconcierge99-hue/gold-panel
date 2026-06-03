@@ -34,17 +34,20 @@
         <a class="doc-card" href="/docs/api/lounge"><h4>Lounge</h4><p>Market feed, signals, RWA, news unlock</p></a>
       </div>
 
-      <h2 class="docs-h2">Discovery</h2>
+      <h2 class="docs-h2">Discovery (x402 + MPP)</h2>
       <div class="card">
+        <p>Concierge Agent is listed on <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan</a>. Install: <code>npx agentcash add https://conc-exe.xyz</code></p>
         <table>
           <thead><tr><th>Resource</th><th>Description</th></tr></thead>
           <tbody>
-            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1, x-payment-info, Bazaar input schemas</td></tr>
-            <tr><td><code>GET /.well-known/x402</code></td><td>All paid routes for x402 clients</td></tr>
-            <tr><td><code>GET /.well-known/agent-card.json</code></td><td>How to register agents and call Concierge</td></tr>
-            <tr><td><code>GET /api/x402-config</code></td><td>enabled, networks, zauth links (no secrets)</td></tr>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 — <code>x-payment-info</code> (x402 + mpp), input/output schemas, <code>info.x-guidance</code></td></tr>
+            <tr><td><code>GET /.well-known/x402</code></td><td>Paid route fan-out · MPPscan / x402scan links</td></tr>
+            <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry (<code>agt_…</code>) and Concierge services</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>Networks, <code>discovery.protocols</code>, pricing (no secrets)</td></tr>
+            <tr><td><code>402</code> + Bazaar</td><td>Runtime input/output schemas for AgentCash probes</td></tr>
           </tbody>
         </table>
+        <p class="note">Full MPP route table: <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
       </div>
 
       <h2 class="docs-h2">Verdict signals (Intel)</h2>

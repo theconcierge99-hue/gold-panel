@@ -39,4 +39,4 @@ Paid calls: `POST` + JSON body → `402` → pay USDC → retry with `PAYMENT-SI
 - `X402_SITE_ORIGIN` — production origin for discovery URLs
 - Optional `PAYAI_API_KEY_ID` / `PAYAI_API_KEY_SECRET` for facilitator auth
 
-See also [x402scan.md](./x402scan.md) and [docs/payment/x402](/docs/payment/x402).
+See also [x402scan.md](./x402scan.md), web docs [/docs/payment/mpp](https://conc-exe.xyz/docs/payment/mpp), and [docs/payment/x402](/docs/payment/x402).

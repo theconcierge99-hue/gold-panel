@@ -55,12 +55,14 @@
 
       <h2 class="docs-h2">Marketplace probes</h2>
       <div class="card">
-        <p><code>GET</code> on paid routes also returns <strong>402</strong> so x402scan and directories can discover pricing without a body.</p>
-        <p>Register your origin at <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com</a> — fan-out via <code>/.well-known/x402</code> lists all paid resources.</p>
+        <p><code>GET</code> on paid routes also returns <strong>402</strong> so x402scan, MPPscan, and AgentCash can discover pricing without a body.</p>
+        <p>Registries: <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com</a> · <a class="ext" href="https://www.mppscan.com/server/6ded1eed8d9dd654f2021f37268ea5f782be7a0c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan (Concierge Agent)</a></p>
+        <p>Fan-out: <code>/.well-known/x402</code> lists all paid resources. Bazaar extensions on <code>402</code> include input and output JSON schemas.</p>
       </div>
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/quickstart">Quickstart</a>
+        <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/pricing">Pricing</a>
       </div>
       <p class="docs-foot">Concierge · Executive Lounge</p>

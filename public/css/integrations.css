@@ -90,6 +90,36 @@ a.int-card:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
 }
 a.int-card:hover .int-card-link{color:var(--int-gold)}
 
+.int-install{
+  margin-top:28px;padding:20px 22px;border:1px solid var(--int-border);
+  background:var(--int-panel);border-radius:8px;
+}
+.int-install-eyebrow{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--int-gold);margin-bottom:8px;
+}
+.int-install-lead{font-size:13px;color:var(--int-muted);margin-bottom:14px;line-height:1.55}
+.int-install-cmd{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px 14px;border:1px solid var(--int-border);border-radius:6px;
+  background:var(--int-bg);
+}
+.int-install-cmd code{
+  font-family:'DM Mono',monospace;font-size:12px;color:var(--int-text);
+  word-break:break-all;flex:1;min-width:200px;
+}
+.int-install-copy{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 12px;border:1px solid var(--int-gold-dim);background:transparent;
+  color:var(--int-gold);border-radius:4px;cursor:pointer;flex-shrink:0;
+}
+.int-install-copy:hover{background:var(--int-glow)}
+.int-install-meta{
+  margin-top:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--int-dim);
+}
+.int-install-meta a{color:var(--int-muted);text-decoration:none}
+.int-install-meta a:hover{color:var(--int-gold)}
+
 .int-payments{
   display:flex;flex-wrap:wrap;gap:8px;margin-top:32px;padding-top:24px;
   border-top:1px solid var(--int-border);
