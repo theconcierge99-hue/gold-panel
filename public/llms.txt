@@ -1,6 +1,6 @@
 # Concierge — Executive Lounge
 
-> AI-powered market and DeFi intelligence. Pay per query via x402 — no API keys, no subscriptions.
+> AI-powered market and DeFi intelligence. Pay per query via x402 (MPP-discoverable on mppscan.com) — no API keys, no subscriptions.
 
 ## Docs
 
@@ -16,7 +16,7 @@
 - [Executive Lounge](https://conc-exe.xyz/docs/playground): Browser terminal and wallet UX.
 - [Concierge Agent home](https://conc-exe.xyz/agent): Hero hub — market intelligence as a service.
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
-- [Discover](https://conc-exe.xyz/agent/discover): x402 fan-out, OpenAPI, agent cards.
+- [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, agent cards. List on [MPPscan](https://www.mppscan.com/register).
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
 
 ## OpenAPI

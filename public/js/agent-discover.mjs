@@ -101,7 +101,16 @@ async function load() {
 
     cards.push(
       discCard(
-        "Marketplace listing",
+        "MPP listing",
+        `<p>Machine Payments Protocol explorer — same OpenAPI as AgentCash. List <code>${origin}</code> after deploy.</p>
+        ${discLink("https://www.mppscan.com/register", "mppscan.com/register")}
+        <p class="res-disc-hint"><code>npx -y @agentcash/discovery@latest discover ${origin}</code></p>`,
+      ),
+    );
+
+    cards.push(
+      discCard(
+        "x402scan listing",
         `<p>Register on x402scan so agents and explorers index your paid routes.</p>
         ${discLink("https://www.x402scan.com/resources/register", "x402scan.com/resources/register")}`,
       ),

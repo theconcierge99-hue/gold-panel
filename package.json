@@ -11,7 +11,8 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "discovery:validate": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

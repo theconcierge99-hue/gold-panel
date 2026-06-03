@@ -24,25 +24,25 @@ const RESOURCE_META: Record<
   { name: string; description: string; mimeType: string; tags: string[] }
 > = {
   news: {
-    name: "Executive Lounge — Open article",
+    name: "Concierge Agent — Open article",
     description: "Open one news article (full story link)",
     mimeType: "application/json",
     tags: ["executive-lounge", "news", "markets"],
   },
   concierge: {
-    name: "Executive Lounge — Concierge AI",
+    name: "Concierge Agent — Concierge AI",
     description: "Concierge AI chat turn (single request)",
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge"],
   },
   "signal-publish": {
-    name: "Executive Lounge — Publish signal",
+    name: "Concierge Agent — Publish signal",
     description: "Publish one RWA intelligence signal to the Lounge (anti-spam fee; Solana NFT mint in Phantom)",
     mimeType: "application/json",
     tags: ["executive-lounge", "creator", "signals", "rwa"],
   },
   "signal-open": {
-    name: "Executive Lounge — Unlock signal",
+    name: "Concierge Agent — Unlock signal",
     description: "Unlock one creator RWA signal (full intelligence summary)",
     mimeType: "application/json",
     tags: ["executive-lounge", "creator", "signals", "rwa"],

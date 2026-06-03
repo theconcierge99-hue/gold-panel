@@ -14,6 +14,18 @@ import {
   X402_SERVICE_TAGS,
   x402ServiceListingMeta,
 } from "./x402-service-meta";
+import {
+  buildXPaymentInfo,
+  buildXServiceInfo,
+  CONCIERGE_OPENAPI_GUIDANCE,
+  formatUsdAmountForDiscovery,
+  isIntelKindWithGetProbe,
+  mppDiscoveryLinks,
+  MPPSCAN_REGISTER_URL,
+  openApiQueryParameters,
+  openApiRequestSchema,
+  openApiResponseSchema,
+} from "./mpp-discovery";
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -165,11 +177,13 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Executive Lounge x402 resources (RWA signals, Concierge AI, market wire). Settlements on-chain via PayAI. Index at x402scan.com after probing POST (402 + PAYMENT-REQUIRED).",
+      "Concierge Agent — nine pay-per-call routes (Concierge AI, DeFi intel, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Register on mppscan.com and x402scan.com after OpenAPI validates.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
       x402scan: X402SCAN_EXPLORE_URL,
+      mppscanRegister: MPPSCAN_REGISTER_URL,
+      ...mppDiscoveryLinks(origin),
       zauth: zauthMetaLinks(origin),
     },
   };
@@ -390,60 +404,84 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
   };
 }
 
-function paymentInfoForPrice(amount: string): Record<string, unknown> {
-  return {
-    protocols: ["x402"],
-    price: { mode: "fixed", currency: "USD", amount },
-  };
-}
-
-function openApiPathItem(resource: X402DiscoveryResource, origin: string): Record<string, unknown> {
+function openApiOperation(
+  resource: X402DiscoveryResource,
+  origin: string,
+  method: "post" | "get",
+): Record<string, unknown> {
   const url = `${origin.replace(/\/$/, "")}${resource.path}`;
-  return {
-    post: {
-      operationId: resource.kind.replace(/-/g, "_"),
-      summary: resource.name,
-      description: resource.description,
-      "x-payment-info": paymentInfoForPrice(resource.priceUsd),
-      tags: resource.tags,
-      requestBody: {
-        required: true,
+  const kind = resource.kind;
+  const opSuffix = method === "get" ? "_get" : "";
+  const op: Record<string, unknown> = {
+    operationId: `${resource.kind.replace(/-/g, "_")}${opSuffix}`,
+    summary:
+      method === "get" && isIntelKindWithGetProbe(kind)
+        ? `${resource.name} (GET probe)`
+        : resource.name,
+    description:
+      method === "get" && isIntelKindWithGetProbe(kind)
+        ? `${resource.description} Probes return 402 without payment; use POST with JSON body after settlement.`
+        : resource.description,
+    "x-payment-info": buildXPaymentInfo(resource.priceUsd, kind),
+    tags: resource.tags,
+    responses: {
+      "200": {
+        description: "Success after payment",
         content: {
           "application/json": {
-            schema: { type: "object" },
+            schema: openApiResponseSchema(kind),
           },
         },
       },
-      responses: {
-        "200": {
-          description: "Success after payment",
-          content: { "application/json": { schema: { type: "object" } } },
-        },
-        "402": {
-          description: "Payment required (x402 v2 — PAYMENT-REQUIRED header)",
-          headers: {
-            "PAYMENT-REQUIRED": {
-              description: "Base64 JSON x402 payment requirements",
-              schema: { type: "string" },
-            },
+      "402": {
+        description: "Payment Required",
+        headers: {
+          "PAYMENT-REQUIRED": {
+            description: "Base64 JSON x402 payment requirements (MPP-compatible)",
+            schema: { type: "string" },
           },
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  error: { type: "string" },
-                  priceUsdc: { type: "number" },
-                  resource: { type: "string" },
-                },
+        },
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: { type: "string" },
+                priceUsdc: { type: "number" },
+                resource: { type: "string" },
               },
             },
           },
         },
       },
-      servers: [{ url }],
     },
+    servers: [{ url }],
   };
+
+  if (method === "post") {
+    op.requestBody = {
+      required: kind !== "intel-tvl",
+      content: {
+        "application/json": {
+          schema: openApiRequestSchema(kind),
+        },
+      },
+    };
+  } else if (isIntelKindWithGetProbe(kind)) {
+    op.parameters = openApiQueryParameters(kind);
+  }
+
+  return op;
+}
+
+function openApiPathItem(resource: X402DiscoveryResource, origin: string): Record<string, unknown> {
+  const pathItem: Record<string, unknown> = {
+    post: openApiOperation(resource, origin, "post"),
+  };
+  if (isIntelKindWithGetProbe(resource.kind)) {
+    pathItem.get = openApiOperation(resource, origin, "get");
+  }
+  return pathItem;
 }
 
 export function buildOpenApiDocument(origin: string): Record<string, unknown> {
@@ -459,21 +497,26 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Executive Lounge — Private Intelligence Lobby",
-      version: "2.0.1",
+      title: "Concierge Agent API",
+      version: "4.0.0",
       description:
-        "Micropayment-gated resources for Executive Lounge: market wire, RWA creator signals, Concierge AI, and Concierge Intel APIs (TVL, yields, whales, wallet, verdict). Discoverable on x402scan.com. USDC on Base and Solana via PayAI facilitator.",
+        "Market intelligence as a service — nine pay-per-call endpoints. Concierge AI, DeFi intel (TVL, yields, whales, wallet, verdict), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
+      "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
     },
-    servers: [{ url: base, description: "Executive Lounge" }],
+    "x-service-info": buildXServiceInfo(base),
+    servers: [{ url: base, description: "Concierge Agent" }],
     paths,
     "x-discovery": {
       ownershipProofs: proofs,
       x402scan: X402SCAN_REGISTER_URL,
+      mppscan: MPPSCAN_REGISTER_URL,
+      ...mppDiscoveryLinks(base),
       serviceName: listing.serviceName,
       description: listing.description,
       tags: listing.tags,
       iconUrl: listing.iconUrl,
+      protocols: ["x402", "mpp"],
     },
     tags: [
       { name: "news", description: "Wire article unlock" },
@@ -501,14 +544,18 @@ export function discoveryMetaForConfig(origin: string) {
     x402scanExploreUrl: X402SCAN_EXPLORE_URL,
     zauth: zauthMetaLinks(base),
     ownershipProofs: ownershipProofs(),
+    protocols: ["x402", "mpp"],
+    mppscanRegisterUrl: MPPSCAN_REGISTER_URL,
     resources: X402_DISCOVERY_RESOURCES.map((r) => ({
       kind: r.kind,
       url: `${base}${r.path}`,
       method: r.method,
       priceUsd: r.priceUsd,
+      priceUsdDiscovery: formatUsdAmountForDiscovery(r.priceUsd),
       atomicAmount: atomicAmountForResource(r.kind),
       priceUsdc: priceUsdcForResource(r.kind),
     })),
+    ...mppDiscoveryLinks(base),
   };
 }
 

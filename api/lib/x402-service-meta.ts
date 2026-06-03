@@ -29,10 +29,10 @@ export const X402_OPERATION_TAGS: Record<
   "intel-verdict": ["AI", "Crypto", "Trading", "RWA"],
 };
 
-export const X402_SERVICE_NAME = "Executive Lounge";
+export const X402_SERVICE_NAME = "Concierge Agent";
 
 export const X402_SERVICE_TAGLINE =
-  "Live market wire, RWA creator signals, and Concierge AI for the onchain economy. Browse free; unlock depth with USDC on Solana or Base.";
+  "Market intelligence as a service — pay-per-call Concierge AI, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).";
 
 export function x402ServiceListingMeta(origin: string): {
   serviceName: string;

@@ -5,13 +5,14 @@ import type { AgentIdentityRecord } from "./agent-identity-types";
 export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
   const base = origin.replace(/\/$/, "");
   return {
-    schema: "executive-lounge-agent-registry-v1",
-    name: "Executive Lounge Agent Registry",
+    schema: "concierge-agent-registry-v1",
+    name: "Concierge Agent Registry",
     description:
-      "Register autonomous agent identities with Solana and/or Base wallets. Pay for Concierge via x402 USDC — no API keys.",
+      "Register autonomous agent identities with Solana and/or Base wallets. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
     registerEndpoint: `${base}/api/agent-identity`,
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
+    protocols: ["x402", "mpp"],
     networks: ["solana", "eip155:8453"],
   };
 }

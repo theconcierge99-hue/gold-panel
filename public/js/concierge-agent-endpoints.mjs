@@ -1,4 +1,4 @@
-/** Concierge Agent — paid x402 endpoint catalog (mirrors api/lib/x402-discovery.ts). */
+/** Concierge Agent — paid x402 + MPP endpoint catalog (mirrors api/lib/x402-discovery.ts). */
 export const CONCIERGE_AGENT_ORIGIN =
   typeof location !== "undefined" && location.origin ? location.origin : "https://conc-exe.xyz";
 
