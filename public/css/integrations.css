@@ -47,13 +47,27 @@ body.int-page{
   display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;
 }
 .int-logo-chip{
-  display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;
+  display:flex;align-items:center;gap:10px;min-height:52px;padding:10px 16px;
   border:1px solid var(--int-border);background:var(--int-panel);border-radius:6px;
   font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.04em;color:var(--int-text);
   text-decoration:none;transition:border-color .15s,background .15s;
 }
 a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
-.int-logo-chip span{color:var(--int-muted);font-size:10px;margin-left:6px}
+.int-logo-chip--multi{gap:10px}
+.int-logo-duo{display:flex;align-items:center;gap:4px;flex-shrink:0}
+
+.int-partner-logo{
+  width:24px;height:24px;object-fit:contain;flex-shrink:0;display:block;
+}
+.int-partner-logo--card{width:28px;height:28px}
+.int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
+html[data-theme="light"] .int-partner-logo--card[src$=".svg"],
+html[data-theme="light"] .int-partner-logo[src$=".svg"]{
+  filter:brightness(0.55);
+}
+
+.int-card-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.int-card-brand h3{font-size:15px;font-weight:600;letter-spacing:.02em}
 
 .int-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;
