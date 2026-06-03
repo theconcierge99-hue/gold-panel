@@ -24,7 +24,7 @@
   "redirects": [
     {
       "source": "/executive-lounge.html",
-      "destination": "/",
+      "destination": "/lounge",
       "permanent": true
     }
   ],
@@ -68,6 +68,10 @@
     {
       "source": "/agent/discover",
       "destination": "/agent-discover.html"
+    },
+    {
+      "source": "/lounge",
+      "destination": "/executive-lounge.html"
     },
     {
       "source": "/docs",
@@ -131,7 +135,7 @@
     },
     {
       "source": "/",
-      "destination": "/executive-lounge.html"
+      "destination": "/agent.html"
     }
   ]
 }

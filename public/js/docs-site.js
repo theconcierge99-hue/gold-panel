@@ -45,7 +45,7 @@
     if (!aside) return;
     var page = currentPageId();
     var html =
-      '<div class="docs-sidebar-brand"><a href="/">' +
+      '<div class="docs-sidebar-brand"><a href="/agent">' +
       '<img src="/images/the-concierge-logo.png" alt="" width="32" height="32" />' +
       "<div><span>Concierge</span><small>Executive Lounge</small></div></a></div>" +
       '<button type="button" class="docs-mobile-toggle" id="docs-nav-toggle" aria-expanded="true">Menu</button>' +

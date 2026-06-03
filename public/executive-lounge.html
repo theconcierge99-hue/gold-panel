@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<script>(function(){if(/\/executive-lounge\.html$/i.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/\/executive-lounge\.html$/i,'/')+location.search+location.hash);}})();</script>
-<link rel="canonical" href="/" />
+<script>(function(){if(/\/executive-lounge\.html$/i.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/\/executive-lounge\.html$/i,'/lounge')+location.search+location.hash);}})();</script>
+<link rel="canonical" href="/lounge" />
 <title>Executive Lounge — Private Intelligence Lobby</title>
 <meta name="description" content="Live market wire, RWA creator signals, and Concierge AI for the onchain economy. Browse free; unlock depth with USDC on Solana or Base." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -596,10 +596,10 @@
     <div class="sidebar-body">
     <div class="nav-group">
       <div class="nav-h">Navigate</div>
+      <a class="nav-i" href="/agent">Concierge Agent</a>
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
-      <a class="nav-i" href="/agent" target="_blank" rel="noopener noreferrer">Concierge Agent</a>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token</div>
     </div>
     <div class="nav-group">
