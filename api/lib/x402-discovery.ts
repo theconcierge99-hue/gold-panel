@@ -15,6 +15,7 @@ import {
   x402ServiceListingMeta,
 } from "./x402-service-meta";
 import {
+  buildBazaarExtension,
   buildXPaymentInfo,
   buildXServiceInfo,
   CONCIERGE_OPENAPI_GUIDANCE,
@@ -24,8 +25,11 @@ import {
   MPPSCAN_REGISTER_URL,
   openApiQueryParameters,
   openApiRequestSchema,
+  openApiResponseExample,
   openApiResponseSchema,
 } from "./mpp-discovery";
+
+export { buildBazaarExtension };
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -189,221 +193,6 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
   };
 }
 
-function jsonSchemaBody(
-  properties: Record<string, unknown>,
-  required: string[],
-): Record<string, unknown> {
-  return {
-    type: "object",
-    additionalProperties: false,
-    properties,
-    required,
-  };
-}
-
-/** Bazaar extension so x402scan can invoke and index paid routes. */
-export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unknown> {
-  const examples: Record<X402ResourceKind, { body: Record<string, unknown>; schema: Record<string, unknown> }> =
-    {
-      news: {
-        body: {
-          url: "https://www.bbc.com/news/example",
-          title: "Example headline",
-          source: "BBC",
-        },
-        schema: jsonSchemaBody(
-          {
-            url: { type: "string", description: "Article URL (http/https)" },
-            title: { type: "string", description: "Headline title" },
-            source: { type: "string", description: "Publisher name" },
-          },
-          ["url"],
-        ),
-      },
-      concierge: {
-        body: {
-          mode: "chat",
-          message: "What is the macro outlook for BTC?",
-          history: [],
-          market: [],
-        },
-        schema: jsonSchemaBody(
-          {
-            mode: {
-              type: "string",
-              enum: ["chat", "enhance", "image"],
-              description: "Concierge mode",
-            },
-            message: { type: "string", description: "User message" },
-            history: {
-              type: "array",
-              description: "Prior chat turns",
-              items: {
-                type: "object",
-                properties: {
-                  role: { type: "string", enum: ["user", "model"] },
-                  text: { type: "string" },
-                },
-                required: ["role", "text"],
-              },
-            },
-            market: { type: "array", description: "Optional market ticks from UI" },
-            signal: {
-              type: "object",
-              description: "Optional signal draft for enhance mode",
-              properties: {
-                title: { type: "string" },
-                summary: { type: "string" },
-              },
-            },
-          },
-          ["message"],
-        ),
-      },
-      "signal-publish": {
-        body: {
-          title: "BTC dominance roll-down thesis",
-          summary:
-            "Dominance stalled at resistance while ETH/BTC prints higher lows; positioning favors risk-curve rotation over the next 1–2 weeks.",
-          categories: ["Crypto", "Macro"],
-          creatorWallet: "0x0000000000000000000000000000000000000000",
-          creatorChain: "evm",
-        },
-        schema: jsonSchemaBody(
-          {
-            title: { type: "string" },
-            summary: { type: "string" },
-            categories: { type: "array", items: { type: "string" } },
-            creatorWallet: { type: "string" },
-            creatorChain: { type: "string", enum: ["sol", "evm"] },
-          },
-          ["title", "summary", "categories", "creatorWallet", "creatorChain"],
-        ),
-      },
-      "signal-open": {
-        body: { signalId: "sig_example000000000000000000000000" },
-        schema: jsonSchemaBody(
-          { signalId: { type: "string", description: "Published signal id" } },
-          ["signalId"],
-        ),
-      },
-      "intel-tvl": {
-        body: {},
-        schema: jsonSchemaBody(
-          { message: { type: "string", description: "Optional context for logging" } },
-          [],
-        ),
-      },
-      "intel-yields": {
-        body: { chain: "solana", project: "meteora" },
-        schema: jsonSchemaBody(
-          {
-            chain: { type: "string", description: "solana | ethereum | base | arbitrum" },
-            project: { type: "string", description: "Filter project id substring" },
-            message: { type: "string" },
-          },
-          [],
-        ),
-      },
-      "intel-whales": {
-        body: { symbols: ["BTC", "ETH", "SOL"] },
-        schema: jsonSchemaBody(
-          {
-            symbols: {
-              type: "array",
-              items: { type: "string", enum: ["BTC", "ETH", "SOL"] },
-            },
-          },
-          [],
-        ),
-      },
-      "intel-wallet": {
-        body: { solAddress: "7hum…", message: "optional context" },
-        schema: jsonSchemaBody(
-          {
-            solAddress: { type: "string" },
-            evmAddress: { type: "string" },
-            message: { type: "string" },
-          },
-          [],
-        ),
-      },
-      "intel-verdict": {
-        body: { message: "DeFi outlook on Solana", includeInsider: true },
-        schema: jsonSchemaBody(
-          {
-            message: { type: "string", description: "Question or theme for verdict" },
-            includeInsider: {
-              type: "boolean",
-              description: "Include Lounge creator signals (default true)",
-            },
-          },
-          ["message"],
-        ),
-      },
-    };
-
-  const ex = examples[kind];
-  const input = {
-    type: "http",
-    method: "POST",
-    bodyType: "json",
-    body: ex.body,
-    headers: { "Content-Type": "application/json" },
-  };
-
-  return {
-    bazaar: {
-      info: {
-        input,
-        output: {
-          type: "json",
-          example:
-            kind === "news"
-              ? { url: "https://www.bbc.com/news/example", unlocked: true }
-              : kind === "concierge"
-                ? { reply: "<p>Analysis…</p>", topics: ["crypto"] }
-                : kind === "signal-publish"
-                  ? { id: "sig_…", published: true }
-                  : kind === "signal-open"
-                    ? { signalId: "sig_…", summary: "Full thesis…" }
-                    : kind === "intel-tvl"
-                      ? { ok: true, chains: [], topProtocols: [] }
-                      : kind === "intel-yields"
-                        ? { ok: true, pools: [] }
-                        : kind === "intel-whales"
-                          ? { ok: true, positioning: [] }
-                          : kind === "intel-wallet"
-                            ? { ok: true, wallet: { chain: "solana", address: "…" } }
-                            : {
-                                ok: true,
-                                verdict: { signal: "watch", confidence: "medium" },
-                              },
-        },
-      },
-      schema: {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        properties: {
-          input: {
-            type: "object",
-            properties: {
-              type: { const: "http" },
-              method: { const: "POST" },
-              bodyType: { const: "json" },
-              body: ex.schema,
-              headers: { type: "object" },
-            },
-            required: ["type", "method", "bodyType", "body"],
-          },
-          output: { type: "object" },
-        },
-        required: ["input", "output"],
-      },
-    },
-  };
-}
-
 function openApiOperation(
   resource: X402DiscoveryResource,
   origin: string,
@@ -430,6 +219,7 @@ function openApiOperation(
         content: {
           "application/json": {
             schema: openApiResponseSchema(kind),
+            example: openApiResponseExample(kind),
           },
         },
       },
@@ -503,6 +293,11 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
         "Market intelligence as a service — nine pay-per-call endpoints. Concierge AI, DeFi intel (TVL, yields, whales, wallet, verdict), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
+      contact: {
+        name: "Concierge Agent",
+        url: `${base}/docs`,
+        email: "support@conc-exe.xyz",
+      },
     },
     "x-service-info": buildXServiceInfo(base),
     servers: [{ url: base, description: "Concierge Agent" }],

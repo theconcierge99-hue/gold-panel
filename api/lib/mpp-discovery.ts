@@ -11,10 +11,13 @@ export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
 export const MPPSCAN_DISCOVERY_DOC_URL = "https://www.mppscan.com/discovery";
 
-/** AgentCash / MPPscan — dual-protocol payment advertisement (settlement via PayAI x402). */
+const PAYAI_FACILITATOR = "https://facilitator.payai.network";
+
+/** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
 export const MPP_PAYMENT_PROTOCOLS: Record<string, unknown>[] = [
-  { x402: {} },
-  { mpp: { method: "", intent: "charge", currency: "USDC" } },
+  { x402: { network: "solana", facilitator: PAYAI_FACILITATOR } },
+  { x402: { network: "base", facilitator: PAYAI_FACILITATOR } },
+  { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
 ];
 
 export const CONCIERGE_OPENAPI_GUIDANCE = [
@@ -135,75 +138,178 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
 };
 
 const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
-  news: {
-    type: "object",
-    properties: {
-      url: { type: "string" },
+  news: jsonSchemaBody(
+    {
+      url: { type: "string", description: "Canonical article URL" },
       unlocked: { type: "boolean" },
+      title: { type: "string" },
+      source: { type: "string" },
     },
-    required: ["url"],
-  },
-  concierge: {
-    type: "object",
-    properties: {
-      reply: { type: "string" },
+    ["url", "unlocked"],
+  ),
+  concierge: jsonSchemaBody(
+    {
+      reply: { type: "string", description: "HTML analysis from Concierge" },
       topics: { type: "array", items: { type: "string" } },
     },
-  },
-  "signal-publish": {
-    type: "object",
-    properties: {
+    ["reply"],
+  ),
+  "signal-publish": jsonSchemaBody(
+    {
       id: { type: "string" },
       published: { type: "boolean" },
+      title: { type: "string" },
     },
-  },
-  "signal-open": {
-    type: "object",
-    properties: {
+    ["id", "published"],
+  ),
+  "signal-open": jsonSchemaBody(
+    {
       signalId: { type: "string" },
       summary: { type: "string" },
+      title: { type: "string" },
     },
-  },
-  "intel-tvl": {
-    type: "object",
-    properties: {
+    ["signalId", "summary"],
+  ),
+  "intel-tvl": jsonSchemaBody(
+    {
       ok: { type: "boolean" },
-      chains: { type: "array", items: { type: "object" } },
-      topProtocols: { type: "array", items: { type: "object" } },
+      chains: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            tvl: { type: "number" },
+          },
+        },
+      },
+      topProtocols: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            tvl: { type: "number" },
+            category: { type: "string" },
+          },
+        },
+      },
     },
-    required: ["ok"],
-  },
-  "intel-yields": {
-    type: "object",
-    properties: {
+    ["ok"],
+  ),
+  "intel-yields": jsonSchemaBody(
+    {
       ok: { type: "boolean" },
-      pools: { type: "array", items: { type: "object" } },
+      pools: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            project: { type: "string" },
+            chain: { type: "string" },
+            apy: { type: "number" },
+            symbol: { type: "string" },
+          },
+        },
+      },
     },
-    required: ["ok"],
+    ["ok"],
+  ),
+  "intel-whales": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      positioning: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            symbol: { type: "string" },
+            longShortRatio: { type: "number" },
+            bias: { type: "string" },
+          },
+        },
+      },
+    },
+    ["ok"],
+  ),
+  "intel-wallet": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      wallet: jsonSchemaBody(
+        {
+          chain: { type: "string" },
+          address: { type: "string" },
+          tokens: { type: "array", items: { type: "object" } },
+        },
+        ["chain", "address"],
+      ),
+    },
+    ["ok"],
+  ),
+  "intel-verdict": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      verdict: jsonSchemaBody(
+        {
+          signal: {
+            type: "string",
+            enum: ["snipe", "watch", "follow", "avoid", "rebalance"],
+          },
+          confidence: { type: "string" },
+          summary: { type: "string" },
+        },
+        ["signal"],
+      ),
+    },
+    ["ok", "verdict"],
+  ),
+};
+
+const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
+  news: {
+    url: "https://www.bbc.com/news/example",
+    title: "Example headline",
+    source: "BBC",
   },
+  concierge: {
+    mode: "chat",
+    message: "What is the macro outlook for BTC?",
+    history: [],
+    market: [],
+  },
+  "signal-publish": {
+    title: "BTC dominance roll-down thesis",
+    summary: "Dominance stalled at resistance; risk-curve rotation over 1–2 weeks.",
+    categories: ["Crypto", "Macro"],
+    creatorWallet: "0x0000000000000000000000000000000000000000",
+    creatorChain: "evm",
+  },
+  "signal-open": { signalId: "sig_example000000000000000000000000" },
+  "intel-tvl": {},
+  "intel-yields": { chain: "solana", project: "meteora" },
+  "intel-whales": { symbols: ["BTC", "ETH", "SOL"] },
+  "intel-wallet": { solAddress: "7hum…", message: "optional context" },
+  "intel-verdict": { message: "DeFi outlook on Solana", includeInsider: true },
+};
+
+const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
+  news: { url: "https://www.bbc.com/news/example", unlocked: true, title: "Example", source: "BBC" },
+  concierge: { reply: "<p>Analysis…</p>", topics: ["crypto", "macro"] },
+  "signal-publish": { id: "sig_abc123", published: true, title: "BTC thesis" },
+  "signal-open": { signalId: "sig_abc123", summary: "Full intelligence summary…", title: "BTC thesis" },
+  "intel-tvl": { ok: true, chains: [{ name: "Solana", tvl: 4.2e9 }], topProtocols: [] },
+  "intel-yields": { ok: true, pools: [{ project: "meteora", chain: "solana", apy: 12.4, symbol: "SOL-USDC" }] },
   "intel-whales": {
-    type: "object",
-    properties: {
-      ok: { type: "boolean" },
-      positioning: { type: "array", items: { type: "object" } },
-    },
-    required: ["ok"],
+    ok: true,
+    positioning: [{ symbol: "BTC", longShortRatio: 1.12, bias: "long" }],
   },
   "intel-wallet": {
-    type: "object",
-    properties: {
-      ok: { type: "boolean" },
-      wallet: { type: "object" },
-    },
-    required: ["ok"],
+    ok: true,
+    wallet: { chain: "solana", address: "7hum…", tokens: [] },
   },
   "intel-verdict": {
-    type: "object",
-    properties: {
-      ok: { type: "boolean" },
-      verdict: { type: "object" },
-    },
-    required: ["ok"],
+    ok: true,
+    verdict: { signal: "watch", confidence: "medium", summary: "Desk bias neutral…" },
   },
 };
 
@@ -213,6 +319,64 @@ export function openApiRequestSchema(kind: X402ResourceKind): Record<string, unk
 
 export function openApiResponseSchema(kind: X402ResourceKind): Record<string, unknown> {
   return RESPONSE_SCHEMAS[kind];
+}
+
+export function openApiResponseExample(kind: X402ResourceKind): Record<string, unknown> {
+  return RESPONSE_BODY_EXAMPLES[kind];
+}
+
+/** Bazaar extension on 402 PAYMENT-REQUIRED — MPPscan requires output schema properties. */
+export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unknown> {
+  const input = {
+    type: "http",
+    method: "POST",
+    bodyType: "json",
+    body: REQUEST_BODY_EXAMPLES[kind],
+    headers: { "Content-Type": "application/json" },
+  };
+
+  const outputBodySchema = openApiResponseSchema(kind);
+
+  return {
+    bazaar: {
+      info: {
+        input,
+        output: {
+          type: "json",
+          example: openApiResponseExample(kind),
+        },
+      },
+      schema: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          input: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              type: { const: "http" },
+              method: { const: "POST" },
+              bodyType: { const: "json" },
+              body: openApiRequestSchema(kind),
+              headers: { type: "object" },
+            },
+            required: ["type", "method", "bodyType", "body"],
+          },
+          output: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              type: { const: "json" },
+              body: outputBodySchema,
+            },
+            required: ["type", "body"],
+          },
+        },
+        required: ["input", "output"],
+      },
+    },
+  };
 }
 
 /** Fixed USD amount with six decimal places for AgentCash validators. */
