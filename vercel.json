@@ -46,6 +46,10 @@
       "destination": "/about.html"
     },
     {
+      "source": "/integrations",
+      "destination": "/integrations.html"
+    },
+    {
       "source": "/agent",
       "destination": "/agent.html"
     },

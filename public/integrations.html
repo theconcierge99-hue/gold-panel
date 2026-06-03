@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Integrations — Executive Lounge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Data sources and distribution partners powering Executive Lounge — Gemini, DeFi Llama, Meteora, x402, PayAI, zauth, x402scan, and more." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/integrations" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/integrations.css" />
+</head>
+<body class="int-page">
+<div class="int-wrap">
+  <div class="int-top">
+    <a class="int-back" href="/">← Back to Lounge</a>
+    <div class="int-brand">
+      <img src="/images/the-concierge-logo.png" alt="" width="40" height="40" />
+      <span>CONCIERGE<em>_</em></span>
+    </div>
+  </div>
+
+  <p class="int-eyebrow">Integrations</p>
+  <h1 class="int-headline">Powered by <em>verified sources</em></h1>
+  <p class="int-lead">
+    Executive Lounge combines live market wire, Concierge AI, and x402 micropayments with trusted data partners and independent discovery registries — for traders and autonomous agents alike.
+  </p>
+
+  <section class="int-section" aria-labelledby="data-sources-h">
+    <header class="int-section-h">
+      <p class="int-eyebrow">Data sources</p>
+      <h2 class="int-headline" id="data-sources-h" style="font-size:clamp(22px,3.5vw,30px)">Intelligence <em>stack</em></h2>
+    </header>
+    <div class="int-logo-strip">
+      <a class="int-logo-chip" href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Gemini</a>
+      <a class="int-logo-chip" href="https://defillama.com/" target="_blank" rel="noopener noreferrer">DeFi Llama</a>
+      <a class="int-logo-chip" href="https://www.meteora.ag/" target="_blank" rel="noopener noreferrer">Meteora</a>
+      <a class="int-logo-chip" href="https://www.binance.com/" target="_blank" rel="noopener noreferrer">Binance</a>
+      <a class="int-logo-chip" href="https://www.helius.dev/" target="_blank" rel="noopener noreferrer">Helius</a>
+      <a class="int-logo-chip" href="https://docs.payai.network/" target="_blank" rel="noopener noreferrer">PayAI</a>
+      <a class="int-logo-chip" href="https://phantom.app/" target="_blank" rel="noopener noreferrer">Phantom</a>
+      <span class="int-logo-chip">OKX</span>
+      <span class="int-logo-chip">Base <span>·</span> Solana</span>
+      <span class="int-logo-chip">Global wire <span>RSS</span></span>
+    </div>
+    <p class="int-lead" style="margin:20px 0 0;font-size:13px">
+      Concierge ingests TVL, yields (including Meteora DLMM), whale positioning, wallet snapshots, live prices, and headline memory — plus Gemini for desk-style replies.
+    </p>
+  </section>
+
+  <section class="int-section" aria-labelledby="distribution-h">
+    <header class="int-section-h">
+      <p class="int-eyebrow">Distribution &amp; trust</p>
+      <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
+    </header>
+    <p class="int-lead" style="margin-bottom:24px">
+      Paid routes are discoverable via machine-readable specs. Optional zauth telemetry reports successful settlements for trust scoring in the public directory.
+    </p>
+    <div class="int-grid">
+      <a class="int-card" href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>x402scan</h3>
+          <span class="int-tag">Discovery</span>
+        </div>
+        <p class="int-card-sub">Marketplace</p>
+        <p>Public x402 resource registry. Register at x402scan after deploy; OpenAPI and <code>/.well-known/x402</code> on conc-exe.xyz.</p>
+        <span class="int-card-link">Visit registry ↗</span>
+      </a>
+      <a class="int-card" href="https://zauth.inc/database" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>zauth</h3>
+          <span class="int-tag">Trust</span>
+        </div>
+        <p class="int-card-sub">Provider hub</p>
+        <p>x402 endpoint directory and Provider Hub telemetry. Proxy: <code>/api/zauth-directory</code> on this deployment.</p>
+        <span class="int-card-link">View database ↗</span>
+      </a>
+      <a class="int-card" href="https://docs.payai.network/x402/facilitators/pricing" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>PayAI</h3>
+          <span class="int-tag">Settlement</span>
+        </div>
+        <p class="int-card-sub">Facilitator</p>
+        <p>USDC verify and settle on Base and Solana for all nine paid Concierge Agent routes.</p>
+        <span class="int-card-link">Facilitator docs ↗</span>
+      </a>
+      <a class="int-card" href="/openapi.json" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>OpenAPI</h3>
+          <span class="int-tag">Builders</span>
+        </div>
+        <p class="int-card-sub">Machine spec</p>
+        <p>Full API catalog with x-payment-info for integrators, agents, and payment clients.</p>
+        <span class="int-card-link">openapi.json ↗</span>
+      </a>
+      <a class="int-card" href="/.well-known/agent-card.json" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>Agent card</h3>
+          <span class="int-tag">A2A</span>
+        </div>
+        <p class="int-card-sub">Discovery</p>
+        <p>Service registry for <code>agt_…</code> identities — ERC-8004-style cards for agent-to-agent x402.</p>
+        <span class="int-card-link">Well-known ↗</span>
+      </a>
+      <a class="int-card" href="https://www.x402.org/" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>x402</h3>
+          <span class="int-tag">Protocol</span>
+        </div>
+        <p class="int-card-sub">Payments</p>
+        <p>HTTP 402 Payment Required — pay-per-call USDC. No API keys; payment is the only gate.</p>
+        <span class="int-card-link">Protocol ↗</span>
+      </a>
+      <a class="int-card" href="/agent/endpoints">
+        <div class="int-card-top">
+          <h3>Concierge Agent</h3>
+          <span class="int-tag">9 routes</span>
+        </div>
+        <p class="int-card-sub">This deployment</p>
+        <p>Chat, DeFi intel, Lounge signals — catalog, playground, and live x402 on conc-exe.xyz.</p>
+        <span class="int-card-link">Endpoint catalog →</span>
+      </a>
+      <a class="int-card" href="https://www.metaplex.com/" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <h3>Metaplex</h3>
+          <span class="int-tag">Solana</span>
+        </div>
+        <p class="int-card-sub">RWA NFT</p>
+        <p>Creator signals can mint optional intelligence NFTs to Phantom after publish (creator-paid SOL gas).</p>
+        <span class="int-card-link">Metaplex ↗</span>
+      </a>
+    </div>
+    <div class="int-payments">
+      <span class="int-pill">USDC · Base</span>
+      <span class="int-pill">USDC · Solana</span>
+      <span class="int-pill">$0.10 / call</span>
+      <span class="int-pill">9 live endpoints</span>
+      <span class="int-pill">Free wire browse</span>
+    </div>
+  </section>
+
+  <footer class="int-foot">
+    <a class="int-btn gold" href="/">Open Lounge</a>
+    <a class="int-btn" href="/agent">Concierge Agent</a>
+    <a class="int-btn" href="/docs">Documentation</a>
+    <a class="int-btn" href="/about">About</a>
+  </footer>
+</div>
+</body>
+</html>
