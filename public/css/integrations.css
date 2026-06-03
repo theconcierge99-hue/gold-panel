@@ -53,8 +53,6 @@ body.int-page{
   text-decoration:none;transition:border-color .15s,background .15s;
 }
 a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
-.int-logo-chip--multi{gap:10px}
-.int-logo-duo{display:flex;align-items:center;gap:4px;flex-shrink:0}
 
 .int-partner-logo{
   width:24px;height:24px;object-fit:contain;flex-shrink:0;display:block;
