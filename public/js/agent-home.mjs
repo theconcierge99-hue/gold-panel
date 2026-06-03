@@ -1,4 +1,4 @@
-import { renderAgentTopNav } from "./agent-nav.mjs";
+import { renderAgentSiteFooter, renderAgentTopNav } from "./agent-nav.mjs";
 import {
   initConciergeLogoParticles,
   initMatrixRain,
@@ -6,6 +6,7 @@ import {
 } from "./agent-home-fx.mjs";
 
 renderAgentTopNav("home");
+renderAgentSiteFooter();
 
 const stopMatrix = initMatrixRain(document.getElementById("agent-matrix-canvas"));
 const stopLogo = initConciergeLogoParticles(document.getElementById("agent-logo-canvas"));
