@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Corbits">
-  <rect width="32" height="32" rx="7" fill="#0a0e14"/>
-  <circle cx="11" cy="16" r="3.2" fill="#e85d3a"/>
-  <circle cx="16" cy="11" r="3.2" fill="#c9a84c"/>
-  <circle cx="21" cy="16" r="3.2" fill="#5b8def"/>
-  <circle cx="16" cy="21" r="3.2" fill="#e8eef8" opacity=".85"/>
-</svg>
