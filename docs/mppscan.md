@@ -22,6 +22,7 @@ npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-inte
 Fix OpenAPI until the CLI reports no errors, then:
 
 1. [MPPscan — Add your Server](https://www.mppscan.com/register) — origin `https://conc-exe.xyz` (or your `X402_SITE_ORIGIN`)
+2. Copy the server profile URL from the browser → set **`MPPSCAN_SERVER_URL`** in Vercel (site links use `https://conc-exe.xyz/go/mppscan`)
 2. [x402scan — Register](https://www.x402scan.com/resources/register) — same origin (optional second listing)
 
 ## Agent integration (no Hyre branding)

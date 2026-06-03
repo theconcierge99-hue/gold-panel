@@ -27,7 +27,18 @@
         <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
         <p><strong>Service:</strong> Concierge Agent API · nine pay-per-call routes</p>
         <p><strong>Protocols advertised:</strong> <code>x402</code> + <code>mpp</code> in <code>/openapi.json</code></p>
-        <p><strong>Live profile:</strong> <a class="ext" href="https://www.mppscan.com/server/6ded3eed8c9dd654f2021f37268ea5f782be740c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan server page ↗</a></p>
+        <p><strong>Live profile:</strong> <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">conc-exe.xyz/go/mppscan ↗</a> (redirects to your MPPscan server URL when <code>MPPSCAN_SERVER_URL</code> is set in Vercel)</p>
+      </div>
+
+      <h2 class="docs-h2">Set MPPscan profile URL (operators)</h2>
+      <div class="card">
+        <p>MPPscan gives each registration a unique <code>/server/{hash}</code>. That hash can change if you re-register — do not hardcode it in HTML.</p>
+        <ol style="margin:12px 0 0 18px;font-size:14px;color:var(--text-secondary);line-height:1.6">
+          <li>Open your working server page on MPPscan (from register → <code>https://conc-exe.xyz</code>).</li>
+          <li>Copy the full URL from the browser address bar.</li>
+          <li>In Vercel → Environment Variables, set <code>MPPSCAN_SERVER_URL</code> to that exact URL.</li>
+          <li>Redeploy. Links on Integrations and docs use <code>/go/mppscan</code> and will 302 to your profile.</li>
+        </ol>
       </div>
 
       <h2 class="docs-h2">Install on your agent</h2>
@@ -82,7 +93,7 @@ npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-inte
       <h2 class="docs-h2">Registries</h2>
       <div class="card">
         <ul>
-          <li><a class="ext" href="https://www.mppscan.com/server/6ded3eed8c9dd654f2021f37268ea5f782be740c3265640c13558a37effb53d1" target="_blank" rel="noopener">MPPscan</a> — Machine Payments Protocol explorer (listed)</li>
+          <li><a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> — Machine Payments Protocol explorer (listed)</li>
           <li><a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan</a> — x402 ecosystem registry (optional second listing)</li>
           <li><a href="/integrations" class="gold-link">Integrations</a> — partner stack and install command</li>
         </ul>

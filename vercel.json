@@ -98,6 +98,10 @@
       "destination": "/docs-payment-mpp.html"
     },
     {
+      "source": "/go/mppscan",
+      "destination": "/api/mppscan-redirect"
+    },
+    {
       "source": "/docs/api/overview",
       "destination": "/docs-api-overview.html"
     },
