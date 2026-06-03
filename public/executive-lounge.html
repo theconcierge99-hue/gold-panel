@@ -164,8 +164,6 @@
   main{overflow-y:auto;padding:26px 32px 60px;-webkit-overflow-scrolling:touch}
   .view{display:none;animation:fadeUp .35s ease-out}
   .view.show{display:block}
-  .token-soon-wrap{display:flex;align-items:center;justify-content:center;min-height:min(480px,58vh);text-align:center}
-  .token-soon{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,6vw,52px);font-weight:300;letter-spacing:.42em;text-indent:.42em;color:var(--text-muted)}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
   .section-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
@@ -556,6 +554,7 @@
   .x402-hint{font-size:10px;color:var(--text-muted);letter-spacing:.06em;margin-top:4px}
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
+<link rel="stylesheet" href="/css/token.css" />
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
@@ -600,7 +599,7 @@
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
-      <div class="nav-i" data-nav="token" onclick="showView('token')">Token</div>
+      <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">SOON</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -712,10 +711,29 @@
       <div id="readerBadgePanel"><div class="intel-empty" style="border:none">Connect wallet to view your badges</div></div>
     </section>
 
-    <!-- TOKEN (placeholder) -->
+    <!-- TOKEN (utility draft — full page at /token) -->
     <section class="view" id="view-token">
-      <div class="token-soon-wrap">
-        <p class="token-soon">SOON</p>
+      <div class="tok-wrap">
+        <p class="tok-eyebrow">Utility token · draft</p>
+        <div class="tok-title-row">
+          <h1 class="tok-name">SOON</h1>
+          <span class="tok-symbol">SOON</span>
+          <span class="tok-soon-badge">Draft</span>
+        </div>
+        <p class="tok-draft-note"><strong>Draft only.</strong> Name and ticker: <strong>SOON</strong> — no CA, no sale yet. <a href="/token" style="color:var(--gold);text-decoration:underline">Full tokenomics →</a></p>
+        <p class="tok-lead">Desk utility + revenue-linked buyback from x402 USDC — not meme-without-product.</p>
+        <div class="tok-pills" style="margin-bottom:28px">
+          <span class="tok-pill">SOON</span>
+          <span class="tok-pill">9 routes · $0.10</span>
+          <span class="tok-pill">Buyback from fees</span>
+        </div>
+        <div class="tok-grid" style="margin-bottom:28px">
+          <div class="tok-card"><h3>Credits</h3><p>Hold → Concierge message credits / month.</p></div>
+          <div class="tok-card"><h3>Intel discount</h3><p>Agent tier → $0.08 per Intel call.</p></div>
+          <div class="tok-card"><h3>Agent badge</h3><p><code>agt_…</code> + hold → Discover badge.</p></div>
+          <div class="tok-card"><h3>Buyback</h3><p>10% x402 inflow → 60% burn / 40% LP weekly.</p></div>
+        </div>
+        <p class="tok-disclaimer" style="margin:0">Not financial advice. Experimental — high risk of total loss. <a href="/token" style="color:var(--gold)">Read full draft →</a></p>
       </div>
     </section>
   </main>
