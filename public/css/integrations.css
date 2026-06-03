@@ -59,10 +59,6 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 }
 .int-partner-logo--card{width:28px;height:28px}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
-html[data-theme="light"] .int-partner-logo--card[src$=".svg"],
-html[data-theme="light"] .int-partner-logo[src$=".svg"]{
-  filter:brightness(0.55);
-}
 
 .int-card-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .int-card-brand h3{font-size:15px;font-weight:600;letter-spacing:.02em}
