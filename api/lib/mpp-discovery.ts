@@ -11,6 +11,11 @@ export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
 export const MPPSCAN_DISCOVERY_DOC_URL = "https://www.mppscan.com/discovery";
 
+/** Live Concierge Agent listing on MPPscan (conc-exe.xyz register flow). */
+export const MPPSCAN_SERVER_ID =
+  "6ded3eed8c9dd654f2021f37268ea5f782be740c3265640c13558a37effb53d1";
+export const MPPSCAN_SERVER_URL = `https://www.mppscan.com/server/${MPPSCAN_SERVER_ID}`;
+
 const PAYAI_FACILITATOR = "https://facilitator.payai.network";
 
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
@@ -429,6 +434,7 @@ export function mppDiscoveryLinks(origin: string): Record<string, string> {
   return {
     mppscanRegister: MPPSCAN_REGISTER_URL,
     mppscan: MPPSCAN_EXPLORE_URL,
+    mppscanServer: MPPSCAN_SERVER_URL,
     mppscanDiscovery: MPPSCAN_DISCOVERY_DOC_URL,
     agentcashDiscover: `npx -y @agentcash/discovery@latest discover ${base}`,
     agentcashCheckIntel: `npx -y @agentcash/discovery@latest check ${base}/api/concierge-intel-tvl`,
