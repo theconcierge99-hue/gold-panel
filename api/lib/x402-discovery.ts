@@ -30,6 +30,7 @@ import {
 } from "./mpp-discovery";
 
 export { buildBazaarExtension };
+import { corbitsDiscoveryLinks } from "./corbits-links";
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -188,6 +189,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
       x402scan: X402SCAN_EXPLORE_URL,
       mppscanRegister: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(origin),
+      corbits: corbitsDiscoveryLinks(),
       zauth: zauthMetaLinks(origin),
     },
   };
@@ -351,6 +353,7 @@ export function discoveryMetaForConfig(origin: string) {
       priceUsdc: priceUsdcForResource(r.kind),
     })),
     ...mppDiscoveryLinks(base),
+    corbits: corbitsDiscoveryLinks(),
   };
 }
 

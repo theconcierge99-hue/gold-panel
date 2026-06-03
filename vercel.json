@@ -98,6 +98,10 @@
       "destination": "/docs-payment-mpp.html"
     },
     {
+      "source": "/docs/corbits",
+      "destination": "/docs-corbits.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

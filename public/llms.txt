@@ -9,6 +9,7 @@
 - [Pricing](https://conc-exe.xyz/docs/pricing): Pay-per-query USDC pricing for all routes.
 - [x402 Protocol](https://conc-exe.xyz/docs/payment/x402): HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.
 - [MPP & AgentCash](https://conc-exe.xyz/docs/payment/mpp): MPPscan listing, nine routes, agentcash add install.
+- [Corbits](https://conc-exe.xyz/docs/corbits): Marketplace, Discovery, Faremeter x402, Interchange governance map.
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini chat, enhance, image.
 - [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields (Meteora DLMM), whales, wallet, verdict.

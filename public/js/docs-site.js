@@ -24,6 +24,7 @@
     { label: "Product", items: [
       { id: "playground", href: "/docs/playground", title: "Executive Lounge" },
       { id: "architecture", href: "/docs/architecture", title: "Architecture" },
+      { id: "corbits", href: "/docs/corbits", title: "Corbits" },
     ]},
   ];
 

@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Integrations — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, MPPscan, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
+<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, MPPscan, Corbits, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/integrations" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -89,7 +89,7 @@
       <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
     </header>
     <p class="int-lead" style="margin-bottom:24px">
-      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (Machine Payments Protocol) — install skills with AgentCash. Optional zauth telemetry reports settlements for trust scoring.
+      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash) and <strong>Corbits Marketplace</strong> (x402 proxy + provider dashboard). Optional zauth telemetry reports settlements for trust scoring.
     </p>
     <div class="int-grid">
       <a class="int-card" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">
@@ -139,6 +139,18 @@
         <p class="int-card-sub">Facilitator</p>
         <p>USDC verify and settle on Base and Solana for all nine paid Concierge Agent routes.</p>
         <span class="int-card-link">Facilitator docs ↗</span>
+      </a>
+      <a class="int-card" href="https://the-concierge.theconcierge99.api.corbits.dev" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <div class="int-card-brand">
+            <img class="int-partner-logo int-partner-logo--card" src="/images/integrations/corbits.svg" alt="" width="28" height="28" />
+            <h3>Corbits</h3>
+          </div>
+          <span class="int-tag">Marketplace</span>
+        </div>
+        <p class="int-card-sub">Agent operations</p>
+        <p>Concierge Agent on Corbits Marketplace — x402 proxy for nine pay-per-call routes (backend <code>conc-exe.xyz</code>). $0.10 USDC per call, $1 publish; MPP + x402 compatible.</p>
+        <span class="int-card-link">Open proxy ↗</span>
       </a>
       <a class="int-card" href="/openapi.json" target="_blank" rel="noopener noreferrer">
         <div class="int-card-top">
@@ -212,6 +224,10 @@
       <p class="int-install-meta">
         <a href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">MPPscan server profile ↗</a>
         ·
+        <a href="https://the-concierge.theconcierge99.api.corbits.dev" target="_blank" rel="noopener noreferrer">Corbits proxy ↗</a>
+        ·
+        <a href="/docs/corbits">Corbits guide</a>
+        ·
         <a href="/openapi.json" target="_blank" rel="noopener noreferrer">openapi.json</a>
         ·
         <a href="/agent/endpoints">9 routes</a>
@@ -222,6 +238,7 @@
       <span class="int-pill">USDC · Base</span>
       <span class="int-pill">USDC · Solana</span>
       <span class="int-pill">MPP · AgentCash</span>
+      <span class="int-pill">Corbits Marketplace</span>
       <span class="int-pill">$0.10 / call</span>
       <span class="int-pill">9 live endpoints</span>
       <span class="int-pill">Free wire browse</span>
