@@ -1,5 +1,12 @@
 import type { MarketTick } from "./concierge-brain";
 import {
+  fetchMacroIntelligence,
+  filterMacroHeadlines,
+  formatMacroIntelligenceForPrompt,
+  messageWantsMacroDesk,
+  type MacroContext,
+} from "./macro-intelligence";
+import {
   fetchBtcNetwork,
   fetchCoinGeckoGlobal,
   fetchDefiLlama,
@@ -63,8 +70,20 @@ export type LiveMarketSnapshot = {
   defi?: DefiContext | null;
   btcNetwork?: BtcNetworkContext | null;
   headlines: NewsHeadline[];
+  macro?: MacroContext | null;
   sources: string[];
 };
+
+function enrichMacroWithHeadlines(
+  macro: MacroContext | null | undefined,
+  headlines: NewsHeadline[],
+): MacroContext | null | undefined {
+  if (!macro || !headlines.length) return macro;
+  return {
+    ...macro,
+    macroHeadlines: filterMacroHeadlines([...macro.macroHeadlines, ...headlines]).slice(0, 14),
+  };
+}
 
 async function fetchJson<T>(
   url: string,
@@ -337,12 +356,17 @@ export async function fetchConciergeMarketSnapshot(options?: {
       if (!hasClientTick(client, "AAPL")) yahooTasks.push(yahooQuote("AAPL", "AAPL", ms));
     }
 
-    const [spot, derivs, btcPositioning, sentiment, headlines, ...yahooExtra] = await Promise.all([
+    const wantsMacro = messageWantsMacroDesk(options?.message ?? "");
+
+    const [spot, derivs, btcPositioning, sentiment, headlines, macro, ...yahooExtra] = await Promise.all([
       binanceSpot(ms),
       binanceFutures(ms),
       binancePositioning("BTCUSDT", "BTC", ms),
       fetchFearGreed(),
       fetchMarketHeadlines(2),
+      wantsMacro
+        ? fetchMacroIntelligence({ timeoutMs: CONCIERGE_TRADING_FETCH_MS })
+        : Promise.resolve(null),
       ...yahooTasks,
     ]);
 
@@ -366,6 +390,7 @@ export async function fetchConciergeMarketSnapshot(options?: {
       const pubs = [...new Set(headlines.map((h) => h.source))];
       sources.push(`Headlines (${pubs.join(", ")})`);
     }
+    if (macro) sources.push("Macro desk (Fed/ECB/BoE wire, Treasury yields, calendar)");
 
     return {
       fetchedAt: new Date().toISOString(),
@@ -374,12 +399,13 @@ export async function fetchConciergeMarketSnapshot(options?: {
       positioning: btcPositioning ? [btcPositioning] : [],
       sentiment,
       headlines,
+      macro: enrichMacroWithHeadlines(macro, headlines),
       sources,
     };
   }
 
   const ms = CONCIERGE_FETCH_MS;
-  const [spot, derivs, btcPositioning, spx, dxy, vix, globalCrypto, sentiment, headlines] =
+  const [spot, derivs, btcPositioning, spx, dxy, vix, globalCrypto, sentiment, headlines, macro] =
     await Promise.all([
       binanceSpot(ms),
       binanceFutures(ms),
@@ -390,6 +416,7 @@ export async function fetchConciergeMarketSnapshot(options?: {
       fetchCoinGeckoGlobal(),
       fetchFearGreed(),
       fetchMarketHeadlines(2),
+      fetchMacroIntelligence({ timeoutMs: ms }),
     ]);
 
   const ticks: MarketTick[] = [...spot];
@@ -408,6 +435,7 @@ export async function fetchConciergeMarketSnapshot(options?: {
     const pubs = [...new Set(headlines.map((h) => h.source))];
     sources.push(`Headlines (${pubs.join(", ")})`);
   }
+  if (macro) sources.push("Macro desk (Fed/ECB/BoE wire, Treasury yields, calendar)");
 
   return {
     fetchedAt: new Date().toISOString(),
@@ -417,6 +445,7 @@ export async function fetchConciergeMarketSnapshot(options?: {
     globalCrypto,
     sentiment,
     headlines,
+    macro: enrichMacroWithHeadlines(macro, headlines),
     sources,
   };
 }
@@ -439,6 +468,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     defi,
     btcNetwork,
     headlines,
+    macro,
   ] = await Promise.all([
     binanceSpot(),
     binanceFutures(),
@@ -455,6 +485,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     fetchDefiLlama(),
     fetchBtcNetwork(),
     fetchMarketHeadlines(2),
+    fetchMacroIntelligence(),
   ]);
 
   const ticks: MarketTick[] = [...spot];
@@ -479,6 +510,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     const pubs = [...new Set(headlines.map((h) => h.source))];
     sources.push(`Headlines (${pubs.join(", ")})`);
   }
+  if (macro) sources.push("Macro desk (Fed/ECB/BoE wire, Treasury yields, calendar)");
 
   return {
     fetchedAt: new Date().toISOString(),
@@ -490,6 +522,7 @@ export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
     defi,
     btcNetwork,
     headlines,
+    macro: enrichMacroWithHeadlines(macro, headlines),
     sources,
   };
 }
@@ -563,6 +596,10 @@ export function formatLiveMarketForPrompt(snapshot: LiveMarketSnapshot): string 
       const when = h.published ? ` (${h.published})` : "";
       lines.push(`- [${h.source}]${when}: ${h.title}`);
     }
+  }
+
+  if (snapshot.macro) {
+    lines.push("\n" + formatMacroIntelligenceForPrompt(snapshot.macro));
   }
 
   return lines.join("\n");

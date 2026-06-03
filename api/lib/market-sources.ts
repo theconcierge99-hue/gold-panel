@@ -47,10 +47,10 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-async function fetchText(url: string): Promise<string | null> {
+async function fetchText(url: string, timeoutMs = FETCH_MS): Promise<string | null> {
   try {
     const res = await fetch(url, {
-      signal: AbortSignal.timeout(FETCH_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: { Accept: "application/rss+xml, application/xml, text/xml", "User-Agent": "ExecutiveLounge/1.0" },
     });
     if (!res.ok) return null;
@@ -173,6 +173,46 @@ const RSS_FEEDS: { url: string; source: string }[] = [
   { url: "https://feeds.reuters.com/Reuters/worldNews", source: "Reuters World" },
 ];
 
+/** Official central bank & macro policy RSS (Fed, ECB, BoE, BIS, Reuters Fed). */
+export const CENTRAL_BANK_RSS_FEEDS: { url: string; source: string }[] = [
+  { url: "https://www.federalreserve.gov/feeds/press_all.xml", source: "Federal Reserve" },
+  { url: "https://www.federalreserve.gov/feeds/speeches.xml", source: "Fed Speeches" },
+  { url: "https://www.bankofengland.co.uk/rss/news", source: "Bank of England" },
+  { url: "https://www.ecb.europa.eu/press/pressconf/shared/data/all_ecb_press_releases.en.rss", source: "ECB" },
+  { url: "https://www.bis.org/pressreleases/rss.xml", source: "BIS" },
+  { url: "https://feeds.reuters.com/news/wealth/fed", source: "Reuters · Fed" },
+];
+
+export async function fetchHeadlinesFromFeeds(
+  feeds: { url: string; source: string }[],
+  maxPerFeed = 2,
+  timeoutMs = FETCH_MS,
+): Promise<NewsHeadline[]> {
+  const results = await Promise.all(
+    feeds.map(async ({ url, source }) => {
+      const xml = await fetchText(url, timeoutMs);
+      if (!xml) return [] as NewsHeadline[];
+      return parseRssHeadlines(xml, source, maxPerFeed);
+    }),
+  );
+  const seen = new Set<string>();
+  const merged: NewsHeadline[] = [];
+  for (const h of results.flat()) {
+    const key = h.title.toLowerCase().slice(0, 80);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(h);
+  }
+  merged.sort((a, b) => headlineSortTime(b.published) - headlineSortTime(a.published));
+  return merged;
+}
+
+function headlineSortTime(raw?: string): number {
+  if (!raw) return 0;
+  const t = new Date(raw).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
 export async function fetchCoinGeckoGlobal(): Promise<GlobalCryptoContext | null> {
   const data = await fetchJson<{
     data?: {
@@ -240,28 +280,7 @@ export async function fetchBtcNetwork(): Promise<BtcNetworkContext | null> {
   };
 }
 
-function headlineSortTime(raw?: string): number {
-  if (!raw) return 0;
-  const t = new Date(raw).getTime();
-  return Number.isFinite(t) ? t : 0;
-}
-
 export async function fetchMarketHeadlines(maxPerFeed = 2): Promise<NewsHeadline[]> {
-  const results = await Promise.all(
-    RSS_FEEDS.map(async ({ url, source }) => {
-      const xml = await fetchText(url);
-      if (!xml) return [] as NewsHeadline[];
-      return parseRssHeadlines(xml, source, maxPerFeed);
-    }),
-  );
-  const seen = new Set<string>();
-  const merged: NewsHeadline[] = [];
-  for (const h of results.flat()) {
-    const key = h.title.toLowerCase().slice(0, 80);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    merged.push(h);
-  }
-  merged.sort((a, b) => headlineSortTime(b.published) - headlineSortTime(a.published));
+  const merged = await fetchHeadlinesFromFeeds(RSS_FEEDS, maxPerFeed);
   return merged.slice(0, 48);
 }

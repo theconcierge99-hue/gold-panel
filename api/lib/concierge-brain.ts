@@ -399,7 +399,8 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - Frame answer in regimes: growth/inflation quadrant, policy stance (hawkish/dovish), liquidity cycle.
 - Connect DXY, real yields, curve shape, and risk appetite to crypto/equities beta.
 - Use transmission channels: rates → USD → EM → duration assets → BTC/ETH correlation.
-- Cite typical elasticities as ranges, not fake precision. Flag if user needs live CPI/FOMC calendar.`,
+- Cite MACRO DESK block for Fed/ECB/BoE/BoJ wire, NFP/CPI/FOMC calendar, and Treasury yields when present.
+- Cite typical elasticities as ranges, not fake precision.`,
 
   micro: `MICROECONOMICS PLAYBOOK:
 - Clarify market structure: perfect competition vs oligopoly, marginal cost/revenue, consumer surplus.
@@ -835,7 +836,7 @@ LOUNGE MEMORY (when provided below):
 RULES:
 1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (infer user language; short replies follow the user's established language).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
-3. MULTI-SOURCE MARKET INTELLIGENCE + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Wikipedia, BBC, NPR, etc.); anchor trade levels to Binance mark ± structure.
+3. MULTI-SOURCE MARKET INTELLIGENCE + MACRO DESK + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Federal Reserve, ECB, Wikipedia, BBC, etc.); anchor trade levels to Binance mark ± structure. For NFP/CPI/FOMC and central-bank news, prioritize MACRO DESK and CENTRAL BANK WIRE sections.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
 5. Trading plans are illustrative frameworks, not personalized financial advice.
 6. Think step-by-step internally: parse question → language → direct answer → data → plan → risks.

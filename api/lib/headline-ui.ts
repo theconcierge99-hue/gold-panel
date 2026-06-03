@@ -9,7 +9,7 @@ export type UiHeadline = NewsHeadline & {
 
 const CATEGORY_RULES: { label: string; color: string; keywords: string[] }[] = [
   { label: "Crypto", color: "#22c87a", keywords: ["bitcoin", "btc", "ethereum", "eth", "crypto", "defi", "blockchain", "solana", "token", "nft", "stablecoin", "web3", "binance", "coinbase"] },
-  { label: "Macro · FX", color: "#c9a84c", keywords: ["fed", "federal reserve", "dollar", "dxy", "inflation", "gdp", "central bank", "treasury", "yield", "rates", "ecb", "boj", "fx", "currency"] },
+  { label: "Macro · FX", color: "#c9a84c", keywords: ["fed", "federal reserve", "dollar", "dxy", "inflation", "gdp", "central bank", "treasury", "yield", "rates", "ecb", "boj", "boe", "fx", "currency", "nfp", "nonfarm", "payroll", "cpi", "ppi", "pce", "fomc", "pmi", "ism"] },
   { label: "Equities", color: "#8899bb", keywords: ["stock", "equity", "s&p", "nasdaq", "earnings", "ipo", "shares", "wall street", "dow"] },
   { label: "Technology", color: "#3b7dd8", keywords: ["ai", "artificial intelligence", "tech", "chip", "semiconductor", "nvidia", "microsoft", "apple", "google", "openai"] },
   { label: "Energy", color: "#e85d4a", keywords: ["oil", "brent", "wti", "gas", "opec", "energy", "crude", "petroleum"] },
