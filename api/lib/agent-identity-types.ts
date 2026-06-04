@@ -43,11 +43,12 @@ export type AgentCardJson = {
 };
 
 export type LoungeAgentServiceCard = {
-  schema: "executive-lounge-agent-registry-v1";
+  schema: "concierge-agent-registry-v1";
   name: string;
   description: string;
   registerEndpoint: string;
   docsUrl: string;
   payment: string;
+  protocols: string[];
   networks: string[];
 };
