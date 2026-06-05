@@ -22,7 +22,7 @@ import {
 const FETCH_MS = 4_500;
 const CONCIERGE_FETCH_MS = 2_800;
 /** Tighter timeouts on the trading-plan fast path (fits Vercel 30s incl. x402). */
-const CONCIERGE_TRADING_FETCH_MS = 2_000;
+const CONCIERGE_TRADING_FETCH_MS = 3_500;
 
 export type ConciergeSnapshotMode = "standard" | "trading";
 

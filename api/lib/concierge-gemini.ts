@@ -2,9 +2,10 @@ import {
   buildConciergeSystemPrompt,
   buildImagePrompt,
   buildReplyLanguageBlock,
+  detectResponseMode,
   detectTopics,
   wantsImage,
-  wantsTradingPlan,
+  type ConciergeResponseMode,
   type MarketTick,
 } from "./concierge-brain";
 import {
@@ -107,8 +108,21 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   return { text: text.trim(), images };
 }
 
-const GEMINI_CALL_MS = 12_000;
-const GEMINI_TRADING_MS = 9_000;
+const GEMINI_CALL_MS = 24_000;
+const GEMINI_TRADING_MS = 22_000;
+
+const TRADING_PLAN_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
+
+function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
+  if (mode === "trading_plan") {
+    return { temperature: 0.55, maxOutputTokens: 8192 };
+  }
+  if (mode === "trade_ideas") {
+    return { temperature: 0.55, maxOutputTokens: 4096 };
+  }
+  return { temperature: 0.55, maxOutputTokens: 3072 };
+}
 
 async function geminiCall(
   apiKey: string,
@@ -132,11 +146,15 @@ async function geminiCall(
   }
 
   const data = (await res.json()) as {
-    candidates?: { content?: { parts?: GeminiPart[] } }[];
+    candidates?: { content?: { parts?: GeminiPart[] }; finishReason?: string }[];
   };
-  const parsed = parseParts(data.candidates?.[0]?.content?.parts);
+  const candidate = data.candidates?.[0];
+  const parsed = parseParts(candidate?.content?.parts);
   if (!parsed.text && parsed.images.length === 0) {
     throw new Error(`${model}: empty response`);
+  }
+  if (candidate?.finishReason === "MAX_TOKENS" && parsed.text) {
+    console.warn(`[concierge-gemini] ${model} hit MAX_TOKENS (${parsed.text.length} chars)`);
   }
   return parsed;
 }
@@ -193,7 +211,7 @@ async function resolveIntelligenceContext(
   market: MarketTick[],
   userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
-  tradingPlan = false,
+  responseMode: ConciergeResponseMode = "standard",
 ): Promise<{
   intelBlock: string;
   ticks: MarketTick[];
@@ -206,8 +224,9 @@ async function resolveIntelligenceContext(
     worldNews: [],
     sources: [] as string[],
   };
-  const marketTimeout = tradingPlan ? 5_000 : 7_000;
-  const generalTimeout = tradingPlan ? 2_500 : 4_000;
+  const tradingPlan = responseMode === "trading_plan";
+  const marketTimeout = tradingPlan ? 6_500 : 7_000;
+  const generalTimeout = tradingPlan ? 3_500 : 4_000;
 
   const queryMessage = normalizeConciergeDeFiMessage(userMessage);
   const topicsForIntel = detectTopics(queryMessage);
@@ -305,13 +324,13 @@ export async function runConciergeGemini(options: {
   const queryMessage = normalizeConciergeDeFiMessage(message);
   const topics = detectTopics(queryMessage);
   const deFiYieldQuestion = wantsDeFiYieldQuestion(queryMessage);
-  const requireTradingPlan =
-    !deFiYieldQuestion && wantsTradingPlan(queryMessage, topics);
+  const responseMode = detectResponseMode(queryMessage, topics, deFiYieldQuestion);
+  const requireTradingPlan = responseMode === "trading_plan";
   const { intelBlock, ticks, snapshot, loungeMemoryBlock } = await resolveIntelligenceContext(
     market,
     queryMessage,
     options.liveSnapshot,
-    requireTradingPlan,
+    responseMode,
   );
   const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
@@ -370,7 +389,7 @@ export async function runConciergeGemini(options: {
       liveMarketBlock: intelBlock,
       ...promptContext,
       imageMode: true,
-      requireTradingPlan,
+      responseMode,
       userMessage: message,
       recentUserMessages: recentUser,
     });
@@ -383,11 +402,8 @@ export async function runConciergeGemini(options: {
         })),
         message,
       ),
-      generationConfig: {
-        temperature: 0.55,
-        maxOutputTokens: requireTradingPlan ? 2048 : 1200,
-      },
-    });
+      generationConfig: generationConfigForMode(responseMode),
+    }, { models: STANDARD_MODELS });
 
     let images: string[] = [];
     try {
@@ -406,14 +422,13 @@ export async function runConciergeGemini(options: {
   }
 
   const recentUser = history.filter((h) => h.role === "user").map((h) => h.text);
-  const historyTurns = requireTradingPlan ? 4 : 8;
+  const historyTurns = responseMode === "trading_plan" ? 4 : 8;
   const systemPrompt = buildConciergeSystemPrompt({
     topics,
     market: ticks,
     liveMarketBlock: intelBlock,
     ...promptContext,
-    requireTradingPlan,
-    compactTradingPlan: requireTradingPlan,
+    responseMode,
     userMessage: message,
     recentUserMessages: recentUser,
   });
@@ -427,33 +442,26 @@ export async function runConciergeGemini(options: {
       message,
       historyTurns,
     ),
-    generationConfig: {
-      temperature: 0.55,
-      maxOutputTokens: requireTradingPlan ? 1400 : 1024,
-    },
+    generationConfig: generationConfigForMode(responseMode),
   };
   let reply = "";
-  if (requireTradingPlan) {
-    const errors: string[] = [];
-    for (const model of TEXT_MODELS.slice(0, 2)) {
-      try {
-        const { text } = await geminiCall(apiKey, model, geminiPayload, GEMINI_TRADING_MS);
-        if (text) {
-          reply = text;
-          break;
-        }
-        errors.push(`${model}: empty`);
-      } catch (e) {
-        errors.push(e instanceof Error ? e.message : String(e));
+  const chatModels = responseMode === "trading_plan" ? TRADING_PLAN_MODELS : STANDARD_MODELS;
+  const chatTimeout = responseMode === "trading_plan" ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
+  const errors: string[] = [];
+  for (const model of chatModels) {
+    try {
+      const { text } = await geminiCall(apiKey, model, geminiPayload, chatTimeout);
+      if (text) {
+        reply = text;
+        break;
       }
+      errors.push(`${model}: empty`);
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
     }
-    if (!reply) {
-      throw new Error(errors[0] || "Concierge timed out — try again in a moment");
-    }
-  } else {
-    reply = await geminiGenerateText(apiKey, geminiPayload, {
-      models: TEXT_MODELS.slice(0, 2),
-    });
+  }
+  if (!reply) {
+    throw new Error(errors[0] || "Concierge timed out — try again in a moment");
   }
 
   return { reply: wrapHtmlParagraphs(reply), topics, ...meta };

@@ -580,6 +580,24 @@ Users may ask about ANY category below. Detect intent, apply the matching playbo
 
 When the user names a category (e.g. "Energy insight", "question about Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
 
+const COMPLETION_RULES = `RESPONSE COMPLETENESS (mandatory):
+- Never stop mid-sentence or mid-section. Always finish the thought you started.
+- If you open a section or bullet list, complete it before ending the response.
+- Answer the user's exact question first — do not drift to unrelated assets or generic macro filler.
+- If space is tight, shorten later sections — never truncate the direct answer or leave "if" / "because" dangling.
+- Every response must end with a complete sentence (and a trading disclaimer when giving trade ideas or plans).`;
+
+const TRADE_IDEAS_FRAMEWORK = `TRADE IDEAS (when user asks for coin/token picks, "potential trade", or USDT pair suggestions — NOT the full 6-section institutional plan):
+
+Deliver in the user's language using 3–5 <p> blocks:
+1. <strong>Market read</strong> — regime from live data (Fear & Greed, BTC mark, funding, L/S, headlines) in 2–4 sentences tied to the question.
+2. <strong>Ideas (2–4 USDT pairs)</strong> — for each: ticker, bias (long/short/watch), thesis (why now), key level or trigger, invalidation — use live prices only.
+3. <strong>Derivatives overlay</strong> — crowded side, funding bias, approximate liq cluster zones as % bands from mark when relevant.
+4. <strong>Risks</strong> — 2–3 catalysts or failure modes for the next 24–48h.
+5. <em>Disclaimer: illustrative research, not personalized financial advice.</em>
+
+Rules: name specific tickers the user asked for. Do NOT use the 6-section trading plan template. Do NOT leave section headers empty. Complete every sentence.`;
+
 const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
 - **Concierge only:** infer which language the user is using and reply in that language (English, Indonesian, or other).
 - **Default English** when language is unknown (e.g. first message with no prior user turns). Otherwise mirror the user's language every turn.
@@ -665,10 +683,10 @@ const DEFI_INTEL_RESPONSE = `DEFI / YIELD / WHALE / VERDICT QUESTIONS (when DEFI
 - End yield-focused replies with: <code>Verdict|signal=[snipe|watch|follow|avoid|rebalance]|confidence=[low|medium|high]</code> (not A2A|asset=UNKNOWN).`;
 
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (standard market Q&A — no full trading plan):
-1. <p>Direct answer — addresses the user's exact question first (2–3 sentences).</p>
-2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, indices, headlines, DEFI DESK block if present).</p>
-3. <p>Implications — positioning and 24–72h regime.</p>
-4. <p>Optional mini setup — only if user implied levels; otherwise skip.</p>
+1. <p>Direct answer — addresses the user's exact question first (3–5 sentences). For liquidation cluster questions: state which side is crowded, where clusters likely sit (% bands from mark), and what trigger would activate them.</p>
+2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, L/S ratios, indices, headlines, DEFI DESK block if present).</p>
+3. <p>Implications — positioning and 24–72h regime; tie back to the original question.</p>
+4. <p>Optional mini setup — only if user implied levels or asked for trade context; otherwise skip.</p>
 5. <p>Optional: one clarifying question only if asset, timeframe, or intent was genuinely unclear.</p>`;
 
 function matchesCategoryPattern(text: string, pattern: string): boolean {
@@ -726,41 +744,52 @@ export function wantsImage(message: string): boolean {
   );
 }
 
-export function wantsTradingPlan(message: string, topics: ConciergeTopic[]): boolean {
+const TRADE_IDEAS_PATTERN =
+  /\b(potential trade|trade idea|trade from|which coin|which token|what coin|what token|any coin|any token|coin\/\s*token|should i (buy|sell|long|short)|rekomendasi (coin|token|saham)|pick (a|one) (coin|token|pair)|best (coin|alt|token) to|usdt pair|pair usdt|token with pair)\b/i;
+
+function isExplicitTradingPlanRequest(message: string): boolean {
+  const t = message.toLowerCase();
+  if (/\b(trading plan|trade plan|rencana trading|strategi trading|stock plan|analisa trading|analisis trading)\b/.test(t)) {
+    return true;
+  }
+  if (/\bfundamental \+ technical\b/i.test(message)) return true;
+  if (/\bgeopolitical context\b/i.test(message) && /\b(entry|stop|targets)\b/i.test(message)) return true;
+  if (
+    /\b(48h|48-hour|5d|swing)\b/i.test(message) &&
+    /\b(geopolitical|macro)\b/i.test(message) &&
+    /\b(entry|stop|targets|bias)\b/i.test(message)
+  ) {
+    return true;
+  }
+  if (/\boutlook\b/i.test(message) && /\b(entry|stop|targets|invalidation)\b/i.test(message)) return true;
+  return false;
+}
+
+export type ConciergeResponseMode = "standard" | "trade_ideas" | "trading_plan";
+
+export function wantsTradeIdeas(message: string): boolean {
+  if (isExplicitTradingPlanRequest(message)) return false;
+  return TRADE_IDEAS_PATTERN.test(message);
+}
+
+export function wantsTradingPlan(message: string, _topics?: ConciergeTopic[]): boolean {
   const t = message.toLowerCase();
   if (/\b(hot|hottest|best|top)\b/.test(t) && /\b(dlmm|dllm|meteora|yield|yields|apy|farm|pool)\b/.test(t)) {
     return false;
   }
-  if (
-    /\b(trading plan|trade plan|rencana trading|strategi trading|analisa trading|analisis trading|advice trading|saran trading|outlook|price target|target harga|entry|stop loss|take profit|tp\/sl|setup trade|buka posisi|invalidasi|fundamental anal|technical anal|analisa fundamental|analisa teknikal|teknikal analisis|rekomendasi saham|rekomendasi crypto|should i (buy|sell)|beli atau jual|long atau short)\b/.test(
-      t,
-    )
-  ) {
-    return true;
-  }
-  const planTopics: ConciergeTopic[] = [
-    "strategy",
-    "technical",
-    "crypto",
-    "liquidation",
-    "oil",
-    "precious_metals",
-    "stocks",
-    "energy",
-    "equities",
-    "macro",
-    "geopolitics",
-  ];
-  if (topics.some((x) => planTopics.includes(x)) && topics.length <= 3) {
-    if (
-      /\b(plan|setup|level|support|resistance|bias|trade|saham|stock|btc|eth|nvda|aapl|analisa|analysis|advice)\b/.test(
-        t,
-      )
-    ) {
-      return true;
-    }
-  }
-  return false;
+  if (wantsTradeIdeas(message)) return false;
+  return isExplicitTradingPlanRequest(message);
+}
+
+export function detectResponseMode(
+  message: string,
+  topics: ConciergeTopic[],
+  deFiYieldQuestion: boolean,
+): ConciergeResponseMode {
+  if (deFiYieldQuestion) return "standard";
+  if (wantsTradingPlan(message, topics)) return "trading_plan";
+  if (wantsTradeIdeas(message)) return "trade_ideas";
+  return "standard";
 }
 
 export function buildConciergeSystemPrompt(options: {
@@ -769,8 +798,7 @@ export function buildConciergeSystemPrompt(options: {
   liveMarketBlock?: string;
   loungeMemoryBlock?: string;
   imageMode?: boolean;
-  requireTradingPlan?: boolean;
-  compactTradingPlan?: boolean;
+  responseMode?: ConciergeResponseMode;
   userMessage?: string;
   recentUserMessages?: string[];
 }): string {
@@ -780,17 +808,16 @@ export function buildConciergeSystemPrompt(options: {
     liveMarketBlock = "",
     loungeMemoryBlock = "",
     imageMode,
-    requireTradingPlan,
-    compactTradingPlan,
+    responseMode = "standard",
     userMessage,
     recentUserMessages = [],
   } = options;
+  const requireTradingPlan = responseMode === "trading_plan";
+  const requireTradeIdeas = responseMode === "trade_ideas";
   const replyLangBlock = buildReplyLanguageBlock(userMessage, recentUserMessages);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
-  const planFramework =
-    compactTradingPlan && requireTradingPlan
-      ? TRADING_PLAN_FRAMEWORK_COMPACT
-      : TRADING_PLAN_FRAMEWORK;
+  const planFramework = requireTradingPlan ? TRADING_PLAN_FRAMEWORK : "";
+  const tradeIdeasBlock = requireTradeIdeas ? `\n${TRADE_IDEAS_FRAMEWORK}\n` : "";
   const tradingBlock = requireTradingPlan ? `\n${planFramework}\n` : "";
 
   const marketBlock = liveMarketBlock
@@ -811,6 +838,8 @@ ${EXECUTIVE_LOUNGE_CATEGORY_INTEL}
 
 ${LANGUAGE_AND_INTENT_RULES}
 
+${COMPLETION_RULES}
+
 ${replyLangBlock}
 
 CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
@@ -823,9 +852,10 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 - DeFi protocol economics when DeFi/onchain questions arise
 - **Agent-to-agent**: structured Agent handoff line on full trading plans
 
-${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : RESPONSE_STRUCTURE}
+${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : requireTradeIdeas ? "Follow TRADE IDEAS framework above — complete all blocks, name specific tickers." : RESPONSE_STRUCTURE}
 
 ${DEFI_INTEL_RESPONSE}
+${tradeIdeasBlock}
 
 LOUNGE MEMORY (when provided below):
 - Creator signals in LOUNGE MEMORY are **insider/tactical intelligence** from the Lounge desk — weigh alongside DEFI DESK INTELLIGENCE (TVL, yields, verdict) when both appear.
