@@ -39,6 +39,8 @@ export type AgentCardJson = {
     x402: string;
     openapi: string;
     docs: string;
+    paysh?: string;
+    payshGuide?: string;
   };
 };
 
