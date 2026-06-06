@@ -21,6 +21,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/openapi.json` | OpenAPI + x-payment-info (x402 + MPP discovery) |
 | `https://your-domain.com/docs/builders` | Builder integration guide — x402, OpenAPI, code examples |
 | `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, twelve-route structure |
+| `https://your-domain.com/docs/payment/paysh` | pay.sh CLI catalog — `pay curl`, Claude/Codex MCP, pay-skills listing |
 
 ## Core features
 

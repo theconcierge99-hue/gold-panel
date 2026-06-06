@@ -102,6 +102,10 @@
       "destination": "/docs-payment-mpp.html"
     },
     {
+      "source": "/docs/payment/paysh",
+      "destination": "/docs-payment-paysh.html"
+    },
+    {
       "source": "/docs/corbits",
       "destination": "/docs-corbits.html"
     },

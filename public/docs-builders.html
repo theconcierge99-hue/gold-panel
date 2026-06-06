@@ -34,6 +34,7 @@
         <a class="doc-card" href="/agent/playground"><h4>① Playground</h4><p>Try any route, see 402 challenge, copy JSON bodies — fastest way to learn.</p></a>
         <a class="doc-card" href="/openapi.json" target="_blank" rel="noopener"><h4>② OpenAPI</h4><p>Full schemas, x-payment-info, MPP protocols — build any HTTP client.</p></a>
         <a class="doc-card" href="/docs/payment/mpp"><h4>③ AgentCash</h4><p><code>npx agentcash add</code> — install all skills into MPP-compatible agents.</p></a>
+        <a class="doc-card" href="/docs/payment/paysh"><h4>④ pay.sh</h4><p><code>pay curl</code> — sandbox wallet, Claude/Codex MCP, no API keys.</p></a>
       </div>
 
       <h2 class="docs-h2">x402 flow (all paid routes)</h2>
@@ -125,7 +126,12 @@ r = httpx.post(f"{ORIGIN}/api/concierge-intel-airdrop", json=payload)
           </tbody>
         </table>
 <pre><code>npx agentcash add https://conc-exe.xyz
-npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></pre>
+npx -y @agentcash/discovery@latest discover https://conc-exe.xyz
+
+# pay.sh — CLI handles 402 automatically
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-verdict \
+  -d '{"message":"Solana DeFi outlook","includeInsider":true}'</code></pre>
+        <p>See <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> · <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
       </div>
 
       <h2 class="docs-h2">CORS &amp; production tips</h2>
@@ -134,7 +140,7 @@ npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></pre>
           <li><strong>Server-side proxy</strong> — Browsers on foreign origins may hit CORS; agents should call Concierge from a backend.</li>
           <li><strong>Idempotency</strong> — Each paid call is independent; cache Intel JSON by <code>dataAsOf</code> if you poll.</li>
           <li><strong>Insider layer</strong> — Alpha + verdict routes weight Lounge creator signals; publish signals to improve alpha quality.</li>
-          <li><strong>Distribution</strong> — Optional proxy via <a href="/docs/corbits" class="gold-link">Corbits Marketplace</a> or list on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>.</li>
+          <li><strong>Distribution</strong> — Optional proxy via <a href="/docs/corbits" class="gold-link">Corbits Marketplace</a>, list on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>, or <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> pay-skills catalog.</li>
         </ul>
       </div>
 

@@ -31,6 +31,7 @@ import {
 
 export { buildBazaarExtension };
 import { corbitsDiscoveryLinks } from "./corbits-links";
+import { payshDiscoveryLinks } from "./paysh-links";
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -209,13 +210,14 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — nine pay-per-call routes (Concierge AI, DeFi intel, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Register on mppscan.com and x402scan.com after OpenAPI validates.",
+      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Listed on MPPscan; submit to pay.sh pay-skills for agent CLI discovery.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
       x402scan: X402SCAN_EXPLORE_URL,
       mppscanRegister: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(origin),
+      ...payshDiscoveryLinks(origin),
       corbits: corbitsDiscoveryLinks(),
       zauth: zauthMetaLinks(origin),
     },
@@ -319,7 +321,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.0.0",
       description:
-        "Market intelligence as a service — nine pay-per-call endpoints. Concierge AI, DeFi intel (TVL, yields, whales, wallet, verdict), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
+        "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {
@@ -336,6 +338,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       x402scan: X402SCAN_REGISTER_URL,
       mppscan: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(base),
+      ...payshDiscoveryLinks(base),
       serviceName: listing.serviceName,
       description: listing.description,
       tags: listing.tags,
@@ -380,6 +383,7 @@ export function discoveryMetaForConfig(origin: string) {
       priceUsdc: priceUsdcForResource(r.kind),
     })),
     ...mppDiscoveryLinks(base),
+    ...payshDiscoveryLinks(base),
     corbits: corbitsDiscoveryLinks(),
   };
 }

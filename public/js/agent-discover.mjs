@@ -101,6 +101,16 @@ async function load() {
 
     cards.push(
       discCard(
+        "pay.sh",
+        `<p>Agent CLI catalog — <code>pay curl</code> handles 402 for Claude, Codex, and shell workflows. Validated: <code>pay catalog check</code> · 20/20 Solana-compatible endpoints.</p>
+        ${discLink("https://pay.sh/", "pay.sh")}
+        <p class="res-disc-hint"><code>pay --sandbox curl ${origin}/api/concierge-intel-tvl -d '{}'</code></p>
+        <p class="res-disc-hint"><a href="/docs/payment/paysh">pay.sh integration guide →</a> · FQN <code>conc-exe/concierge-agent</code></p>`,
+      ),
+    );
+
+    cards.push(
+      discCard(
         "MPP listing",
         `<p>Machine Payments Protocol explorer — same OpenAPI as AgentCash. List <code>${origin}</code> after deploy.</p>
         ${discLink("https://www.mppscan.com/register", "mppscan.com/register")}

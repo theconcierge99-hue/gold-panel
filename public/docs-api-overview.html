@@ -35,9 +35,13 @@
         <a class="doc-card" href="/docs/api/lounge"><h4>Lounge</h4><p>Market feed, signals, RWA, news unlock</p></a>
       </div>
 
-      <h2 class="docs-h2">Discovery (x402 + MPP)</h2>
+      <h2 class="docs-h2">Discovery (x402 + MPP + pay.sh)</h2>
       <div class="card">
-        <p>Concierge Agent is listed on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>. Install: <code>npx agentcash add https://conc-exe.xyz</code></p>
+        <p>Install via AgentCash or pay.sh — same twelve routes, same x402 settlement:</p>
+<pre><code>npx agentcash add https://conc-exe.xyz
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></pre>
+        <p>Listed on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> · pay.sh catalog PR: <code>conc-exe/concierge-agent</code></p>
         <table>
           <thead><tr><th>Resource</th><th>Description</th></tr></thead>
           <tbody>
@@ -48,7 +52,7 @@
             <tr><td><code>402</code> + Bazaar</td><td>Runtime input/output schemas for AgentCash probes</td></tr>
           </tbody>
         </table>
-        <p class="note">Full MPP route table: <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
+        <p class="note">Guides: <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> · <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
       </div>
 
       <h2 class="docs-h2">Verdict signals (Intel)</h2>

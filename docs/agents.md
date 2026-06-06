@@ -73,6 +73,7 @@ Server-side agents: no CORS. Browser apps on other domains: host must list origi
 
 ## Trust
 
+- [pay.sh](https://pay.sh/) — agent CLI catalog (`pay curl`, Claude/Codex MCP) · [paysh.md](paysh.md)  
 - [x402scan](https://www.x402scan.com/) — marketplace listing  
 - `GET /api/zauth-directory` — verified endpoints  
 - [zauth.md](zauth.md) — Provider Hub telemetry  

@@ -12,7 +12,10 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "discovery:validate": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz"
+    "discovery:validate": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz",
+    "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
+    "paysh:validate": "npx -y @solana/pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md",
+    "paysh:prepare-pr": "node scripts/prepare-paysh-pr.mjs"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

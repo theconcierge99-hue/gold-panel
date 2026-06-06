@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Integrations — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, MPPscan, Corbits, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
+<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, pay.sh, MPPscan, Corbits, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/integrations" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -89,7 +89,7 @@
       <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
     </header>
     <p class="int-lead" style="margin-bottom:24px">
-      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash) and <strong>Corbits Marketplace</strong> (x402 proxy + provider dashboard). Optional zauth telemetry reports settlements for trust scoring.
+      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash), <strong>Corbits Marketplace</strong> (x402 proxy), and compatible with <strong>pay.sh</strong> (agent CLI catalog). Optional zauth telemetry reports settlements for trust scoring.
     </p>
     <div class="int-grid">
       <a class="int-card" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">
@@ -103,6 +103,18 @@
         <p class="int-card-sub">Agent marketplace</p>
         <p>Concierge Agent API — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). Listed on the MPP explorer with x402 + MPP discovery.</p>
         <span class="int-card-link">View server ↗</span>
+      </a>
+      <a class="int-card" href="https://pay.sh/" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <div class="int-card-brand">
+            <img class="int-partner-logo int-partner-logo--card" src="/images/integrations/paysh.svg" alt="" width="28" height="28" />
+            <h3>pay.sh</h3>
+          </div>
+          <span class="int-tag">Agents</span>
+        </div>
+        <p class="int-card-sub">CLI catalog</p>
+        <p>Pay-as-you-go API directory for Claude, Codex, and <code>pay curl</code>. Twelve Concierge routes — x402 USDC, no API keys. List via pay-skills PR.</p>
+        <span class="int-card-link">pay.sh ↗</span>
       </a>
       <a class="int-card" href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">
         <div class="int-card-top">
@@ -216,12 +228,20 @@
 
     <aside class="int-install" aria-labelledby="int-install-h">
       <p class="int-install-eyebrow" id="int-install-h">Install on your agent</p>
-      <p class="int-install-lead">Add Concierge Agent API skills to any AgentCash-compatible client (same flow as MPPscan server page).</p>
+      <p class="int-install-lead">Add Concierge to AgentCash, pay.sh, or any x402 client — same twelve routes, same USDC settlement.</p>
       <div class="int-install-cmd">
         <code>npx agentcash add https://conc-exe.xyz</code>
-        <button type="button" class="int-install-copy" data-copy="npx agentcash add https://conc-exe.xyz" aria-label="Copy install command">Copy</button>
+        <button type="button" class="int-install-copy" data-copy="npx agentcash add https://conc-exe.xyz" aria-label="Copy AgentCash install command">Copy</button>
+      </div>
+      <div class="int-install-cmd" style="margin-top:10px">
+        <code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code>
+        <button type="button" class="int-install-copy" data-copy="pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'" aria-label="Copy pay.sh curl command">Copy</button>
       </div>
       <p class="int-install-meta">
+        <a href="https://pay.sh/" target="_blank" rel="noopener noreferrer">pay.sh ↗</a>
+        ·
+        <a href="/docs/payment/paysh">pay.sh guide</a>
+        ·
         <a href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">MPPscan server profile ↗</a>
         ·
         <a href="https://the-concierge.theconcierge99.api.corbits.dev" target="_blank" rel="noopener noreferrer">Corbits proxy ↗</a>
@@ -242,9 +262,10 @@
       <span class="int-pill">USDC · Base</span>
       <span class="int-pill">USDC · Solana</span>
       <span class="int-pill">MPP · AgentCash</span>
+      <span class="int-pill">pay.sh</span>
       <span class="int-pill">Corbits Marketplace</span>
       <span class="int-pill">$0.10 / call</span>
-      <span class="int-pill">9 live endpoints</span>
+      <span class="int-pill">12 live endpoints</span>
       <span class="int-pill">Free wire browse</span>
     </div>
   </section>

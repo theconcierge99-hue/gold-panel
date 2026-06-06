@@ -21,7 +21,8 @@ Executive Lounge combines a live market wire, **RWA intelligence certificates** 
 | [docs/configuration.md](docs/configuration.md) | Environment variables |
 | [docs/api-reference.md](docs/api-reference.md) | HTTP API endpoints |
 | [docs/x402-payments.md](docs/x402-payments.md) | x402 / PayAI payment integration |
-| [docs/x402scan.md](docs/x402scan.md) | Public discovery and marketplace listing |
+| [docs/mppscan.md](docs/mppscan.md) | MPPscan + AgentCash discovery |
+| [docs/paysh.md](docs/paysh.md) | pay.sh agent CLI catalog + pay-skills listing |
 | [docs/concierge-ai.md](docs/concierge-ai.md) | Concierge AI behavior and language rules |
 | [docs/creator-signals.md](docs/creator-signals.md) | Publish / unlock signals and revenue split |
 | [docs/deployment.md](docs/deployment.md) | Vercel production deployment |

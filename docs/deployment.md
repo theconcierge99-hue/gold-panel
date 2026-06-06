@@ -75,6 +75,24 @@ Expected: `enabled: true`, four resources in discovery, Concierge returns `402`.
 
 After deploy, register on [x402scan](x402scan.md). If batch registration fails for 3/4 endpoints, register each API URL individually.
 
+## pay.sh (agent CLI catalog)
+
+Concierge is compatible with [pay.sh](https://pay.sh/) — no backend changes required.
+
+```bash
+npm run paysh:sync-openapi   # refresh OpenAPI snapshot from local discovery code
+npm run paysh:validate       # 20/20 Solana 402 probe (requires network)
+npm run paysh:prepare-pr     # copy bundle into ../pay-skills clone for PR
+```
+
+Open PR to [solana-foundation/pay-skills](https://github.com/solana-foundation/pay-skills) with `providers/conc-exe/concierge-agent/`. See [paysh.md](paysh.md).
+
+After deploy, agents can call immediately (even before catalog merge):
+
+```bash
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
+```
+
 ## Repo hygiene
 
 - `.vercel/` is gitignored — never commit.

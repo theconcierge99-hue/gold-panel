@@ -86,6 +86,8 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
       x402: `${base}/.well-known/x402`,
       openapi: `${base}/openapi.json`,
       docs: `${base}/docs/agents`,
+      paysh: "https://pay.sh/",
+      payshGuide: `${base}/docs/payment/paysh`,
     },
   };
 }

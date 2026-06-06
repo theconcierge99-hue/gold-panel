@@ -19,7 +19,8 @@ Integrate **Concierge Agent** into apps, agents, trading bots, or backends.
 1. **Playground** — `/agent/playground` — try routes, see 402, copy bodies  
 2. **OpenAPI** — `GET /openapi.json` — schemas + x402/MPP metadata  
 3. **AgentCash** — `npx agentcash add https://conc-exe.xyz`  
-4. **x402 client** — PayAI / ecosystem SDK handles 402 → pay → retry  
+4. **pay.sh** — `pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'` — CLI handles 402 for Claude/Codex agents  
+5. **x402 client** — PayAI / ecosystem SDK handles 402 → pay → retry  
 
 ## x402 flow
 
@@ -69,6 +70,7 @@ Call from **server-side** or your agent runtime — browser CORS is limited to L
 
 ## Optional distribution
 
+- [pay.sh](paysh.md) — agent CLI catalog (`pay curl`, Claude/Codex MCP)  
 - [MPPscan / AgentCash](mppscan.md)  
 - [Corbits Marketplace](corbits.md) proxy  
 

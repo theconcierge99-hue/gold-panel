@@ -99,7 +99,7 @@ const agent = await Interchange.register({
 
 ## Recommended rollout order
 
-1. **Keep** direct origin `https://conc-exe.xyz` (MPPscan, AgentCash, browsers).
+1. **Keep** direct origin `https://conc-exe.xyz` (MPPscan, AgentCash, pay.sh, browsers).
 2. **Register** [Marketplace](https://www.corbits.dev/marketplace) proxy → backend conc-exe.xyz.
 3. **List** proxy on [Discovery](https://docs.corbits.dev/discovery/overview).
 4. **Document** Interchange for teams that need spend caps + audit on agents calling you.
@@ -111,7 +111,7 @@ const agent = await Interchange.register({
 |---------|------------------------|
 | Marketplace proxy URL | Direct x402 on origin (simpler for integrators) |
 | Interchange policies | `agt_` + optional `X-Agent-Id` |
-| Discovery index | MPPscan + x402scan + `/openapi.json` |
+| Discovery index | MPPscan + x402scan + pay.sh + `/openapi.json` |
 
 Running **both** direct origin and Corbits proxy is valid: direct for open agents, Corbits proxy for enterprise discovery and dashboard analytics.
 

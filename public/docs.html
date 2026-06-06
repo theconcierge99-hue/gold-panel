@@ -106,20 +106,27 @@
           <h4>MPP &amp; AgentCash</h4>
           <p>MPPscan listing, twelve routes, <code>agentcash add</code> install.</p>
         </a>
+        <a class="doc-card" href="/docs/payment/paysh">
+          <div class="card-icon">⌘</div>
+          <h4>pay.sh</h4>
+          <p>Agent CLI catalog — <code>pay curl</code>, Claude/Codex MCP, sandbox wallet.</p>
+        </a>
       </div>
 
-      <h2 class="docs-h2">MPP &amp; agent install</h2>
+      <h2 class="docs-h2">Agent install</h2>
       <div class="card">
-        <p>Concierge Agent is listed on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>. Install all twelve paid skills:</p>
-<pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
-        <p>See <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> for route table, OpenAPI discovery, and registry links.</p>
+        <p>Concierge Agent is listed on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>. Install via AgentCash or pay.sh:</p>
+<pre><code>npx agentcash add https://conc-exe.xyz
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></pre>
+        <p>See <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> · <a href="/docs/payment/paysh" class="gold-link">pay.sh</a></p>
       </div>
 
       <h2 class="docs-h2">How it works</h2>
       <div class="steps">
         <div class="step">
-          <h4>Discover (MPP / OpenAPI)</h4>
-          <p>Read <code>/openapi.json</code> or use AgentCash — prices and JSON schemas for all twelve routes before you pay.</p>
+          <h4>Discover (OpenAPI / MPP / pay.sh)</h4>
+          <p>Read <code>/openapi.json</code>, use AgentCash, or <code>pay skills search</code> — prices and JSON schemas for all twelve routes before you pay.</p>
         </div>
         <div class="step">
           <h4>Send a request</h4>

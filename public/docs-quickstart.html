@@ -60,6 +60,16 @@
         <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> · full builder guide: <a href="/docs/builders" class="gold-link">For Builders</a>.</p>
       </div>
 
+      <h2 class="docs-h2">pay.sh (fastest for agents)</h2>
+      <div class="card">
+        <p>The <a class="ext" href="https://pay.sh/" target="_blank" rel="noopener">pay.sh</a> CLI handles 402 automatically — no manual PAYMENT-SIGNATURE wiring:</p>
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge \
+  -d '{"mode":"chat","message":"BTC outlook 24h"}'</code></pre>
+        <p>Works with Claude Code and Codex via <code>pay --sandbox claude</code>. Full guide: <a href="/docs/payment/paysh" class="gold-link">pay.sh</a></p>
+      </div>
+
       <h2 class="docs-h2">MPP / AgentCash (optional)</h2>
       <div class="card">
         <p>Install all Concierge skills from the <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> listing:</p>

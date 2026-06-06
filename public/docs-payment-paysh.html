@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>pay.sh — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Call Concierge Agent from pay.sh — pay CLI, Claude, Codex. Twelve x402 routes, sandbox wallet, no API keys." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/payment/paysh" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="payment-paysh">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Payment</div>
+      <h1 class="docs-title">pay.sh</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://pay.sh/" target="_blank" rel="noopener">pay.sh</a> lets agents call paid APIs with <strong>no sign-up, no API keys</strong>. The <code>pay</code> CLI wraps <code>curl</code>, Claude, and Codex — it handles HTTP <strong>402</strong> (x402 / MPP) automatically. Concierge Agent is compatible today; listing is a PR to the open <a class="ext" href="https://github.com/solana-foundation/pay-skills" target="_blank" rel="noopener">pay-skills</a> registry.
+      </p>
+
+      <div class="card">
+        <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Service:</strong> Concierge Agent API · twelve pay-per-call routes</p>
+        <p><strong>Settlement:</strong> x402 USDC via PayAI (Solana mainnet; Base also supported)</p>
+        <p><strong>Expected catalog FQN:</strong> <code>conc-exe/concierge-agent</code></p>
+        <p><strong>Catalog:</strong> <a class="ext" href="https://pay.sh/api/catalog" target="_blank" rel="noopener">pay.sh/api/catalog ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Install pay CLI</h2>
+      <div class="card">
+<pre><code># Homebrew (macOS / Linux)
+brew install pay
+
+# npm
+npm install -g @solana/pay
+
+# One-shot (no global install)
+npx @solana/pay --version</code></pre>
+        <p>Docs: <a class="ext" href="https://pay.sh/" target="_blank" rel="noopener">pay.sh</a> · <a class="ext" href="https://github.com/solana-foundation/pay" target="_blank" rel="noopener">pay CLI repo ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Call Concierge (sandbox)</h2>
+      <div class="card">
+        <p><code>--sandbox</code> creates an ephemeral funded wallet — good for tests and agent demos.</p>
+<pre><code># DeFi TVL snapshot ($0.10)
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
+
+# Yields — Meteora on Solana
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-yields \
+  -d '{"chain":"solana","project":"meteora"}'
+
+# Alpha momentum scan
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-momentum \
+  -d '{"message":"BTC altcoin volatility","limit":5,"includeInsider":true}'
+
+# Concierge AI chat
+pay --sandbox curl https://conc-exe.xyz/api/concierge \
+  -d '{"mode":"chat","message":"Solana DeFi outlook"}'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Mainnet wallet</h2>
+      <div class="card">
+<pre><code>pay setup    # OS keychain wallet + MCP config
+pay topup    # fund via PayPal / Venmo / Apple Pay / Solana wallet
+
+pay curl https://conc-exe.xyz/api/concierge-intel-verdict \
+  -d '{"message":"ETH outlook","includeInsider":true}'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Agents (Claude / Codex)</h2>
+      <div class="card">
+<pre><code>pay --sandbox claude   # Claude Code + Pay MCP tools
+pay codex              # OpenAI Codex + same tools
+
+pay skills update
+pay skills search "market intelligence"
+pay skills search "defi"</code></pre>
+        <p>After listing, agents discover Concierge via <code>pay skills search</code> instead of hardcoding URLs.</p>
+      </div>
+
+      <h2 class="docs-h2">Twelve routes</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>Price</th><th>Segment</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge</code></td><td>$0.10</td><td>Concierge AI</td></tr>
+            <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-yields</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-whales</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-listing</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
+            <tr><td><code>POST /api/news-open</code></td><td>$0.10</td><td>Lounge</td></tr>
+            <tr><td><code>POST /api/lounge-signal-open</code></td><td>$0.10</td><td>Lounge</td></tr>
+            <tr><td><code>POST /api/lounge-signal-publish</code></td><td>$1.00</td><td>Lounge</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Full catalog: <a href="/agent/endpoints" class="gold-link">Endpoint catalog</a> · <a href="/openapi.json" class="gold-link" target="_blank" rel="noopener">openapi.json</a></p>
+      </div>
+
+      <h2 class="docs-h2">List on pay.sh (operators)</h2>
+      <div class="card">
+        <p><strong>Validation:</strong> <code>npm run paysh:validate</code> → 20/20 Solana-compatible (local bundle)</p>
+        <p>Submission bundle in this repo: <code>pay-skills/conc-exe/concierge-agent/</code></p>
+        <ol style="margin:12px 0 0 18px;font-size:14px;color:var(--text-secondary);line-height:1.6">
+          <li>Refresh OpenAPI snapshot: <code>npm run paysh:sync-openapi</code></li>
+          <li>Validate: <code>pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md</code></li>
+          <li>Open PR to <a class="ext" href="https://github.com/solana-foundation/pay-skills" target="_blank" rel="noopener">solana-foundation/pay-skills</a> — copy into <code>providers/conc-exe/concierge-agent/</code></li>
+          <li>CI probes live 402 + Solana USDC — ensure <code>X402_SOL_PAY_TO</code> is set in production</li>
+        </ol>
+        <p class="note">See repository <code>docs/paysh.md</code> for the full checklist.</p>
+      </div>
+
+      <h2 class="docs-h2">Related registries</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> — <code>npx agentcash add https://conc-exe.xyz</code></li>
+          <li><a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan</a> — x402 ecosystem registry</li>
+          <li><a href="/docs/corbits" class="gold-link">Corbits Marketplace</a> — hosted proxy for enterprise buyers</li>
+          <li><a href="/integrations" class="gold-link">Integrations</a> — full partner stack</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://pay.sh/" target="_blank" rel="noopener">pay.sh ↗</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+        <a class="btn" href="/docs/builders">For Builders</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · pay.sh discovery · x402 settlement · <a href="https://pay.sh/" class="ext" target="_blank" rel="noopener">pay.sh</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

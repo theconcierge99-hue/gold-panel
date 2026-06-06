@@ -25,7 +25,20 @@ Fix OpenAPI until the CLI reports no errors, then:
 2. Copy the server profile URL from the browser → set **`MPPSCAN_SERVER_URL`** in Vercel (site links use `https://conc-exe.xyz/go/mppscan`)
 2. [x402scan — Register](https://www.x402scan.com/resources/register) — same origin (optional second listing)
 
-## Agent integration (no Hyre branding)
+## Agent integration
+
+### pay.sh (CLI — recommended for Claude/Codex)
+
+```bash
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-verdict \
+  -d '{"message":"Solana DeFi outlook","includeInsider":true}'
+pay skills search "market intelligence"
+```
+
+See [paysh.md](paysh.md) · web [/docs/payment/paysh](https://conc-exe.xyz/docs/payment/paysh).
+
+### AgentCash / MPPscan
 
 ```bash
 npx agentcash discover https://conc-exe.xyz
@@ -40,4 +53,4 @@ Paid calls: `POST` + JSON body → `402` → pay USDC → retry with `PAYMENT-SI
 - `X402_SITE_ORIGIN` — production origin for discovery URLs
 - Optional `PAYAI_API_KEY_ID` / `PAYAI_API_KEY_SECRET` for facilitator auth
 
-See also [x402scan.md](./x402scan.md), web docs [/docs/payment/mpp](https://conc-exe.xyz/docs/payment/mpp), and [docs/payment/x402](/docs/payment/x402).
+See also [paysh.md](./paysh.md), [x402scan.md](./x402scan.md), web docs [/docs/payment/mpp](https://conc-exe.xyz/docs/payment/mpp), [/docs/payment/paysh](https://conc-exe.xyz/docs/payment/paysh), and [docs/payment/x402](/docs/payment/x402).
