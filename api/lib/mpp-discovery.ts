@@ -32,6 +32,7 @@ const PAYAI_FACILITATOR = "https://facilitator.payai.network";
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
 export const MPP_PAYMENT_PROTOCOLS: Record<string, unknown>[] = [
   { x402: { network: "solana", facilitator: PAYAI_FACILITATOR } },
+  { x402: { network: "base", facilitator: PAYAI_FACILITATOR } },
   { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
 ];
 
@@ -133,14 +134,18 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     [],
   ),
-  "intel-wallet": jsonSchemaBody(
-    {
-      solAddress: { type: "string" },
-      evmAddress: { type: "string" },
-      message: { type: "string" },
+  "intel-wallet": {
+    type: "object",
+    additionalProperties: false,
+    minProperties: 1,
+    description: "At least one of solAddress, evmAddress, or message (with address) is required.",
+    properties: {
+      solAddress: { type: "string", description: "Solana wallet address" },
+      evmAddress: { type: "string", description: "EVM wallet address (0x…)" },
+      message: { type: "string", description: "Optional context; may include an address" },
     },
-    [],
-  ),
+    required: [],
+  },
   "intel-verdict": jsonSchemaBody(
     {
       message: { type: "string", description: "Question or theme for verdict" },
@@ -329,7 +334,17 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     {
       ok: { type: "boolean" },
       summary: { type: "string" },
-      candidates: { type: "array", items: { type: "object" } },
+      candidates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            asset: { type: "string" },
+            thesis: { type: "string" },
+            conviction: { type: "string" },
+          },
+        },
+      },
     },
     ["ok", "candidates"],
   ),
@@ -345,6 +360,7 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
             asset: { type: "string" },
             direction: { type: "string", enum: ["up", "down", "neutral", "watch"] },
             thesis: { type: "string" },
+            conviction: { type: "string" },
           },
         },
       },
