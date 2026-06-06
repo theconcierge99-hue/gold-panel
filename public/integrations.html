@@ -301,6 +301,7 @@
     var img = brand && brand.querySelector("img");
     var name = brand && brand.querySelector("h3");
     var tag = card.querySelector(".int-tag");
+    var sub = card.querySelector(".int-card-sub");
     var chip = document.createElement("a");
     chip.className = "int-marquee-chip";
     chip.href = card.getAttribute("href") || "#";
@@ -310,15 +311,24 @@
     }
     if (img) {
       var logo = img.cloneNode(true);
-      logo.className = "int-partner-logo int-marquee-logo";
-      logo.width = 22;
-      logo.height = 22;
+      logo.className = "int-partner-logo int-partner-logo--card int-marquee-logo";
+      logo.removeAttribute("width");
+      logo.removeAttribute("height");
       chip.appendChild(logo);
     }
+    var body = document.createElement("div");
+    body.className = "int-marquee-body";
     var label = document.createElement("span");
     label.className = "int-marquee-name";
     label.textContent = name ? name.textContent : "Partner";
-    chip.appendChild(label);
+    body.appendChild(label);
+    if (sub) {
+      var subEl = document.createElement("span");
+      subEl.className = "int-marquee-sub";
+      subEl.textContent = sub.textContent;
+      body.appendChild(subEl);
+    }
+    chip.appendChild(body);
     if (tag) {
       var pill = document.createElement("span");
       pill.className = "int-marquee-tag";
