@@ -4,6 +4,7 @@ import {
   buildReplyLanguageBlock,
   detectResponseMode,
   detectTopics,
+  prefixUserMessageForLanguage,
   wantsImage,
   type ConciergeResponseMode,
   type MarketTick,
@@ -72,12 +73,20 @@ export function normalizeGeminiApiKey(raw: string | undefined): string {
   return key;
 }
 
-function buildContents(history: ChatTurn[], message: string, maxTurns = 10): GeminiContent[] {
+function buildContents(
+  history: ChatTurn[],
+  message: string,
+  maxTurns = 10,
+  recentUserMessages: string[] = [],
+): GeminiContent[] {
   const contents: GeminiContent[] = history.slice(-maxTurns).map((t) => ({
     role: t.role === "user" ? "user" : "model",
     parts: [{ text: t.text }],
   }));
-  contents.push({ role: "user", parts: [{ text: message }] });
+  contents.push({
+    role: "user",
+    parts: [{ text: prefixUserMessageForLanguage(message, recentUserMessages) }],
+  });
   return contents;
 }
 
@@ -401,6 +410,8 @@ export async function runConciergeGemini(options: {
           text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
         })),
         message,
+        10,
+        recentUser,
       ),
       generationConfig: generationConfigForMode(responseMode),
     }, { models: STANDARD_MODELS });
@@ -441,6 +452,7 @@ export async function runConciergeGemini(options: {
       })),
       message,
       historyTurns,
+      recentUser,
     ),
     generationConfig: generationConfigForMode(responseMode),
   };

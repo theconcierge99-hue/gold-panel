@@ -608,9 +608,10 @@ Deliver in the user's language using 3–5 <p> blocks:
 Rules: name specific tickers the user asked for. Do NOT use the 6-section trading plan template. Do NOT leave section headers empty. Complete every sentence.`;
 
 const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
+- **Latest user message wins:** reply in the language of the user's **current** message — not the language of your prior replies or older turns.
 - **Concierge only:** infer which language the user is using and reply in that language (English, Indonesian, or other).
 - **Default English** when language is unknown (e.g. first message with no prior user turns). Otherwise mirror the user's language every turn.
-- **Short or ambiguous lines** (e.g. "ok", "ya", "thanks"): use the language established from the user's recent messages in this thread — do not switch language based on Concierge's prior replies.
+- **Short or ambiguous lines** (e.g. "ok", "ya", "thanks"): use the language of the most recent **non-ambiguous** user message — do not switch language based on Concierge's prior replies.
 - Answer exactly what was asked — do not change the topic, asset, or timeframe unless the user was ambiguous (then ask one short clarifying question at the end only).
 - Lead with a direct answer to the specific question in the first paragraph; then analysis, data, and trading plan if relevant.
 - Match depth to the question: brief question → tighter answer; deep or multi-part question → fuller structured answer covering each part explicitly.
@@ -619,7 +620,14 @@ const LANGUAGE_AND_INTENT_RULES = `LANGUAGE & QUESTION FIDELITY (mandatory):
 export type ReplyLanguage = "en" | "id" | "other";
 
 const ID_REPLY_MARKERS =
-  /\b(yang|dan|di|ke|dari|untuk|pada|dengan|ini|itu|apa|bagaimana|kenapa|mengapa|kapan|dimana|saya|kamu|anda|tidak|bisa|akan|adalah|juga|atau|sudah|belum|harus|tolong|mohon|jelaskan|berita|saham|harga|kena|berapa|gimana|dong|nih|aja|sih|banget|kayak|gak|nggak)\b/i;
+  /\b(yang|dan|di|ke|dari|untuk|pada|dengan|ini|itu|apa|apakah|bagaimana|kenapa|mengapa|kapan|dimana|saya|kamu|anda|tidak|bisa|akan|adalah|juga|atau|sudah|belum|harus|tolong|mohon|jelaskan|berita|saham|harga|kena|berapa|gimana|dong|nih|aja|sih|banget|kayak|gak|nggak|rencana|masih|posisi|pasar|analisis|insight|desk|jelaskan|mohon|tolong)\b/gi;
+const EN_REPLY_MARKERS =
+  /\b(the|is|are|was|were|be|been|being|have|has|had|do|does|did|will|would|could|should|can|may|might|must|your|my|our|their|this|that|these|those|what|when|where|why|how|which|who|still|valid|right|now|there|here|plan|trading|stock|market|price|about|with|from|for|not|please|thanks|thank|hello|hey|tell|explain|give|show|currently|today|valid|still)\b/gi;
+
+function countLanguageMarkers(text: string, re: RegExp): number {
+  const m = text.match(re);
+  return m ? m.length : 0;
+}
 
 /** Too short to reliably detect language from the line alone — use recent user turns. */
 function isAmbiguousShortMessage(text: string): boolean {
@@ -634,9 +642,15 @@ function isAmbiguousShortMessage(text: string): boolean {
 function detectLanguageFromText(text: string): ReplyLanguage {
   const t = text.trim();
   if (!t) return "en";
-  if (ID_REPLY_MARKERS.test(t)) return "id";
   if (/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff]/.test(t)) return "other";
   if (/[àáâãäåæçèéêëìíîïñòóôõöùúûüýÿÀ-ÿ]/.test(t)) return "other";
+
+  const idScore = countLanguageMarkers(t, ID_REPLY_MARKERS);
+  const enScore = countLanguageMarkers(t, EN_REPLY_MARKERS);
+  if (idScore > enScore && idScore >= 1) return "id";
+  if (enScore > idScore && enScore >= 1) return "en";
+  if (idScore >= 2) return "id";
+  if (enScore >= 1) return "en";
   return "en";
 }
 
@@ -649,21 +663,21 @@ export function detectReplyLanguage(
   recentUserMessages: string[] = [],
 ): ReplyLanguage {
   const latest = (message ?? "").trim();
-  const fromCurrent = detectLanguageFromText(latest);
 
   if (!isAmbiguousShortMessage(latest)) {
-    return fromCurrent;
+    return detectLanguageFromText(latest);
   }
 
   const prior = recentUserMessages
     .map((m) => m.trim())
-    .filter((m) => m && m !== latest)
-    .slice(-5);
-  const corpus = [...prior, latest].filter(Boolean).join("\n");
-  if (corpus.trim()) {
-    return detectLanguageFromText(corpus);
+    .filter((m) => m && m !== latest);
+  for (let i = prior.length - 1; i >= 0; i--) {
+    if (!isAmbiguousShortMessage(prior[i])) {
+      return detectLanguageFromText(prior[i]);
+    }
   }
-  return fromCurrent || "en";
+  if (latest) return detectLanguageFromText(latest);
+  return "en";
 }
 
 export function buildReplyLanguageBlock(
@@ -671,16 +685,33 @@ export function buildReplyLanguageBlock(
   recentUserMessages: string[] = [],
 ): string {
   const lang = detectReplyLanguage(message, recentUserMessages);
+  const latestSnippet = (message ?? "").trim().slice(0, 100);
+  const snippetLine = latestSnippet ? `\nUser's latest message: "${latestSnippet}${(message ?? "").trim().length > 100 ? "…" : ""}"` : "";
   if (lang === "id") {
-    return `REPLY LANGUAGE (mandatory):
-The user is communicating in Indonesian (from this message or their recent messages). Write your entire response in Indonesian (Bahasa Indonesia). Use a clear, professional institutional tone. Keep market tickers and symbols in Latin script (BTC, ETH, DXY).`;
+    return `REPLY LANGUAGE (mandatory — overrides chat history):${snippetLine}
+The user's latest message is in Indonesian. Write your ENTIRE response in Bahasa Indonesia — opening sentence, section headers, body, and disclaimer. Do NOT reply in English even if earlier assistant turns were English. Keep market tickers and symbols in Latin script (BTC, ETH, DXY).`;
   }
   if (lang === "other") {
-    return `REPLY LANGUAGE (mandatory):
-The user is communicating in a non-English language (from this message or their recent messages). Write your entire response in that same language. Keep tickers in Latin script.`;
+    return `REPLY LANGUAGE (mandatory — overrides chat history):${snippetLine}
+The user's latest message is in a non-English language. Write your ENTIRE response in that same language — do not follow the language of prior assistant turns. Keep tickers in Latin script.`;
   }
-  return `REPLY LANGUAGE (mandatory):
-The user is communicating in English (or language is not yet established — default English). Write your entire response in English.`;
+  return `REPLY LANGUAGE (mandatory — overrides chat history):${snippetLine}
+The user's latest message is in English. Write your ENTIRE response in English — opening sentence, section headers, body, and disclaimer. Do NOT reply in Indonesian or any other language even if earlier assistant turns were in another language.`;
+}
+
+/** Prefix the live user turn so Gemini mirrors the current message language, not prior replies. */
+export function prefixUserMessageForLanguage(
+  message: string,
+  recentUserMessages: string[] = [],
+): string {
+  const lang = detectReplyLanguage(message, recentUserMessages);
+  if (lang === "id") {
+    return `[Reply entirely in Bahasa Indonesia for this message — match the user's language now, not prior assistant language.]\n\n${message}`;
+  }
+  if (lang === "en") {
+    return `[Reply entirely in English for this message — match the user's language now, not prior assistant language.]\n\n${message}`;
+  }
+  return `[Reply in the same language as this user message — not prior assistant language.]\n\n${message}`;
 }
 
 const DEFI_INTEL_RESPONSE = `DEFI / YIELD / WHALE / VERDICT QUESTIONS (when DEFI DESK INTELLIGENCE is in the prompt):
