@@ -93,9 +93,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-registry.is-expanded .int-marquee-wrap{display:none}
 .int-marquee-track{
   display:flex;width:max-content;
-}
-.int-marquee-track--ltr{
-  animation:int-marquee-scroll-ltr 55s linear infinite;
+  animation:int-marquee-scroll 55s linear infinite;
 }
 .int-marquee-wrap:hover .int-marquee-track{animation-play-state:paused}
 .int-marquee-wrap--sources .int-marquee-group{align-items:center}
@@ -124,7 +122,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
   white-space:nowrap;flex-shrink:0;margin-left:4px;
 }
 
-@keyframes int-marquee-scroll-ltr{
+@keyframes int-marquee-scroll{
   from{transform:translateX(-50%)}
   to{transform:translateX(0)}
 }

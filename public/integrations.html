@@ -33,9 +33,9 @@
       <h2 class="int-headline" id="data-sources-h" style="font-size:clamp(22px,3.5vw,30px)">Intelligence <em>stack</em></h2>
     </header>
     <div class="int-marquee-wrap int-marquee-wrap--sources" id="int-sources-marquee-wrap" aria-label="Data source partners">
-      <div class="int-marquee-track int-marquee-track--ltr" id="int-sources-marquee-track"></div>
+      <div class="int-marquee-track" id="int-sources-marquee-track"></div>
     </div>
-    <div class="int-logo-strip int-logo-strip--source" id="int-sources-source" hidden aria-hidden="true">
+    <template id="int-sources-template">
       <a class="int-logo-chip" href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">
         <img class="int-partner-logo" src="/images/integrations/googlegemini.svg" alt="" width="24" height="24" />
         <span>Gemini</span>
@@ -80,7 +80,7 @@
         <img class="int-partner-logo" src="/images/integrations/rss.svg" alt="" width="24" height="24" />
         <span>Global wire</span>
       </span>
-    </div>
+    </template>
     <p class="int-lead" style="margin:20px 0 0;font-size:13px">
       Concierge ingests TVL, yields (including Meteora DLMM), whale positioning, wallet snapshots, live prices, headline memory, central-bank wire (Fed, ECB, BoE), macro calendar (NFP, CPI, FOMC), and Treasury yields — plus Gemini for desk-style replies.
     </p>
@@ -102,7 +102,7 @@
         </button>
       </div>
       <div class="int-marquee-wrap" id="int-marquee-wrap" aria-label="Integration partners marquee">
-        <div class="int-marquee-track int-marquee-track--ltr" id="int-marquee-track"></div>
+        <div class="int-marquee-track" id="int-marquee-track"></div>
       </div>
       <div class="int-grid int-grid--full" id="int-registry-grid" hidden>
       <a class="int-card" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">
@@ -362,10 +362,10 @@
   }
 
   function buildSourcesMarquee() {
-    var source = document.getElementById("int-sources-source");
+    var template = document.getElementById("int-sources-template");
     var sourcesTrack = document.getElementById("int-sources-marquee-track");
-    if (!source || !sourcesTrack) return;
-    var chips = source.querySelectorAll(".int-logo-chip");
+    if (!template || !sourcesTrack) return;
+    var chips = template.content.querySelectorAll(".int-logo-chip");
     buildMarqueeLoop(sourcesTrack, Array.prototype.slice.call(chips), function (chip) {
       return chip.cloneNode(true);
     });
