@@ -32,7 +32,10 @@
       <p class="int-eyebrow">Data sources</p>
       <h2 class="int-headline" id="data-sources-h" style="font-size:clamp(22px,3.5vw,30px)">Intelligence <em>stack</em></h2>
     </header>
-    <div class="int-logo-strip">
+    <div class="int-marquee-wrap int-marquee-wrap--sources" id="int-sources-marquee-wrap" aria-label="Data source partners">
+      <div class="int-marquee-track int-marquee-track--ltr" id="int-sources-marquee-track"></div>
+    </div>
+    <div class="int-logo-strip int-logo-strip--source" id="int-sources-source" hidden aria-hidden="true">
       <a class="int-logo-chip" href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">
         <img class="int-partner-logo" src="/images/integrations/googlegemini.svg" alt="" width="24" height="24" />
         <span>Gemini</span>
@@ -99,7 +102,7 @@
         </button>
       </div>
       <div class="int-marquee-wrap" id="int-marquee-wrap" aria-label="Integration partners marquee">
-        <div class="int-marquee-track" id="int-marquee-track"></div>
+        <div class="int-marquee-track int-marquee-track--ltr" id="int-marquee-track"></div>
       </div>
       <div class="int-grid int-grid--full" id="int-registry-grid" hidden>
       <a class="int-card" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">
@@ -296,6 +299,20 @@
   var toggle = document.getElementById("int-registry-toggle");
   var marqueeWrap = document.getElementById("int-marquee-wrap");
 
+  function buildMarqueeLoop(track, items, renderItem) {
+    if (!track || !items.length) return;
+    track.innerHTML = "";
+    for (var d = 0; d < 2; d++) {
+      var group = document.createElement("div");
+      group.className = "int-marquee-group";
+      group.setAttribute("aria-hidden", d === 1 ? "true" : "false");
+      items.forEach(function (item) {
+        group.appendChild(renderItem(item));
+      });
+      track.appendChild(group);
+    }
+  }
+
   function buildMarqueeChip(card) {
     var brand = card.querySelector(".int-card-brand");
     var img = brand && brand.querySelector("img");
@@ -341,16 +358,17 @@
   function buildMarquee() {
     if (!grid || !track) return;
     var cards = grid.querySelectorAll(".int-card");
-    track.innerHTML = "";
-    for (var d = 0; d < 2; d++) {
-      var group = document.createElement("div");
-      group.className = "int-marquee-group";
-      group.setAttribute("aria-hidden", d === 1 ? "true" : "false");
-      cards.forEach(function (card) {
-        group.appendChild(buildMarqueeChip(card));
-      });
-      track.appendChild(group);
-    }
+    buildMarqueeLoop(track, Array.prototype.slice.call(cards), buildMarqueeChip);
+  }
+
+  function buildSourcesMarquee() {
+    var source = document.getElementById("int-sources-source");
+    var sourcesTrack = document.getElementById("int-sources-marquee-track");
+    if (!source || !sourcesTrack) return;
+    var chips = source.querySelectorAll(".int-logo-chip");
+    buildMarqueeLoop(sourcesTrack, Array.prototype.slice.call(chips), function (chip) {
+      return chip.cloneNode(true);
+    });
   }
 
   function setExpanded(expanded) {
@@ -370,6 +388,7 @@
   }
 
   buildMarquee();
+  buildSourcesMarquee();
 
   document.querySelectorAll(".int-install-copy").forEach(function (btn) {
     btn.addEventListener("click", function () {
