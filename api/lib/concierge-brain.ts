@@ -31,6 +31,15 @@ export const EXECUTIVE_LOUNGE_CATEGORIES = [
   "Other",
 ] as const;
 
+/** Mandatory disclaimer for trading / intel outputs — localize; replace [sources] with cited sources. */
+const TRADING_DISCLAIMER_EN =
+  "This information is a summary from [name sources used in your reply] compiled to the best of our ability. Trading carries significant risk. Use this as part of your research & Do Your Own Research. Not Financial Advice.";
+const TRADING_DISCLAIMER_ID =
+  "Informasi ini adalah rangkuman dari [sebutkan sumber yang dipakai] yang telah kami rangkum sebaik-baiknya. Trading adalah hal yang mempunyai resiko tinggi. Jadikan ini sebagai bagian dari riset & Do Your Own Research. Not Financial Advice.";
+const TRADING_DISCLAIMER_PROMPT = `Disclaimer (mandatory — user's language; replace [sources] with sources you cited; never use "illustrative", "research framework", or "personalized financial advice"):
+EN — "${TRADING_DISCLAIMER_EN}"
+ID — "${TRADING_DISCLAIMER_ID}"`;
+
 const LOUNGE_CATEGORY_TRIGGERS: { patterns: string[]; topics: ConciergeTopic[] }[] = [
   { patterns: ["technology", "teknologi"], topics: ["technology"] },
   { patterns: ["macro", "makro", "macroeconom"], topics: ["macro"] },
@@ -528,13 +537,13 @@ State which lens applies; if both crypto and equities are in scope, cover both i
 • Entry: [zone or trigger]<br/>
 • Stop / invalidation: [price + what breaks thesis]<br/>
 • Targets: TP1 [price] (R:R ~1:X) | TP2 [price] optional<br/>
-• Position sizing: illustrative [0.25–1% NAV]; leverage stance for perps<br/>
+• Position sizing: [0.25–1% NAV] suggested; leverage stance for perps<br/>
 • Plan B: one clause if regime flips</p>
 
 <p><strong>6. Risks & catalysts (24–72h)</strong><br/>
 List 3–5 concrete catalysts (data prints, Fed speakers, earnings, OPEC, geo headlines, funding resets).</p>
 
-<p><em>Disclaimer: illustrative research framework, not personalized financial advice.</em></p>
+<p><em>${TRADING_DISCLAIMER_PROMPT}</em></p>
 
 <p><strong>Agent handoff</strong> (one line, machine-readable for agent-to-agent):<br/>
 <code>A2A|asset=[TICKER]|class=[crypto|equity|both]|tf=[timeframe]|bias=[long|short|neutral]|conviction=[L/M/H]|entry=[zone]|stop=[price]|tp1=[price]|rr=[ratio]|regime=[risk-on|off|mixed]</code></p>
@@ -554,7 +563,7 @@ Use six <p> blocks (titles may be localized):
 3. <strong>Fundamental</strong> — crypto lens (flows, dominance, narrative) and/or stock lens (catalyst, valuation, beta) as relevant.
 4. <strong>Technical</strong> — trend, S/R from live mark, momentum; perps: funding/OI/L-S; stocks: index confluence.
 5. <strong>Trading plan</strong> — entry, stop, TP1/TP2, R:R, size, Plan B.
-6. <strong>Risks & catalysts</strong> (24–72h) + <em>not financial advice</em> + one-line <code>A2A|asset=…|bias=…|entry=…|stop=…|tp1=…</code>.
+6. <strong>Risks & catalysts</strong> (24–72h) + ${TRADING_DISCLAIMER_PROMPT} + one-line <code>A2A|asset=…|bias=…|entry=…|stop=…|tp1=…</code>.
 
 Keep each section tight (2–5 bullets). Never skip geo, fundamental, or technical. Anchor levels to live data only.`;
 
@@ -594,7 +603,7 @@ Deliver in the user's language using 3–5 <p> blocks:
 2. <strong>Ideas (2–4 USDT pairs)</strong> — for each: ticker, bias (long/short/watch), thesis (why now), key level or trigger, invalidation — use live prices only.
 3. <strong>Derivatives overlay</strong> — crowded side, funding bias, approximate liq cluster zones as % bands from mark when relevant.
 4. <strong>Risks</strong> — 2–3 catalysts or failure modes for the next 24–48h.
-5. <em>Disclaimer: illustrative research, not personalized financial advice.</em>
+5. <em>${TRADING_DISCLAIMER_PROMPT}</em>
 
 Rules: name specific tickers the user asked for. Do NOT use the 6-section trading plan template. Do NOT leave section headers empty. Complete every sentence.`;
 
@@ -868,7 +877,7 @@ RULES:
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
 3. MULTI-SOURCE MARKET INTELLIGENCE + MACRO DESK + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Federal Reserve, ECB, Wikipedia, BBC, etc.); anchor trade levels to Binance mark ± structure. For NFP/CPI/FOMC and central-bank news, prioritize MACRO DESK and CENTRAL BANK WIRE sections.
 4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
-5. Trading plans are illustrative frameworks, not personalized financial advice.
+5. End trading plans and trade ideas with the mandatory disclaimer above (localize EN/ID; cite sources; never call output "illustrative" or a "research framework").
 6. Think step-by-step internally: parse question → language → direct answer → data → plan → risks.
 ${tradingBlock}
 ${marketBlock}

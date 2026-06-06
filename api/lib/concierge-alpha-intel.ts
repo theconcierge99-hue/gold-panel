@@ -478,7 +478,7 @@ export async function runAlphaIntel(
     methodology: {
       priority: ["insider", "institutional", "onchain", "narrative", "kol"],
       disclaimer:
-        "Illustrative desk intelligence — not financial advice. Insider signals are Lounge creator content; verify before acting.",
+        "This information is a summary from live desk data and public sources compiled to the best of our ability. Trading carries significant risk. Use this as part of your research & Do Your Own Research. Not Financial Advice. Lounge insider signals are creator content; verify independently.",
     },
     summary: synthesized.summary,
     candidates: synthesized.candidates,
