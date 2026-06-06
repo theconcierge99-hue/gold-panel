@@ -91,7 +91,17 @@
     <p class="int-lead" style="margin-bottom:24px">
       Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash), <strong>Corbits Marketplace</strong> (x402 proxy), and compatible with <strong>pay.sh</strong> (agent CLI catalog). Optional zauth telemetry reports settlements for trust scoring.
     </p>
-    <div class="int-grid">
+    <div class="int-registry" id="int-registry">
+      <div class="int-registry-bar">
+        <p class="int-registry-hint">11 registries · scrolls automatically</p>
+        <button type="button" class="int-registry-toggle" id="int-registry-toggle" aria-expanded="false" aria-controls="int-registry-grid">
+          Open full registry →
+        </button>
+      </div>
+      <div class="int-marquee-wrap" id="int-marquee-wrap" aria-label="Integration partners marquee">
+        <div class="int-marquee-track" id="int-marquee-track"></div>
+      </div>
+      <div class="int-grid int-grid--full" id="int-registry-grid" hidden>
       <a class="int-card" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">
         <div class="int-card-top">
           <div class="int-card-brand">
@@ -225,6 +235,7 @@
         <span class="int-card-link">Metaplex ↗</span>
       </a>
     </div>
+    </div>
 
     <aside class="int-install" aria-labelledby="int-install-h">
       <p class="int-install-eyebrow" id="int-install-h">Install on your agent</p>
@@ -279,6 +290,77 @@
 </div>
 <script>
 (function () {
+  var registry = document.getElementById("int-registry");
+  var grid = document.getElementById("int-registry-grid");
+  var track = document.getElementById("int-marquee-track");
+  var toggle = document.getElementById("int-registry-toggle");
+  var marqueeWrap = document.getElementById("int-marquee-wrap");
+
+  function buildMarqueeChip(card) {
+    var brand = card.querySelector(".int-card-brand");
+    var img = brand && brand.querySelector("img");
+    var name = brand && brand.querySelector("h3");
+    var tag = card.querySelector(".int-tag");
+    var chip = document.createElement("a");
+    chip.className = "int-marquee-chip";
+    chip.href = card.getAttribute("href") || "#";
+    if (card.getAttribute("target")) {
+      chip.target = card.getAttribute("target");
+      chip.rel = card.getAttribute("rel") || "noopener noreferrer";
+    }
+    if (img) {
+      var logo = img.cloneNode(true);
+      logo.className = "int-partner-logo int-marquee-logo";
+      logo.width = 22;
+      logo.height = 22;
+      chip.appendChild(logo);
+    }
+    var label = document.createElement("span");
+    label.className = "int-marquee-name";
+    label.textContent = name ? name.textContent : "Partner";
+    chip.appendChild(label);
+    if (tag) {
+      var pill = document.createElement("span");
+      pill.className = "int-marquee-tag";
+      pill.textContent = tag.textContent;
+      chip.appendChild(pill);
+    }
+    return chip;
+  }
+
+  function buildMarquee() {
+    if (!grid || !track) return;
+    var cards = grid.querySelectorAll(".int-card");
+    track.innerHTML = "";
+    for (var d = 0; d < 2; d++) {
+      var group = document.createElement("div");
+      group.className = "int-marquee-group";
+      group.setAttribute("aria-hidden", d === 1 ? "true" : "false");
+      cards.forEach(function (card) {
+        group.appendChild(buildMarqueeChip(card));
+      });
+      track.appendChild(group);
+    }
+  }
+
+  function setExpanded(expanded) {
+    if (!registry || !grid || !toggle) return;
+    registry.classList.toggle("is-expanded", expanded);
+    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+    toggle.textContent = expanded ? "Minimize registry ↑" : "Open full registry →";
+    if (marqueeWrap) marqueeWrap.hidden = expanded;
+    if (expanded) grid.removeAttribute("hidden");
+    else grid.setAttribute("hidden", "");
+  }
+
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      setExpanded(!registry.classList.contains("is-expanded"));
+    });
+  }
+
+  buildMarquee();
+
   document.querySelectorAll(".int-install-copy").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var text = btn.getAttribute("data-copy") || "";
