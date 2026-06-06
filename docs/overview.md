@@ -19,7 +19,8 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/api/x402-config` | Public payment + RWA readiness flags |
 | `https://your-domain.com/.well-known/x402` | x402 resource fan-out (discovery) |
 | `https://your-domain.com/openapi.json` | OpenAPI + x-payment-info (x402 + MPP discovery) |
-| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, nine-route structure |
+| `https://your-domain.com/docs/builders` | Builder integration guide — x402, OpenAPI, code examples |
+| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, twelve-route structure |
 
 ## Core features
 

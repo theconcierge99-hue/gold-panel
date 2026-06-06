@@ -49,17 +49,20 @@
         <p>On success: <strong>200</strong>, JSON with <code>reply</code> (HTML), <code>topics</code>, <code>marketLive</code>, <code>dataAsOf</code>, and header <code>PAYMENT-RESPONSE</code> with settlement hash.</p>
       </div>
 
-      <h2 class="docs-h2">Structured DeFi (no chat)</h2>
+      <h2 class="docs-h2">Structured DeFi &amp; Alpha (no chat)</h2>
       <div class="card">
         <p>Same x402 flow on Intel routes — example hottest Meteora DLMM yields:</p>
 <pre><code>POST /api/concierge-intel-yields
 { "chain": "solana", "project": "meteora" }</code></pre>
-        <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> for all five endpoints.</p>
+        <p>Alpha desks (airdrop, listing, momentum):</p>
+<pre><code>POST /api/concierge-intel-momentum
+{ "message": "BTC volatility", "limit": 5, "includeInsider": true }</code></pre>
+        <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> · full builder guide: <a href="/docs/builders" class="gold-link">For Builders</a>.</p>
       </div>
 
       <h2 class="docs-h2">MPP / AgentCash (optional)</h2>
       <div class="card">
-        <p>Install all nine Concierge skills from the <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> listing:</p>
+        <p>Install all Concierge skills from the <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> listing:</p>
 <pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
         <p>Validate discovery: <code>npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></p>
       </div>
@@ -78,7 +81,8 @@
       </div>
 
       <div class="cta-row">
-        <a class="btn gold" href="/docs/api/concierge">Concierge Chat API</a>
+        <a class="btn gold" href="/docs/builders">For Builders</a>
+        <a class="btn" href="/docs/api/concierge">Concierge Chat API</a>
         <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
       </div>

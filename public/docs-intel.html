@@ -50,9 +50,12 @@
           <tr><td><code>POST /api/concierge-intel-whales</code></td><td>Top-trader positioning (BTC/ETH/SOL)</td></tr>
           <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>Wallet snapshot / PnL note</td></tr>
           <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>Desk verdict + insider overlay</td></tr>
+          <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops (insider-first alpha)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
+          <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move up/down candidates</td></tr>
         </tbody>
       </table>
-      <p class="note">Discovery: <a class="ext" href="/openapi.json">openapi.json</a> · <a class="ext" href="/.well-known/x402">/.well-known/x402</a> · <a href="/docs/payment/mpp">MPPscan / AgentCash</a></p>
+      <p class="note">Discovery: <a class="ext" href="/openapi.json">openapi.json</a> · <a class="ext" href="/.well-known/x402">/.well-known/x402</a> · <a href="/docs/payment/mpp">MPPscan / AgentCash</a> · <a href="/docs/builders" class="gold-link">For Builders</a></p>
     </div>
   </section>
 
@@ -128,6 +131,28 @@
 }</code></pre>
       <p><strong>Solana:</strong> token snapshot when <code>SOLANA_RPC_URL</code> uses Helius <code>api-key</code>. Historical PnL is <em>not</em> computed server-side.</p>
       <p><strong>Response:</strong> <code>wallet</code> with <code>chain</code>, <code>address</code>, <code>summary</code>.</p>
+    </div>
+  </section>
+
+  <section id="alpha">
+    <h2>Alpha desks — insider-first intelligence</h2>
+    <div class="card">
+      <p>Three endpoints for <strong>airdrop</strong>, <strong>listing</strong>, and <strong>momentum</strong> candidates. Evidence priority: Lounge insider → institutional positioning → onchain yields → narrative headlines → KOL/creator context.</p>
+      <table>
+        <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrop protocols/tokens</td></tr>
+          <tr><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listing catalysts</td></tr>
+          <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>Large move up/down watchlist</td></tr>
+        </tbody>
+      </table>
+      <pre><code>{
+  "message": "Solana ecosystem airdrop themes",
+  "chain": "solana",
+  "limit": 5,
+  "includeInsider": true
+}</code></pre>
+      <p><strong>Response:</strong> <code>summary</code>, <code>candidates[]</code> (each with <code>insiderSignals</code>, <code>institutional</code>, <code>onchain</code>, <code>narrative</code>, <code>kol</code>, <code>riskFlags</code>, <code>actionable</code>). Momentum includes <code>direction</code>: <code>up</code> | <code>down</code> | <code>watch</code>.</p>
     </div>
   </section>
 

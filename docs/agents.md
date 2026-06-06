@@ -20,6 +20,9 @@ Structured JSON per desk function (no full chat) — **0.1 USDC** each:
 | `POST /api/concierge-intel-whales` | Top-trader positioning (`symbols`) |
 | `POST /api/concierge-intel-wallet` | Wallet snapshot (`solAddress` / `evmAddress`) |
 | `POST /api/concierge-intel-verdict` | Verdict + insider (`message`, `includeInsider`) |
+| `POST /api/concierge-intel-airdrop` | Airdrop candidates (`message`, `chain`, `limit`, `includeInsider`) |
+| `POST /api/concierge-intel-listing` | Listing candidates (same body as airdrop) |
+| `POST /api/concierge-intel-momentum` | Momentum / large-move candidates (same body) |
 
 **Web:** `https://conc-exe.xyz/docs/intel` · [concierge-intel.md](concierge-intel.md)
 

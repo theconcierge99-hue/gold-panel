@@ -14,6 +14,21 @@ Structured DeFi desk data as **separate x402 endpoints** — **0.1 USDC** each, 
 | POST | `/api/concierge-intel-whales` | Binance top-trader ratios (BTC/ETH/SOL) |
 | POST | `/api/concierge-intel-wallet` | Solana snapshot (Helius) or EVM ack |
 | POST | `/api/concierge-intel-verdict` | Desk verdict + optional Lounge insider signals |
+| POST | `/api/concierge-intel-airdrop` | Potential airdrops — insider-first alpha desk |
+| POST | `/api/concierge-intel-listing` | Potential exchange listings — insider-first |
+| POST | `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
+
+## Alpha desk methodology
+
+All three alpha endpoints synthesize evidence in this order:
+
+1. **Insider** — Lounge creator signals (highest weight)
+2. **Institutional** — Binance positioning, Fear & Greed
+3. **Onchain** — DeFi yields / TVL proxies
+4. **Narrative** — wire headlines, general news
+5. **KOL** — creator publisher context from insider block
+
+Gemini synthesis when `GEMINI_API_KEY` is set; rule-based fallback otherwise.
 
 ## Payment
 
@@ -71,6 +86,21 @@ At least one address required (or address in `message`).
 
 `includeInsider` (default `true`) pulls relevant **creator signals** from Lounge memory as insider overlay.
 
+### Alpha desks (airdrop, listing, momentum)
+
+```json
+{
+  "message": "Solana airdrop farming themes",
+  "chain": "solana",
+  "limit": 5,
+  "includeInsider": true
+}
+```
+
+- `limit` — max candidates (1–8, default 5)
+- `chain` — optional filter for yield/onchain context
+- Response: `summary`, `candidates[]` with `insiderSignals`, `institutional`, `onchain`, `narrative`, `kol`, `riskFlags`, `actionable`
+
 ## Verdict signals
 
 | Signal | Meaning |
@@ -89,7 +119,7 @@ At least one address required (or address in `message`).
 | Use case | Agents, pipelines | Human chat, trading plans |
 | Price | 0.1 USDC / call | 0.1 USDC / call |
 
-Implementation: `api/lib/concierge-defi-intel.ts`, `api/lib/concierge-intel-handler.ts`.
+Implementation: `api/lib/concierge-defi-intel.ts`, `api/lib/concierge-intel-handler.ts`, `api/lib/concierge-alpha-intel.ts`.
 
 ## Related
 

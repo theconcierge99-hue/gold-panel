@@ -77,6 +77,24 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "verdict"],
   },
+  "intel-airdrop": {
+    name: "Concierge Intel — Airdrop",
+    description: "Potential airdrop candidates — insider Lounge signals first, then institutional/onchain/narrative overlay",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "alpha"],
+  },
+  "intel-listing": {
+    name: "Concierge Intel — Listing",
+    description: "Potential exchange listing candidates — insider-first multi-source alpha desk",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "alpha"],
+  },
+  "intel-momentum": {
+    name: "Concierge Intel — Momentum",
+    description: "Tokens with large move potential (up or down) — insider, positioning, narrative synthesis",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "alpha"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -150,6 +168,12 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-wallet";
     case "intel-verdict":
       return "/api/concierge-intel-verdict";
+    case "intel-airdrop":
+      return "/api/concierge-intel-airdrop";
+    case "intel-listing":
+      return "/api/concierge-intel-listing";
+    case "intel-momentum":
+      return "/api/concierge-intel-momentum";
     default:
       return `/api/${kind}`;
   }

@@ -2,7 +2,7 @@
 
 [Corbits](https://www.corbits.dev/) is an **Agent Operations** platform (neoteams): governance (**Interchange**), service discovery (**Discovery**), API monetization (**Marketplace**), and x402 payments (**Flex** / **Faremeter**).
 
-Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery and Marketplace expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **nine pay-per-call routes**, and **MPP/AgentCash** discovery.
+Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery and Marketplace expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **twelve pay-per-call routes**, and **MPP/AgentCash** discovery.
 
 ## What integrates today (no Corbits account required)
 
@@ -35,6 +35,9 @@ Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery an
 | `/api/concierge-intel-whales` | 0.10 |
 | `/api/concierge-intel-wallet` | 0.10 |
 | `/api/concierge-intel-verdict` | 0.10 |
+| `/api/concierge-intel-airdrop` | 0.10 |
+| `/api/concierge-intel-listing` | 0.10 |
+| `/api/concierge-intel-momentum` | 0.10 |
 
 **Auth header:** leave token empty unless you add a private backend secret — Concierge paid routes use **x402** (`payment-signature`), not Bearer to origin.
 

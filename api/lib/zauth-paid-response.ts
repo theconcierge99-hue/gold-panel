@@ -13,6 +13,9 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-whales": "JSON with positioning[] top-trader ratios",
   "intel-wallet": "JSON with wallet chain, address, summary",
   "intel-verdict": "JSON with verdict signal, confidence, rationale, optional insider[]",
+  "intel-airdrop": "JSON with summary and candidates[] (insider-first airdrop desk)",
+  "intel-listing": "JSON with summary and candidates[] (listing catalyst desk)",
+  "intel-momentum": "JSON with summary and candidates[] (large-move up/down desk)",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

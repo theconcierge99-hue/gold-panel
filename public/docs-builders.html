@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>For Builders — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, twelve JSON endpoints, no API keys." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/builders" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="builders">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/agent/endpoints">Endpoint catalog</a></div>
+      <div class="docs-eyebrow">Integrate</div>
+      <h1 class="docs-title">For builders &amp; developers</h1>
+      <p class="docs-lead">
+        Ship market intelligence in your agent, trading bot, dashboard, or backend — <strong>no API keys</strong>, pay-per-call via <strong>x402 USDC</strong> (Solana or Base). Machine-readable discovery via OpenAPI and MPP/AgentCash.
+      </p>
+
+      <div class="card">
+        <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Auth:</strong> None required. Optional <code>X-Agent-Id: agt_…</code> after <a href="/docs/api/agent-identity" class="gold-link">agent registration</a>.</p>
+        <p><strong>Price:</strong> <code>0.10 USDC</code> per call (<code>100000</code> atomic) · publish signal <code>1.00 USDC</code></p>
+      </div>
+
+      <h2 class="docs-h2">Choose your integration path</h2>
+      <div class="card-grid cols-3" style="margin-bottom:20px">
+        <a class="doc-card" href="/agent/playground"><h4>① Playground</h4><p>Try any route, see 402 challenge, copy JSON bodies — fastest way to learn.</p></a>
+        <a class="doc-card" href="/openapi.json" target="_blank" rel="noopener"><h4>② OpenAPI</h4><p>Full schemas, x-payment-info, MPP protocols — build any HTTP client.</p></a>
+        <a class="doc-card" href="/docs/payment/mpp"><h4>③ AgentCash</h4><p><code>npx agentcash add</code> — install all skills into MPP-compatible agents.</p></a>
+      </div>
+
+      <h2 class="docs-h2">x402 flow (all paid routes)</h2>
+      <div class="card">
+        <ol style="margin:0 0 0 18px;font-size:14px;line-height:1.75;color:var(--text-secondary)">
+          <li><code>POST</code> with JSON body → <strong>402</strong> + <code>PAYMENT-REQUIRED</code> header (base64 requirements)</li>
+          <li>Sign USDC on Solana or Base (PayAI facilitator: <code>facilitator.payai.network</code>)</li>
+          <li>Retry same request with <code>PAYMENT-SIGNATURE</code> header</li>
+          <li><strong>200</strong> → JSON response + <code>PAYMENT-RESPONSE</code> settlement header</li>
+        </ol>
+        <p class="note">Use an <a class="ext" href="https://docs.payai.network/x402/reference" target="_blank" rel="noopener">x402 HTTP client</a> to automate steps 2–3. See <a href="/docs/quickstart" class="gold-link">Quickstart</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Twelve endpoints — pick by use case</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Segment</th><th>Path</th><th>When to use</th></tr></thead>
+          <tbody>
+            <tr><td>Chat</td><td><code>POST /api/concierge</code></td><td>Natural language — trading plans, macro, geo, DeFi Q&amp;A (HTML <code>reply</code>)</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-tvl</code></td><td>Chain + protocol TVL snapshot</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-yields</code></td><td>Screened yield pools (Meteora DLMM, Jupiter, …)</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-whales</code></td><td>BTC/ETH/SOL top-trader positioning</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-wallet</code></td><td>Solana/EVM wallet snapshot</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-verdict</code></td><td>Desk verdict + Lounge insider overlay</td></tr>
+            <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops — insider-first synthesis</td></tr>
+            <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
+            <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move candidates (up or down)</td></tr>
+            <tr><td>Lounge</td><td><code>POST /api/news-open</code></td><td>Unlock wire article URL</td></tr>
+            <tr><td>Lounge</td><td><code>POST /api/lounge-signal-publish</code></td><td>Publish creator signal ($1)</td></tr>
+            <tr><td>Lounge</td><td><code>POST /api/lounge-signal-open</code></td><td>Unlock creator signal summary</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Structured JSON</strong> → Intel + Alpha routes. <strong>HTML narrative</strong> → Concierge chat. Details: <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> · <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a></p>
+      </div>
+
+      <h2 class="docs-h2">Example — probe Alpha Intel (curl)</h2>
+      <div class="card">
+<pre><code># 1) Payment challenge
+curl -s -X POST "https://conc-exe.xyz/api/concierge-intel-momentum" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"BTC altcoin volatility","limit":5,"includeInsider":true}' \
+  -D - -o /dev/null | head -15
+
+# 2) After x402 client pays — same body + PAYMENT-SIGNATURE header → 200 JSON</code></pre>
+        <p>Alpha body fields: <code>message</code>, optional <code>chain</code>, <code>limit</code> (1–8), <code>includeInsider</code> (default true).</p>
+      </div>
+
+      <h2 class="docs-h2">Example — TypeScript (server-side)</h2>
+      <div class="card">
+        <p>Call from your backend or agent worker (recommended — avoids browser CORS). Use your x402 SDK of choice; pseudocode:</p>
+<pre><code>const origin = "https://conc-exe.xyz";
+const body = { chain: "solana", project: "meteora" };
+
+// x402Client wraps: POST → 402 → sign → retry
+const res = await x402Client.fetch(`${origin}/api/concierge-intel-yields`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-Agent-Id": "agt_your_agent_id", // optional
+  },
+  body: JSON.stringify(body),
+});
+
+const data = await res.json(); // { ok, pools, dataAsOf, ... }</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Example — Python (httpx + x402)</h2>
+      <div class="card">
+<pre><code>import httpx
+
+ORIGIN = "https://conc-exe.xyz"
+payload = {"message": "Solana airdrop themes", "limit": 5}
+
+# Use PayAI / x402 Python helper for payment round-trip
+r = httpx.post(f"{ORIGIN}/api/concierge-intel-airdrop", json=payload)
+# First response: 402 — decode PAYMENT-REQUIRED, settle, retry with PAYMENT-SIGNATURE</code></pre>
+        <p>See <a href="/docs/quickstart" class="gold-link">Quickstart</a> and repository <code>docs/agents.md</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Discovery resources</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>URL</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402/MPP payment metadata per route</td></tr>
+            <tr><td><code>GET /.well-known/x402</code></td><td>Resource fan-out for x402scan / registries</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>Networks, pricing flags (no secrets)</td></tr>
+            <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Concierge registry + <code>agt_</code> cards</td></tr>
+          </tbody>
+        </table>
+<pre><code>npx agentcash add https://conc-exe.xyz
+npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></pre>
+      </div>
+
+      <h2 class="docs-h2">CORS &amp; production tips</h2>
+      <div class="card">
+        <ul style="margin:0 0 0 18px;font-size:14px;line-height:1.7;color:var(--text-secondary)">
+          <li><strong>Server-side proxy</strong> — Browsers on foreign origins may hit CORS; agents should call Concierge from a backend.</li>
+          <li><strong>Idempotency</strong> — Each paid call is independent; cache Intel JSON by <code>dataAsOf</code> if you poll.</li>
+          <li><strong>Insider layer</strong> — Alpha + verdict routes weight Lounge creator signals; publish signals to improve alpha quality.</li>
+          <li><strong>Distribution</strong> — Optional proxy via <a href="/docs/corbits" class="gold-link">Corbits Marketplace</a> or list on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>.</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/agent/playground">Open Playground</a>
+        <a class="btn" href="/agent/endpoints">Endpoint catalog</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI JSON</a>
+        <a class="btn" href="/docs/quickstart">Quickstart</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

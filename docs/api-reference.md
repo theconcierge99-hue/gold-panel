@@ -105,6 +105,9 @@ Structured JSON for agents — see [concierge-intel.md](concierge-intel.md) · w
 | `/api/concierge-intel-whales` | Top-trader positioning (Binance) |
 | `/api/concierge-intel-wallet` | Wallet snapshot (Solana/Helius) |
 | `/api/concierge-intel-verdict` | Desk verdict + Lounge insider signals |
+| `/api/concierge-intel-airdrop` | Potential airdrops (insider-first alpha) |
+| `/api/concierge-intel-listing` | Potential exchange listings |
+| `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
 
 ## Paid endpoints
 

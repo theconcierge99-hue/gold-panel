@@ -86,6 +86,10 @@
       "destination": "/docs-quickstart.html"
     },
     {
+      "source": "/docs/builders",
+      "destination": "/docs-builders.html"
+    },
+    {
       "source": "/docs/pricing",
       "destination": "/docs-pricing.html"
     },

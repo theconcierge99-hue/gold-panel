@@ -6,6 +6,7 @@ export const CONCIERGE_AGENT_SEGMENTS = [
   { id: "all", label: "All" },
   { id: "concierge", label: "Concierge" },
   { id: "intel", label: "DeFi Intel" },
+  { id: "alpha", label: "Alpha Intel" },
   { id: "lounge", label: "Lounge" },
 ];
 
@@ -77,6 +78,36 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { message: "DeFi outlook on Solana", includeInsider: true },
   },
   {
+    id: "intel-airdrop",
+    segment: "alpha",
+    method: "POST",
+    path: "/api/concierge-intel-airdrop",
+    name: "Intel — Airdrop",
+    description: "Potential airdrop candidates — Lounge insider first, then institutional/onchain/narrative/KOL.",
+    priceUsd: "0.10",
+    sampleBody: { message: "Solana ecosystem points farming", limit: 5, includeInsider: true },
+  },
+  {
+    id: "intel-listing",
+    segment: "alpha",
+    method: "POST",
+    path: "/api/concierge-intel-listing",
+    name: "Intel — Listing",
+    description: "Potential exchange listing candidates — insider-first alpha desk synthesis.",
+    priceUsd: "0.10",
+    sampleBody: { message: "Binance listing rumors", limit: 5 },
+  },
+  {
+    id: "intel-momentum",
+    segment: "alpha",
+    method: "POST",
+    path: "/api/concierge-intel-momentum",
+    name: "Intel — Momentum",
+    description: "Large-move candidates (up or down) — insider + positioning + narrative.",
+    priceUsd: "0.10",
+    sampleBody: { message: "Altcoins volatility catalysts", limit: 5, includeInsider: true },
+  },
+  {
     id: "news-open",
     segment: "lounge",
     method: "POST",
@@ -119,7 +150,8 @@ export function endpointUrl(path) {
 export function countBySegment() {
   const total = CONCIERGE_AGENT_ENDPOINTS.length;
   const intel = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "intel").length;
+  const alpha = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "alpha").length;
   const lounge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "lounge").length;
   const concierge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "concierge").length;
-  return { total, intel, lounge, concierge };
+  return { total, intel, alpha, lounge, concierge };
 }

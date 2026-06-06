@@ -5,10 +5,11 @@
 ## Docs
 
 - [Welcome to Concierge](https://conc-exe.xyz/docs): Introduction, endpoint map, standard response shapes.
+- [For Builders](https://conc-exe.xyz/docs/builders): Integrate Concierge — OpenAPI, AgentCash, code examples, twelve routes.
 - [Quickstart](https://conc-exe.xyz/docs/quickstart): First paid API call in under two minutes.
 - [Pricing](https://conc-exe.xyz/docs/pricing): Pay-per-query USDC pricing for all routes.
 - [x402 Protocol](https://conc-exe.xyz/docs/payment/x402): HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.
-- [MPP & AgentCash](https://conc-exe.xyz/docs/payment/mpp): MPPscan listing, nine routes, agentcash add install.
+- [MPP & AgentCash](https://conc-exe.xyz/docs/payment/mpp): MPPscan listing, twelve routes, agentcash add install.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Marketplace, Discovery, Faremeter x402, Interchange governance map.
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini chat, enhance, image.

@@ -203,6 +203,12 @@ async function listRecentMemoryItems(limit = MAX_LIST_FOR_RETRIEVAL): Promise<Lo
   return ids.map((id) => devMemory.get(id)).filter((v): v is LoungeMemoryItem => v != null);
 }
 
+/** Recent Lounge creator signals for alpha / insider desks. */
+export async function listRecentCreatorSignals(limit = 12): Promise<LoungeMemoryItem[]> {
+  const items = await listRecentMemoryItems(Math.min(MAX_LIST_FOR_RETRIEVAL, limit * 3));
+  return items.filter((i) => i.kind === "creator_signal").slice(0, limit);
+}
+
 function scoreItem(item: LoungeMemoryItem, tokens: string[]): number {
   if (!tokens.length) return 0;
   const blob = `${item.title} ${item.summary} ${item.source} ${item.category}`.toLowerCase();

@@ -128,6 +128,33 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["intel-verdict"]],
   },
+  {
+    kind: "intel-airdrop",
+    method: "POST",
+    path: "/api/concierge-intel-airdrop",
+    name: "Concierge Intel — Airdrop",
+    description: "Potential airdrop candidates — Lounge insider signals first, institutional/onchain/narrative/KOL overlay.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-airdrop"]],
+  },
+  {
+    kind: "intel-listing",
+    method: "POST",
+    path: "/api/concierge-intel-listing",
+    name: "Concierge Intel — Listing",
+    description: "Potential exchange listing candidates — insider-first alpha desk synthesis for agents.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-listing"]],
+  },
+  {
+    kind: "intel-momentum",
+    method: "POST",
+    path: "/api/concierge-intel-momentum",
+    name: "Concierge Intel — Momentum",
+    description: "Large-move candidates (up or down) — insider, derivatives positioning, narrative synthesis.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-momentum"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */

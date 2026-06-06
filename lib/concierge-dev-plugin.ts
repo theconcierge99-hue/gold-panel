@@ -118,6 +118,9 @@ export function conciergeDevPlugin(): Plugin {
           "/api/concierge-intel-whales": (r) => handleConciergeIntelRoute(r, "intel-whales"),
           "/api/concierge-intel-wallet": (r) => handleConciergeIntelRoute(r, "intel-wallet"),
           "/api/concierge-intel-verdict": (r) => handleConciergeIntelRoute(r, "intel-verdict"),
+          "/api/concierge-intel-airdrop": (r) => handleConciergeIntelRoute(r, "intel-airdrop"),
+          "/api/concierge-intel-listing": (r) => handleConciergeIntelRoute(r, "intel-listing"),
+          "/api/concierge-intel-momentum": (r) => handleConciergeIntelRoute(r, "intel-momentum"),
         };
         if (url && signalRoutes[url]) {
           const chunks: Buffer[] = [];

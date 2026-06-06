@@ -7,7 +7,10 @@ export type X402IntelKind =
   | "intel-yields"
   | "intel-whales"
   | "intel-wallet"
-  | "intel-verdict";
+  | "intel-verdict"
+  | "intel-airdrop"
+  | "intel-listing"
+  | "intel-momentum";
 
 export type X402ResourceKind = X402CoreKind | X402IntelKind;
 

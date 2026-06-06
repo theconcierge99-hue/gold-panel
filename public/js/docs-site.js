@@ -2,6 +2,7 @@
   var NAV = [
     { label: "Start", items: [
       { id: "introduction", href: "/docs", title: "Welcome to Concierge" },
+      { id: "builders", href: "/docs/builders", title: "For Builders" },
       { id: "quickstart", href: "/docs/quickstart", title: "Quickstart" },
       { id: "pricing", href: "/docs/pricing", title: "Pricing" },
     ]},

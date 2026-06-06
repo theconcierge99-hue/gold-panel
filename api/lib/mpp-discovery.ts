@@ -39,7 +39,7 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
   "Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI facilitator).",
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
-  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider).",
+  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider).",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
 ].join(" ");
@@ -149,6 +149,33 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
       },
     },
     ["message"],
+  ),
+  "intel-airdrop": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Focus theme or protocol name" },
+      chain: { type: "string", description: "Optional chain filter (solana, ethereum, base)" },
+      limit: { type: "number", description: "Max candidates 1–8 (default 5)" },
+      includeInsider: { type: "boolean", description: "Include Lounge insider signals (default true)" },
+    },
+    [],
+  ),
+  "intel-listing": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Token or listing catalyst focus" },
+      chain: { type: "string" },
+      limit: { type: "number" },
+      includeInsider: { type: "boolean" },
+    },
+    [],
+  ),
+  "intel-momentum": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Asset or momentum theme" },
+      chain: { type: "string" },
+      limit: { type: "number" },
+      includeInsider: { type: "boolean" },
+    },
+    [],
   ),
 };
 
@@ -278,6 +305,51 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "verdict"],
   ),
+  "intel-airdrop": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      summary: { type: "string" },
+      candidates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            asset: { type: "string" },
+            thesis: { type: "string" },
+            conviction: { type: "string" },
+            insiderWeight: { type: "string" },
+          },
+        },
+      },
+    },
+    ["ok", "candidates"],
+  ),
+  "intel-listing": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      summary: { type: "string" },
+      candidates: { type: "array", items: { type: "object" } },
+    },
+    ["ok", "candidates"],
+  ),
+  "intel-momentum": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      summary: { type: "string" },
+      candidates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            asset: { type: "string" },
+            direction: { type: "string", enum: ["up", "down", "neutral", "watch"] },
+            thesis: { type: "string" },
+          },
+        },
+      },
+    },
+    ["ok", "candidates"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -305,6 +377,9 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-whales": { symbols: ["BTC", "ETH", "SOL"] },
   "intel-wallet": { solAddress: "7hum…", message: "optional context" },
   "intel-verdict": { message: "DeFi outlook on Solana", includeInsider: true },
+  "intel-airdrop": { message: "Solana ecosystem airdrop farming", limit: 5, includeInsider: true },
+  "intel-listing": { message: "Potential Binance listings", limit: 5 },
+  "intel-momentum": { message: "BTC altcoin volatility catalysts", limit: 5, includeInsider: true },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -325,6 +400,28 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
   "intel-verdict": {
     ok: true,
     verdict: { signal: "watch", confidence: "medium", summary: "Desk bias neutral…" },
+  },
+  "intel-airdrop": {
+    ok: true,
+    summary: "Two Solana protocols show insider + narrative airdrop overlap.",
+    candidates: [
+      {
+        asset: "EXAMPLE",
+        thesis: "Creator signal + TVL growth — monitor points program.",
+        conviction: "medium",
+        insiderWeight: "primary",
+      },
+    ],
+  },
+  "intel-listing": {
+    ok: true,
+    summary: "Listing desk scan complete.",
+    candidates: [{ asset: "TOKEN", thesis: "Volume + headline listing rumor.", conviction: "low" }],
+  },
+  "intel-momentum": {
+    ok: true,
+    summary: "Momentum desk: crowded positioning watchlist.",
+    candidates: [{ asset: "BTC", direction: "down", thesis: "Crowded long — liq risk on dips.", conviction: "medium" }],
   },
 };
 

@@ -1,6 +1,7 @@
 /**
  * Shared x402 handlers for Concierge DeFi intelligence endpoints (integrators).
  */
+import { runAlphaIntel } from "./concierge-alpha-intel";
 import {
   buildVerdict,
   fetchChainTvl,
@@ -36,6 +37,9 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-whales": "/api/concierge-intel-whales",
   "intel-wallet": "/api/concierge-intel-wallet",
   "intel-verdict": "/api/concierge-intel-verdict",
+  "intel-airdrop": "/api/concierge-intel-airdrop",
+  "intel-listing": "/api/concierge-intel-listing",
+  "intel-momentum": "/api/concierge-intel-momentum",
 };
 
 export type IntelRequestBody = {
@@ -50,6 +54,8 @@ export type IntelRequestBody = {
   project?: string;
   /** Verdict: include Lounge creator signals as insider overlay */
   includeInsider?: boolean;
+  /** Alpha desks: max candidates (1–8, default 5) */
+  limit?: number;
 };
 
 function jsonResponse(
@@ -196,6 +202,10 @@ async function runIntel(
         positioning: snapshot.positioning,
       },
     };
+  }
+
+  if (kind === "intel-airdrop" || kind === "intel-listing" || kind === "intel-momentum") {
+    return runAlphaIntel(kind, body);
   }
 
   throw new Error("Unknown intel kind");
