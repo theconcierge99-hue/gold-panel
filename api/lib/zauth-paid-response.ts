@@ -16,6 +16,7 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-airdrop": "JSON with summary and candidates[] (insider-first airdrop desk)",
   "intel-listing": "JSON with summary and candidates[] (listing catalyst desk)",
   "intel-momentum": "JSON with summary and candidates[] (large-move up/down desk)",
+  "intel-scalp": "JSON with 5m/15m TA for BTC/ETH/BNB/SOL USDT (RSI, EMA, levels, perp overlay)",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

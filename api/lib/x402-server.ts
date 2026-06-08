@@ -95,6 +95,12 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "alpha"],
   },
+  "intel-scalp": {
+    name: "Concierge Intel — Scalp",
+    description: "BTC/ETH/BNB/SOL USDT scalping desk — 5m & 15m klines, RSI/EMA, perp funding & positioning",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "trading"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -174,6 +180,8 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-listing";
     case "intel-momentum":
       return "/api/concierge-intel-momentum";
+    case "intel-scalp":
+      return "/api/concierge-intel-scalp";
     default:
       return `/api/${kind}`;
   }

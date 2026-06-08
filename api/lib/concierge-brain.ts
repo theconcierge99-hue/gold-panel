@@ -1,3 +1,5 @@
+import { messageRequestsScalpDesk } from "./concierge-scalp-intel";
+
 export type ConciergeTopic =
   | "macro"
   | "micro"
@@ -420,7 +422,8 @@ const TOPIC_PLAYBOOKS: Record<ConciergeTopic, string> = {
 - State timeframe explicitly (intraday / swing / position).
 - Structure: trend → key levels → momentum (RSI/MACD) → volume → invalidation → targets (R:R).
 - Mention confluence (HTF level + LTF trigger). Avoid certitude; use probability language.
-- For crypto perps: tie levels to liquidity pools and prior swing H/L.`,
+- For crypto perps: tie levels to liquidity pools and prior swing H/L.
+- **5m / 15m scalps (BTC, ETH, BNB, SOL/USDT):** use SCALP DESK block — RSI14, EMA9/EMA21, last 20-bar H/L; tight stops beyond recent swing; TP1 at prior H/L or 1:1–1.5 R.`,
 
   liquidation: `LIQUIDATION CLUSTER PLAYBOOK:
 - Explain mechanics: OI concentration, funding, leverage distribution, cascade triggers.
@@ -571,6 +574,27 @@ const TRADING_PLAN_RESPONSE_STRUCTURE = `TRADING-PLAN RESPONSE STRUCTURE (when t
 Follow sections 1–6 + Agent handoff from INSTITUTIONAL TRADING PLAN above.
 Do not skip geopolitical, fundamental, or technical sections — even if brief when data is thin (say what you would watch).
 Lead section 1 with the direct answer; support with live figures in sections 2–4.`;
+
+const SCALPING_PLAN_FRAMEWORK = `CRYPTO SCALPING PLAN (mandatory — user's language; BTC/ETH/BNB/SOL vs USDT; 5m & 15m only):
+
+Supported assets: **BTC, ETH, BNB, SOL** (USDT spot/perp). Default timeframes: **5m** trigger, **15m** bias filter unless user names one.
+
+Use five <p> blocks (titles may be localized):
+1. <strong>Executive summary</strong> — pair, primary TF (5m or 15m), bias (long/short/neutral), conviction, one-sentence thesis from SCALP DESK closes.
+2. <strong>Micro-structure (5m / 15m)</strong> — trend (EMA9 vs EMA21), RSI14 zone, last 20-bar high/low as S/R; note 5m vs 15m alignment or conflict.
+3. <strong>Scalp setup</strong> — entry trigger (break/retest), stop beyond invalidation swing, TP1/TP2 with R:R (target 1:1–2:1); size 0.1–0.5% NAV; max hold minutes/hours for scalp.
+4. <strong>Derivatives overlay</strong> — perp mark, funding, OI, top-trader L/S; flag crowded side and liq-risk bands % from mark.
+5. <strong>Risks & session notes</strong> — next 1–4h catalysts only (no 48h geo essay) + ${TRADING_DISCLAIMER_PROMPT} + <code>A2A|asset=[BTC|ETH|BNB|SOL]|class=crypto|tf=[5m|15m]|bias=[long|short|neutral]|conviction=[L|M/H]|entry=[zone]|stop=[price]|tp1=[price]|rr=[ratio]</code>
+
+Rules:
+- Anchor every level to SCALP DESK INTELLIGENCE (klines) + perp mark — never invent prices.
+- If user asks one coin, focus that pair; if unspecified, lead with BTC then note alts briefly.
+- Do NOT use the 6-section institutional swing plan; keep geo/macro to 1–2 sentences max.
+- Neutral → range scalp or wait-for-breakout; do not force direction.`;
+
+const SCALPING_PLAN_RESPONSE_STRUCTURE = `SCALPING-PLAN RESPONSE STRUCTURE (when scalping plan is required):
+Follow the five blocks in CRYPTO SCALPING PLAN above. Lead with a direct answer to validity/entry questions.
+Prioritize SCALP DESK INTELLIGENCE over generic 24h tape for levels.`;
 
 const EXECUTIVE_LOUNGE_CATEGORY_INTEL = `EXECUTIVE LOUNGE — 11 INTELLIGENCE CATEGORIES (mandatory taxonomy):
 Users may ask about ANY category below. Detect intent, apply the matching playbook(s), and combine when a question spans lenses (e.g. Geopolitics + Oil, Macro + Gold / Silver).
@@ -805,10 +829,17 @@ function isExplicitTradingPlanRequest(message: string): boolean {
   return false;
 }
 
-export type ConciergeResponseMode = "standard" | "trade_ideas" | "trading_plan";
+export type ConciergeResponseMode = "standard" | "trade_ideas" | "trading_plan" | "scalping_plan";
+
+export function wantsScalpingPlan(message: string): boolean {
+  if (/\b(hot|hottest|best|top)\b/.test(message.toLowerCase()) && /\b(dlmm|dllm|meteora|yield|yields|apy)\b/i.test(message)) {
+    return false;
+  }
+  return messageRequestsScalpDesk(message);
+}
 
 export function wantsTradeIdeas(message: string): boolean {
-  if (isExplicitTradingPlanRequest(message)) return false;
+  if (isExplicitTradingPlanRequest(message) || wantsScalpingPlan(message)) return false;
   return TRADE_IDEAS_PATTERN.test(message);
 }
 
@@ -817,6 +848,7 @@ export function wantsTradingPlan(message: string, _topics?: ConciergeTopic[]): b
   if (/\b(hot|hottest|best|top)\b/.test(t) && /\b(dlmm|dllm|meteora|yield|yields|apy|farm|pool)\b/.test(t)) {
     return false;
   }
+  if (wantsScalpingPlan(message)) return false;
   if (wantsTradeIdeas(message)) return false;
   return isExplicitTradingPlanRequest(message);
 }
@@ -827,6 +859,7 @@ export function detectResponseMode(
   deFiYieldQuestion: boolean,
 ): ConciergeResponseMode {
   if (deFiYieldQuestion) return "standard";
+  if (wantsScalpingPlan(message)) return "scalping_plan";
   if (wantsTradingPlan(message, topics)) return "trading_plan";
   if (wantsTradeIdeas(message)) return "trade_ideas";
   return "standard";
@@ -853,12 +886,14 @@ export function buildConciergeSystemPrompt(options: {
     recentUserMessages = [],
   } = options;
   const requireTradingPlan = responseMode === "trading_plan";
+  const requireScalpingPlan = responseMode === "scalping_plan";
   const requireTradeIdeas = responseMode === "trade_ideas";
   const replyLangBlock = buildReplyLanguageBlock(userMessage, recentUserMessages);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
   const planFramework = requireTradingPlan ? TRADING_PLAN_FRAMEWORK : "";
+  const scalpFramework = requireScalpingPlan ? SCALPING_PLAN_FRAMEWORK : "";
   const tradeIdeasBlock = requireTradeIdeas ? `\n${TRADE_IDEAS_FRAMEWORK}\n` : "";
-  const tradingBlock = requireTradingPlan ? `\n${planFramework}\n` : "";
+  const tradingBlock = requireTradingPlan ? `\n${planFramework}\n` : requireScalpingPlan ? `\n${scalpFramework}\n` : "";
 
   const marketBlock = liveMarketBlock
     ? `\n${liveMarketBlock}\n`
@@ -892,7 +927,7 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 - DeFi protocol economics when DeFi/onchain questions arise
 - **Agent-to-agent**: structured Agent handoff line on full trading plans
 
-${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : requireTradeIdeas ? "Follow TRADE IDEAS framework above — complete all blocks, name specific tickers." : RESPONSE_STRUCTURE}
+${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : requireScalpingPlan ? SCALPING_PLAN_RESPONSE_STRUCTURE : requireTradeIdeas ? "Follow TRADE IDEAS framework above — complete all blocks, name specific tickers." : RESPONSE_STRUCTURE}
 
 ${DEFI_INTEL_RESPONSE}
 ${tradeIdeasBlock}

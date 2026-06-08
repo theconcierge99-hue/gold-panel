@@ -10,7 +10,8 @@ export type X402IntelKind =
   | "intel-verdict"
   | "intel-airdrop"
   | "intel-listing"
-  | "intel-momentum";
+  | "intel-momentum"
+  | "intel-scalp";
 
 export type X402ResourceKind = X402CoreKind | X402IntelKind;
 

@@ -10,6 +10,11 @@ import {
   type MarketTick,
 } from "./concierge-brain";
 import {
+  fetchScalpDeskIntel,
+  formatScalpIntelForPrompt,
+  messageRequestsScalpDesk,
+} from "./concierge-scalp-intel";
+import {
   fetchGeneralKnowledgeSnapshot,
   formatGeneralKnowledgeForPrompt,
 } from "./general-knowledge";
@@ -127,6 +132,9 @@ function generationConfigForMode(mode: ConciergeResponseMode): Record<string, un
   if (mode === "trading_plan") {
     return { temperature: 0.55, maxOutputTokens: 8192 };
   }
+  if (mode === "scalping_plan") {
+    return { temperature: 0.5, maxOutputTokens: 6144 };
+  }
   if (mode === "trade_ideas") {
     return { temperature: 0.55, maxOutputTokens: 4096 };
   }
@@ -233,7 +241,8 @@ async function resolveIntelligenceContext(
     worldNews: [],
     sources: [] as string[],
   };
-  const tradingPlan = responseMode === "trading_plan";
+  const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
+  const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
   const marketTimeout = tradingPlan ? 6_500 : 7_000;
   const generalTimeout = tradingPlan ? 3_500 : 4_000;
 
@@ -298,9 +307,20 @@ async function resolveIntelligenceContext(
     if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
   }
 
+  let scalpBlock = "";
+  if (scalpDesk) {
+    const scalp = await withTimeout(
+      fetchScalpDeskIntel({ message: userMessage }),
+      tradingPlan ? 5_500 : 4_500,
+      null,
+    );
+    if (scalp) scalpBlock = formatScalpIntelForPrompt(scalp);
+  }
+
   ingestWireHeadlinesAsync(snapshot.headlines);
   const intelBlock = [
     formatLiveMarketForPrompt(snapshot),
+    scalpBlock,
     formatGeneralKnowledgeForPrompt(general),
     defiIntelBlock,
   ]
@@ -334,7 +354,7 @@ export async function runConciergeGemini(options: {
   const topics = detectTopics(queryMessage);
   const deFiYieldQuestion = wantsDeFiYieldQuestion(queryMessage);
   const responseMode = detectResponseMode(queryMessage, topics, deFiYieldQuestion);
-  const requireTradingPlan = responseMode === "trading_plan";
+  const requireTradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const { intelBlock, ticks, snapshot, loungeMemoryBlock } = await resolveIntelligenceContext(
     market,
     queryMessage,
@@ -433,7 +453,7 @@ export async function runConciergeGemini(options: {
   }
 
   const recentUser = history.filter((h) => h.role === "user").map((h) => h.text);
-  const historyTurns = responseMode === "trading_plan" ? 4 : 8;
+  const historyTurns = requireTradingPlan ? 4 : 8;
   const systemPrompt = buildConciergeSystemPrompt({
     topics,
     market: ticks,
@@ -457,8 +477,8 @@ export async function runConciergeGemini(options: {
     generationConfig: generationConfigForMode(responseMode),
   };
   let reply = "";
-  const chatModels = responseMode === "trading_plan" ? TRADING_PLAN_MODELS : STANDARD_MODELS;
-  const chatTimeout = responseMode === "trading_plan" ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
+  const chatModels = requireTradingPlan ? TRADING_PLAN_MODELS : STANDARD_MODELS;
+  const chatTimeout = requireTradingPlan ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
   const errors: string[] = [];
   for (const model of chatModels) {
     try {

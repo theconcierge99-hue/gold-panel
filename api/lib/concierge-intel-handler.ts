@@ -2,6 +2,7 @@
  * Shared x402 handlers for Concierge DeFi intelligence endpoints (integrators).
  */
 import { runAlphaIntel } from "./concierge-alpha-intel";
+import { runScalpIntel } from "./concierge-scalp-intel";
 import {
   buildVerdict,
   fetchChainTvl,
@@ -40,6 +41,7 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-airdrop": "/api/concierge-intel-airdrop",
   "intel-listing": "/api/concierge-intel-listing",
   "intel-momentum": "/api/concierge-intel-momentum",
+  "intel-scalp": "/api/concierge-intel-scalp",
 };
 
 export type IntelRequestBody = {
@@ -56,6 +58,8 @@ export type IntelRequestBody = {
   includeInsider?: boolean;
   /** Alpha desks: max candidates (1–8, default 5) */
   limit?: number;
+  /** Scalp desk: 5m | 15m (default both) */
+  intervals?: ("5m" | "15m")[];
 };
 
 function jsonResponse(
@@ -206,6 +210,10 @@ async function runIntel(
 
   if (kind === "intel-airdrop" || kind === "intel-listing" || kind === "intel-momentum") {
     return runAlphaIntel(kind, body);
+  }
+
+  if (kind === "intel-scalp") {
+    return runScalpIntel(body);
   }
 
   throw new Error("Unknown intel kind");

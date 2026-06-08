@@ -156,6 +156,15 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["intel-momentum"]],
   },
+  {
+    kind: "intel-scalp",
+    method: "POST",
+    path: "/api/concierge-intel-scalp",
+    name: "Concierge Intel — Scalp",
+    description: "BTC/ETH/BNB/SOL USDT scalping desk — 5m & 15m Binance klines, RSI/EMA, perp overlay for agents.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-scalp"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */

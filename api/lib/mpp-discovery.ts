@@ -40,7 +40,7 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
   "Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI facilitator).",
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
-  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider).",
+  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m).",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
   "pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
@@ -180,6 +180,20 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
       chain: { type: "string" },
       limit: { type: "number" },
       includeInsider: { type: "boolean" },
+    },
+    [],
+  ),
+  "intel-scalp": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Scalp context (e.g. BTC 15m entry)" },
+      symbols: {
+        type: "array",
+        items: { type: "string", enum: ["BTC", "ETH", "BNB", "SOL"] },
+      },
+      intervals: {
+        type: "array",
+        items: { type: "string", enum: ["5m", "15m"] },
+      },
     },
     [],
   ),
@@ -367,6 +381,23 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "candidates"],
   ),
+  "intel-scalp": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      assets: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            symbol: { type: "string" },
+            pair: { type: "string" },
+            intervals: { type: "array" },
+          },
+        },
+      },
+    },
+    ["ok", "assets"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -397,6 +428,7 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-airdrop": { message: "Solana ecosystem airdrop farming", limit: 5, includeInsider: true },
   "intel-listing": { message: "Potential Binance listings", limit: 5 },
   "intel-momentum": { message: "BTC altcoin volatility catalysts", limit: 5, includeInsider: true },
+  "intel-scalp": { message: "scalp BTC 15m", symbols: ["BTC"], intervals: ["5m", "15m"] },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -439,6 +471,17 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
     ok: true,
     summary: "Momentum desk: crowded positioning watchlist.",
     candidates: [{ asset: "BTC", direction: "down", thesis: "Crowded long — liq risk on dips.", conviction: "medium" }],
+  },
+  "intel-scalp": {
+    ok: true,
+    filters: { symbols: ["BTC"], intervals: ["5m", "15m"], pairs: ["BTC/USDT"] },
+    assets: [
+      {
+        symbol: "BTC",
+        pair: "BTCUSDT",
+        intervals: [{ interval: "15m", ta: { rsi14: 52, trend: "neutral", lastClose: 60781 } }],
+      },
+    ],
   },
 };
 

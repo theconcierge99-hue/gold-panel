@@ -121,6 +121,7 @@ export function conciergeDevPlugin(): Plugin {
           "/api/concierge-intel-airdrop": (r) => handleConciergeIntelRoute(r, "intel-airdrop"),
           "/api/concierge-intel-listing": (r) => handleConciergeIntelRoute(r, "intel-listing"),
           "/api/concierge-intel-momentum": (r) => handleConciergeIntelRoute(r, "intel-momentum"),
+          "/api/concierge-intel-scalp": (r) => handleConciergeIntelRoute(r, "intel-scalp"),
         };
         if (url && signalRoutes[url]) {
           const chunks: Buffer[] = [];

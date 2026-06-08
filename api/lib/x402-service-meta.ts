@@ -18,7 +18,8 @@ export const X402_OPERATION_TAGS: Record<
   | "intel-verdict"
   | "intel-airdrop"
   | "intel-listing"
-  | "intel-momentum",
+  | "intel-momentum"
+  | "intel-scalp",
   readonly string[]
 > = {
   news: ["Search", "Trading", "RWA"],
@@ -33,6 +34,7 @@ export const X402_OPERATION_TAGS: Record<
   "intel-airdrop": ["AI", "Crypto", "Trading", "RWA"],
   "intel-listing": ["AI", "Crypto", "Trading", "RWA"],
   "intel-momentum": ["AI", "Crypto", "Trading", "RWA"],
+  "intel-scalp": ["AI", "Crypto", "Trading"],
 };
 
 export const X402_SERVICE_NAME = "Concierge Agent";

@@ -108,6 +108,16 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { message: "Altcoins volatility catalysts", limit: 5, includeInsider: true },
   },
   {
+    id: "intel-scalp",
+    segment: "alpha",
+    method: "POST",
+    path: "/api/concierge-intel-scalp",
+    name: "Intel — Scalp",
+    description: "BTC/ETH/BNB/SOL USDT scalping — 5m & 15m klines, RSI/EMA, perp funding & positioning.",
+    priceUsd: "0.10",
+    sampleBody: { message: "scalp BTC 15m entry stop", symbols: ["BTC"], intervals: ["5m", "15m"] },
+  },
+  {
     id: "news-open",
     segment: "lounge",
     method: "POST",
