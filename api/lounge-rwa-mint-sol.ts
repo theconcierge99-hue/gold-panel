@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { authorizeInternalApi } from "./lib/lounge-internal-auth";
+import { authorizeInternalApi } from "../lib/concierge-api/lounge-internal-auth";
 
 /** Node + @vercel/node handler — Metaplex (not Edge-compatible). */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -31,14 +31,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const { getSignalById } = await import("./lib/signal-store");
+    const { getSignalById } = await import("../lib/concierge-api/signal-store");
     const signal = await getSignalById(signalId);
     if (!signal) {
       res.status(404).json({ error: "Signal not found" });
       return;
     }
 
-    const { mintSolanaSignalNftForSignal } = await import("./lib/rwa-solana-mint");
+    const { mintSolanaSignalNftForSignal } = await import("../lib/concierge-api/rwa-solana-mint");
     const solanaNft = await mintSolanaSignalNftForSignal(signal);
 
     res.status(200).json({ ok: true, solanaNft });

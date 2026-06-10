@@ -1,18 +1,18 @@
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
-import { normalizeGeminiApiKey, runConciergeGemini } from "../api/lib/concierge-gemini";
+import { normalizeGeminiApiKey, runConciergeGemini } from "./concierge-api/concierge-gemini";
 import {
   readBodyWithLimit,
   sanitizePublicError,
   validateConciergeRequest,
-} from "../api/lib/concierge-security";
-import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
-import { handleSignalOpen } from "../api/lib/signal-open-handler";
-import { handleSignalPublish } from "../api/lib/signal-publish-handler";
-import handleAgentIdentity from "../api/lib/routes/agent-identity";
-import handleAgentIdentityCard from "../api/lib/routes/agent-identity-card";
-import handleWellKnownAgentCard from "../api/lib/routes/well-known-agent-card";
-import { handleConciergeIntelRoute } from "../api/lib/concierge-intel-handler";
+} from "./concierge-api/concierge-security";
+import { buildLoungeMarketPayload } from "./concierge-api/lounge-market";
+import { handleSignalOpen } from "./concierge-api/signal-open-handler";
+import { handleSignalPublish } from "./concierge-api/signal-publish-handler";
+import handleAgentIdentity from "./concierge-api/routes/agent-identity";
+import handleAgentIdentityCard from "./concierge-api/routes/agent-identity-card";
+import handleWellKnownAgentCard from "./concierge-api/routes/well-known-agent-card";
+import { handleConciergeIntelRoute } from "./concierge-api/concierge-intel-handler";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",

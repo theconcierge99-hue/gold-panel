@@ -14,7 +14,7 @@ import { mintSignalRwaToken, siteOrigin } from "./rwa-token";
 import type { SolanaRwaMintResult } from "./rwa-types";
 import { savePublishedSignal, signalStoreReady } from "./signal-store";
 import type { CreatorSignal } from "./signals-types";
-import { truncateOnChainMetaName } from "../../lib/on-chain-meta";
+import { truncateOnChainMetaName } from "../on-chain-meta";
 import { reportPaidRouteToZauth } from "./zauth-paid-response";
 
 function newSignalId(): string {

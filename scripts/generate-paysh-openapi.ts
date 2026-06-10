@@ -5,7 +5,7 @@
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildOpenApiDocument } from "../api/lib/x402-discovery.ts";
+import { buildOpenApiDocument } from "../lib/concierge-api/x402-discovery.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const origin = (process.env.ORIGIN ?? "https://conc-exe.xyz").replace(/\/$/, "");

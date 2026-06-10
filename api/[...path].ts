@@ -1,4 +1,4 @@
-import { dispatchApiRoute } from "./lib/api-router";
+import { dispatchApiRoute } from "../lib/concierge-api/api-router";
 
 export const config = { runtime: "edge" };
 

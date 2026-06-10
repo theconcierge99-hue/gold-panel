@@ -1,6 +1,6 @@
 /**
- * Single Edge entry dispatches all public API paths (Vercel Hobby ≤12 functions).
- * External URLs are unchanged — only the serverless entry layout changed.
+ * Dispatched from api/[...path].ts. Handler modules live in lib/concierge-api/
+ * (outside /api) so Vercel does not register each file as its own function.
  */
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";

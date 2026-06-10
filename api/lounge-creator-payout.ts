@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { authorizeInternalApi } from "./lib/lounge-internal-auth";
-import type { CreatorPayoutResult } from "./lib/creator-payout-types";
+import { authorizeInternalApi } from "../lib/concierge-api/lounge-internal-auth";
+import type { CreatorPayoutResult } from "../lib/concierge-api/creator-payout-types";
 
 /** Node + @vercel/node handler — SPL / ERC-20 transfers. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -37,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const { disburseCreatorInstantShare } = await import("./lib/creator-instant-payout");
+    const { disburseCreatorInstantShare } = await import("../lib/concierge-api/creator-instant-payout");
     const payout: CreatorPayoutResult = await disburseCreatorInstantShare({
       creatorWallet,
       creatorChain,
