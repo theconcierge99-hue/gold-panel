@@ -31,6 +31,7 @@ import {
 
 export { buildBazaarExtension };
 import { corbitsDiscoveryLinks } from "./corbits-links";
+import { grokDiscoveryLinks } from "./grok-links";
 import { payshDiscoveryLinks } from "./paysh-links";
 import { zauthMetaLinks } from "./zauth";
 
@@ -219,7 +220,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Listed on MPPscan; submit to pay.sh pay-skills for agent CLI discovery.",
+      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Listed on MPPscan; pay.sh CLI; Grok Build skill concierge-intel in repo.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -227,6 +228,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
       mppscanRegister: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(origin),
       ...payshDiscoveryLinks(origin),
+      ...grokDiscoveryLinks(origin),
       corbits: corbitsDiscoveryLinks(),
       zauth: zauthMetaLinks(origin),
     },

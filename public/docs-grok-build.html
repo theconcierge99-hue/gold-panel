@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Grok Build — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Use Grok Build CLI with Concierge Agent — terminal coding agent, concierge-intel skill, pay.sh x402 calls." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/grok-build" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="grok-build">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Toolchain</div>
+      <h1 class="docs-title">Grok Build CLI</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://x.ai/cli" target="_blank" rel="noopener">Grok Build</a> is xAI’s terminal coding agent — plan mode, subagents, skills, MCP, and headless <code>-p</code> mode. This repo ships a <strong>concierge-intel</strong> skill so Grok sessions can call Concierge’s twelve x402 routes with the right discovery and payment flow.
+      </p>
+
+      <div class="card">
+        <p><strong>CLI home:</strong> <a class="ext" href="https://x.ai/cli" target="_blank" rel="noopener">x.ai/cli ↗</a></p>
+        <p><strong>Docs:</strong> <a class="ext" href="https://docs.x.ai/build/overview" target="_blank" rel="noopener">docs.x.ai/build ↗</a></p>
+        <p><strong>Access:</strong> SuperGrok or X Premium+ subscription</p>
+        <p><strong>Skill:</strong> <code>.grok/skills/concierge-intel/</code> (loaded automatically in this repo)</p>
+      </div>
+
+      <h2 class="docs-h2">Install Grok Build</h2>
+      <div class="card">
+<pre><code># macOS / Linux
+curl -fsSL https://x.ai/cli/install.sh | bash
+
+# Windows (PowerShell)
+irm https://x.ai/cli/install.ps1 | iex
+
+# npm alternative
+npm install -g @xai-official/grok</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Start in this repo</h2>
+      <div class="card">
+<pre><code>cd gold-panel
+grok inspect          # confirm .grok/skills/concierge-intel loaded
+grok                    # interactive TUI — use /concierge-intel
+
+# Headless
+grok -p "Explain lib/concierge-api/api-router.ts"</code></pre>
+        <p class="note">Grok reads <code>AGENTS.md</code>, <code>CLAUDE.md</code>, skills, hooks, and MCP servers in the project tree.</p>
+      </div>
+
+      <h2 class="docs-h2">Call Concierge intel (pay.sh)</h2>
+      <div class="card">
+        <p>Install <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> for automatic HTTP 402 settlement:</p>
+<pre><code>brew install pay
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-scalp \
+  -d '{"symbols":["BTC","SOL"],"intervals":["5m","15m"]}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge \
+  -d '{"mode":"chat","message":"BTC outlook"}'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Skill reference</h2>
+      <div class="card">
+        <p>Invoke in Grok session: <code>/concierge-intel</code></p>
+        <p>Covers discovery (<code>/openapi.json</code>, <code>/.well-known/x402</code>), twelve paid routes, sandbox commands, and repo paths (<code>lib/concierge-api/</code>, Vercel ≤12 function layout).</p>
+        <p>Source: <code>.grok/skills/concierge-intel/SKILL.md</code></p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — recommended x402 payment CLI</li>
+          <li><a href="/docs/builders" class="gold-link">For Builders</a> — OpenAPI + AgentCash</li>
+          <li><a href="/docs/api/intel" class="gold-link">DeFi Intel</a> — route schemas</li>
+          <li><a href="/integrations" class="gold-link">Integrations</a> — full partner stack</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://x.ai/cli" target="_blank" rel="noopener">x.ai/cli ↗</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+        <a class="btn" href="/agent/endpoints">12 routes</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · Grok Build skill · <a href="https://x.ai/cli" class="ext" target="_blank" rel="noopener">x.ai/cli</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

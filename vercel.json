@@ -110,6 +110,10 @@
       "destination": "/docs-corbits.html"
     },
     {
+      "source": "/docs/grok-build",
+      "destination": "/docs-grok-build.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

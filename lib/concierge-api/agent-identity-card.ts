@@ -88,6 +88,8 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
       docs: `${base}/docs/agents`,
       paysh: "https://pay.sh/",
       payshGuide: `${base}/docs/payment/paysh`,
+      grokBuild: "https://x.ai/cli",
+      grokBuildGuide: `${base}/docs/grok-build`,
     },
   };
 }

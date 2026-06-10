@@ -27,6 +27,7 @@
       { id: "playground", href: "/docs/playground", title: "Executive Lounge" },
       { id: "architecture", href: "/docs/architecture", title: "Architecture" },
       { id: "corbits", href: "/docs/corbits", title: "Corbits" },
+      { id: "grok-build", href: "/docs/grok-build", title: "Grok Build CLI" },
     ]},
   ];
 

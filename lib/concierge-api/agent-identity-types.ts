@@ -41,6 +41,8 @@ export type AgentCardJson = {
     docs: string;
     paysh?: string;
     payshGuide?: string;
+    grokBuild?: string;
+    grokBuildGuide?: string;
   };
 };
 
