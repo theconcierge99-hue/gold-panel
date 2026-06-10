@@ -3,15 +3,11 @@ import {
   corsHeadersFor,
   readBodyWithLimit,
   sanitizeNewsOpenError,
-} from "./lib/concierge-security";
-import { reportPaidRouteToZauth } from "./lib/zauth-paid-response";
-import { guardPaidX402Api } from "./lib/x402-server";
+} from "../concierge-security";
+import { reportPaidRouteToZauth } from "../zauth-paid-response";
+import { guardPaidX402Api } from "../x402-server";
 
 /** Edge + PayAI HTTP facilitator (no Node-only @x402 server SDK) */
-export const config = {
-  runtime: "edge",
-};
-
 const MAX_URL_LEN = 2048;
 const MAX_TITLE_LEN = 500;
 const MAX_SOURCE_LEN = 120;

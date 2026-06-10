@@ -1,8 +1,6 @@
-import { buildAgentCard, resolveOrigin } from "./lib/agent-identity-card";
-import { corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { getAgentById } from "./lib/agent-identity-store";
-
-export const config = { runtime: "edge" };
+import { buildAgentCard, resolveOrigin } from "../agent-identity-card";
+import { corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { getAgentById } from "../agent-identity-store";
 
 /** ERC-8004-style agent card JSON for one registered agent. */
 export default async function handler(request: Request): Promise<Response> {

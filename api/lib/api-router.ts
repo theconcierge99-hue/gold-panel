@@ -1,0 +1,71 @@
+/**
+ * Single Edge entry dispatches all public API paths (Vercel Hobby ≤12 functions).
+ * External URLs are unchanged — only the serverless entry layout changed.
+ */
+import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
+import handleAgentIdentity from "./routes/agent-identity";
+import handleAgentIdentityCard from "./routes/agent-identity-card";
+import handleConcierge from "./routes/concierge";
+import handleLoungeRwaRecordMint from "./routes/lounge-rwa-record-mint";
+import handleLoungeSignalOpen from "./routes/lounge-signal-open";
+import handleLoungeSignalPublish from "./routes/lounge-signal-publish";
+import handleMarket from "./routes/market";
+import handleMppscanRedirect from "./routes/mppscan-redirect";
+import handleNewsOpen from "./routes/news-open";
+import handleOpenapi from "./routes/openapi";
+import handleRwaBadges from "./routes/rwa-badges";
+import handleRwaMetadata from "./routes/rwa-metadata";
+import handleRwaToken from "./routes/rwa-token";
+import handleSolUsdcBalance from "./routes/sol-usdc-balance";
+import handleSolanaRpc from "./routes/solana-rpc";
+import handleSolanaRpcSend from "./routes/solana-rpc-send";
+import handleWellKnownAgentCard from "./routes/well-known-agent-card";
+import handleWellKnownX402 from "./routes/well-known-x402";
+import handleX402Config from "./routes/x402-config";
+import handleZauthDirectory from "./routes/zauth-directory";
+import handleZauthStatus from "./routes/zauth-status";
+
+type RouteHandler = (request: Request) => Promise<Response>;
+
+const EXACT_ROUTES: Record<string, RouteHandler> = {
+  "/api/agent-identity": handleAgentIdentity,
+  "/api/agent-identity-card": handleAgentIdentityCard,
+  "/api/concierge": handleConcierge,
+  "/api/lounge-rwa-record-mint": handleLoungeRwaRecordMint,
+  "/api/lounge-signal-open": handleLoungeSignalOpen,
+  "/api/lounge-signal-publish": handleLoungeSignalPublish,
+  "/api/market": handleMarket,
+  "/api/mppscan-redirect": handleMppscanRedirect,
+  "/api/news-open": handleNewsOpen,
+  "/api/openapi": handleOpenapi,
+  "/api/rwa-badges": handleRwaBadges,
+  "/api/rwa-metadata": handleRwaMetadata,
+  "/api/rwa-token": handleRwaToken,
+  "/api/sol-usdc-balance": handleSolUsdcBalance,
+  "/api/solana-rpc": handleSolanaRpc,
+  "/api/solana-rpc-send": handleSolanaRpcSend,
+  "/api/well-known-agent-card": handleWellKnownAgentCard,
+  "/api/well-known-x402": handleWellKnownX402,
+  "/api/x402-config": handleX402Config,
+  "/api/zauth-directory": handleZauthDirectory,
+  "/api/zauth-status": handleZauthStatus,
+};
+
+export function dispatchApiRoute(request: Request): Promise<Response> {
+  const pathname = new URL(request.url).pathname;
+
+  const intelKind = resolveIntelKindFromRequest(request);
+  if (intelKind) {
+    return handleConciergeIntelRoute(request, intelKind);
+  }
+
+  const handler = EXACT_ROUTES[pathname];
+  if (handler) return handler(request);
+
+  return Promise.resolve(
+    new Response(JSON.stringify({ error: "Not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    }),
+  );
+}

@@ -1,9 +1,5 @@
-import { corsHeadersFor } from "./lib/concierge-security";
-import { getPublicX402ConfigAsync } from "./lib/x402-config";
-
-export const config = {
-  runtime: "edge",
-};
+import { corsHeadersFor } from "../concierge-security";
+import { getPublicX402ConfigAsync } from "../x402-config";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);

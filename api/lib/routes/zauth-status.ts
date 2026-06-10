@@ -1,12 +1,10 @@
-import { corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { resolveX402SiteOrigin } from "./lib/x402-discovery";
+import { corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { resolveX402SiteOrigin } from "../x402-discovery";
 import {
   fetchZauthEndpointsForOrigin,
   isZauthProviderEnabled,
   zauthMetaLinks,
-} from "./lib/zauth";
-
-export const config = { runtime: "edge" };
+} from "../zauth";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);

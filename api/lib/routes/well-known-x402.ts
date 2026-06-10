@@ -1,10 +1,8 @@
 import {
-  buildOpenApiDocument,
+  buildWellKnownX402Document,
   discoveryCorsHeaders,
   resolveX402SiteOrigin,
-} from "./lib/x402-discovery";
-
-export const config = { runtime: "edge" };
+} from "../x402-discovery";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = discoveryCorsHeaders();
@@ -21,9 +19,9 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const origin = resolveX402SiteOrigin(request);
-  const doc = buildOpenApiDocument(origin);
+  const body = buildWellKnownX402Document(origin);
 
-  return new Response(JSON.stringify(doc), {
+  return new Response(JSON.stringify(body, null, 2), {
     status: 200,
     headers: {
       ...cors,

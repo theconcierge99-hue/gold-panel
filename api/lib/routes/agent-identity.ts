@@ -1,5 +1,5 @@
-import { buildAgentCard, resolveOrigin } from "./lib/agent-identity-card";
-import { corsHeadersFor, readBodyWithLimit, sanitizePublicError } from "./lib/concierge-security";
+import { buildAgentCard, resolveOrigin } from "../agent-identity-card";
+import { corsHeadersFor, readBodyWithLimit, sanitizePublicError } from "../concierge-security";
 import {
   normalizeEvmAddress,
   normalizeSolAddress,
@@ -7,9 +7,7 @@ import {
   getAgentById,
   listAgents,
   toPublicView,
-} from "./lib/agent-identity-store";
-
-export const config = { runtime: "edge" };
+} from "../agent-identity-store";
 
 function json(
   request: Request,

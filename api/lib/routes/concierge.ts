@@ -1,14 +1,14 @@
-import { normalizeGeminiApiKey, runConciergeGemini } from "./lib/concierge-gemini";
+import { normalizeGeminiApiKey, runConciergeGemini } from "../concierge-gemini";
 import {
   assertAllowedOrigin,
   corsHeadersFor,
   readBodyWithLimit,
   sanitizePublicError,
   validateConciergeRequest,
-} from "./lib/concierge-security";
-import { getAgentById } from "./lib/agent-identity-store";
-import { reportPaidRouteToZauth } from "./lib/zauth-paid-response";
-import { guardPaidX402Api } from "./lib/x402-server";
+} from "../concierge-security";
+import { getAgentById } from "../agent-identity-store";
+import { reportPaidRouteToZauth } from "../zauth-paid-response";
+import { guardPaidX402Api } from "../x402-server";
 
 function parseAgentIdHeader(request: Request): string | null {
   const id = request.headers.get("x-agent-id")?.trim();
@@ -17,10 +17,6 @@ function parseAgentIdHeader(request: Request): string | null {
 }
 
 /** Edge — Gemini + x402 only (no Solana / Metaplex imports). Wall time capped at 30s by Vercel Edge. */
-export const config = {
-  runtime: "edge",
-};
-
 function jsonResponse(
   request: Request,
   body: unknown,

@@ -1,8 +1,6 @@
-import { corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { fetchZauthDirectory, zauthMetaLinks } from "./lib/zauth";
-import { resolveX402SiteOrigin } from "./lib/x402-discovery";
-
-export const config = { runtime: "edge" };
+import { corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { fetchZauthDirectory, zauthMetaLinks } from "../zauth";
+import { resolveX402SiteOrigin } from "../x402-discovery";
 
 /** Proxy to zauth x402 directory — agents query before paying third-party endpoints. */
 export default async function handler(request: Request): Promise<Response> {

@@ -1,7 +1,5 @@
-import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { getReaderBadgeProfile } from "./lib/rwa-badge";
-
-export const config = { runtime: "edge" };
+import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { getReaderBadgeProfile } from "../rwa-badge";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);

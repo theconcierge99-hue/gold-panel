@@ -1,11 +1,7 @@
-import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { buildLoungeMarketPayload } from "./lib/lounge-market";
+import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { buildLoungeMarketPayload } from "../lounge-market";
 
 /** Edge — free headline feed; no x402 / Node SDK deps */
-export const config = {
-  runtime: "edge",
-};
-
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
 

@@ -1,10 +1,6 @@
-import { corsHeadersFor } from "./lib/concierge-security";
-import { getSolanaRpcUrlForServer } from "./lib/x402-config";
-import { getSolUsdcBalanceAtomic } from "./lib/x402-solana-rpc";
-
-export const config = {
-  runtime: "edge",
-};
+import { corsHeadersFor } from "../concierge-security";
+import { getSolanaRpcUrlForServer } from "../x402-config";
+import { getSolUsdcBalanceAtomic } from "../x402-solana-rpc";
 
 const OWNER_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 

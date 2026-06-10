@@ -1,10 +1,6 @@
-import { corsHeadersFor } from "./lib/concierge-security";
-import { getSolanaRpcUrlForServer } from "./lib/x402-config";
-import { solanaRpcCall } from "./lib/x402-solana-rpc";
-
-export const config = {
-  runtime: "edge",
-};
+import { corsHeadersFor } from "../concierge-security";
+import { getSolanaRpcUrlForServer } from "../x402-config";
+import { solanaRpcCall } from "../x402-solana-rpc";
 
 /** Read-only RPC forwarded to Helius — blocks transaction submission from browser */
 const BLOCKED_METHODS = new Set([

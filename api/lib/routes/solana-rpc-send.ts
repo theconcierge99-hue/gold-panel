@@ -1,10 +1,8 @@
-import { corsHeadersFor } from "./lib/concierge-security";
-import { getSolanaRpcUrlForServer } from "./lib/x402-config";
-import { solanaRpcCallEx } from "./lib/x402-solana-rpc";
+import { corsHeadersFor } from "../concierge-security";
+import { getSolanaRpcUrlForServer } from "../x402-config";
+import { solanaRpcCallEx } from "../x402-solana-rpc";
 
 /** Edge — forward Solana JSON-RPC for client NFT mint (creator signs in Phantom) */
-export const config = { runtime: "edge" };
-
 const BLOCKED = new Set(["requestAirdrop"]);
 
 const SLOW_METHODS = new Set([

@@ -1,6 +1,4 @@
-import { getMppscanServerUrl, MPPSCAN_REGISTER_URL } from "./lib/mpp-discovery";
-
-export const config = { runtime: "edge" };
+import { getMppscanServerUrl, MPPSCAN_REGISTER_URL } from "../mpp-discovery";
 
 /** Redirect to live MPPscan server profile (set MPPSCAN_SERVER_URL in Vercel). */
 export default function handler(): Response {

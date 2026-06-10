@@ -1,7 +1,5 @@
-import { buildLoungeServiceCard, resolveOrigin } from "./lib/agent-identity-card";
-import { corsHeadersFor } from "./lib/concierge-security";
-
-export const config = { runtime: "edge" };
+import { buildLoungeServiceCard, resolveOrigin } from "../agent-identity-card";
+import { corsHeadersFor } from "../concierge-security";
 
 /** Service-level agent registry card (ERC-8004-style discovery). */
 export default async function handler(request: Request): Promise<Response> {

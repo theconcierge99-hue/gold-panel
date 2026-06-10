@@ -9,9 +9,9 @@ import {
 import { buildLoungeMarketPayload } from "../api/lib/lounge-market";
 import { handleSignalOpen } from "../api/lib/signal-open-handler";
 import { handleSignalPublish } from "../api/lib/signal-publish-handler";
-import handleAgentIdentity from "../api/agent-identity";
-import handleAgentIdentityCard from "../api/agent-identity-card";
-import handleWellKnownAgentCard from "../api/well-known-agent-card";
+import handleAgentIdentity from "../api/lib/routes/agent-identity";
+import handleAgentIdentityCard from "../api/lib/routes/agent-identity-card";
+import handleWellKnownAgentCard from "../api/lib/routes/well-known-agent-card";
 import { handleConciergeIntelRoute } from "../api/lib/concierge-intel-handler";
 
 const jsonHeaders = {

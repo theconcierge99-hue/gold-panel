@@ -1,7 +1,5 @@
-import { metaplexMetadataJson } from "./lib/rwa-metadata-json";
-import { getSignalRwaToken } from "./lib/rwa-store";
-
-export const config = { runtime: "edge" };
+import { metaplexMetadataJson } from "../rwa-metadata-json";
+import { getSignalRwaToken } from "../rwa-store";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = {

@@ -158,42 +158,6 @@
       "destination": "/api/well-known-agent-card"
     },
     {
-      "source": "/api/concierge-intel-tvl",
-      "destination": "/api/concierge-intel?kind=intel-tvl"
-    },
-    {
-      "source": "/api/concierge-intel-yields",
-      "destination": "/api/concierge-intel?kind=intel-yields"
-    },
-    {
-      "source": "/api/concierge-intel-whales",
-      "destination": "/api/concierge-intel?kind=intel-whales"
-    },
-    {
-      "source": "/api/concierge-intel-wallet",
-      "destination": "/api/concierge-intel?kind=intel-wallet"
-    },
-    {
-      "source": "/api/concierge-intel-verdict",
-      "destination": "/api/concierge-intel?kind=intel-verdict"
-    },
-    {
-      "source": "/api/concierge-intel-airdrop",
-      "destination": "/api/concierge-intel?kind=intel-airdrop"
-    },
-    {
-      "source": "/api/concierge-intel-listing",
-      "destination": "/api/concierge-intel?kind=intel-listing"
-    },
-    {
-      "source": "/api/concierge-intel-momentum",
-      "destination": "/api/concierge-intel?kind=intel-momentum"
-    },
-    {
-      "source": "/api/concierge-intel-scalp",
-      "destination": "/api/concierge-intel?kind=intel-scalp"
-    },
-    {
       "source": "/",
       "destination": "/agent.html"
     }

@@ -1,11 +1,9 @@
-import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { normalizeSolPayTo } from "./lib/x402-address";
-import { getSignalRwaToken, saveSignalRwaToken } from "./lib/rwa-store";
-import { getSignalById } from "./lib/signal-store";
+import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { normalizeSolPayTo } from "../x402-address";
+import { getSignalRwaToken, saveSignalRwaToken } from "../rwa-store";
+import { getSignalById } from "../signal-store";
 
 /** Edge — persist on-chain mint after creator signs in Phantom */
-export const config = { runtime: "edge" };
-
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
 

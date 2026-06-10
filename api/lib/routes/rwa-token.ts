@@ -1,8 +1,6 @@
-import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "./lib/concierge-security";
-import { getSignalRwaToken } from "./lib/rwa-store";
-import { getSignalById } from "./lib/signal-store";
-
-export const config = { runtime: "edge" };
+import { assertAllowedOrigin, corsHeadersFor, sanitizePublicError } from "../concierge-security";
+import { getSignalRwaToken } from "../rwa-store";
+import { getSignalById } from "../signal-store";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
