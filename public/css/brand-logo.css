@@ -1,0 +1,65 @@
+/**
+ * Concierge / Executive Lounge — shared logo treatment (visibility + gold ring).
+ */
+html,html[data-theme="dark"]{
+  --el-logo-gold:#c9a84c;
+  --el-logo-gold-bright:#e8c968;
+  --el-logo-ring:rgba(232,200,104,.85);
+  --el-logo-glow:rgba(201,168,76,.5);
+  --el-logo-glow-soft:rgba(201,168,76,.28);
+  --el-logo-bg:radial-gradient(circle at 38% 32%,#243048 0%,#121a2a 52%,#060810 100%);
+}
+html[data-theme="light"]{
+  --el-logo-gold:#9a7b2e;
+  --el-logo-gold-bright:#c9a84c;
+  --el-logo-ring:rgba(154,123,46,.75);
+  --el-logo-glow:rgba(201,168,76,.38);
+  --el-logo-glow-soft:rgba(154,123,46,.18);
+  --el-logo-bg:radial-gradient(circle at 38% 32%,#fff 0%,#f6f2ea 50%,#ebe6dc 100%);
+}
+
+.el-logo,
+.brand-logo,
+.pg-logo img,
+.int-brand img,
+.tok-brand img,
+.docs-sidebar-brand img,
+.conc-model img,
+.logo-row img{
+  display:block;flex-shrink:0;
+  border-radius:50%;
+  object-fit:contain;
+  background:var(--el-logo-bg);
+  border:2px solid var(--el-logo-ring);
+  box-shadow:
+    0 0 0 1px rgba(201,168,76,.35),
+    0 0 24px var(--el-logo-glow),
+    0 0 44px var(--el-logo-glow-soft),
+    0 4px 16px rgba(0,0,0,.4);
+  filter:brightness(1.14) contrast(1.08) saturate(1.1);
+}
+
+/* Header — Executive Lounge */
+.brand-logo{width:48px;height:48px;padding:4px}
+.brand-logo--lg{width:54px;height:54px;padding:5px}
+
+/* Concierge chat topbar */
+.conc-model img{width:54px;height:54px;padding:5px}
+
+/* Agent hub nav */
+.pg-logo img{width:36px;height:36px;padding:3px}
+
+/* Integrations / token pages */
+.int-brand img,.tok-brand img{width:48px;height:48px;padding:4px}
+
+/* Docs sidebar */
+.docs-sidebar-brand img{width:40px;height:40px;padding:3px}
+
+/* About & standalone */
+.logo-row img{width:54px;height:54px;padding:5px}
+
+@media(max-width:640px){
+  .brand-logo{width:44px;height:44px;padding:3px}
+  .conc-model img{width:48px;height:48px;padding:4px}
+  .pg-logo img{width:32px;height:32px;padding:2px}
+}

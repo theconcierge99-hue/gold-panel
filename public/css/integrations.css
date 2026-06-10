@@ -24,8 +24,7 @@ body.int-page{
   text-decoration:none;
 }
 .int-back:hover{color:var(--int-gold)}
-.int-brand{display:flex;align-items:center;gap:12px}
-.int-brand img{width:40px;height:40px;border-radius:50%;border:1px solid var(--int-gold-dim)}
+.int-brand{display:flex;align-items:center;gap:14px}
 .int-brand span{font-family:'DM Mono',monospace;font-size:15px}
 .int-brand em{color:var(--int-gold);font-style:normal}
 

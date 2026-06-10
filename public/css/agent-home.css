@@ -1,3 +1,5 @@
+@import url("/css/brand-logo.css");
+
 html,html[data-theme="dark"]{
   color-scheme:dark;
   --pg-bg:#030508;--pg-panel:#0a0e14;--pg-panel-border:#1a2438;
@@ -24,7 +26,6 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
   backdrop-filter:blur(8px);position:relative;z-index:20;flex-shrink:0;
 }
 .pg-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pg-text);font-family:'DM Mono',monospace;font-size:15px;justify-self:start}
-.pg-logo img{border-radius:50%;border:1px solid var(--pg-accent-dim)}
 .pg-logo-dim{color:var(--pg-accent)}
 .pg-nav{display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:center;justify-self:center;margin:0}
 .pg-nav a{
@@ -145,7 +146,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
   .pg-nav::-webkit-scrollbar{display:none}
   .pg-nav a{padding:8px 8px;font-size:9px;white-space:nowrap;flex-shrink:0}
   .pg-logo{font-size:13px}
-  .pg-logo img{width:24px;height:24px}
+  .pg-logo img{width:30px;height:30px;padding:2px}
   .agent-hero-wrap{padding:0 16px 92px}
   .agent-foot-row{gap:10px}
   .agent-foot-divider{display:none}

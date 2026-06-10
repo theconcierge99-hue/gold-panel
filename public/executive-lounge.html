@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/brand-logo.css" />
 <style>
   html,html[data-theme="dark"]{
     color-scheme:dark;
@@ -33,7 +34,7 @@
     --overlay-bg:rgba(8,10,15,.7); --nav-active-bg:rgba(201,168,76,.04);
     --pitem-hover:rgba(20,27,45,.6); --bar-track:rgba(30,45,74,.6);
     --ai-av-bg:linear-gradient(135deg,#0c1120,#1e2d4a);
-    --blob-opacity:.18; --logo-shadow:0 2px 14px rgba(0,0,0,.45);
+    --blob-opacity:.18;
     --gold-hover-bg:rgba(201,168,76,.06);
   }
   html[data-theme="light"]{
@@ -53,7 +54,7 @@
     --overlay-bg:rgba(20,28,46,.4); --nav-active-bg:rgba(154,123,46,.1);
     --pitem-hover:rgba(243,241,235,.9); --bar-track:rgba(216,210,198,.8);
     --ai-av-bg:linear-gradient(135deg,#ebe8e1,#d8d2c6);
-    --blob-opacity:.1; --logo-shadow:0 2px 12px rgba(0,0,0,.1);
+    --blob-opacity:.1;
     --gold-hover-bg:rgba(154,123,46,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -101,8 +102,6 @@
   }
   .brand-mark{display:flex;align-items:center;gap:12px}
   .brand-text{display:flex;flex-direction:column;line-height:1}
-  .brand-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid rgba(201,168,76,.4);box-shadow:var(--logo-shadow)}
-  .brand-logo--lg{width:44px;height:44px}
   .logo .name{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text-primary);letter-spacing:.02em}
   .logo .sub{font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--text-muted);margin-top:5px}
 
@@ -225,7 +224,6 @@
   .concierge-shell{display:flex;flex-direction:column;height:calc(100dvh - var(--header-h,60px) - var(--mobile-nav-h,0px));background:var(--bg);position:relative}
   .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
   .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:default;text-align:left}
-  .conc-model img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.4);box-shadow:var(--logo-shadow);flex-shrink:0}
   .conc-model-text{display:flex;flex-direction:column;gap:5px;line-height:1}
   .conc-model-title{display:inline-flex;align-items:center;gap:8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text-primary);letter-spacing:.02em}
   .conc-model .chev{font-size:11px;color:var(--text-muted);font-family:'Outfit',sans-serif}
@@ -565,7 +563,7 @@
 <div class="app">
   <header>
     <div class="logo brand-mark">
-      <img class="brand-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="38" height="38" />
+      <img class="brand-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="48" height="48" />
       <div class="brand-text">
       <span class="name">Executive Lounge</span>
         <span class="sub">Private Intelligence Lobby</span>
@@ -655,7 +653,7 @@
       <div class="concierge-shell" id="conciergeShell">
         <div class="conc-topbar">
           <div class="conc-model" aria-label="Concierge AI">
-            <img src="/images/the-concierge-logo.png" alt="The Concierge" width="44" height="44" />
+            <img class="el-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="54" height="54" />
             <div class="conc-model-text">
               <div class="conc-model-title">Concierge <span class="chev">▾</span></div>
               <div class="conc-model-sub">Your Intelligence Partner</div>

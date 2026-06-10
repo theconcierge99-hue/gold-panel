@@ -1,3 +1,5 @@
+@import url("/css/brand-logo.css");
+
 html,html[data-theme="dark"]{
   color-scheme:dark;
   --bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;
@@ -21,7 +23,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-prima
 }
 .docs-sidebar-brand{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:12px}
 .docs-sidebar-brand a{text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px}
-.docs-sidebar-brand img{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-dim)}
 .docs-sidebar-brand span{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300}
 .docs-sidebar-brand small{display:block;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-top:4px}
 .docs-nav-group{margin:14px 0 0}

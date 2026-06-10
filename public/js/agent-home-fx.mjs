@@ -31,7 +31,7 @@ export function initConciergeLogoParticles(canvas) {
     const footer = 52;
     const availW = w - padX * 2;
     const availH = h - padTop - textBlock - footer;
-    const maxDiam = Math.min(availW * 0.9, availH * 0.96, 460);
+    const maxDiam = Math.min(availW * 0.92, availH * 0.98, 520);
     const scale = maxDiam / LOGO_SRC;
     const radius = LOGO_HALF * scale;
     const cx = w / 2;
@@ -69,7 +69,7 @@ export function initConciergeLogoParticles(canvas) {
           ty,
           x: Math.cos(ang) * spread,
           y: Math.sin(ang) * spread,
-          size: goldish ? 3.4 : 2.4,
+          size: goldish ? 3.8 : 2.7,
           gold: goldish || lum > 140,
           phase: Math.random() * Math.PI * 2,
         });
@@ -99,9 +99,9 @@ export function initConciergeLogoParticles(canvas) {
       ctx.beginPath();
       ctx.arc(x, y, dotR, 0, Math.PI * 2);
       if (p.gold) {
-        ctx.fillStyle = `rgba(201,168,76,${0.62 + 0.38 * pulse})`;
+        ctx.fillStyle = `rgba(232,200,104,${0.72 + 0.28 * pulse})`;
       } else {
-        ctx.fillStyle = `rgba(210,218,230,${0.32 + 0.42 * pulse})`;
+        ctx.fillStyle = `rgba(210,218,230,${0.4 + 0.48 * pulse})`;
       }
       ctx.fill();
     }

@@ -22,8 +22,7 @@ body.tok-page .tok-wrap{padding:40px 24px 72px}
 .tok-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap}
 .tok-back{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--tok-muted);text-decoration:none}
 .tok-back:hover{color:var(--tok-gold)}
-.tok-brand{display:flex;align-items:center;gap:12px}
-.tok-brand img{width:40px;height:40px;border-radius:50%;border:1px solid var(--tok-gold-dim)}
+.tok-brand{display:flex;align-items:center;gap:14px}
 .tok-brand span{font-family:'DM Mono',monospace;font-size:15px}
 .tok-brand em{color:var(--tok-gold);font-style:normal}
 

@@ -43,7 +43,7 @@ export function renderAgentTopNav(activeId) {
 
   el.innerHTML = `
     <a class="pg-logo" href="/agent">
-      <img src="/images/the-concierge-logo.png" alt="" width="28" height="28" />
+      <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="36" height="36" />
       <span>CONCIERGE<span class="pg-logo-dim">_</span></span>
     </a>
     <nav class="pg-nav" aria-label="Concierge Agent">
