@@ -44,6 +44,21 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-scalp": "/api/concierge-intel-scalp",
 };
 
+const INTEL_KINDS = Object.keys(INTEL_ROUTE_PATH) as X402IntelKind[];
+
+/** Resolve intel kind from unified /api/concierge-intel or legacy /api/concierge-intel-* paths. */
+export function resolveIntelKindFromRequest(request: Request): X402IntelKind | null {
+  const url = new URL(request.url);
+  const fromQuery = url.searchParams.get("kind");
+  if (fromQuery && INTEL_KINDS.includes(fromQuery as X402IntelKind)) {
+    return fromQuery as X402IntelKind;
+  }
+  const match = url.pathname.match(/^\/api\/concierge-intel-([a-z]+)$/);
+  if (!match) return null;
+  const kind = `intel-${match[1]}` as X402IntelKind;
+  return INTEL_KINDS.includes(kind) ? kind : null;
+}
+
 export type IntelRequestBody = {
   message?: string;
   solAddress?: string;
