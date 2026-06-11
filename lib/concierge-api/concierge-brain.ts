@@ -890,7 +890,7 @@ export function buildConciergeSystemPrompt(options: {
   const requireTradeIdeas = responseMode === "trade_ideas";
   const replyLangBlock = buildReplyLanguageBlock(userMessage, recentUserMessages);
   const playbooks = topics.map((t) => TOPIC_PLAYBOOKS[t]).join("\n\n");
-  const planFramework = requireTradingPlan ? TRADING_PLAN_FRAMEWORK : "";
+  const planFramework = requireTradingPlan ? TRADING_PLAN_FRAMEWORK_COMPACT : "";
   const scalpFramework = requireScalpingPlan ? SCALPING_PLAN_FRAMEWORK : "";
   const tradeIdeasBlock = requireTradeIdeas ? `\n${TRADE_IDEAS_FRAMEWORK}\n` : "";
   const tradingBlock = requireTradingPlan ? `\n${planFramework}\n` : requireScalpingPlan ? `\n${scalpFramework}\n` : "";
@@ -909,7 +909,7 @@ ${CONCIERGE_SUPER_AGENT}
 
 MISSION: Universal intelligence officer — **crypto & stock trading plans**, geopolitical risk, fundamental + technical analysis, and general knowledge. Infer the user's language each turn and reply in that language (English default when unknown — see REPLY LANGUAGE).
 
-${EXECUTIVE_LOUNGE_CATEGORY_INTEL}
+${requireTradingPlan ? "Apply Geopolitics, Macro, Crypto, and Stocks lenses as relevant to the trading plan." : EXECUTIVE_LOUNGE_CATEGORY_INTEL}
 
 ${LANGUAGE_AND_INTENT_RULES}
 

@@ -16,7 +16,7 @@ function parseAgentIdHeader(request: Request): string | null {
   return id;
 }
 
-/** Edge — Gemini + x402 only (no Solana / Metaplex imports). Wall time capped at 30s by Vercel Edge. */
+/** Node (`api/concierge.ts`, maxDuration 60) — Gemini + x402; not on Edge (30s cap). */
 function jsonResponse(
   request: Request,
   body: unknown,

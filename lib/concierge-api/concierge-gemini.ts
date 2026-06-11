@@ -123,14 +123,16 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
 }
 
 const GEMINI_CALL_MS = 24_000;
-const GEMINI_TRADING_MS = 22_000;
+const GEMINI_TRADING_MS = 35_000;
+/** Wall-clock budget for Gemini on trading-plan path (Node concierge: 60s maxDuration). */
+const GEMINI_TRADING_BUDGET_MS = 42_000;
 
-const TRADING_PLAN_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+const TRADING_PLAN_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
   if (mode === "trading_plan") {
-    return { temperature: 0.55, maxOutputTokens: 8192 };
+    return { temperature: 0.55, maxOutputTokens: 6144 };
   }
   if (mode === "scalping_plan") {
     return { temperature: 0.5, maxOutputTokens: 6144 };
@@ -243,15 +245,16 @@ async function resolveIntelligenceContext(
   };
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
-  const marketTimeout = tradingPlan ? 6_500 : 7_000;
-  const generalTimeout = tradingPlan ? 3_500 : 4_000;
+  const marketTimeout = tradingPlan ? 5_500 : 7_000;
+  const generalTimeout = tradingPlan ? 3_000 : 4_000;
 
   const queryMessage = normalizeConciergeDeFiMessage(userMessage);
   const topicsForIntel = detectTopics(queryMessage);
-  const needDeFiIntel =
-    wantsDeFiIntel(queryMessage) ||
-    topicsForIntel.includes("defi") ||
-    topicsForIntel.includes("crypto");
+  const needDeFiIntel = tradingPlan
+    ? wantsDeFiIntel(queryMessage) || topicsForIntel.includes("defi")
+    : wantsDeFiIntel(queryMessage) ||
+      topicsForIntel.includes("defi") ||
+      topicsForIntel.includes("crypto");
 
   const deFiQueryNote =
     /\bdllm\b/i.test(userMessage) && !/\bdlmm\b/i.test(userMessage)
@@ -278,7 +281,10 @@ async function resolveIntelligenceContext(
           },
         ),
     withTimeout(
-      fetchGeneralKnowledgeSnapshot(queryMessage, { mode: "lite" }),
+      fetchGeneralKnowledgeSnapshot(
+        queryMessage,
+        tradingPlan ? { mode: "trading" } : { mode: "lite" },
+      ),
       generalTimeout,
       emptyGeneral,
     ),
@@ -479,10 +485,15 @@ export async function runConciergeGemini(options: {
   let reply = "";
   const chatModels = requireTradingPlan ? TRADING_PLAN_MODELS : STANDARD_MODELS;
   const chatTimeout = requireTradingPlan ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
+  const geminiDeadline = requireTradingPlan ? Date.now() + GEMINI_TRADING_BUDGET_MS : 0;
   const errors: string[] = [];
   for (const model of chatModels) {
+    const modelTimeout = requireTradingPlan
+      ? Math.min(chatTimeout, Math.max(3_000, geminiDeadline - Date.now()))
+      : chatTimeout;
+    if (requireTradingPlan && modelTimeout < 3_000) break;
     try {
-      const { text } = await geminiCall(apiKey, model, geminiPayload, chatTimeout);
+      const { text } = await geminiCall(apiKey, model, geminiPayload, modelTimeout);
       if (text) {
         reply = text;
         break;
