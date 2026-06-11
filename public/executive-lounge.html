@@ -386,24 +386,31 @@
   .wallet-row .waddr{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:4px}
   .wallet-row .wmeta{font-size:10px;color:var(--text-secondary);margin-top:2px}
 
+  .wallet-modal.privy-mode > h2#walletModalTitle{display:none}
   .privy-card{
-    margin-top:4px;border:1px solid var(--border);border-radius:12px;background:var(--graphite);
-    overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.35);
+    margin-top:0;border:1px solid var(--border);border-radius:14px;background:var(--graphite);
+    overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.4);
   }
-  .privy-card-h{padding:14px 16px 10px;font-size:11px;letter-spacing:.06em;color:var(--text-muted)}
-  .privy-card-body{padding:0}
+  .privy-brand{
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 20px 16px;
+    border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(103,111,255,.08),transparent);
+  }
+  .privy-brand img{height:28px;width:auto;display:block}
+  .privy-brand p{margin:0;font-size:12px;line-height:1.45;color:var(--text-secondary);text-align:center}
+  .privy-card-h{padding:12px 16px 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+  .privy-card-body{padding:0 0 4px}
   .privy-row{
-    display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;border:none;background:transparent;
+    display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:none;background:transparent;
     color:var(--text-primary);font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;text-align:left;
-    cursor:pointer;transition:background .12s;
+    cursor:pointer;transition:background .12s,border-color .12s;
   }
-  .privy-row:hover{background:rgba(255,255,255,.04)}
+  .privy-row:hover{background:rgba(255,255,255,.05)}
   html[data-theme="light"] .privy-row:hover{background:rgba(0,0,0,.04)}
   .privy-row .privy-ico{
-    width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    color:var(--text-primary);
+    width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
-  .privy-row .privy-ico svg{width:18px;height:18px;display:block}
+  .privy-row .privy-ico svg,.privy-row .privy-ico img{width:20px;height:20px;display:block}
+  .privy-row.google{font-weight:500}
   .privy-row.more{color:#60a5fa}
   .privy-row.more .privy-ico{color:#60a5fa}
   .privy-row.ext{color:var(--accent-teal)}
@@ -417,13 +424,22 @@
   .privy-more-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   .privy-more-actions .btn.sm{flex:1;min-width:120px;justify-content:center}
   .privy-powered{
-    padding:12px 16px 14px;text-align:center;font-size:11px;color:var(--text-muted);
-    border-top:1px solid var(--border);background:rgba(0,0,0,.12);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:12px 16px 14px;font-size:11px;color:var(--text-muted);
+    border-top:1px solid var(--border);background:rgba(0,0,0,.14);
   }
   html[data-theme="light"] .privy-powered{background:rgba(0,0,0,.03)}
+  .privy-powered img{width:14px;height:14px;opacity:.85}
   .privy-powered a{color:var(--text-muted);text-decoration:none}
   .privy-powered a:hover{color:var(--text-secondary)}
-  .wallet-ext-panel{margin-top:4px}
+  .privy-switch-btn{
+    display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:14px;padding:12px 14px;
+    border:1px solid var(--border);border-radius:10px;background:var(--gcard-bg);color:#8b9cff;
+    font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;
+  }
+  .privy-switch-btn:hover{border-color:rgba(103,111,255,.45);background:rgba(103,111,255,.06)}
+  .privy-switch-btn img{width:18px;height:18px;border-radius:4px}
+  .wallet-ext-panel{margin-top:2px}
   .wallet-ext-panel[hidden]{display:none!important}
   .privy-card[hidden]{display:none!important}
 
@@ -829,27 +845,19 @@
 
 <!-- WALLET MODAL -->
 <div class="overlay" id="walletOverlay" onclick="if(event.target===this)closeWalletModal()">
-  <div class="modal wallet-modal" onclick="event.stopPropagation()">
+  <div class="modal wallet-modal" id="walletModal" onclick="event.stopPropagation()">
     <button class="close" onclick="closeWalletModal()">×</button>
     <h2 id="walletModalTitle">Connect wallet</h2>
     <div id="walletConnectForm">
       <div class="privy-card" id="privyLoginPanel" hidden>
+        <div class="privy-brand">
+          <img src="/images/integrations/privy-logo.svg" alt="Privy" width="108" height="32" />
+          <p>Embedded Solana &amp; Base wallets · no extension needed</p>
+        </div>
         <div class="privy-card-h">Sign in with</div>
         <div class="privy-card-body">
-          <button type="button" class="privy-row" onclick="privyLoginOAuthUi('twitter')">
-            <span class="privy-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
-            <span>X</span>
-          </button>
-          <button type="button" class="privy-row" onclick="privyLoginOAuthUi('github')">
-            <span class="privy-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg></span>
-            <span>GitHub</span>
-          </button>
-          <button type="button" class="privy-row" onclick="privyLoginOAuthUi('linkedin')">
-            <span class="privy-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
-            <span>LinkedIn</span>
-          </button>
-          <button type="button" class="privy-row" onclick="privyLoginOAuthUi('google')">
-            <span class="privy-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></span>
+          <button type="button" class="privy-row google" onclick="privyLoginOAuthUi('google')">
+            <span class="privy-ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></span>
             <span>Google</span>
           </button>
           <div class="privy-divider"></div>
@@ -877,10 +885,13 @@
             <span>Connect wallet</span>
           </button>
         </div>
-        <div class="privy-powered">Powered by <a href="https://www.privy.io/" target="_blank" rel="noopener">Privy</a></div>
+        <div class="privy-powered">
+          <img src="/images/integrations/privy.svg" alt="" width="14" height="14" />
+          <span>Powered by <a href="https://www.privy.io/" target="_blank" rel="noopener">Privy</a></span>
+        </div>
       </div>
       <div class="wallet-ext-panel" id="walletExtPanel">
-        <p class="wallet-intro" id="walletExtIntro">Browser extension wallets — Solana &amp; Base in one connect.</p>
+        <p class="wallet-intro" id="walletExtIntro">Phantom or OKX — Solana &amp; Base in one connect.</p>
         <div class="wallet-grid" id="walletChoices">
           <div class="wallet-opt" data-wallet="phantom">
             <img class="wlogo" src="/images/phantom-wallet.png" alt="Phantom" width="44" height="44" />
@@ -891,8 +902,8 @@
             <div class="wname">OKX</div>
           </div>
         </div>
-        <button type="button" class="privy-row more" id="privyBackBtn" style="width:100%;margin-top:10px;border:1px solid var(--border);border-radius:8px" hidden onclick="showPrivyLogin()">
-          <span class="privy-ico" aria-hidden="true"><img src="/images/integrations/privy.svg" alt="" width="18" height="18" style="border-radius:4px" /></span>
+        <button type="button" class="privy-switch-btn" id="privyBackBtn" hidden onclick="showPrivyLogin()">
+          <img src="/images/integrations/privy.svg" alt="" width="18" height="18" />
           <span>Sign in with Privy instead</span>
         </button>
       </div>
@@ -1176,11 +1187,13 @@
     const extPanel = document.getElementById('walletExtPanel');
     const foot = document.getElementById('walletConnectFoot');
     const title = document.getElementById('walletModalTitle');
+    const modal = document.getElementById('walletModal');
     const isPrivy = walletView === 'privy';
     if(privyPanel) privyPanel.hidden = !isPrivy;
     if(extPanel) extPanel.hidden = isPrivy;
     if(foot) foot.style.display = isPrivy ? 'none' : '';
     if(title) title.textContent = isPrivy ? 'Login' : 'Connect wallet';
+    if(modal) modal.classList.toggle('privy-mode', isPrivy);
   }
 
   function showPrivyLogin(){
@@ -1292,17 +1305,16 @@
   }
 
   async function privyLoginOAuthUi(provider){
+    if(provider !== 'google') return;
     const st = document.getElementById('walletStatus');
     st.classList.remove('err');
-    st.textContent = 'Redirecting…';
+    st.textContent = 'Redirecting to Google…';
     try {
-      const fn = window.__elPrivy?.loginWithOAuth || window.__elPrivy?.loginWithGoogle;
-      if(!fn) throw new Error('Privy not loaded');
-      if(window.__elPrivy?.loginWithOAuth) await window.__elPrivy.loginWithOAuth(provider);
-      else if(provider === 'google') await window.__elPrivy.loginWithGoogle();
-      else throw new Error('OAuth provider not available — refresh and retry');
+      if(!window.__elPrivy?.loginWithOAuth && !window.__elPrivy?.loginWithGoogle) throw new Error('Privy not loaded');
+      if(window.__elPrivy?.loginWithOAuth) await window.__elPrivy.loginWithOAuth('google');
+      else await window.__elPrivy.loginWithGoogle();
     } catch(e){
-      st.textContent = e?.message || 'Login failed';
+      st.textContent = e?.message || 'Google login failed';
       st.classList.add('err');
     }
   }

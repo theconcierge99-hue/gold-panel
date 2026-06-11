@@ -21,7 +21,7 @@ export function getPublicPrivyConfig() {
     enabled: !!(appId && clientId),
     appId: appId ?? undefined,
     clientId: clientId ?? undefined,
-    loginMethods: ["email", "google"] as const,
+    loginMethods: ["email", "google"] as const, // OAuth UI: Google only; email via More
     embeddedWallets: {
       solana: true,
       ethereum: true,
