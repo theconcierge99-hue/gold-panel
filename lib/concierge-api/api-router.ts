@@ -1,11 +1,12 @@
 /**
  * Dispatched from api/[...path].ts. Handler modules live in lib/concierge-api/
  * (outside /api) so Vercel does not register each file as its own function.
- * POST /api/concierge is served by `api/concierge.ts` (Node, 60s) — not this Edge router.
+ * Production POST /api/concierge is served by `api/concierge.ts` (Node, 60s); Edge route kept for dev/fallback.
  */
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
+import handleConcierge from "./routes/concierge";
 import handleLoungeRwaRecordMint from "./routes/lounge-rwa-record-mint";
 import handleLoungeSignalOpen from "./routes/lounge-signal-open";
 import handleLoungeSignalPublish from "./routes/lounge-signal-publish";
@@ -31,6 +32,7 @@ type RouteHandler = (request: Request) => Promise<Response>;
 const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/agent-identity": handleAgentIdentity,
   "/api/agent-identity-card": handleAgentIdentityCard,
+  "/api/concierge": handleConcierge,
   "/api/lounge-rwa-record-mint": handleLoungeRwaRecordMint,
   "/api/lounge-signal-open": handleLoungeSignalOpen,
   "/api/lounge-signal-publish": handleLoungeSignalPublish,
