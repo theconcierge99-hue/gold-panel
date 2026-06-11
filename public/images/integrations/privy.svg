@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Privy">
-  <rect width="32" height="32" rx="8" fill="#676FFF"/>
-  <path fill="#fff" d="M10 9.5h4.6c2.9 0 4.9 1.8 4.9 4.4 0 2.1-1.2 3.6-3.1 4.2l3.6 5.1h-3l-3.3-4.7H12.2v4.7H10V9.5zm4.4 6.7c1.6 0 2.6-.9 2.6-2.2s-1-2.2-2.6-2.2H12.2v4.4h2.2z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 56" fill="none" role="img" aria-label="Privy">
+  <circle cx="24" cy="17" r="13.5" fill="#111111"/>
+  <ellipse cx="24" cy="44.5" rx="17.5" ry="5.8" fill="#111111"/>
 </svg>

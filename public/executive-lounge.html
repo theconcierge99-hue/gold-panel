@@ -393,9 +393,9 @@
   }
   .privy-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 20px 16px;
-    border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(103,111,255,.08),transparent);
+    border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);
   }
-  .privy-brand img{height:28px;width:auto;display:block}
+  .privy-brand img{height:36px;width:auto;display:block}
   .privy-brand p{margin:0;font-size:12px;line-height:1.45;color:var(--text-secondary);text-align:center}
   .privy-card-h{padding:12px 16px 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
   .privy-card-body{padding:0 0 4px}
@@ -434,11 +434,11 @@
   .privy-powered a:hover{color:var(--text-secondary)}
   .privy-switch-btn{
     display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:14px;padding:12px 14px;
-    border:1px solid var(--border);border-radius:10px;background:var(--gcard-bg);color:#8b9cff;
+    border:1px solid var(--border);border-radius:10px;background:var(--gcard-bg);color:var(--text-secondary);
     font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;
   }
-  .privy-switch-btn:hover{border-color:rgba(103,111,255,.45);background:rgba(103,111,255,.06)}
-  .privy-switch-btn img{width:18px;height:18px;border-radius:4px}
+  .privy-switch-btn:hover{border-color:rgba(232,236,244,.2);background:rgba(255,255,255,.04)}
+  .privy-switch-btn img{width:18px;height:18px}
   .wallet-ext-panel{margin-top:2px}
   .wallet-ext-panel[hidden]{display:none!important}
   .privy-card[hidden]{display:none!important}
@@ -851,7 +851,7 @@
     <div id="walletConnectForm">
       <div class="privy-card" id="privyLoginPanel" hidden>
         <div class="privy-brand">
-          <img src="/images/integrations/privy-logo.svg" alt="Privy" width="108" height="32" />
+          <img src="/images/integrations/privy-logo.svg" alt="Privy" width="132" height="40" />
           <p>Embedded Solana &amp; Base wallets · no extension needed</p>
         </div>
         <div class="privy-card-h">Sign in with</div>
@@ -886,7 +886,7 @@
           </button>
         </div>
         <div class="privy-powered">
-          <img src="/images/integrations/privy.svg" alt="" width="14" height="14" />
+          <img src="/images/integrations/privy-light.svg" alt="" width="14" height="14" />
           <span>Powered by <a href="https://www.privy.io/" target="_blank" rel="noopener">Privy</a></span>
         </div>
       </div>
@@ -903,7 +903,7 @@
           </div>
         </div>
         <button type="button" class="privy-switch-btn" id="privyBackBtn" hidden onclick="showPrivyLogin()">
-          <img src="/images/integrations/privy.svg" alt="" width="18" height="18" />
+          <img src="/images/integrations/privy-light.svg" alt="" width="18" height="18" />
           <span>Sign in with Privy instead</span>
         </button>
       </div>
