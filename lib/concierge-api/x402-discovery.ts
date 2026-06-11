@@ -31,8 +31,10 @@ import {
 
 export { buildBazaarExtension };
 import { corbitsDiscoveryLinks } from "./corbits-links";
+import { dexterDiscoveryLinks } from "./dexter-links";
 import { grokDiscoveryLinks } from "./grok-links";
 import { payshDiscoveryLinks } from "./paysh-links";
+import { getX402FacilitatorProfile } from "./x402-facilitator";
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -211,6 +213,7 @@ export function ownershipProofs(): string[] {
 export function buildWellKnownX402Document(origin: string): Record<string, unknown> {
   const proofs = ownershipProofs();
   const listing = x402ServiceListingMeta(origin);
+  const facilitator = getX402FacilitatorProfile();
   return {
     version: 1,
     resources: listDiscoveryResourceUrls(origin),
@@ -220,13 +223,14 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via PayAI USDC on Solana/Base. Listed on MPPscan; pay.sh CLI; Grok Build skill concierge-intel in repo.",
+      `Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via ${facilitator.name} USDC on Solana/Base. Listed on OpenDexter (auto-discovery on first Dexter settlement), MPPscan, pay.sh CLI; Grok Build skill concierge-intel in repo.`,
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
       x402scan: X402SCAN_EXPLORE_URL,
       mppscanRegister: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(origin),
+      ...dexterDiscoveryLinks(origin),
       ...payshDiscoveryLinks(origin),
       ...grokDiscoveryLinks(origin),
       corbits: corbitsDiscoveryLinks(),
@@ -325,6 +329,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
 
   const proofs = ownershipProofs();
   const listing = x402ServiceListingMeta(base);
+  const facilitator = getX402FacilitatorProfile();
 
   return {
     openapi: "3.1.0",
@@ -332,7 +337,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.0.0",
       description:
-        "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
+        `Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via ${facilitator.name}.`,
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {
@@ -349,11 +354,14 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       x402scan: X402SCAN_REGISTER_URL,
       mppscan: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(base),
+      ...dexterDiscoveryLinks(base),
       ...payshDiscoveryLinks(base),
       serviceName: listing.serviceName,
       description: listing.description,
       tags: listing.tags,
       iconUrl: listing.iconUrl,
+      facilitator: facilitator.name,
+      facilitatorUrl: facilitator.url,
       protocols: ["x402", "mpp"],
     },
     tags: [
@@ -369,6 +377,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
 export function discoveryMetaForConfig(origin: string) {
   const base = origin.replace(/\/$/, "");
   const listing = x402ServiceListingMeta(base);
+  const facilitator = getX402FacilitatorProfile();
   return {
     siteOrigin: base,
     serviceName: listing.serviceName,
@@ -383,6 +392,9 @@ export function discoveryMetaForConfig(origin: string) {
     zauth: zauthMetaLinks(base),
     ownershipProofs: ownershipProofs(),
     protocols: ["x402", "mpp"],
+    facilitator: facilitator.name,
+    facilitatorId: facilitator.id,
+    facilitatorUrl: facilitator.url,
     mppscanRegisterUrl: MPPSCAN_REGISTER_URL,
     resources: X402_DISCOVERY_RESOURCES.map((r) => ({
       kind: r.kind,
@@ -394,6 +406,7 @@ export function discoveryMetaForConfig(origin: string) {
       priceUsdc: priceUsdcForResource(r.kind),
     })),
     ...mppDiscoveryLinks(base),
+    ...dexterDiscoveryLinks(base),
     ...payshDiscoveryLinks(base),
     corbits: corbitsDiscoveryLinks(),
   };

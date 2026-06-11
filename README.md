@@ -5,7 +5,7 @@
 Production site: your deployed domain (e.g. Executive Lounge on Vercel)  
 Repository: private `gold-panel` — clone from your Git remote only; do not commit secrets
 
-Executive Lounge combines a live market wire, **RWA intelligence certificates** (creator signals with optional **Solana NFT** mint), and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via the [PayAI facilitator](https://facilitator.payai.network). Paid APIs can be listed on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
+Executive Lounge combines a live market wire, **RWA intelligence certificates** (creator signals with optional **Solana NFT** mint), and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via the [Dexter facilitator](https://x402.dexter.cash) (default; [OpenDexter](https://dexter.cash/opendexter) auto-discovery). Also listable on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
 
 > **Security:** Documentation uses placeholders only. Never commit API keys, RPC URLs with keys, or KV tokens. See [docs/security.md](docs/security.md).
 

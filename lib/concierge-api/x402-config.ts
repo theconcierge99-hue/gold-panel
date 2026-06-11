@@ -1,4 +1,4 @@
-/** Shared x402 / PayAI configuration (server + public config API). */
+/** Shared x402 configuration (server + public config API). */
 
 import {
   addressEnvDiagnostics,
@@ -21,6 +21,8 @@ import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
 } from "./signal-revenue";
+import { getSolanaFeePayer, getX402FacilitatorProfile } from "./x402-facilitator";
+import { dexterDiscoveryLinks } from "./dexter-links";
 
 export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
 export const X402_PRICE_LABEL = "$0.10";
@@ -31,8 +33,8 @@ export const X402_PRICE_ATOMIC = X402_READ_PRICE_ATOMIC;
 
 export { X402_SIGNAL_PUBLISH_USDC, X402_SIGNAL_PUBLISH_ATOMIC };
 
-/** PayAI facilitator fee payer for Solana exact scheme */
-export const SOLANA_FEE_PAYER = "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4";
+/** Solana fee payer for the active x402 facilitator (Dexter or PayAI). */
+export const SOLANA_FEE_PAYER = getSolanaFeePayer();
 
 /** CAIP-2 Solana IDs — first 32 chars of genesis hash (x402 / @x402/svm requirement) */
 export const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
@@ -156,11 +158,15 @@ export function getPublicX402Config() {
       ? "Merchant receive addresses invalid in Vercel — fix X402_EVM_PAY_TO (Base 0x…) and/or X402_SOL_PAY_TO (Solana)."
       : undefined;
 
+  const facilitator = getX402FacilitatorProfile();
+
   return {
     enabled: isX402Enabled(),
     paymentsRequested: wantsPay,
-    facilitator: "PayAI",
-    facilitatorUrl: "https://facilitator.payai.network",
+    facilitator: facilitator.name,
+    facilitatorId: facilitator.id,
+    facilitatorUrl: facilitator.url,
+    facilitatorDocsUrl: facilitator.docsUrl,
     priceUsdc: X402_PRICE_USDC,
     priceLabel: X402_PRICE_LABEL,
     networks: nets,
@@ -204,6 +210,7 @@ export function getPublicX402Config() {
     readerBadgesEnabled: true,
     solanaRwaMintReady: solanaRwaMintConfigured(),
     discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
+    dexter: dexterDiscoveryLinks(resolveX402SiteOrigin()),
     zauthTelemetryEnabled: isZauthProviderEnabled(),
   };
 }

@@ -1,23 +1,21 @@
 /**
- * x402 payment gate via PayAI facilitator HTTP API (Edge-safe).
- * Avoids @x402/evm/svm server SDKs and @payai/facilitator bundle on Vercel.
+ * x402 payment gate via facilitator HTTP API (Edge-safe).
+ * Default: Dexter (https://x402.dexter.cash). Set X402_FACILITATOR=payai for PayAI.
  */
 import {
   getMerchantAddresses,
   getX402NetworkProfile,
   getUsdcAssetForNetwork,
   isX402Enabled,
-  SOLANA_FEE_PAYER,
   X402_PRICE_LABEL,
 } from "./x402-config";
+import { getSolanaFeePayer, getX402FacilitatorProfile } from "./x402-facilitator";
 import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
 import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
 
 export type { X402ResourceKind };
-
-const FACILITATOR_URL = "https://facilitator.payai.network";
 
 const RESOURCE_META: Record<
   X402ResourceKind,
@@ -230,7 +228,7 @@ function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequi
       asset: getUsdcAssetForNetwork(nets.sol),
       payTo: sol,
       maxTimeoutSeconds: 120,
-      extra: { feePayer: SOLANA_FEE_PAYER },
+      extra: { feePayer: getSolanaFeePayer() },
     });
   }
 
@@ -263,10 +261,12 @@ function findMatchingRequirement(
   );
 }
 
-/** Free tier: no auth. Optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). */
+/** PayAI only — optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). Dexter needs no auth. */
 async function facilitatorAuthHeaders(
   endpoint: "verify" | "settle",
 ): Promise<Record<string, string>> {
+  if (getX402FacilitatorProfile().id !== "payai") return {};
+
   const keyId = process.env.PAYAI_API_KEY_ID?.trim();
   const keySecret = process.env.PAYAI_API_KEY_SECRET?.trim();
   if (!keyId || !keySecret) return {};
@@ -287,7 +287,8 @@ async function facilitatorPost<T>(
   endpoint: "verify" | "settle",
 ): Promise<T> {
   const auth = await facilitatorAuthHeaders(endpoint);
-  const res = await fetch(`${FACILITATOR_URL}${path}`, {
+  const facilitatorUrl = getX402FacilitatorProfile().url;
+  const res = await fetch(`${facilitatorUrl}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

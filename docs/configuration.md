@@ -15,8 +15,9 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 | `X402_EVM_PAY_TO` | Merchant USDC receive address on **Base** (`0x` + 40 hex). |
 | `X402_SOL_PAY_TO` | Optional merchant USDC receive address on **Solana** (base58, 32–44 chars). |
 | `X402_ENABLED` | Set `false` to disable payments entirely. Default: enabled when a valid pay-to exists. |
+| `X402_FACILITATOR` | `dexter` (default) or `payai`. Dexter: `https://x402.dexter.cash` — free settlement, OpenDexter auto-discovery. |
 | `X402_NETWORK_MODE` | `mainnet` (default) or `testnet` (Base Sepolia + Solana devnet). |
-| `PAYAI_API_KEY_ID` | Optional PayAI JWT key id (free tier: 10k settlements/month without keys). |
+| `PAYAI_API_KEY_ID` | Optional PayAI JWT key id — only when `X402_FACILITATOR=payai`. |
 | `PAYAI_API_KEY_SECRET` | Optional PayAI JWT secret. |
 | `SOLANA_RPC_URL` | Helius or [publicnode](https://solana-rpc.publicnode.com) mainnet URL — **server only** (used by `/api/solana-rpc-send` for Phantom NFT mint). **Do not** use `solana.drpc.org` or Ankr free RPC — they block `getLatestBlockhash`. If unset or set to a blocked host, the server falls back to publicnode. |
 

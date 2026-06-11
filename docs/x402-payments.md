@@ -4,18 +4,21 @@ Executive Lounge uses the [x402](https://www.x402.org/) payment protocol (HTTP *
 
 ## Facilitator
 
-| Setting | Value |
+Default: **[Dexter](https://dexter.cash/)** — free x402 settlement at `https://x402.dexter.cash` (gas sponsored on Solana + Base). Set `X402_FACILITATOR=payai` to use [PayAI](https://docs.payai.network/x402/facilitators/pricing) instead.
+
+| Setting | Value (Dexter default) |
 |---------|--------|
-| Provider | [PayAI](https://docs.payai.network/x402/facilitators/pricing) |
-| URL | `https://facilitator.payai.network` |
-| Server module | `api/lib/x402-server.ts` (Edge-safe HTTP client, no Node-only SDK on Vercel) |
+| Provider | [Dexter](https://docs.dexter.cash/docs/facilitator-and-chains/) |
+| URL | `https://x402.dexter.cash` |
+| Server module | `lib/concierge-api/x402-server.ts` (Edge-safe HTTP client) |
+| OpenDexter | Auto-listed after first Dexter settlement — [marketplace](https://dexter.cash/opendexter), claim profile at [dexter.cash/sellers](https://dexter.cash/sellers) |
 
 Flow per paid request:
 
 1. Client receives **402** + `PAYMENT-REQUIRED` (base64 JSON, x402 version 2).
 2. Wallet signs USDC transfer matching one of the `accepts` entries.
 3. Client retries with `PAYMENT-SIGNATURE`.
-4. Server calls PayAI `/verify` then `/settle`.
+4. Server calls facilitator `/verify` then `/settle`.
 5. On success, server returns **200** + `PAYMENT-RESPONSE` (includes on-chain `transaction`).
 
 Settlements are **on-chain**; transaction hashes are visible to explorers and indexers such as [x402scan](x402scan.md).
@@ -63,8 +66,8 @@ The lounge page loads this module to:
 
 ## Solana notes
 
-- PayAI **fee payer** for exact scheme is configured in `api/lib/x402-config.ts` (`SOLANA_FEE_PAYER`).
-- Transactions use a 3-instruction pattern compatible with PayAI verification (no memo instruction).
+- Active facilitator **fee payer** is set in `lib/concierge-api/x402-facilitator.ts` (Dexter: `DeXterR2k…`, PayAI: `2wKupLR9…`).
+- Transactions use a 3-instruction pattern compatible with facilitator verification (no memo instruction).
 - Optional `SOLANA_RPC_URL` (e.g. Helius) improves reliability; proxied only on the server.
 
 ## Local development without payments

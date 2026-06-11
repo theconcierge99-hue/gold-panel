@@ -93,7 +93,7 @@ export class SolanaExactPhantomScheme implements SchemeNetworkClient {
 
     if (merchant.equals(feePayer)) {
       throw new Error(
-        "X402_SOL_PAY_TO must not be the PayAI fee payer address — use your merchant receive wallet in Vercel",
+        "X402_SOL_PAY_TO must not be the facilitator fee payer address — use your merchant receive wallet in Vercel",
       );
     }
 

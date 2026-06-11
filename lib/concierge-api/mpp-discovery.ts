@@ -6,6 +6,7 @@
 import type { X402ResourceKind } from "./x402-pricing";
 import { atomicAmountForResource } from "./x402-pricing";
 import { X402_SERVICE_TAGS, x402ServiceListingMeta } from "./x402-service-meta";
+import { getX402FacilitatorProfile, mppPaymentProtocols } from "./x402-facilitator";
 
 export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
@@ -27,22 +28,24 @@ export function resolveMppscanProfileLink(siteOrigin: string): string {
   return `${siteOrigin.replace(/\/$/, "")}/go/mppscan`;
 }
 
-const PAYAI_FACILITATOR = "https://facilitator.payai.network";
+function facilitatorLabel(): string {
+  const f = getX402FacilitatorProfile();
+  return `${f.name} (${f.url.replace(/^https:\/\//, "")})`;
+}
 
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
-export const MPP_PAYMENT_PROTOCOLS: Record<string, unknown>[] = [
-  { x402: { network: "solana", facilitator: PAYAI_FACILITATOR } },
-  { x402: { network: "base", facilitator: PAYAI_FACILITATOR } },
-  { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
-];
+export function getMppPaymentProtocols(): Record<string, unknown>[] {
+  return mppPaymentProtocols(getX402FacilitatorProfile().url);
+}
 
 export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
-  "Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI facilitator).",
+  `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (${facilitatorLabel()}).`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
   "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m).",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
+  "OpenDexter: npx -y @dexterai/opendexter · x402_search for marketplace discovery",
   "pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
 ].join(" ");
 
@@ -562,16 +565,17 @@ export function formatUsdAmountForDiscovery(priceUsd: string): string {
 export function buildXPaymentInfo(priceUsd: string, kind: X402ResourceKind): Record<string, unknown> {
   const amount = formatUsdAmountForDiscovery(priceUsd);
   const atomic = atomicAmountForResource(kind);
+  const facilitator = getX402FacilitatorProfile();
   return {
     price: { mode: "fixed", currency: "USD", amount },
-    protocols: MPP_PAYMENT_PROTOCOLS,
+    protocols: getMppPaymentProtocols(),
     offers: [
       {
         protocol: "x402",
         amount: atomic,
         currency: "USDC",
         intent: "charge",
-        description: `$${priceUsd} USDC via PayAI (Solana or Base)`,
+        description: `$${priceUsd} USDC via ${facilitator.name} (Solana or Base)`,
       },
       {
         protocol: "mpp",
@@ -586,13 +590,15 @@ export function buildXPaymentInfo(priceUsd: string, kind: X402ResourceKind): Rec
 
 export function buildXServiceInfo(origin: string): Record<string, unknown> {
   const listing = x402ServiceListingMeta(origin);
+  const facilitator = getX402FacilitatorProfile();
   return {
     name: listing.serviceName,
     description: listing.description,
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     protocols: ["x402", "mpp"],
-    facilitator: "PayAI",
+    facilitator: facilitator.name,
+    facilitatorUrl: facilitator.url,
     networks: ["solana", "base"],
   };
 }

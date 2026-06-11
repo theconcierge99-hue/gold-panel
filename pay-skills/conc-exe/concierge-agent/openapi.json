@@ -3,8 +3,8 @@
   "info": {
     "title": "Concierge Agent API",
     "version": "4.0.0",
-    "description": "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI.",
-    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI facilitator). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider). Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
+    "description": "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via Dexter.",
+    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (Dexter (x402.dexter.cash)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m). Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
     "x-marketplace-tags": [
       "AI",
       "Trading",
@@ -33,7 +33,8 @@
       "x402",
       "mpp"
     ],
-    "facilitator": "PayAI",
+    "facilitator": "Dexter",
+    "facilitatorUrl": "https://x402.dexter.cash",
     "networks": [
       "solana",
       "base"
@@ -61,13 +62,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -84,7 +85,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -217,13 +218,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -240,7 +241,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -410,13 +411,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -433,7 +434,7 @@
               "amount": "1000000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$1.00 USDC via PayAI (Solana or Base)"
+              "description": "$1.00 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -574,13 +575,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -597,7 +598,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -716,13 +717,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -739,7 +740,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -884,13 +885,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -907,7 +908,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1046,13 +1047,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1069,7 +1070,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1211,13 +1212,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1234,7 +1235,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1379,13 +1380,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1402,7 +1403,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1540,13 +1541,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1563,7 +1564,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1688,13 +1689,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1711,7 +1712,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -1855,13 +1856,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -1878,7 +1879,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2022,13 +2023,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2045,7 +2046,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2190,13 +2191,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2213,7 +2214,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2354,13 +2355,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2377,7 +2378,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2530,13 +2531,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2553,7 +2554,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2712,13 +2713,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2735,7 +2736,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -2881,13 +2882,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -2904,7 +2905,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -3059,13 +3060,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -3082,7 +3083,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -3238,13 +3239,13 @@
             {
               "x402": {
                 "network": "solana",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
               "x402": {
                 "network": "base",
-                "facilitator": "https://facilitator.payai.network"
+                "facilitator": "https://x402.dexter.cash"
               }
             },
             {
@@ -3261,7 +3262,7 @@
               "amount": "100000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (Solana or Base)"
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
             },
             {
               "protocol": "mpp",
@@ -3410,12 +3411,394 @@
           }
         ]
       }
+    },
+    "/api/concierge-intel-scalp": {
+      "post": {
+        "operationId": "intel_scalp",
+        "summary": "Concierge Intel — Scalp",
+        "description": "BTC/ETH/BNB/SOL USDT scalping desk — 5m & 15m Binance klines, RSI/EMA, perp overlay for agents.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Crypto",
+          "Trading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "assets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "pair": {
+                            "type": "string"
+                          },
+                          "intervals": {
+                            "type": "array"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "assets"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "filters": {
+                    "symbols": [
+                      "BTC"
+                    ],
+                    "intervals": [
+                      "5m",
+                      "15m"
+                    ],
+                    "pairs": [
+                      "BTC/USDT"
+                    ]
+                  },
+                  "assets": [
+                    {
+                      "symbol": "BTC",
+                      "pair": "BTCUSDT",
+                      "intervals": [
+                        {
+                          "interval": "15m",
+                          "ta": {
+                            "rsi14": 52,
+                            "trend": "neutral",
+                            "lastClose": 60781
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-scalp"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "Scalp context (e.g. BTC 15m entry)"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "BTC",
+                        "ETH",
+                        "BNB",
+                        "SOL"
+                      ]
+                    }
+                  },
+                  "intervals": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "5m",
+                        "15m"
+                      ]
+                    }
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "intel_scalp_get",
+        "summary": "Concierge Intel — Scalp (GET probe)",
+        "description": "BTC/ETH/BNB/SOL USDT scalping desk — 5m & 15m Binance klines, RSI/EMA, perp overlay for agents. Probes return 402 without payment; use POST with JSON body after settlement.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via Dexter (Solana or Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Crypto",
+          "Trading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "assets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "pair": {
+                            "type": "string"
+                          },
+                          "intervals": {
+                            "type": "array"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "assets"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "filters": {
+                    "symbols": [
+                      "BTC"
+                    ],
+                    "intervals": [
+                      "5m",
+                      "15m"
+                    ],
+                    "pairs": [
+                      "BTC/USDT"
+                    ]
+                  },
+                  "assets": [
+                    {
+                      "symbol": "BTC",
+                      "pair": "BTCUSDT",
+                      "intervals": [
+                        {
+                          "interval": "15m",
+                          "ta": {
+                            "rsi14": 52,
+                            "trend": "neutral",
+                            "lastClose": 60781
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-scalp"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array"
+            }
+          },
+          {
+            "name": "intervals",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array"
+            }
+          }
+        ]
+      }
     }
   },
   "x-discovery": {
-    "ownershipProofs": [
-      "0xb85c83cc448edca8eb724f5d79b523faff9375a7"
-    ],
+    "ownershipProofs": [],
     "x402scan": "https://www.x402scan.com/resources/register",
     "mppscan": "https://www.mppscan.com/",
     "mppscanRegister": "https://www.mppscan.com/register",
@@ -3424,6 +3807,19 @@
     "mppscanDiscovery": "https://www.mppscan.com/discovery",
     "agentcashDiscover": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz",
     "agentcashCheckIntel": "npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-intel-tvl",
+    "dexter": "https://dexter.cash/",
+    "dexterDocs": "https://docs.dexter.cash/",
+    "dexterFacilitator": "https://x402.dexter.cash",
+    "dexterFacilitatorDocs": "https://docs.dexter.cash/docs/facilitator-and-chains/",
+    "dexterSupported": "https://x402.dexter.cash/supported",
+    "openDexter": "https://dexter.cash/opendexter",
+    "openDexterMcp": "https://open.dexter.cash/mcp",
+    "openDexterNpm": "https://www.npmjs.com/package/@dexterai/opendexter",
+    "dexterSellers": "https://dexter.cash/sellers",
+    "dexterMarketplaceApi": "https://api.dexter.cash/api/facilitator/marketplace/resources?search=concierge&limit=10",
+    "dexterSearchIntel": "x402_search(query: \"market intelligence\", network: \"solana\")",
+    "openDexterInstall": "npx -y @dexterai/opendexter",
+    "dexterProbeIntel": "https://conc-exe.xyz/api/concierge-intel-tvl",
     "paysh": "https://pay.sh/",
     "payshCatalog": "https://pay.sh/api/catalog",
     "payshDocs": "https://pay.sh/docs/overview/index.md",
@@ -3443,6 +3839,8 @@
       "RWA"
     ],
     "iconUrl": "https://conc-exe.xyz/images/the-concierge-logo.png",
+    "facilitator": "Dexter",
+    "facilitatorUrl": "https://x402.dexter.cash",
     "protocols": [
       "x402",
       "mpp"
