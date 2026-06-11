@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && node scripts/write-deploy-version.mjs && node scripts/build-x402-client.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
+    "build": "vite build && node scripts/write-deploy-version.mjs && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
+    "build:privy": "node scripts/build-privy-bridge.mjs",
     "build:x402": "node scripts/build-x402-client.mjs",
     "build:agent-identity": "node scripts/build-agent-identity.mjs",
     "build:dev": "vite build --mode development",
@@ -26,6 +27,7 @@
     "@metaplex-foundation/umi-signer-wallet-adapters": "^1.5.1",
     "@metaplex-foundation/umi-web3js-adapters": "^1.5.1",
     "@payai/facilitator": "^2.4.1",
+    "@privy-io/js-sdk-core": "^0.67.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",

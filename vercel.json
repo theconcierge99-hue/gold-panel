@@ -138,6 +138,10 @@
       "destination": "/docs-integration-agent-card.html"
     },
     {
+      "source": "/docs/integration/privy",
+      "destination": "/docs-integration-privy.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

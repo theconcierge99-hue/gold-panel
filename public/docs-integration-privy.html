@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Privy — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Privy integration — embedded Solana and Base wallets for Executive Lounge login and x402 USDC payments without browser extensions." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/privy" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-privy">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">Privy</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://www.privy.io/" target="_blank" rel="noopener">Privy</a> powers optional <strong>embedded wallet login</strong> in Executive Lounge — email or Google sign-in, non-custodial Solana + Base wallets, and x402 USDC payments without Phantom or OKX extensions.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Integrated (enable with <code>PRIVY_APP_ID</code> + <code>PRIVY_CLIENT_ID</code> in Vercel)</p>
+        <p><strong>Dashboard:</strong> <a class="ext" href="https://dashboard.privy.io/" target="_blank" rel="noopener">dashboard.privy.io ↗</a></p>
+        <p><strong>Docs:</strong> <a class="ext" href="https://docs.privy.io/" target="_blank" rel="noopener">docs.privy.io ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">What it does in the Lounge</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Login</strong> — Wallet modal → Privy → email OTP or Google OAuth</li>
+          <li><strong>Embedded wallets</strong> — auto-provision Solana + EVM (Base) addresses after sign-in</li>
+          <li><strong>x402 payments</strong> — same 0.1 USDC unlocks and Concierge calls as Phantom/OKX</li>
+          <li><strong>Coexists</strong> — Phantom and OKX remain available; users pick one provider per session</li>
+        </ul>
+        <p>Source: <code>lib/privy-wallet-bridge.ts</code>, <code>lib/x402-browser-client.ts</code>, <code>public/executive-lounge.html</code></p>
+      </div>
+
+      <h2 class="docs-h2">Public API</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /api/privy-config</code></td><td>Client-safe Privy app ID + client ID (when configured)</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td><code>privyWalletEnabled</code> flag</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Enable (operators)</h2>
+      <div class="card">
+        <ol>
+          <li>Create an app at <a class="ext" href="https://dashboard.privy.io/" target="_blank" rel="noopener">Privy Dashboard ↗</a></li>
+          <li>Enable <strong>Embedded wallets</strong> for Solana and Ethereum</li>
+          <li>Add your production origin (e.g. <code>https://conc-exe.xyz</code>) under allowed domains</li>
+          <li>Copy <strong>App ID</strong> and <strong>Client ID</strong> (Settings → Clients)</li>
+        </ol>
+<pre><code># Vercel environment variables
+PRIVY_APP_ID=your_privy_app_id
+PRIVY_CLIENT_ID=your_privy_client_id</code></pre>
+        <p>Redeploy after setting env vars. The Privy option appears in the Lounge wallet modal when both values are present.</p>
+      </div>
+
+      <h2 class="docs-h2">Verify integration</h2>
+      <div class="card">
+<pre><code>curl -s https://conc-exe.xyz/api/privy-config | jq '.enabled, .appId'
+
+curl -s https://conc-exe.xyz/api/x402-config | jq '.privyWalletEnabled'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/payment/x402" class="gold-link">x402 Protocol</a> — payment flow unchanged</li>
+          <li><a href="/docs/playground" class="gold-link">Executive Lounge</a> — wallet UI</li>
+          <li><a href="/docs/api/agent-identity" class="gold-link">Agent Identity</a> — separate browser-generated agent keys</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://dashboard.privy.io/" target="_blank" rel="noopener">Privy Dashboard ↗</a>
+        <a class="btn" href="/lounge">Open Lounge</a>
+        <a class="btn" href="/api/privy-config" target="_blank" rel="noopener">privy-config</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

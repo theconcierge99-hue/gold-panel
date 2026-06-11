@@ -219,8 +219,29 @@ async function ensureWalletOnBase(provider: EIP1193Provider): Promise<void> {
   });
 }
 
+type ElPrivyBridge = {
+  getEvmProvider?: () => EIP1193Provider | null;
+  getSolanaSigner?: () => PhantomSolanaProvider | null;
+};
+
+function elPrivy(): ElPrivyBridge | undefined {
+  return (window as Window & { __elPrivy?: ElPrivyBridge }).__elPrivy;
+}
+
+function privySolanaProvider(): PhantomSolanaProvider | null {
+  return elPrivy()?.getSolanaSigner?.() ?? null;
+}
+
+function evmProviderForSession(session: WalletSession): EIP1193Provider | undefined {
+  if (session.evm?.wallet === "privy") {
+    return elPrivy()?.getEvmProvider?.() ?? undefined;
+  }
+  return window.ethereum;
+}
+
 function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
   const w = session.sol?.wallet;
+  if (w === "privy") return privySolanaProvider();
   if (w === "phantom") return window.phantom?.solana ?? null;
   if (w === "okx") return window.okxwallet?.solana ?? null;
   return window.phantom?.solana ?? window.okxwallet?.solana ?? null;
@@ -321,7 +342,7 @@ export async function getPaymentChainOptions(
   networkMode: "mainnet" | "testnet" = "mainnet",
   serverConfig: X402ServerPayConfig = {},
 ): Promise<ChainPayOption[]> {
-  const provider = window.ethereum;
+  const provider = evmProviderForSession(session);
   const options: ChainPayOption[] = [];
 
   if (serverConfig.acceptsEvm && serverConfig.evmPayToReady) {
@@ -331,7 +352,10 @@ export async function getPaymentChainOptions(
     if (!hasWallet) {
       disabledReason = "Connect EVM (Ethereum on Base) in your wallet";
     } else if (!provider) {
-      disabledReason = "EVM provider not found — reopen Phantom/OKX";
+      disabledReason =
+        session.evm?.wallet === "privy"
+          ? "Privy EVM wallet not ready — reconnect Privy"
+          : "EVM provider not found — reopen Phantom/OKX";
     } else {
       bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode);
     }
@@ -357,7 +381,10 @@ export async function getPaymentChainOptions(
     if (!hasWallet) {
       disabledReason = "Connect Solana in your wallet";
     } else if (!solProv) {
-      disabledReason = "Solana provider not found — reopen Phantom/OKX";
+      disabledReason =
+        session.sol?.wallet === "privy"
+          ? "Privy Solana wallet not ready — reconnect Privy"
+          : "Solana provider not found — reopen Phantom/OKX";
     } else if (
       serverConfig.solPayTo &&
       session.sol!.address === serverConfig.solPayTo
@@ -456,7 +483,7 @@ export async function createX402PaidFetch(
   options: X402PaidFetchOptions = {},
 ): Promise<typeof fetch> {
   const nets = USDC[networkMode];
-  const provider = window.ethereum;
+  const provider = evmProviderForSession(session);
   const chain = networkMode === "testnet" ? baseSepolia : base;
 
   const preferred = await resolvePaymentChain(

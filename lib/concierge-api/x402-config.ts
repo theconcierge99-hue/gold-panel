@@ -17,6 +17,7 @@ import {
 import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
 import { isZauthProviderEnabled } from "./zauth";
 import { creatorPayoutWalletsConfigured, solanaRwaMintConfigured } from "./creator-payout-env";
+import { isPrivyEnabled } from "./privy-env";
 import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
@@ -217,6 +218,7 @@ export function getPublicX402Config() {
     discovery: discoveryMetaForConfig(resolveX402SiteOrigin()),
     dexter: dexterDiscoveryLinks(resolveX402SiteOrigin()),
     zauthTelemetryEnabled: isZauthProviderEnabled(),
+    privyWalletEnabled: isPrivyEnabled(),
   };
 }
 

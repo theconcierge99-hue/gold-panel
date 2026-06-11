@@ -553,6 +553,7 @@
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
 <link rel="stylesheet" href="/css/token.css" />
+<script type="module" src="/js/privy-bridge.mjs"></script>
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
@@ -696,7 +697,7 @@
 
     <!-- WALLET / LOGIN -->
     <section class="view" id="view-profile">
-      <div class="section-h"><h2>Wallet</h2><div class="meta">Phantom &amp; OKX · SOL &amp; EVM</div></div>
+      <div class="section-h"><h2>Wallet</h2><div class="meta">Phantom · OKX · Privy · SOL &amp; EVM</div></div>
       <div class="pcard" style="margin-bottom:22px">
         <div class="pav" id="walletAvatar">◇</div>
         <div>
@@ -800,9 +801,28 @@
           <img class="wlogo" src="/images/okx-wallet.png" alt="OKX Wallet" width="44" height="44" />
           <div class="wname">OKX</div>
         </div>
+        <div class="wallet-opt" data-wallet="privy" id="walletOptPrivy" hidden>
+          <img class="wlogo" src="/images/integrations/privy.svg" alt="Privy" width="44" height="44" />
+          <div class="wname">Privy</div>
+        </div>
+      </div>
+      <div id="privyLoginPanel" hidden>
+        <p class="wallet-intro">Email or Google — embedded Solana &amp; Base wallets via <a href="https://www.privy.io/" target="_blank" rel="noopener" style="color:var(--gold)">Privy</a>. No browser extension required.</p>
+        <div class="field" style="margin-bottom:10px">
+          <label for="privyEmail">Email</label>
+          <input id="privyEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field" id="privyOtpField" style="margin-bottom:10px" hidden>
+          <label for="privyOtp">Verification code</label>
+          <input id="privyOtp" type="text" inputmode="numeric" placeholder="6-digit code" maxlength="8" autocomplete="one-time-code" />
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <button type="button" class="btn sm" id="privySendCodeBtn" onclick="privySendCodeUi()">Send code</button>
+          <button type="button" class="btn sm gold" id="privyGoogleBtn" onclick="privyLoginGoogleUi()">Google</button>
+        </div>
       </div>
       <div class="wallet-status" id="walletStatus"></div>
-      <div class="modal-foot" style="margin-top:0;padding-top:0;border-top:none">
+      <div class="modal-foot" style="margin-top:0;padding-top:0;border-top:none" id="walletConnectFoot">
         <button class="btn" onclick="closeWalletModal()">Cancel</button>
         <button class="btn gold" id="walletConnectBtn" onclick="connectSelectedWallet()">Connect</button>
       </div>
@@ -978,6 +998,12 @@
       evm: () => window.okxwallet?.ethereum,
       install: 'https://www.okx.com/web3',
     },
+    privy: {
+      label: 'Privy',
+      sol: null,
+      evm: null,
+      install: 'https://www.privy.io/',
+    },
   };
 
   function loadWalletSession(){
@@ -1067,10 +1093,47 @@
     }
   }
 
+  function updateWalletPickUi(){
+    const isPrivy = walletPick === 'privy';
+    const panel = document.getElementById('privyLoginPanel');
+    const foot = document.getElementById('walletConnectFoot');
+    const btn = document.getElementById('walletConnectBtn');
+    if(panel) panel.hidden = !isPrivy;
+    if(foot) foot.style.display = isPrivy ? '' : '';
+    if(btn) btn.textContent = isPrivy ? 'Connect with Privy' : 'Connect';
+  }
+
+  async function restorePrivySession(){
+    if(!window.__elPrivy?.getAddresses) return;
+    const addrs = await window.__elPrivy.getAddresses();
+    if(!addrs?.sol && !addrs?.evm) return;
+    const session = loadWalletSession();
+    const now = Date.now();
+    if(addrs.sol) session.sol = { wallet: 'privy', address: addrs.sol, connectedAt: now };
+    if(addrs.evm) session.evm = { wallet: 'privy', address: addrs.evm, connectedAt: now };
+    saveWalletSession(session);
+    renderWalletUI();
+    toast('Privy session restored');
+  }
+
+  async function initPrivyWalletOption(){
+    try {
+      const res = await fetch('/api/privy-config', { cache: 'no-store' });
+      const cfg = await res.json();
+      const opt = document.getElementById('walletOptPrivy');
+      if(cfg?.enabled && opt) opt.hidden = false;
+      if(cfg?.enabled && window.__elPrivy?.init){
+        await window.__elPrivy.init();
+        await restorePrivySession();
+      }
+    } catch(e){ console.warn('privy config', e); }
+  }
+
   function openWalletModal(){
     document.getElementById('walletStatus').textContent = '';
     document.getElementById('walletStatus').classList.remove('err');
     renderWalletUI();
+    updateWalletPickUi();
     document.getElementById('walletOverlay').classList.add('show');
   }
   function closeWalletModal(){ document.getElementById('walletOverlay').classList.remove('show'); }
@@ -1080,6 +1143,7 @@
       document.querySelectorAll('#walletChoices .wallet-opt').forEach(o=>o.classList.remove('sel'));
       el.classList.add('sel');
       walletPick = el.dataset.wallet;
+      updateWalletPickUi();
     });
   });
   document.querySelector('#walletChoices .wallet-opt')?.classList.add('sel');
@@ -1100,6 +1164,53 @@
     return accounts[0];
   }
 
+  async function privySendCodeUi(){
+    const st = document.getElementById('walletStatus');
+    st.classList.remove('err');
+    st.textContent = 'Sending code…';
+    try {
+      const email = document.getElementById('privyEmail')?.value?.trim();
+      if(!window.__elPrivy?.sendEmailCode) throw new Error('Privy not loaded');
+      await window.__elPrivy.sendEmailCode(email || '');
+      document.getElementById('privyOtpField').hidden = false;
+      st.textContent = 'Code sent — check your email';
+    } catch(e){
+      st.textContent = e?.message || 'Failed to send code';
+      st.classList.add('err');
+    }
+  }
+
+  async function privyLoginGoogleUi(){
+    const st = document.getElementById('walletStatus');
+    st.classList.remove('err');
+    st.textContent = 'Redirecting to Google…';
+    try {
+      if(!window.__elPrivy?.loginWithGoogle) throw new Error('Privy not loaded');
+      await window.__elPrivy.loginWithGoogle();
+    } catch(e){
+      st.textContent = e?.message || 'Google login failed';
+      st.classList.add('err');
+    }
+  }
+
+  async function connectPrivyWallet(){
+    const st = document.getElementById('walletStatus');
+    const email = document.getElementById('privyEmail')?.value?.trim();
+    const otp = document.getElementById('privyOtp')?.value?.trim();
+    if(!window.__elPrivy?.loginWithEmail) throw new Error('Privy not loaded');
+    st.textContent = 'Creating embedded wallets…';
+    const addrs = await window.__elPrivy.loginWithEmail(email || '', otp || '');
+    const session = loadWalletSession();
+    const now = Date.now();
+    if(addrs.sol) session.sol = { wallet: 'privy', address: addrs.sol, connectedAt: now };
+    if(addrs.evm) session.evm = { wallet: 'privy', address: addrs.evm, connectedAt: now };
+    if(!session.sol && !session.evm) throw new Error('Privy connected but no wallets were created');
+    saveWalletSession(session);
+    st.textContent = 'Connected via Privy';
+    renderWalletUI();
+    toast('Connected via Privy');
+  }
+
   async function connectSelectedWallet(){
     const st = document.getElementById('walletStatus');
     st.classList.remove('err');
@@ -1108,6 +1219,11 @@
       const wallet = walletPick;
       const cfg = WALLET_PROVIDERS[wallet];
       if(!cfg) throw new Error('Unknown wallet');
+
+      if(wallet === 'privy'){
+        await connectPrivyWallet();
+        return;
+      }
 
       const session = loadWalletSession();
       const errors = [];
@@ -1143,12 +1259,19 @@
     if(entry){
       const cfg = WALLET_PROVIDERS[entry.wallet];
       try {
-        if(chainKey === 'sol'){
-          const p = cfg?.sol();
+        if(entry.wallet === 'privy' && window.__elPrivy?.disconnect){
+          await window.__elPrivy.disconnect();
+        } else if(chainKey === 'sol'){
+          const p = cfg?.sol?.();
           if(p?.disconnect) await p.disconnect();
         }
       } catch(e){ console.warn('wallet disconnect', e); }
-      delete session[chainKey];
+      if(entry.wallet === 'privy'){
+        delete session.sol;
+        delete session.evm;
+      } else {
+        delete session[chainKey];
+      }
       saveWalletSession(session);
     }
     renderWalletUI();
@@ -1166,7 +1289,10 @@
   window.disconnectAllWallets = disconnectAllWallets;
   window.openWalletModal = openWalletModal;
   window.closeWalletModal = closeWalletModal;
+  window.privySendCodeUi = privySendCodeUi;
+  window.privyLoginGoogleUi = privyLoginGoogleUi;
   renderWalletUI();
+  void initPrivyWalletOption();
 
   let _pendingAgentWallets = null;
 
