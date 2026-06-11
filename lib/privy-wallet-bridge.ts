@@ -186,13 +186,19 @@ export async function privyLoginWithEmail(email: string, code: string): Promise<
   }
 }
 
-export async function privyLoginWithGoogle(): Promise<void> {
+export type PrivyOAuthProvider = "google" | "twitter" | "github" | "linkedin";
+
+export async function privyLoginWithOAuth(provider: PrivyOAuthProvider): Promise<void> {
   const ok = await initPrivy();
   if (!ok || !client) throw new Error("Privy is not configured on this deployment");
-  const oauth = await client.auth.oauth.generateURL("google", redirectUri());
+  const oauth = await client.auth.oauth.generateURL(provider, redirectUri());
   const url = typeof oauth === "string" ? oauth : oauth.url;
   if (!url) throw new Error("Privy OAuth URL missing");
   window.location.assign(url);
+}
+
+export async function privyLoginWithGoogle(): Promise<void> {
+  return privyLoginWithOAuth("google");
 }
 
 export function getPrivyAddresses(): PrivyWalletAddresses {
@@ -265,6 +271,7 @@ declare global {
       sendEmailCode: (email: string) => Promise<void>;
       loginWithEmail: (email: string, code: string) => Promise<PrivyWalletAddresses>;
       loginWithGoogle: () => Promise<void>;
+      loginWithOAuth: (provider: PrivyOAuthProvider) => Promise<void>;
       disconnect: () => Promise<void>;
       getAddresses: () => Promise<PrivyWalletAddresses>;
       getEvmProvider: () => EIP1193Provider | null;
@@ -283,6 +290,7 @@ if (typeof window !== "undefined") {
       return getPrivyAddressesAsync();
     },
     loginWithGoogle: privyLoginWithGoogle,
+    loginWithOAuth: privyLoginWithOAuth,
     disconnect: privyDisconnect,
     getAddresses: getPrivyAddressesAsync,
     getEvmProvider: getPrivyEvmProvider,
