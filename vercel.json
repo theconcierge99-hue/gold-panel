@@ -114,6 +114,30 @@
       "destination": "/docs-grok-build.html"
     },
     {
+      "source": "/docs/integration/dexter",
+      "destination": "/docs-integration-dexter.html"
+    },
+    {
+      "source": "/docs/integration/payai",
+      "destination": "/docs-integration-payai.html"
+    },
+    {
+      "source": "/docs/integration/x402scan",
+      "destination": "/docs-integration-x402scan.html"
+    },
+    {
+      "source": "/docs/integration/zauth",
+      "destination": "/docs-integration-zauth.html"
+    },
+    {
+      "source": "/docs/integration/metaplex",
+      "destination": "/docs-integration-metaplex.html"
+    },
+    {
+      "source": "/docs/integration/agent-card",
+      "destination": "/docs-integration-agent-card.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

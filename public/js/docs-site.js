@@ -11,6 +11,18 @@
       { id: "payment-mpp", href: "/docs/payment/mpp", title: "MPP & AgentCash" },
       { id: "payment-paysh", href: "/docs/payment/paysh", title: "pay.sh" },
     ]},
+    { label: "Integrations", items: [
+      { id: "integration-dexter", href: "/docs/integration/dexter", title: "Dexter & OpenDexter" },
+      { id: "integration-payai", href: "/docs/integration/payai", title: "PayAI" },
+      { id: "integration-x402scan", href: "/docs/integration/x402scan", title: "x402scan" },
+      { id: "integration-zauth", href: "/docs/integration/zauth", title: "zauth" },
+      { id: "integration-mpp", href: "/docs/payment/mpp", title: "MPPscan" },
+      { id: "integration-paysh", href: "/docs/payment/paysh", title: "pay.sh" },
+      { id: "corbits", href: "/docs/corbits", title: "Corbits" },
+      { id: "grok-build", href: "/docs/grok-build", title: "Grok Build" },
+      { id: "integration-metaplex", href: "/docs/integration/metaplex", title: "Metaplex" },
+      { id: "integration-agent-card", href: "/docs/integration/agent-card", title: "Agent Card (A2A)" },
+    ]},
     { label: "API Reference", items: [
       { id: "api-overview", href: "/docs/api/overview", title: "API Overview" },
       { id: "api-concierge", href: "/docs/api/concierge", title: "Concierge Chat" },
@@ -26,8 +38,6 @@
     { label: "Product", items: [
       { id: "playground", href: "/docs/playground", title: "Executive Lounge" },
       { id: "architecture", href: "/docs/architecture", title: "Architecture" },
-      { id: "corbits", href: "/docs/corbits", title: "Corbits" },
-      { id: "grok-build", href: "/docs/grok-build", title: "Grok Build CLI" },
     ]},
   ];
 

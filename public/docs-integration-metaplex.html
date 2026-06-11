@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Metaplex — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent Metaplex integration — optional Solana RWA intelligence NFT mint on creator signal publish." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/metaplex" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-metaplex">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">Metaplex</h1>
+      <p class="docs-lead">
+        Creator signals on Executive Lounge can mint optional <strong>RWA intelligence NFTs</strong> on Solana via
+        <a class="ext" href="https://www.metaplex.com/" target="_blank" rel="noopener">Metaplex</a> Token Metadata — separate from x402 USDC payments (creator pays SOL gas in Phantom).
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live (browser mint via Phantom)</p>
+        <p><strong>Publish fee:</strong> 1 USDC via x402 (<code>/api/lounge-signal-publish</code>)</p>
+        <p><strong>NFT mint:</strong> Creator-paid SOL gas — not included in x402 price</p>
+        <p><strong>Client bundle:</strong> <code>public/js/mint-signal.mjs</code></p>
+      </div>
+
+      <h2 class="docs-h2">Flow</h2>
+      <div class="steps">
+        <div class="step"><h4>Publish signal</h4><p>Pay 1 USDC x402 fee → signal stored in KV with RWA metadata hash.</p></div>
+        <div class="step"><h4>Mint in Phantom</h4><p>Browser calls Metaplex via <code>mint-signal.mjs</code> — NFT to creator wallet.</p></div>
+        <div class="step"><h4>Record mint</h4><p><code>POST /api/lounge-rwa-record-mint</code> links mint address to signal id.</p></div>
+      </div>
+
+      <h2 class="docs-h2">Source files</h2>
+      <div class="card">
+        <ul>
+          <li><code>lib/mint-signal-browser.ts</code> — Phantom + Metaplex Umi client</li>
+          <li><code>lib/concierge-api/rwa-solana-mint.ts</code> — server mint helpers</li>
+          <li><code>lib/concierge-api/routes/rwa-metadata.ts</code> — on-chain metadata JSON</li>
+          <li><code>docs/rwa-solana-setup.md</code> — operator setup guide</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/lounge" class="gold-link">Lounge &amp; Signals API</a></li>
+          <li><a href="/docs/payment/x402" class="gold-link">x402 payments</a> — publish/unlock fees</li>
+          <li><a href="/integrations" class="gold-link">Integrations</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://www.metaplex.com/" target="_blank" rel="noopener">Metaplex ↗</a>
+        <a class="btn" href="/lounge">Executive Lounge</a>
+        <a class="btn" href="/docs/api/lounge">Signals API</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · Metaplex RWA NFT · Solana</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

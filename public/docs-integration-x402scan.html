@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>x402scan — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent listed on x402scan — x402 ecosystem discovery and on-chain settlement index." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/x402scan" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-x402scan">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">x402scan</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://www.x402scan.com/" target="_blank" rel="noopener">x402scan</a> indexes payable APIs in the x402 ecosystem — probes 402 challenges, lists resources, and tracks on-chain settlement volume from facilitators.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Discovery-ready (register at x402scan after deploy)</p>
+        <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Service name:</strong> Concierge Agent API</p>
+        <p><strong>Register:</strong> <a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan.com/resources/register ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Discovery endpoints we expose</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>URL</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /.well-known/x402</code></td><td>Resource fan-out + ownership proofs + registry links</td></tr>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 with <code>x-payment-info</code> per route</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td>Runtime networks, pricing, discovery metadata</td></tr>
+            <tr><td><code>402 PAYMENT-REQUIRED</code></td><td>Bazaar extensions + service tags on every paid route</td></tr>
+          </tbody>
+        </table>
+        <p>Implementation: <code>lib/concierge-api/x402-discovery.ts</code></p>
+      </div>
+
+      <h2 class="docs-h2">Twelve registered resources</h2>
+      <div class="card">
+        <p>Concierge Agent advertises twelve pay-per-call routes — Concierge AI, DeFi intel, Alpha desks, Lounge wire and RWA signals. See <a href="/agent/endpoints" class="gold-link">endpoint catalog</a> or <a href="/openapi.json" target="_blank" rel="noopener">openapi.json</a>.</p>
+        <p class="note">Pricing: <strong>$0.10</strong> per call · publish signal <strong>$1.00</strong></p>
+      </div>
+
+      <h2 class="docs-h2">Verify integration</h2>
+      <div class="card">
+<pre><code>curl -s https://conc-exe.xyz/.well-known/x402 | jq '.resources | length'
+
+curl -s https://conc-exe.xyz/openapi.json | jq '.info.title, ."x-discovery".x402scan'
+
+npm run discovery:validate</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/integration/payai" class="gold-link">PayAI</a> — primary settlement (indexed by x402scan)</li>
+          <li><a href="/docs/payment/x402" class="gold-link">x402 Protocol</a></li>
+          <li><a href="/docs/payment/mpp" class="gold-link">MPPscan</a> — parallel MPP listing</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://www.x402scan.com/" target="_blank" rel="noopener">x402scan ↗</a>
+        <a class="btn" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">Register ↗</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · x402scan discovery · <a href="https://www.x402scan.com/" class="ext" target="_blank" rel="noopener">x402scan.com</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

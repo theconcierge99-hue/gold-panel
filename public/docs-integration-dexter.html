@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Dexter &amp; OpenDexter — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent integration with Dexter x402 facilitator and OpenDexter agent marketplace." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/dexter" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-dexter">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">Dexter &amp; OpenDexter</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://dexter.cash/" target="_blank" rel="noopener">Dexter</a> is our <strong>x402 fallback facilitator</strong> and agent discovery surface.
+        <a class="ext" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">OpenDexter</a> lets AI agents find, price-check, and pay for our twelve routes in USDC — no API keys.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Integrated (backend + discovery metadata)</p>
+        <p><strong>Facilitator URL:</strong> <code>https://x402.dexter.cash</code></p>
+        <p><strong>Role:</strong> Fallback settlement · OpenDexter marketplace discovery</p>
+        <p><strong>Primary facilitator:</strong> <a href="/docs/integration/payai" class="gold-link">PayAI</a> — Dexter activates when PayAI is unavailable (Base) or as second Solana accept</p>
+        <p><strong>Marketplace:</strong> <a class="ext" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">dexter.cash/opendexter ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">What we integrated</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Layer</th><th>Implementation</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Settlement</strong></td><td><code>lib/concierge-api/x402-server.ts</code> — verify/settle via Dexter when selected or as EVM fallback</td></tr>
+            <tr><td><strong>Solana 402</strong></td><td>Dual <code>accepts</code> — PayAI fee payer + Dexter fee payer (<code>DeXterR2k…</code>)</td></tr>
+            <tr><td><strong>Discovery</strong></td><td><code>/.well-known/x402</code>, <code>/openapi.json</code>, <code>/api/x402-config</code> include Dexter / OpenDexter links</td></tr>
+            <tr><td><strong>Public UI</strong></td><td><a href="/integrations" class="gold-link">Integrations</a> registry card + install command for <code>@dexterai/opendexter</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Verify integration (live)</h2>
+      <div class="card">
+<pre><code>curl -s https://conc-exe.xyz/api/x402-config | jq '.fallbackFacilitator, .dexter'
+
+curl -s https://conc-exe.xyz/.well-known/x402 | jq '.links.openDexter, .links.dexterFacilitator'
+
+curl -s https://conc-exe.xyz/openapi.json | jq '."x-discovery".fallbackFacilitator'</code></pre>
+        <p class="note">OpenDexter search listing appears after the first successful settlement via Dexter facilitator — not from PayAI-only payments.</p>
+      </div>
+
+      <h2 class="docs-h2">For agents (OpenDexter MCP)</h2>
+      <div class="card">
+<pre><code># Hosted MCP (Claude, ChatGPT, Cursor)
+# https://open.dexter.cash/mcp
+
+# Local runtime
+npx -y @dexterai/opendexter
+
+# Search once listed
+x402_search(query: "market intelligence", network: "solana")</code></pre>
+        <p>Agents discover Concierge via OpenAPI at <code>https://conc-exe.xyz/openapi.json</code> or OpenDexter search after Dexter settlement indexes our origin.</p>
+      </div>
+
+      <h2 class="docs-h2">Seller profile</h2>
+      <div class="card">
+        <p>Claim your merchant wallet on Dexter for logo, tagline, and category:</p>
+        <p><a class="ext" href="https://dexter.cash/sellers" target="_blank" rel="noopener">dexter.cash/sellers ↗</a> — connect the same wallet as <code>X402_EVM_PAY_TO</code> or <code>X402_SOL_PAY_TO</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/integration/payai" class="gold-link">PayAI</a> — primary facilitator</li>
+          <li><a href="/docs/payment/x402" class="gold-link">x402 Protocol</a> — payment flow</li>
+          <li><a href="/docs/builders" class="gold-link">For Builders</a> — twelve routes</li>
+          <li><a href="/integrations" class="gold-link">Integrations page</a> — full partner stack</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">OpenDexter ↗</a>
+        <a class="btn" href="https://docs.dexter.cash/" target="_blank" rel="noopener">Dexter docs ↗</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · Dexter fallback · <a href="https://dexter.cash/" class="ext" target="_blank" rel="noopener">dexter.cash</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>zauth — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent zauth integration — x402 trust layer, directory proxy, Provider Hub telemetry." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/zauth" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-zauth">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">zauth</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://zauth.inc/" target="_blank" rel="noopener">zauth</a> is our optional <strong>x402 trust and telemetry layer</strong> — endpoint directory, verification checks, and Provider Hub events after successful paid calls. It does not replace PayAI/Dexter settlement.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Integrated (enable with <code>ZAUTH_API_KEY</code> in Vercel)</p>
+        <p><strong>Directory:</strong> <a class="ext" href="https://zauth.inc/database" target="_blank" rel="noopener">zauth.inc/database ↗</a></p>
+        <p><strong>Provider Hub:</strong> <a class="ext" href="https://zauth.inc/provider-hub" target="_blank" rel="noopener">zauth.inc/provider-hub ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Public APIs on Concierge</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /api/zauth-directory</code></td><td>CORS-open proxy to zauth endpoint directory</td></tr>
+            <tr><td><code>GET /api/zauth-status</code></td><td>Live verification checks for this origin (when key set)</td></tr>
+            <tr><td><code>GET /api/x402-config</code></td><td><code>zauthTelemetryEnabled</code> + discovery links</td></tr>
+          </tbody>
+        </table>
+        <p>Source: <code>lib/concierge-api/zauth.ts</code>, <code>zauth-paid-response.ts</code></p>
+      </div>
+
+      <h2 class="docs-h2">Telemetry (Provider Hub)</h2>
+      <div class="card">
+        <p>After successful x402 settlement on paid routes (Concierge, intel, news-open, signals), Concierge fires async events to zauth when <code>ZAUTH_API_KEY</code> is configured.</p>
+        <p>Helps agents choose reliable APIs via success rate, uptime, and verified badges in the zauth Database.</p>
+      </div>
+
+      <h2 class="docs-h2">Enable (operators)</h2>
+      <div class="card">
+<pre><code># Vercel environment variables
+ZAUTH_API_KEY=your_zauth_provider_api_key
+# optional override:
+# ZAUTH_API_ENDPOINT=https://back.zauthx402.com</code></pre>
+        <p>See <code>.env.example</code> and full markdown guide in repo <code>docs/zauth.md</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Verify integration</h2>
+      <div class="card">
+<pre><code>curl -s https://conc-exe.xyz/api/zauth-directory | jq '.endpoints | length'
+
+curl -s https://conc-exe.xyz/api/x402-config | jq '.zauthTelemetryEnabled, .discovery.zauth'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/integration/payai" class="gold-link">PayAI</a> — settlement unchanged</li>
+          <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — parallel discovery registry</li>
+          <li><a href="/about" class="gold-link">About</a> — zauth trust layer section</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://zauth.inc/provider-hub" target="_blank" rel="noopener">Provider Hub ↗</a>
+        <a class="btn" href="https://zauth.inc/database" target="_blank" rel="noopener">Database ↗</a>
+        <a class="btn" href="/api/zauth-directory" target="_blank" rel="noopener">Directory proxy</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · zauth trust layer · <a href="https://zauth.inc/" class="ext" target="_blank" rel="noopener">zauth.inc</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

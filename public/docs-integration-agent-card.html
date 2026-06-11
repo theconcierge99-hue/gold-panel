@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Agent Card (A2A) — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent Card — A2A discovery at /.well-known/agent-card.json for agent-to-agent x402." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/agent-card" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-agent-card">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">Agent Card (A2A)</h1>
+      <p class="docs-lead">
+        Concierge publishes a machine-readable <strong>Agent Card</strong> at <code>/.well-known/agent-card.json</code> for agent-to-agent (A2A) discovery — compatible with ERC-8004-style service registries and x402-paid endpoints.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live</p>
+        <p><strong>Well-known URL:</strong> <a href="/.well-known/agent-card.json" target="_blank" rel="noopener">/.well-known/agent-card.json</a></p>
+        <p><strong>Per-agent cards:</strong> <code>GET /api/agent-identity-card?id=agt_…</code></p>
+        <p><strong>Registration:</strong> <code>POST /api/agent-identity</code> — see <a href="/docs/api/agent-identity" class="gold-link">Agent Identity</a></p>
+      </div>
+
+      <h2 class="docs-h2">What the card includes</h2>
+      <div class="card">
+        <ul>
+          <li>Service name, description, and icon for Concierge Agent</li>
+          <li>Links to <code>/openapi.json</code> and paid endpoint catalog</li>
+          <li>x402 payment capability — USDC on Base and Solana</li>
+          <li>Twelve pay-per-call intelligence routes</li>
+        </ul>
+        <p>Handler: <code>lib/concierge-api/routes/well-known-agent-card.ts</code></p>
+      </div>
+
+      <h2 class="docs-h2">Verify integration</h2>
+      <div class="card">
+<pre><code>curl -s https://conc-exe.xyz/.well-known/agent-card.json | jq .
+
+curl -s https://conc-exe.xyz/api/agent-identity-card?id=agt_demo | jq .</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/agent-identity" class="gold-link">Agent Identity API</a></li>
+          <li><a href="/agent/identity" class="gold-link">Register an agent</a></li>
+          <li><a href="/docs/integration/dexter" class="gold-link">OpenDexter</a> — MCP agent discovery</li>
+          <li><a href="/docs/payment/mpp" class="gold-link">MPPscan</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/.well-known/agent-card.json" target="_blank" rel="noopener">Agent card ↗</a>
+        <a class="btn" href="/agent/endpoints">12 routes</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · A2A discovery · x402 paid services</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>
