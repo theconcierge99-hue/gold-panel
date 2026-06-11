@@ -13,7 +13,8 @@ export default async function handler(request: Request): Promise<Response> {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
-  return new Response(JSON.stringify(getPublicPrivyConfig()), {
+  const config = await getPublicPrivyConfig();
+  return new Response(JSON.stringify(config), {
     status: 200,
     headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });

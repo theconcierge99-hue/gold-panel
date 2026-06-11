@@ -223,13 +223,34 @@ export async function privyLoginWithEmail(email: string, code: string): Promise<
 
 export type PrivyOAuthProvider = "google" | "twitter" | "github" | "linkedin";
 
+function formatOAuthError(e: unknown, provider: PrivyOAuthProvider): Error {
+  const privyErr = e as { code?: string; error?: string; message?: string };
+  const raw = privyErr?.error || (e instanceof Error ? e.message : String(e));
+  const code = privyErr?.code ?? "";
+  const disallowed =
+    code === "disallowed_login_method" ||
+    /not allowed/i.test(raw) ||
+    /disallowed_login_method/i.test(raw);
+  if (disallowed) {
+    const label = provider === "google" ? "Google" : provider;
+    return new Error(
+      `${label} sign-in is disabled for this Privy app. Enable it in Privy Dashboard → Login methods → Socials, or use email below.`,
+    );
+  }
+  return e instanceof Error ? e : new Error(raw || "OAuth login failed");
+}
+
 export async function privyLoginWithOAuth(provider: PrivyOAuthProvider): Promise<void> {
   const ok = await initPrivy();
   if (!ok || !client) throw privyUnavailableError();
-  const oauth = await client.auth.oauth.generateURL(provider, redirectUri());
-  const url = typeof oauth === "string" ? oauth : oauth.url;
-  if (!url) throw new Error("Privy OAuth URL missing");
-  window.location.assign(url);
+  try {
+    const oauth = await client.auth.oauth.generateURL(provider, redirectUri());
+    const url = typeof oauth === "string" ? oauth : oauth.url;
+    if (!url) throw new Error("Privy OAuth URL missing");
+    window.location.assign(url);
+  } catch (e) {
+    throw formatOAuthError(e, provider);
+  }
 }
 
 export async function privyLoginWithGoogle(): Promise<void> {
