@@ -1,7 +1,6 @@
 /**
  * Dispatched from api/[...path].ts. Handler modules live in lib/concierge-api/
  * (outside /api) so Vercel does not register each file as its own function.
- * Production POST /api/concierge is served by `api/concierge.ts` (Node, 60s); Edge route kept for dev/fallback.
  */
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";

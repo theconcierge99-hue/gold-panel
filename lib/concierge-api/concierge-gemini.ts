@@ -123,9 +123,9 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
 }
 
 const GEMINI_CALL_MS = 24_000;
-const GEMINI_TRADING_MS = 35_000;
-/** Wall-clock budget for Gemini on trading-plan path (Node concierge: 60s maxDuration). */
-const GEMINI_TRADING_BUDGET_MS = 42_000;
+const GEMINI_TRADING_MS = 17_000;
+/** Wall-clock budget for Gemini on trading-plan path (fits Vercel Edge ~30s incl. x402 + intel). */
+const GEMINI_TRADING_BUDGET_MS = 18_000;
 
 const TRADING_PLAN_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];

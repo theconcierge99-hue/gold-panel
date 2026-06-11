@@ -16,7 +16,7 @@ function parseAgentIdHeader(request: Request): string | null {
   return id;
 }
 
-/** Node (`api/concierge.ts`, maxDuration 60) — Gemini + x402; not on Edge (30s cap). */
+/** Edge — Gemini + x402 (via api/[...path].ts). Trading-plan path tuned for ~30s wall clock. */
 function jsonResponse(
   request: Request,
   body: unknown,
