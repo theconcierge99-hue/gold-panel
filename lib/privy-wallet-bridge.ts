@@ -18,12 +18,12 @@ export type PrivyWalletAddresses = {
 };
 
 type PrivyBridgeState = {
-  ready: boolean;
   enabled: boolean;
   loggingIn: boolean;
 };
 
 let client: Privy | null = null;
+let lastInitError: string | null = null;
 let iframe: HTMLIFrameElement | null = null;
 let messageListener: ((e: MessageEvent) => void) | null = null;
 let evmProvider: EIP1193Provider | null = null;
@@ -31,7 +31,18 @@ let solProvider: PrivyEmbeddedSolanaWalletProvider | null = null;
 let evmAddress: string | null = null;
 let solAddress: string | null = null;
 
-const state: PrivyBridgeState = { ready: false, enabled: false, loggingIn: false };
+const state: PrivyBridgeState = { enabled: false, loggingIn: false };
+
+function privyUnavailableError(): Error {
+  if (lastInitError) {
+    return new Error(
+      `Privy login failed: ${lastInitError}. Add ${typeof window !== "undefined" ? window.location.host : "your domain"} to allowed domains in Privy Dashboard.`,
+    );
+  }
+  return new Error(
+    "Privy is not configured — set PRIVY_APP_ID and PRIVY_CLIENT_ID in Vercel, then redeploy.",
+  );
+}
 
 function redirectUri(): string {
   if (typeof window === "undefined") return "";
@@ -106,14 +117,16 @@ async function ensureEmbeddedWallets(privy: Privy): Promise<void> {
 }
 
 async function initPrivy(): Promise<boolean> {
-  if (state.ready) return state.enabled;
+  if (state.enabled && client) return true;
+  lastInitError = null;
   try {
     const res = await fetch("/api/privy-config", { cache: "no-store" });
-    if (!res.ok) return false;
+    if (!res.ok) {
+      lastInitError = `privy-config HTTP ${res.status}`;
+      return false;
+    }
     const cfg = (await res.json()) as { enabled?: boolean; appId?: string; clientId?: string };
     if (!cfg.enabled || !cfg.appId || !cfg.clientId) {
-      state.ready = true;
-      state.enabled = false;
       return false;
     }
 
@@ -132,11 +145,11 @@ async function initPrivy(): Promise<boolean> {
     }
 
     state.enabled = true;
-    state.ready = true;
     return true;
   } catch (e) {
     console.warn("[privy] init failed", e);
-    state.ready = true;
+    lastInitError = e instanceof Error ? e.message : String(e);
+    client = null;
     state.enabled = false;
     return false;
   }
@@ -167,14 +180,14 @@ export async function handleOAuthCallback(): Promise<boolean> {
 export async function privySendEmailCode(email: string): Promise<void> {
   if (!email.trim()) throw new Error("Enter your email");
   const ok = await initPrivy();
-  if (!ok || !client) throw new Error("Privy is not configured on this deployment");
+  if (!ok || !client) throw privyUnavailableError();
   await client.auth.email.sendCode(email.trim());
 }
 
 export async function privyLoginWithEmail(email: string, code: string): Promise<PrivyWalletAddresses> {
   if (!email.trim() || !code.trim()) throw new Error("Email and verification code required");
   const ok = await initPrivy();
-  if (!ok || !client) throw new Error("Privy is not configured on this deployment");
+  if (!ok || !client) throw privyUnavailableError();
 
   state.loggingIn = true;
   try {
@@ -190,7 +203,7 @@ export type PrivyOAuthProvider = "google" | "twitter" | "github" | "linkedin";
 
 export async function privyLoginWithOAuth(provider: PrivyOAuthProvider): Promise<void> {
   const ok = await initPrivy();
-  if (!ok || !client) throw new Error("Privy is not configured on this deployment");
+  if (!ok || !client) throw privyUnavailableError();
   const oauth = await client.auth.oauth.generateURL(provider, redirectUri());
   const url = typeof oauth === "string" ? oauth : oauth.url;
   if (!url) throw new Error("Privy OAuth URL missing");
@@ -256,12 +269,15 @@ export async function privyDisconnect(): Promise<void> {
   iframe?.remove();
   iframe = null;
   client = null;
-  state.ready = false;
   state.enabled = false;
 }
 
 export function isPrivyBridgeEnabled(): boolean {
   return state.enabled;
+}
+
+export function getPrivyInitError(): string | null {
+  return lastInitError;
 }
 
 declare global {
@@ -277,6 +293,8 @@ declare global {
       getEvmProvider: () => EIP1193Provider | null;
       getSolanaSigner: () => ReturnType<typeof getPrivySolanaSigner>;
       isEnabled: () => boolean;
+      getInitError: () => string | null;
+      isConfigPresent: () => Promise<boolean>;
     };
   }
 }
@@ -296,6 +314,16 @@ if (typeof window !== "undefined") {
     getEvmProvider: getPrivyEvmProvider,
     getSolanaSigner: getPrivySolanaSigner,
     isEnabled: isPrivyBridgeEnabled,
+    getInitError: getPrivyInitError,
+    isConfigPresent: async () => {
+      try {
+        const res = await fetch("/api/privy-config", { cache: "no-store" });
+        if (!res.ok) return false;
+        const cfg = (await res.json()) as { enabled?: boolean };
+        return !!cfg.enabled;
+      } catch {
+        return false;
+      }
+    },
   };
-  void initPrivy();
 }

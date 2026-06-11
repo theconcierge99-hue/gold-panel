@@ -1196,10 +1196,19 @@
     if(modal) modal.classList.toggle('privy-mode', isPrivy);
   }
 
-  function showPrivyLogin(){
-    walletView = 'privy';
-    document.getElementById('walletStatus').textContent = '';
-    document.getElementById('walletStatus').classList.remove('err');
+  async function showPrivyLogin(){
+    const st = document.getElementById('walletStatus');
+    st.classList.remove('err');
+    st.textContent = '';
+    privyEnabled = await ensurePrivyReady();
+    walletView = privyEnabled ? 'privy' : 'ext';
+    if(!privyEnabled){
+      const err = window.__elPrivy?.getInitError?.();
+      st.textContent = err
+        ? ('Privy unavailable: '+err)
+        : 'Privy not configured — set PRIVY_APP_ID and PRIVY_CLIENT_ID in Vercel.';
+      st.classList.add('err');
+    }
     updateWalletPickUi();
   }
 
@@ -1232,30 +1241,51 @@
     toast('Privy session restored');
   }
 
+  async function waitForPrivyBridge(maxMs){
+    const deadline = Date.now() + (maxMs || 8000);
+    while(!window.__elPrivy?.init && Date.now() < deadline){
+      await new Promise(r => setTimeout(r, 40));
+    }
+    return !!window.__elPrivy?.init;
+  }
+
+  async function ensurePrivyReady(){
+    if(!await waitForPrivyBridge()) return false;
+    if(window.__elPrivy?.isEnabled?.()) return true;
+    const ok = await window.__elPrivy.init();
+    if(ok) await restorePrivySession();
+    return ok;
+  }
+
   async function initPrivyWalletOption(){
     try {
       const res = await fetch('/api/privy-config', { cache: 'no-store' });
       const cfg = await res.json();
-      privyEnabled = !!cfg?.enabled;
+      const configPresent = !!cfg?.enabled;
       const backBtn = document.getElementById('privyBackBtn');
-      if(backBtn) backBtn.hidden = !privyEnabled;
-      if(privyEnabled && window.__elPrivy?.init){
-        await window.__elPrivy.init();
-        await restorePrivySession();
-        walletView = 'privy';
-      } else {
-        walletView = 'ext';
-      }
+      if(backBtn) backBtn.hidden = !configPresent;
+      privyEnabled = configPresent && await ensurePrivyReady();
+      walletView = privyEnabled ? 'privy' : 'ext';
       updateWalletPickUi();
     } catch(e){ console.warn('privy config', e); }
   }
 
-  function openWalletModal(){
-    document.getElementById('walletStatus').textContent = '';
-    document.getElementById('walletStatus').classList.remove('err');
+  async function openWalletModal(){
+    const st = document.getElementById('walletStatus');
+    st.textContent = '';
+    st.classList.remove('err');
     document.getElementById('privyMorePanel')?.classList.remove('show');
     document.getElementById('privyOtpField').hidden = true;
+    const configPresent = await window.__elPrivy?.isConfigPresent?.().catch(() => false);
+    if(configPresent) privyEnabled = await ensurePrivyReady();
     walletView = privyEnabled ? 'privy' : 'ext';
+    if(configPresent && !privyEnabled){
+      const err = window.__elPrivy?.getInitError?.();
+      st.textContent = err
+        ? ('Privy unavailable: '+err+' — add '+location.host+' in Privy Dashboard allowed domains.')
+        : 'Privy not configured — set PRIVY_APP_ID and PRIVY_CLIENT_ID in Vercel.';
+      st.classList.add('err');
+    }
     renderWalletUI();
     updateWalletPickUi();
     document.getElementById('walletOverlay').classList.add('show');
