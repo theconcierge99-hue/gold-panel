@@ -15,7 +15,7 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 | `X402_EVM_PAY_TO` | Merchant USDC receive address on **Base** (`0x` + 40 hex). |
 | `X402_SOL_PAY_TO` | Optional merchant USDC receive address on **Solana** (base58, 32–44 chars). |
 | `X402_ENABLED` | Set `false` to disable payments entirely. Default: enabled when a valid pay-to exists. |
-| `X402_FACILITATOR` | `dexter` (default) or `payai`. Dexter: `https://x402.dexter.cash` — free settlement, OpenDexter auto-discovery. |
+| `X402_FACILITATOR` | `payai` (default) or `dexter`. PayAI primary; Dexter listed as fallback in 402 accepts and EVM retry. |
 | `X402_NETWORK_MODE` | `mainnet` (default) or `testnet` (Base Sepolia + Solana devnet). |
 | `PAYAI_API_KEY_ID` | Optional PayAI JWT key id — only when `X402_FACILITATOR=payai`. |
 | `PAYAI_API_KEY_SECRET` | Optional PayAI JWT secret. |

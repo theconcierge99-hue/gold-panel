@@ -20,7 +20,7 @@
       <div class="docs-eyebrow">Payment</div>
       <h1 class="docs-title">MPP &amp; AgentCash</h1>
       <p class="docs-lead">
-        Concierge Agent is listed on <strong>MPPscan</strong> (Machine Payments Protocol). Settlement stays <strong>x402 USDC</strong> via PayAI — MPP is discovery and agent tooling, not a separate payment rail.
+        Concierge Agent is listed on <strong>MPPscan</strong> (Machine Payments Protocol). Settlement stays <strong>x402 USDC</strong> via PayAI (primary) with Dexter fallback — MPP is discovery and agent tooling, not a separate payment rail.
       </p>
 
       <div class="card">
@@ -90,7 +90,7 @@ npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-inte
       <div class="steps">
         <div class="step"><h4>Discovery (MPP / AgentCash)</h4><p>Agents read <code>/openapi.json</code> and MPPscan to learn routes, prices, and JSON shapes before calling.</p></div>
         <div class="step"><h4>Challenge (x402 v2)</h4><p>Runtime <code>402</code> + <code>PAYMENT-REQUIRED</code> with USDC requirements on Solana and/or Base.</p></div>
-        <div class="step"><h4>Settlement (PayAI)</h4><p><code>PAYMENT-SIGNATURE</code> → verify/settle → <code>200</code> + JSON intelligence.</p></div>
+        <div class="step"><h4>Settlement (PayAI + Dexter)</h4><p><code>PAYMENT-SIGNATURE</code> → verify/settle (PayAI primary; Dexter fallback on Base outage or second Solana accept) → <code>200</code> + JSON intelligence.</p></div>
       </div>
 
       <h2 class="docs-h2">Registries</h2>
@@ -98,6 +98,7 @@ npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-inte
         <ul>
           <li><a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> — Machine Payments Protocol explorer (listed)</li>
           <li><a class="ext" href="https://pay.sh/" target="_blank" rel="noopener">pay.sh</a> — agent CLI catalog (<code>pay curl</code>, Claude/Codex MCP)</li>
+          <li><a class="ext" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">OpenDexter</a> — Dexter agent marketplace (auto-discovery on Dexter settlements)</li>
           <li><a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan</a> — x402 ecosystem registry (optional second listing)</li>
           <li><a href="/integrations" class="gold-link">Integrations</a> — partner stack and install command</li>
         </ul>

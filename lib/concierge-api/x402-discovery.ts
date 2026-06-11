@@ -34,7 +34,7 @@ import { corbitsDiscoveryLinks } from "./corbits-links";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { grokDiscoveryLinks } from "./grok-links";
 import { payshDiscoveryLinks } from "./paysh-links";
-import { getX402FacilitatorProfile } from "./x402-facilitator";
+import { getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
@@ -223,7 +223,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      `Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; settlement via ${facilitator.name} USDC on Solana/Base. Listed on OpenDexter (auto-discovery on first Dexter settlement), MPPscan, pay.sh CLI; Grok Build skill concierge-intel in repo.`,
+      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; USDC settlement via PayAI (primary) with Dexter fallback on Solana/Base. OpenDexter auto-discovery on Dexter settlements; also on MPPscan, pay.sh CLI, x402scan.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -337,7 +337,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.0.0",
       description:
-        `Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via ${facilitator.name}.`,
+        "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {
@@ -362,6 +362,8 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       iconUrl: listing.iconUrl,
       facilitator: facilitator.name,
       facilitatorUrl: facilitator.url,
+      fallbackFacilitator: getX402FacilitatorFallback().name,
+      fallbackFacilitatorUrl: getX402FacilitatorFallback().url,
       protocols: ["x402", "mpp"],
     },
     tags: [
@@ -395,6 +397,8 @@ export function discoveryMetaForConfig(origin: string) {
     facilitator: facilitator.name,
     facilitatorId: facilitator.id,
     facilitatorUrl: facilitator.url,
+    fallbackFacilitator: getX402FacilitatorFallback().name,
+    fallbackFacilitatorUrl: getX402FacilitatorFallback().url,
     mppscanRegisterUrl: MPPSCAN_REGISTER_URL,
     resources: X402_DISCOVERY_RESOURCES.map((r) => ({
       kind: r.kind,

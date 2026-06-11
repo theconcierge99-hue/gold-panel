@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Integrations — Executive Lounge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, Meteora, x402, PayAI, pay.sh, Grok Build, MPPscan, Corbits, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
+<meta name="description" content="Data sources and distribution partners — Gemini, DeFi Llama, x402, PayAI, Dexter OpenDexter, pay.sh, Grok Build, MPPscan, Corbits, AgentCash, x402scan, zauth, and Concierge Agent on conc-exe.xyz." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/integrations" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -93,11 +93,11 @@
       <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
     </header>
     <p class="int-lead" style="margin-bottom:24px">
-      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash), <strong>Corbits Marketplace</strong> (x402 proxy), and compatible with <strong>pay.sh</strong> (agent CLI catalog). Optional zauth telemetry reports settlements for trust scoring.
+      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash), <strong>Corbits Marketplace</strong> (x402 proxy), and compatible with <strong>pay.sh</strong> (agent CLI catalog). Settlement runs through <strong>PayAI</strong> (primary) with <strong><a href="https://dexter.cash/" target="_blank" rel="noopener noreferrer">Dexter</a></strong> as fallback — auto-listed on <strong>OpenDexter</strong> after Dexter settlements. Optional zauth telemetry reports settlements for trust scoring.
     </p>
     <div class="int-registry" id="int-registry">
       <div class="int-registry-bar">
-        <p class="int-registry-hint">12 registries · scrolls automatically</p>
+        <p class="int-registry-hint">13 registries · scrolls automatically</p>
         <button type="button" class="int-registry-toggle" id="int-registry-toggle" aria-expanded="false" aria-controls="int-registry-grid">
           Open full registry →
         </button>
@@ -172,11 +172,23 @@
             <img class="int-partner-logo int-partner-logo--card" src="/images/integrations/payai.png" alt="" width="28" height="28" />
             <h3>PayAI</h3>
           </div>
-          <span class="int-tag">Settlement</span>
+          <span class="int-tag">Primary</span>
         </div>
         <p class="int-card-sub">Facilitator</p>
-        <p>USDC verify and settle on Base and Solana for all twelve paid Concierge Agent routes.</p>
+        <p>Default USDC verify and settle on Base and Solana for all twelve paid Concierge Agent routes.</p>
         <span class="int-card-link">Facilitator docs ↗</span>
+      </a>
+      <a class="int-card" href="https://dexter.cash/opendexter" target="_blank" rel="noopener noreferrer">
+        <div class="int-card-top">
+          <div class="int-card-brand">
+            <img class="int-partner-logo int-partner-logo--card int-partner-logo--round" src="https://dexter.cash/favicon.ico" alt="" width="28" height="28" />
+            <h3>Dexter</h3>
+          </div>
+          <span class="int-tag">Fallback</span>
+        </div>
+        <p class="int-card-sub">OpenDexter</p>
+        <p>Free x402 fallback facilitator at <code>x402.dexter.cash</code>. Auto-discovery on OpenDexter marketplace after settlement — agents find us via <code>x402_search</code> MCP.</p>
+        <span class="int-card-link">OpenDexter ↗</span>
       </a>
       <a class="int-card" href="https://the-concierge.theconcierge99.api.corbits.dev" target="_blank" rel="noopener noreferrer">
         <div class="int-card-top">
@@ -255,7 +267,7 @@
 
     <aside class="int-install" aria-labelledby="int-install-h">
       <p class="int-install-eyebrow" id="int-install-h">Install on your agent</p>
-      <p class="int-install-lead">Add Concierge to AgentCash, pay.sh, Grok Build, or any x402 client — same twelve routes, same USDC settlement.</p>
+      <p class="int-install-lead">Add Concierge to AgentCash, pay.sh, OpenDexter, Grok Build, or any x402 client — same twelve routes, PayAI settlement with Dexter fallback.</p>
       <div class="int-install-cmd">
         <code>npx agentcash add https://conc-exe.xyz</code>
         <button type="button" class="int-install-copy" data-copy="npx agentcash add https://conc-exe.xyz" aria-label="Copy AgentCash install command">Copy</button>
@@ -265,6 +277,10 @@
         <button type="button" class="int-install-copy" data-copy="pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'" aria-label="Copy pay.sh curl command">Copy</button>
       </div>
       <div class="int-install-cmd" style="margin-top:10px">
+        <code>npx -y @dexterai/opendexter</code>
+        <button type="button" class="int-install-copy" data-copy="npx -y @dexterai/opendexter" aria-label="Copy OpenDexter install command">Copy</button>
+      </div>
+      <div class="int-install-cmd" style="margin-top:10px">
         <code>irm https://x.ai/cli/install.ps1 | iex</code>
         <button type="button" class="int-install-copy" data-copy="irm https://x.ai/cli/install.ps1 | iex" aria-label="Copy Grok Build install command">Copy</button>
       </div>
@@ -272,6 +288,10 @@
         <a href="https://pay.sh/" target="_blank" rel="noopener noreferrer">pay.sh ↗</a>
         ·
         <a href="/docs/payment/paysh">pay.sh guide</a>
+        ·
+        <a href="https://dexter.cash/opendexter" target="_blank" rel="noopener noreferrer">OpenDexter ↗</a>
+        ·
+        <a href="https://dexter.cash/sellers" target="_blank" rel="noopener noreferrer">Dexter sellers ↗</a>
         ·
         <a href="https://x.ai/cli" target="_blank" rel="noopener noreferrer">Grok Build ↗</a>
         ·
@@ -294,6 +314,9 @@
     </aside>
 
     <div class="int-payments">
+      <span class="int-pill">PayAI · primary</span>
+      <span class="int-pill">Dexter · fallback</span>
+      <span class="int-pill">OpenDexter</span>
       <span class="int-pill">USDC · Base</span>
       <span class="int-pill">USDC · Solana</span>
       <span class="int-pill">MPP · AgentCash</span>

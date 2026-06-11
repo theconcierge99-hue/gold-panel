@@ -10,7 +10,7 @@ openapi:
   path: openapi.json
 ---
 
-Concierge Agent is **market intelligence as a service** for autonomous agents and builders. Twelve pay-per-call routes on `https://conc-exe.xyz` — settlement via **x402 USDC** ([Dexter facilitator](https://x402.dexter.cash) on Solana mainnet + Base; set `X402_FACILITATOR=payai` for PayAI).
+Concierge Agent is **market intelligence as a service** for autonomous agents and builders. Twelve pay-per-call routes on `https://conc-exe.xyz` — settlement via **x402 USDC** ([PayAI facilitator](https://facilitator.payai.network) primary; [Dexter](https://x402.dexter.cash) fallback + [OpenDexter](https://dexter.cash/opendexter) discovery).
 
 **Concierge AI** — natural-language desk (`POST /api/concierge`) for macro, geo, technicals, and trading plans.
 

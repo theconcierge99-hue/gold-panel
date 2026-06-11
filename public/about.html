@@ -89,7 +89,7 @@
 
   <div class="card">
     <h2>x402 micropayments</h2>
-    <p>Payments run on <strong>Solana and/or Base</strong> via the <strong>x402</strong> protocol—small, intentional, and spam-resistant. You approve USDC in your wallet; the server verifies settlement through PayAI. No subscription required for paid reads or Concierge.</p>
+    <p>Payments run on <strong>Solana and/or Base</strong> via the <strong>x402</strong> protocol—small, intentional, and spam-resistant. You approve USDC in your wallet; the server verifies settlement through <strong>PayAI</strong> (primary), with <strong><a href="https://dexter.cash/" target="_blank" rel="noopener noreferrer">Dexter</a></strong> as fallback facilitator and <strong><a href="https://dexter.cash/opendexter" target="_blank" rel="noopener noreferrer">OpenDexter</a></strong> for agent marketplace discovery. No subscription required for paid reads or Concierge.</p>
     <ul>
       <li>Discoverable via <code>openapi.json</code> and <code>/.well-known/x402</code> for agents and marketplaces.</li>
       <li>Listed on <strong><a href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">x402scan</a></strong> and <strong><a href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">MPPscan</a></strong> (Machine Payments Protocol).</li>
@@ -122,7 +122,7 @@
 
   <div class="card">
     <h2>zauth trust layer</h2>
-    <p>We integrate <strong><a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer">zauth</a></strong> as a trust and discovery layer for the broader x402 ecosystem—not a replacement for wallet signing or PayAI settlement.</p>
+    <p>We integrate <strong><a href="https://zauth.inc/" target="_blank" rel="noopener noreferrer">zauth</a></strong> as a trust and discovery layer for the broader x402 ecosystem—not a replacement for wallet signing or PayAI/Dexter settlement.</p>
     <ul>
       <li><strong>Directory proxy</strong> — query verified x402 endpoints before recommending third-party paid APIs.</li>
       <li><strong>Provider Hub telemetry</strong> — optional operator reporting after successful paid calls (Concierge, news-open, signals).</li>

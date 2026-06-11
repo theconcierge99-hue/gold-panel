@@ -5,7 +5,7 @@
 Production site: your deployed domain (e.g. Executive Lounge on Vercel)  
 Repository: private `gold-panel` — clone from your Git remote only; do not commit secrets
 
-Executive Lounge combines a live market wire, **RWA intelligence certificates** (creator signals with optional **Solana NFT** mint), and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via the [Dexter facilitator](https://x402.dexter.cash) (default; [OpenDexter](https://dexter.cash/opendexter) auto-discovery). Also listable on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
+Executive Lounge combines a live market wire, **RWA intelligence certificates** (creator signals with optional **Solana NFT** mint), and a paid **Concierge AI** desk. Micropayments use the [x402](https://www.x402.org/) protocol (USDC on **Base** and **Solana**) via [PayAI](https://facilitator.payai.network) (primary) with [Dexter](https://x402.dexter.cash) fallback and [OpenDexter](https://dexter.cash/opendexter) agent discovery. Also listable on [x402scan.com](https://www.x402scan.com/) when discovery endpoints are enabled.
 
 > **Security:** Documentation uses placeholders only. Never commit API keys, RPC URLs with keys, or KV tokens. See [docs/security.md](docs/security.md).
 
@@ -20,7 +20,7 @@ Executive Lounge combines a live market wire, **RWA intelligence certificates** 
 | [docs/getting-started.md](docs/getting-started.md) | Local development setup |
 | [docs/configuration.md](docs/configuration.md) | Environment variables |
 | [docs/api-reference.md](docs/api-reference.md) | HTTP API endpoints |
-| [docs/x402-payments.md](docs/x402-payments.md) | x402 / PayAI payment integration |
+| [docs/x402-payments.md](docs/x402-payments.md) | x402 payment integration (PayAI + Dexter) |
 | [docs/mppscan.md](docs/mppscan.md) | MPPscan + AgentCash discovery |
 | [docs/paysh.md](docs/paysh.md) | pay.sh agent CLI catalog + pay-skills listing |
 | [docs/concierge-ai.md](docs/concierge-ai.md) | Concierge AI behavior and language rules |

@@ -2,23 +2,27 @@
 
 Executive Lounge uses the [x402](https://www.x402.org/) payment protocol (HTTP **402 Payment Required**) with USDC on **Base (EVM)** and optionally **Solana**.
 
-## Facilitator
+## Facilitators
 
-Default: **[Dexter](https://dexter.cash/)** — free x402 settlement at `https://x402.dexter.cash` (gas sponsored on Solana + Base). Set `X402_FACILITATOR=payai` to use [PayAI](https://docs.payai.network/x402/facilitators/pricing) instead.
+| Role | Provider | URL |
+|------|----------|-----|
+| **Primary (default)** | [PayAI](https://docs.payai.network/x402/facilitators/pricing) | `https://facilitator.payai.network` |
+| **Fallback** | [Dexter](https://docs.dexter.cash/docs/facilitator-and-chains/) | `https://x402.dexter.cash` |
 
-| Setting | Value (Dexter default) |
-|---------|--------|
-| Provider | [Dexter](https://docs.dexter.cash/docs/facilitator-and-chains/) |
-| URL | `https://x402.dexter.cash` |
-| Server module | `lib/concierge-api/x402-server.ts` (Edge-safe HTTP client) |
-| OpenDexter | Auto-listed after first Dexter settlement — [marketplace](https://dexter.cash/opendexter), claim profile at [dexter.cash/sellers](https://dexter.cash/sellers) |
+Server module: `lib/concierge-api/x402-server.ts` (Edge-safe HTTP client).
+
+- **Base (EVM):** verify/settle via PayAI first; on facilitator outage, retry Dexter automatically.
+- **Solana:** `402` accepts list **both** PayAI and Dexter fee payers — clients sign with the primary (PayAI) unless retrying via Dexter accept.
+- **OpenDexter:** Dexter settlements auto-list on [OpenDexter marketplace](https://dexter.cash/opendexter). Claim seller profile at [dexter.cash/sellers](https://dexter.cash/sellers).
+
+Set `X402_FACILITATOR=dexter` only if you want Dexter as primary (unusual).
 
 Flow per paid request:
 
 1. Client receives **402** + `PAYMENT-REQUIRED` (base64 JSON, x402 version 2).
 2. Wallet signs USDC transfer matching one of the `accepts` entries.
 3. Client retries with `PAYMENT-SIGNATURE`.
-4. Server calls facilitator `/verify` then `/settle`.
+4. Server calls facilitator `/verify` then `/settle` (PayAI primary, Dexter fallback where configured).
 5. On success, server returns **200** + `PAYMENT-RESPONSE` (includes on-chain `transaction`).
 
 Settlements are **on-chain**; transaction hashes are visible to explorers and indexers such as [x402scan](x402scan.md).
@@ -66,7 +70,7 @@ The lounge page loads this module to:
 
 ## Solana notes
 
-- Active facilitator **fee payer** is set in `lib/concierge-api/x402-facilitator.ts` (Dexter: `DeXterR2k…`, PayAI: `2wKupLR9…`).
+- PayAI fee payer: `2wKupLR9…` · Dexter fee payer: `DeXterR2k…` (both listed in Solana `accepts`).
 - Transactions use a 3-instruction pattern compatible with facilitator verification (no memo instruction).
 - Optional `SOLANA_RPC_URL` (e.g. Helius) improves reliability; proxied only on the server.
 
@@ -81,39 +85,27 @@ Example `PAYMENT-REQUIRED` payload (decoded):
 ```json
 {
   "x402Version": 2,
-  "resource": {
-    "url": "https://your-production-domain.com/api/concierge",
-    "name": "Executive Lounge — Concierge AI",
-    "description": "...",
-    "mimeType": "application/json",
-    "tags": ["executive-lounge", "ai", "concierge"]
-  },
+  "resource": { "url": "https://conc-exe.xyz/api/concierge", "name": "..." },
   "accepts": [
     {
       "scheme": "exact",
       "network": "eip155:8453",
       "amount": "100000",
-      "asset": "<Base mainnet USDC contract>",
-      "payTo": "<your merchant receive address>",
-      "maxTimeoutSeconds": 120
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0xYourMerchantAddress"
     }
-  ],
-  "extensions": {
-    "bazaar": { "...": "discovery input schema for agents" }
-  }
+  ]
 }
 ```
 
-## zauth trust layer
+## Discovery
 
-Optional [zauth](https://zauth.inc/) integration records successful paid responses to Provider Hub, exposes `/api/zauth-directory` and `/api/zauth-status`, and adds `discovery.zauth` links. Set `ZAUTH_API_KEY` in Vercel — see **[zauth.md](zauth.md)**. PayAI settlement and browser wallets are unchanged.
+- `GET /.well-known/x402` — resource URLs + Dexter/OpenDexter links
+- `GET /openapi.json` — full catalog with x-payment-info
+- `GET /api/x402-config` — runtime facilitator primary + fallback
 
-## Related code
+See [x402scan.md](x402scan.md) for registry listing.
 
-| File | Role |
-|------|------|
-| `api/lib/x402-server.ts` | 402 builder, verify/settle, `guardPaidX402Api` |
-| `api/lib/x402-config.ts` | Networks, addresses, public config |
-| `api/lib/x402-discovery.ts` | Bazaar extension + OpenAPI |
-| `api/x402-config.ts` | HTTP handler |
-| `api/lib/zauth.ts`, `api/lib/zauth-paid-response.ts` | zauth directory + telemetry (optional) |
+## zauth (optional)
+
+Optional [zauth](https://zauth.inc/) integration records successful paid responses to Provider Hub, exposes `/api/zauth-directory` and `/api/zauth-status`, and adds `discovery.zauth` links. Set `ZAUTH_API_KEY` in Vercel — see **[zauth.md](zauth.md)**. PayAI/Dexter settlement and browser wallets are unchanged.

@@ -41,7 +41,7 @@
       <div class="card">
         <ol style="margin:0 0 0 18px;font-size:14px;line-height:1.75;color:var(--text-secondary)">
           <li><code>POST</code> with JSON body → <strong>402</strong> + <code>PAYMENT-REQUIRED</code> header (base64 requirements)</li>
-          <li>Sign USDC on Solana or Base (PayAI facilitator: <code>facilitator.payai.network</code>)</li>
+          <li>Sign USDC on Solana or Base — primary facilitator <code>facilitator.payai.network</code>, fallback <code>x402.dexter.cash</code> (Solana 402 lists both fee payers)</li>
           <li>Retry same request with <code>PAYMENT-SIGNATURE</code> header</li>
           <li><strong>200</strong> → JSON response + <code>PAYMENT-RESPONSE</code> settlement header</li>
         </ol>

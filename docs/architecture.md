@@ -10,7 +10,7 @@
 | Dev server | Vite + `lib/concierge-dev-plugin.ts` |
 | API routes | Vercel **Edge** (`runtime: "edge"`) under `api/`; some **Node** routes for payouts / legacy mint |
 | AI | Google Gemini (`api/lib/concierge-gemini.ts`) |
-| Payments | x402 v2 via PayAI (`api/lib/x402-server.ts`) |
+| Payments | x402 v2 via PayAI + Dexter fallback (`lib/concierge-api/x402-server.ts`) |
 | Signals + RWA + memory | Vercel KV / Upstash (`signal-store`, `rwa-store`, `lounge-memory`) |
 | TanStack Start | `src/` scaffold; production lounge is static HTML + Edge APIs |
 

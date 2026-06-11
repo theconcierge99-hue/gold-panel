@@ -21,7 +21,7 @@ import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
 } from "./signal-revenue";
-import { getSolanaFeePayer, getX402FacilitatorProfile } from "./x402-facilitator";
+import { getSolanaFeePayer, getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { dexterDiscoveryLinks } from "./dexter-links";
 
 export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
@@ -159,6 +159,7 @@ export function getPublicX402Config() {
       : undefined;
 
   const facilitator = getX402FacilitatorProfile();
+  const fallback = getX402FacilitatorFallback();
 
   return {
     enabled: isX402Enabled(),
@@ -167,6 +168,10 @@ export function getPublicX402Config() {
     facilitatorId: facilitator.id,
     facilitatorUrl: facilitator.url,
     facilitatorDocsUrl: facilitator.docsUrl,
+    fallbackFacilitator: fallback.name,
+    fallbackFacilitatorId: fallback.id,
+    fallbackFacilitatorUrl: fallback.url,
+    fallbackFacilitatorDocsUrl: fallback.docsUrl,
     priceUsdc: X402_PRICE_USDC,
     priceLabel: X402_PRICE_LABEL,
     networks: nets,

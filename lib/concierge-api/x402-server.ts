@@ -1,6 +1,6 @@
 /**
  * x402 payment gate via facilitator HTTP API (Edge-safe).
- * Default: Dexter (https://x402.dexter.cash). Set X402_FACILITATOR=payai for PayAI.
+ * Primary: PayAI. Fallback: Dexter (dual Solana accepts + EVM retry on outage).
  */
 import {
   getMerchantAddresses,
@@ -9,7 +9,14 @@ import {
   isX402Enabled,
   X402_PRICE_LABEL,
 } from "./x402-config";
-import { getSolanaFeePayer, getX402FacilitatorProfile } from "./x402-facilitator";
+import {
+  getX402FacilitatorProfile,
+  getX402FacilitatorFallback,
+  resolveFacilitatorForSolanaFeePayer,
+  PAYAI_FACILITATOR,
+  DEXTER_FACILITATOR,
+  type X402FacilitatorProfile,
+} from "./x402-facilitator";
 import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
 import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
@@ -221,14 +228,21 @@ function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequi
     });
   }
   if (sol) {
-    accepts.push({
-      scheme: "exact",
+    const solBase = {
+      scheme: "exact" as const,
       network: nets.sol,
       amount,
       asset: getUsdcAssetForNetwork(nets.sol),
       payTo: sol,
       maxTimeoutSeconds: 120,
-      extra: { feePayer: getSolanaFeePayer() },
+    };
+    accepts.push({
+      ...solBase,
+      extra: { feePayer: PAYAI_FACILITATOR.solanaFeePayer },
+    });
+    accepts.push({
+      ...solBase,
+      extra: { feePayer: DEXTER_FACILITATOR.solanaFeePayer },
     });
   }
 
@@ -264,8 +278,9 @@ function findMatchingRequirement(
 /** PayAI only — optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). Dexter needs no auth. */
 async function facilitatorAuthHeaders(
   endpoint: "verify" | "settle",
+  facilitator: X402FacilitatorProfile,
 ): Promise<Record<string, string>> {
-  if (getX402FacilitatorProfile().id !== "payai") return {};
+  if (facilitator.id !== "payai") return {};
 
   const keyId = process.env.PAYAI_API_KEY_ID?.trim();
   const keySecret = process.env.PAYAI_API_KEY_SECRET?.trim();
@@ -285,10 +300,10 @@ async function facilitatorPost<T>(
   path: string,
   body: unknown,
   endpoint: "verify" | "settle",
+  facilitator: X402FacilitatorProfile,
 ): Promise<T> {
-  const auth = await facilitatorAuthHeaders(endpoint);
-  const facilitatorUrl = getX402FacilitatorProfile().url;
-  const res = await fetch(`${facilitatorUrl}${path}`, {
+  const auth = await facilitatorAuthHeaders(endpoint, facilitator);
+  const res = await fetch(`${facilitator.url}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -310,6 +325,86 @@ async function facilitatorPost<T>(
     throw new Error(err.error || err.message || `Facilitator ${path} HTTP ${res.status}`);
   }
   return data;
+}
+
+function resolveFacilitatorForRequirement(req: X402AcceptRequirement): X402FacilitatorProfile {
+  const feePayer = req.extra?.feePayer;
+  if (typeof feePayer === "string" && req.network.startsWith("solana:")) {
+    return resolveFacilitatorForSolanaFeePayer(feePayer);
+  }
+  return getX402FacilitatorProfile();
+}
+
+function isFacilitatorOutageError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false;
+  const msg = e.message.toLowerCase();
+  return (
+    msg.includes("invalid json") ||
+    msg.includes("http 5") ||
+    msg.includes("http 429") ||
+    msg.includes("fetch failed") ||
+    msg.includes("timeout") ||
+    msg.includes("aborted")
+  );
+}
+
+async function verifyAndSettle(
+  paymentPayload: PaymentPayloadV2,
+  matched: X402AcceptRequirement,
+): Promise<{
+  payer: string;
+  transaction: string;
+  network?: string;
+}> {
+  const primary = resolveFacilitatorForRequirement(matched);
+  const facilitators: X402FacilitatorProfile[] = [primary];
+  const fallback = getX402FacilitatorFallback();
+  if (fallback.id !== primary.id && !matched.network.startsWith("solana:")) {
+    facilitators.push(fallback);
+  }
+
+  let lastError: unknown;
+  for (const facilitator of facilitators) {
+    try {
+      const verify = await facilitatorPost<{ isValid: boolean; invalidReason?: string; payer?: string }>(
+        "/verify",
+        { paymentPayload, paymentRequirements: matched },
+        "verify",
+        facilitator,
+      );
+
+      if (!verify.isValid) {
+        throw new Error(verify.invalidReason || "Payment verification failed");
+      }
+
+      const settle = await facilitatorPost<{
+        success: boolean;
+        errorReason?: string;
+        payer?: string;
+        transaction?: string;
+        network?: string;
+      }>("/settle", { paymentPayload, paymentRequirements: matched }, "settle", facilitator);
+
+      if (!settle.success) {
+        throw new Error(settle.errorReason || "Payment settlement failed");
+      }
+
+      return {
+        payer: settle.payer || verify.payer || "unknown",
+        transaction: settle.transaction || "",
+        network: settle.network,
+      };
+    } catch (e) {
+      lastError = e;
+      if (facilitators.length > 1 && facilitator.id === primary.id && isFacilitatorOutageError(e)) {
+        console.warn(`[x402] ${primary.name} unavailable, trying ${fallback.name}`, e instanceof Error ? e.message : e);
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Payment settlement failed");
 }
 
 export async function buildPaymentRequiredResponse(
@@ -421,43 +516,7 @@ export async function requireX402Payment(
       };
     }
 
-    const verify = await facilitatorPost<{ isValid: boolean; invalidReason?: string; payer?: string }>(
-      "/verify",
-      { paymentPayload, paymentRequirements: matched },
-      "verify",
-    );
-
-    if (!verify.isValid) {
-      return {
-        ok: false,
-        response: await buildPaymentRequiredResponse(
-          request,
-          kind,
-          cors,
-          verify.invalidReason || "Payment verification failed",
-        ),
-      };
-    }
-
-    const settle = await facilitatorPost<{
-      success: boolean;
-      errorReason?: string;
-      payer?: string;
-      transaction?: string;
-      network?: string;
-    }>("/settle", { paymentPayload, paymentRequirements: matched }, "settle");
-
-    if (!settle.success) {
-      return {
-        ok: false,
-        response: await buildPaymentRequiredResponse(
-          request,
-          kind,
-          cors,
-          settle.errorReason || "Payment settlement failed",
-        ),
-      };
-    }
+    const settle = await verifyAndSettle(paymentPayload, matched);
 
     const paymentResponseHeader = b64EncodeJson({
       success: true,
@@ -468,11 +527,20 @@ export async function requireX402Payment(
 
     return {
       ok: true,
-      payer: settle.payer || "unknown",
-      transaction: settle.transaction || "",
+      payer: settle.payer,
+      transaction: settle.transaction,
       paymentResponseHeader,
     };
   } catch (e) {
+    if (
+      e instanceof Error &&
+      /Payment verification failed|Payment settlement failed/i.test(e.message)
+    ) {
+      return {
+        ok: false,
+        response: await buildPaymentRequiredResponse(request, kind, cors, e.message),
+      };
+    }
     console.error("[x402]", e instanceof Error ? e.message : e);
     return {
       ok: false,
