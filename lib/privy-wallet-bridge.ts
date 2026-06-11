@@ -33,11 +33,23 @@ let solAddress: string | null = null;
 
 const state: PrivyBridgeState = { enabled: false, loggingIn: false };
 
+function isBenignPrivySessionError(e: unknown): boolean {
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  return (
+    msg.includes("no tokens found") ||
+    msg.includes("not authenticated") ||
+    msg.includes("must_be_authenticated") ||
+    msg.includes("no session")
+  );
+}
+
 function privyUnavailableError(): Error {
   if (lastInitError) {
-    return new Error(
-      `Privy login failed: ${lastInitError}. Add ${typeof window !== "undefined" ? window.location.host : "your domain"} to allowed domains in Privy Dashboard.`,
-    );
+    const host = typeof window !== "undefined" ? window.location.host : "your domain";
+    const domainHint = /origin|domain|allowed|cors/i.test(lastInitError)
+      ? ` Add https://${host} in Privy Dashboard → Domains.`
+      : "";
+    return new Error(`Privy login failed: ${lastInitError}.${domainHint}`);
   }
   return new Error(
     "Privy is not configured — set PRIVY_APP_ID and PRIVY_CLIENT_ID in Vercel, then redeploy.",
@@ -140,13 +152,23 @@ async function initPrivy(): Promise<boolean> {
 
     const oauthHandled = await handleOAuthCallback();
     if (!oauthHandled) {
-      const { user } = await client.user.get();
-      if (user) await ensureEmbeddedWallets(client).catch(() => undefined);
+      try {
+        const { user } = await client.user.get();
+        if (user) await ensureEmbeddedWallets(client).catch(() => undefined);
+      } catch (e) {
+        if (!isBenignPrivySessionError(e)) throw e;
+      }
     }
 
     state.enabled = true;
+    lastInitError = null;
     return true;
   } catch (e) {
+    if (client && isBenignPrivySessionError(e)) {
+      state.enabled = true;
+      lastInitError = null;
+      return true;
+    }
     console.warn("[privy] init failed", e);
     lastInitError = e instanceof Error ? e.message : String(e);
     client = null;
@@ -223,7 +245,13 @@ export function getPrivyAddresses(): PrivyWalletAddresses {
 
 export async function getPrivyAddressesAsync(): Promise<PrivyWalletAddresses> {
   if (!client) return {};
-  const { user } = await client.user.get();
+  let user;
+  try {
+    ({ user } = await client.user.get());
+  } catch (e) {
+    if (isBenignPrivySessionError(e)) return {};
+    throw e;
+  }
   if (!user) return {};
   const eth = getUserEmbeddedEthereumWallet(user);
   const sol = getUserEmbeddedSolanaWallet(user);
