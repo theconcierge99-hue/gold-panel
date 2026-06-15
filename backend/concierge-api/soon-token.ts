@@ -1,6 +1,6 @@
 /**
- * SOON utility token gate — holder tiers for Lounge features (DLMM bot, credits, etc.).
- * Mint unset = draft / not launched (UI preview only).
+ * SOON utility token — holder tiers for Lounge features (credits, discounts, etc.).
+ * Mint unset = draft / not launched.
  */
 import { getSolanaRpcUrlForServer } from "./x402-config";
 import { solanaRpcCall } from "./x402-solana-rpc";
@@ -16,7 +16,7 @@ export type SoonTier = {
 
 /** Draft tiers — align with frontend/public/token.html */
 export const SOON_TIERS: SoonTier[] = [
-  { id: "desk", label: "Desk", minHold: 50_000, utility: "DLMM bot · Concierge credits" },
+  { id: "desk", label: "Desk", minHold: 50_000, utility: "Concierge credits · profile badge" },
   { id: "agent", label: "Agent", minHold: 250_000, utility: "Intel discount · Discover priority" },
   { id: "institutional", label: "Institutional", minHold: 1_000_000, utility: "Rate limits · macro webhook beta" },
 ];
@@ -31,16 +31,6 @@ export function getSoonMint(): string | null {
 export function getSoonDecimals(): number {
   const n = Number(process.env.SOON_TOKEN_DECIMALS ?? "6");
   return Number.isFinite(n) && n >= 0 && n <= 12 ? Math.floor(n) : 6;
-}
-
-/** Minimum SOON hold to unlock manual DLMM bot (default: Desk tier). */
-export function getSoonDlmmMinHold(): number {
-  const n = Number(process.env.SOON_DLMM_MIN_HOLD ?? String(SOON_TIERS[0].minHold));
-  return Number.isFinite(n) && n > 0 ? n : SOON_TIERS[0].minHold;
-}
-
-export function isSoonGatePreview(): boolean {
-  return process.env.SOON_GATE_PREVIEW === "true";
 }
 
 export function isSoonLaunched(): boolean {
@@ -81,100 +71,4 @@ export function resolveSoonTier(balanceUi: number): SoonTier | null {
     if (balanceUi >= tier.minHold) matched = tier;
   }
   return matched;
-}
-
-export type SoonGateResult = {
-  launched: boolean;
-  preview: boolean;
-  mint: string | null;
-  decimals: number;
-  dlmmMinHold: number;
-  tiers: SoonTier[];
-  balanceUi: number | null;
-  balanceAtomic: string | null;
-  tier: SoonTierId | null;
-  dlmmUnlocked: boolean;
-  reason: string;
-};
-
-export async function evaluateSoonGate(ownerAddress?: string | null): Promise<SoonGateResult> {
-  const launched = isSoonLaunched();
-  const preview = isSoonGatePreview();
-  const mint = getSoonMint();
-  const decimals = getSoonDecimals();
-  const dlmmMinHold = getSoonDlmmMinHold();
-  const tiers = SOON_TIERS;
-
-  if (!launched) {
-    return {
-      launched: false,
-      preview,
-      mint: null,
-      decimals,
-      dlmmMinHold,
-      tiers,
-      balanceUi: null,
-      balanceAtomic: null,
-      tier: null,
-      dlmmUnlocked: preview,
-      reason: preview
-        ? "SOON not launched — preview mode enabled"
-        : "SOON not launched yet — connect wallet to preview; bot unlocks after token goes live",
-    };
-  }
-
-  if (!ownerAddress?.trim()) {
-    return {
-      launched: true,
-      preview,
-      mint,
-      decimals,
-      dlmmMinHold,
-      tiers,
-      balanceUi: null,
-      balanceAtomic: null,
-      tier: null,
-      dlmmUnlocked: false,
-      reason: "Connect wallet to verify SOON balance",
-    };
-  }
-
-  const atomic = await getSoonBalanceAtomic(ownerAddress.trim());
-  if (atomic === null) {
-    return {
-      launched: true,
-      preview,
-      mint,
-      decimals,
-      dlmmMinHold,
-      tiers,
-      balanceUi: null,
-      balanceAtomic: null,
-      tier: null,
-      dlmmUnlocked: preview,
-      reason: preview ? "Balance check failed — preview mode" : "Could not read SOON balance",
-    };
-  }
-
-  const balanceUi = Number(atomic) / 10 ** decimals;
-  const tier = resolveSoonTier(balanceUi);
-  const dlmmUnlocked = preview || balanceUi >= dlmmMinHold;
-
-  return {
-    launched: true,
-    preview,
-    mint,
-    decimals,
-    dlmmMinHold,
-    tiers,
-    balanceUi,
-    balanceAtomic: atomic.toString(),
-    tier: tier?.id ?? null,
-    dlmmUnlocked,
-    reason: dlmmUnlocked
-      ? preview && balanceUi < dlmmMinHold
-        ? "Preview mode — SOON hold not required"
-        : `Unlocked · ${tier?.label ?? "Desk"} tier`
-      : `Hold at least ${dlmmMinHold.toLocaleString()} SOON to use DLMM bot (you have ${Math.floor(balanceUi).toLocaleString()})`,
-  };
 }

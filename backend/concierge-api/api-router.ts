@@ -63,11 +63,6 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
     return handleConciergeIntelRoute(request, intelKind);
   }
 
-  if (pathname === "/api/dlmm-config") {
-    const { default: handleDlmmConfig } = await import("./routes/dlmm-config");
-    return handleDlmmConfig(request);
-  }
-
   const handler = EXACT_ROUTES[pathname];
   if (handler) return handler(request);
 

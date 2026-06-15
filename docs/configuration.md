@@ -66,17 +66,15 @@ Fund treasury wallets with USDC. Reader payment (0.1 USDC) still settles to merc
 
 Check readiness: `GET /api/x402-config` → `creatorInstantPayoutReady`.
 
-## SOON token & DLMM bot (manual · wallet-signed)
+## SOON token & Token Pay
 
-Executive Lounge **DLMM Bot** (`/lounge` → DLMM Bot) is gated by **connected Solana wallet** + **SOON hold** (when mint is configured). All liquidity txs are signed in the user wallet (Phantom / OKX / Privy) — no server hot key.
+SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_MINT` after launch; until then the UI shows “Coming soon”.
 
 | Variable | Description |
 |----------|-------------|
-| `SOON_TOKEN_MINT` | SPL mint address (base58) after SOON launches. **Unset** = token not live; bot stays locked unless preview. |
+| `SOON_TOKEN_MINT` | SPL mint address (base58) after SOON launches. **Unset** = token not live. |
 | `SOON_MINT` | Alias for `SOON_TOKEN_MINT`. |
 | `SOON_TOKEN_DECIMALS` | Token decimals (default `6`). |
-| `SOON_DLMM_MIN_HOLD` | Minimum SOON balance to unlock DLMM bot (default `50000` = Desk tier). |
-| `SOON_GATE_PREVIEW` | Set `true` to unlock DLMM UI **without** SOON hold (dev/staging only). |
 | `SOON_PRICE_SOURCE` | `dexscreener` (default) or `env` (static rate only). |
 | `SOON_PRICE_MAX_AGE_SEC` | In-memory DexScreener cache TTL per Edge isolate (default `60`, max `300`). |
 | `SOON_USDC_RATE` | Fallback USD price per 1 SOON when DexScreener fails or `SOON_PRICE_SOURCE=env`. |
@@ -84,7 +82,7 @@ Executive Lounge **DLMM Bot** (`/lounge` → DLMM Bot) is gated by **connected S
 
 **Token Pay platform:** see [token-pay-platform.md](token-pay-platform.md). Default merchant SOON; `GET /api/token-pay`. Concierge token x402 enabled when `SOON_TOKEN_MINT` is set.
 
-**Requires:** `SOLANA_RPC_URL` (Helius recommended) for `/api/solana-rpc-send` used by client DLMM txs.
+**DLMM yields:** Concierge AI and `/api/concierge-intel-yields` use the Meteora DLMM API for live pool intel. Users deploy liquidity on [Meteora](https://app.meteora.ag/dlmm) — no in-app LP UI in the Lounge.
 
 ## CORS
 

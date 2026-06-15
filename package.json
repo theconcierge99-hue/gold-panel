@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node scripts/write-deploy-version.mjs && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs && node scripts/build-dlmm-bot.mjs",
+    "build": "node scripts/write-deploy-version.mjs && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
     "build:privy": "node scripts/build-privy-bridge.mjs",
     "build:x402": "node scripts/build-x402-client.mjs",
     "build:agent-identity": "node scripts/build-agent-identity.mjs",
@@ -96,15 +96,12 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@coral-xyz/anchor": "^0.32.1",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^1.7.0",
-    "@meteora-ag/dlmm": "^1.9.10",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
-    "bn.js": "^5.2.3",
     "buffer": "^6.0.3",
     "esbuild": "^0.28.0",
     "eslint": "^9.32.0",

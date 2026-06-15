@@ -9,7 +9,6 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 - **API entry (Vercel):** root `api/*.ts` shims → `backend/api/` · Edge router `[...path].ts` · Node: `lounge-creator-payout`, `lounge-rwa-mint-sol`
 - **Handlers:** `backend/concierge-api/` — keep new handlers **outside** root `/api/` (Vercel Hobby ≤12 serverless functions)
 - **x402 / Token Pay:** `backend/concierge-api/token-pay/` (multi-merchant native token self-settle) · SOON = default merchant · `GET /api/token-pay` · docs `docs/token-pay-platform.md`
-- **DLMM bot:** `backend/concierge-api/dlmm-pools.ts`, `soon-token.ts`, `GET /api/dlmm-config` · browser bundle `frontend/lib/dlmm-browser.ts` → `public/js/dlmm-bot.mjs`
 - **x402 / OpenAPI:** `backend/concierge-api/x402-server.ts`, `x402-discovery.ts`
 
 ## Grok Build
