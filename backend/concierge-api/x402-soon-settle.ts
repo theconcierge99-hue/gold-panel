@@ -1,4 +1,3 @@
-import { VersionedTransaction } from "@solana/web3.js";
 import { getSolanaRpcUrlForServer } from "./x402-config";
 import { solanaRpcCallEx } from "./x402-solana-rpc";
 
@@ -12,10 +11,10 @@ export type SoonAcceptRequirement = {
   extra?: Record<string, unknown>;
 };
 
-type SoonPaymentPayload = {
+export type SoonPaymentPayload = {
   x402Version?: number;
   accepted?: SoonAcceptRequirement;
-  payload?: { transaction?: string };
+  payload?: { transaction?: string } | unknown;
 };
 
 type TokenBalanceRow = {
@@ -24,19 +23,29 @@ type TokenBalanceRow = {
   uiTokenAmount?: { amount?: string };
 };
 
+type GetTxDetail = {
+  transaction?: {
+    message?: {
+      accountKeys?: Array<string | { pubkey?: string }>;
+    };
+  };
+  meta?: {
+    err?: unknown;
+    preTokenBalances?: TokenBalanceRow[];
+    postTokenBalances?: TokenBalanceRow[];
+  };
+};
+
 export function isSelfSettleRequirement(req: { extra?: Record<string, unknown> }): boolean {
   return req.extra?.settlement === "self";
 }
 
-function txFeePayer(txB64: string): string {
-  const raw =
-    typeof Buffer !== "undefined"
-      ? Buffer.from(txB64, "base64")
-      : Uint8Array.from(atob(txB64), (c) => c.charCodeAt(0));
-  const tx = VersionedTransaction.deserialize(raw);
-  const payer = tx.message.staticAccountKeys[0];
-  if (!payer) throw new Error("Could not read fee payer from transaction");
-  return payer.toBase58();
+function feePayerFromTxDetail(tx: GetTxDetail): string | null {
+  const keys = tx.transaction?.message?.accountKeys;
+  if (!keys?.length) return null;
+  const first = keys[0];
+  if (typeof first === "string") return first;
+  return first.pubkey ?? null;
 }
 
 function merchantMintDelta(
@@ -86,7 +95,11 @@ export async function verifyAndSettleSoonSelf(
   paymentPayload: SoonPaymentPayload,
   matched: SoonAcceptRequirement,
 ): Promise<{ payer: string; transaction: string; network: string }> {
-  const txB64 = paymentPayload.payload?.transaction;
+  const payload = paymentPayload.payload;
+  const txB64 =
+    payload && typeof payload === "object" && "transaction" in payload
+      ? (payload as { transaction?: string }).transaction
+      : undefined;
   if (!txB64 || typeof txB64 !== "string") {
     throw new Error("Missing signed transaction in payment payload");
   }
@@ -107,8 +120,11 @@ export async function verifyAndSettleSoonSelf(
     txB64,
     { encoding: "base64", skipPreflight: true, maxRetries: 3 },
   ]);
-  if (!send.ok || !send.result) {
+  if (!send.ok) {
     throw new Error(send.error || "Failed to broadcast SOON payment");
+  }
+  if (!send.result) {
+    throw new Error("Failed to broadcast SOON payment");
   }
 
   const signature = send.result;
@@ -117,13 +133,10 @@ export async function verifyAndSettleSoonSelf(
     throw new Error("SOON payment broadcast but not confirmed — retry or check explorer");
   }
 
-  const tx = await solanaRpcCallEx<{
-    meta?: {
-      err?: unknown;
-      preTokenBalances?: TokenBalanceRow[];
-      postTokenBalances?: TokenBalanceRow[];
-    };
-  }>(rpc, "getTransaction", [signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }]);
+  const tx = await solanaRpcCallEx<GetTxDetail>(rpc, "getTransaction", [
+    signature,
+    { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 },
+  ]);
   if (!tx.ok || !tx.result) {
     throw new Error("Could not verify SOON payment on-chain");
   }
@@ -141,8 +154,13 @@ export async function verifyAndSettleSoonSelf(
     throw new Error("SOON payment amount does not match requirement");
   }
 
+  const payer = feePayerFromTxDetail(tx.result);
+  if (!payer) {
+    throw new Error("Could not read fee payer from confirmed transaction");
+  }
+
   return {
-    payer: txFeePayer(txB64),
+    payer,
     transaction: signature,
     network: matched.network,
   };

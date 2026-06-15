@@ -28,7 +28,7 @@ import {
   isSoonX402Enabled,
   soonAtomicForUsdcAsync,
 } from "./soon-x402";
-import { isSelfSettleRequirement, verifyAndSettleSoonSelf } from "./x402-soon-settle";
+import { isSelfSettleRequirement, verifyAndSettleSoonSelf, type SoonPaymentPayload } from "./x402-soon-settle";
 
 export type { X402ResourceKind };
 
@@ -388,7 +388,7 @@ async function verifyAndSettle(
   network?: string;
 }> {
   if (isSelfSettleRequirement(matched)) {
-    return verifyAndSettleSoonSelf(paymentPayload, matched);
+    return verifyAndSettleSoonSelf(paymentPayload as SoonPaymentPayload, matched);
   }
 
   const primary = resolveFacilitatorForRequirement(matched);
