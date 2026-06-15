@@ -1,4 +1,10 @@
 (function () {
+  function markPremium() {
+    document.body.classList.add("el-premium");
+  }
+  if (document.body) markPremium();
+  else document.addEventListener("DOMContentLoaded", markPremium);
+
   var NAV = [
     { label: "Start", items: [
       { id: "introduction", href: "/docs", title: "Welcome to Concierge" },

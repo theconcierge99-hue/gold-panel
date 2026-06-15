@@ -1,19 +1,7 @@
 @import url("/css/brand-logo.css");
+@import url("/css/concierge-tokens.css");
+@import url("/css/concierge-premium.css");
 
-html,html[data-theme="dark"]{
-  color-scheme:dark;
-  --pg-bg:#030508;--pg-panel:#0a0e14;--pg-panel-border:#1a2438;
-  --pg-text:#e8eef8;--pg-muted:#6b7d9a;--pg-dim:#3a4a62;
-  --pg-accent:#c9a84c;--pg-accent-dim:#7a6030;--pg-accent-glow:rgba(201,168,76,.12);
-  --pg-method:#5ee87a;
-}
-html[data-theme="light"]{
-  color-scheme:light;
-  --pg-bg:#e8e4dc;--pg-panel:#faf8f4;--pg-panel-border:#d4cfc4;
-  --pg-text:#1a1f2e;--pg-muted:#4a5568;--pg-dim:#6b7280;
-  --pg-accent:#9a7b2e;--pg-accent-dim:#c9a84c;--pg-accent-glow:rgba(154,123,46,.1);
-  --pg-method:#1d7a3a;
-}
 *{box-sizing:border-box;margin:0;padding:0}
 body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);color:var(--pg-text);min-height:100vh;overflow-x:hidden}
 .agent-home-shell{position:relative;min-height:100vh;display:flex;flex-direction:column}
@@ -34,7 +22,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 }
 .pg-nav a:hover{color:var(--pg-text)}
 .pg-nav a.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
-.pg-topnav-right{justify-self:end;display:flex;align-items:center;gap:8px;margin-left:0}
+.pg-topnav-right{justify-self:end;display:flex;align-items:center;gap:10px;margin-left:0}
 .pg-theme-btn{
   width:34px;height:34px;border:1px solid var(--pg-panel-border);background:transparent;
   color:var(--pg-muted);border-radius:6px;cursor:pointer;font-size:14px;
@@ -139,6 +127,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 
 @media(max-width:768px){
   .pg-topnav{grid-template-columns:auto 1fr auto;padding:0 12px;gap:8px}
+  .pg-topnav-right .el-status-pill{display:none}
   .pg-nav{
     overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;
     -webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:min(52vw,280px);

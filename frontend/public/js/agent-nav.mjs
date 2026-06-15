@@ -25,10 +25,31 @@ export function renderAgentSiteFooter(containerId = "agent-site-footer") {
     </div>`;
 }
 
+function syncThemeButtons() {
+  const theme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  document.querySelectorAll("[data-theme-btn]").forEach((btn) => {
+    btn.classList.toggle("active", btn.getAttribute("data-theme-btn") === theme);
+  });
+}
+
+function bindThemeToggle(root) {
+  root?.querySelectorAll("[data-theme-btn]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const next = btn.getAttribute("data-theme-btn") === "light" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("el-theme", next);
+      syncThemeButtons();
+    });
+  });
+  syncThemeButtons();
+}
+
 /** Shared top nav for Concierge Agent hub pages. */
 export function renderAgentTopNav(activeId) {
   const el = document.getElementById("agent-topnav");
   if (!el) return;
+
+  document.body.classList.add("el-premium");
 
   const links = [
     { id: "home", href: "/agent", label: "Home" },
@@ -44,7 +65,7 @@ export function renderAgentTopNav(activeId) {
   el.innerHTML = `
     <a class="pg-logo" href="/agent">
       <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="36" height="36" />
-      <span>CONCIERGE<span class="pg-logo-dim">_</span></span>
+      <span>Concierge<span class="pg-logo-dim"> Agent</span></span>
     </a>
     <nav class="pg-nav" aria-label="Concierge Agent">
       ${links
@@ -55,13 +76,14 @@ export function renderAgentTopNav(activeId) {
         .join("")}
     </nav>
     <div class="pg-topnav-right">
-      <button type="button" class="pg-theme-btn" id="pg-theme-toggle" aria-label="Toggle theme">◐</button>
+      <div class="el-status-pill" title="x402 pay-per-call API">
+        <span class="dot"></span> Live API
+      </div>
+      <div class="el-theme-toggle theme-toggle" role="group" aria-label="Theme mode">
+        <button type="button" class="theme-btn" data-theme-btn="dark">Dark</button>
+        <button type="button" class="theme-btn" data-theme-btn="light">Light</button>
+      </div>
     </div>`;
 
-  el.querySelector("#pg-theme-toggle")?.addEventListener("click", () => {
-    const cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-    const next = cur === "light" ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("el-theme", next);
-  });
+  bindThemeToggle(el);
 }

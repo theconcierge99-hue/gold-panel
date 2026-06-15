@@ -1,19 +1,7 @@
 @import url("/css/brand-logo.css");
+@import url("/css/concierge-tokens.css");
+@import url("/css/concierge-premium.css");
 
-html,html[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#080a0f;--border:#1e2d4a;--gold:#c9a84c;--gold-dim:#7a6030;
-  --text-primary:#d8e4f0;--text-secondary:#6b7d9a;--text-muted:#3a4a62;
-  --nav-active-bg:rgba(201,168,76,.12);--card-grad-1:#121a2e;--card-grad-2:#0e1525;
-  --code-bg:#0a0e18;--sidebar-bg:#060810;
-}
-html[data-theme="light"]{
-  color-scheme:light;
-  --bg:#f4f2ec;--border:#d4cfc4;--gold:#9a7b2e;--gold-dim:#c9a84c;
-  --text-primary:#1a1f2e;--text-secondary:#4a5568;--text-muted:#6b7280;
-  --nav-active-bg:rgba(154,123,46,.1);--card-grad-1:#fff;--card-grad-2:#f8f6f0;
-  --code-bg:#ebe8e0;--sidebar-bg:#eceae4;
-}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;line-height:1.65}
 .docs-layout{display:flex;min-height:100vh}

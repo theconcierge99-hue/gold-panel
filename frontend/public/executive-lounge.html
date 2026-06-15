@@ -16,47 +16,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/brand-logo.css" />
+<link rel="stylesheet" href="/css/concierge-tokens.css" />
+<link rel="stylesheet" href="/css/concierge-premium.css" />
 <style>
-  html,html[data-theme="dark"]{
-    color-scheme:dark;
-    --bg:#080a0f; --navy:#0c1120; --graphite:#111827; --panel:#141b2d;
-    --border:#1e2d4a; --gold:#c9a84c; --gold-dim:#7a6030;
-    --chrome:#8899bb; --chrome-bright:#aabbd0;
-    --text-primary:#d8e4f0; --text-secondary:#6b7d9a; --text-muted:#3a4a62;
-    --accent-blue:#3b7dd8; --accent-teal:#1d8f7a;
-    --signal-green:#22c87a; --signal-red:#e85d4a; --signal-amber:#f5a623;
-    --header-bg:rgba(8,10,15,.9); --sidebar-bg:rgba(12,17,32,.4);
-    --card-grad-1:rgba(20,27,45,.7); --card-grad-2:rgba(12,17,32,.5);
-    --gcard-bg:rgba(17,24,39,.55); --gcard-hover:rgba(20,27,45,.7);
-    --bubble-bg:rgba(20,27,45,.7); --bubble-accent:rgba(59,125,216,.4);
-    --user-bubble-bg:rgba(59,125,216,.08); --user-bubble-border:rgba(59,125,216,.3);
-    --input-bg:rgba(12,17,32,.6); --field-bg:rgba(8,10,15,.6);
-    --overlay-bg:rgba(8,10,15,.7); --nav-active-bg:rgba(201,168,76,.04);
-    --pitem-hover:rgba(20,27,45,.6); --bar-track:rgba(30,45,74,.6);
-    --ai-av-bg:linear-gradient(135deg,#0c1120,#1e2d4a);
-    --blob-opacity:.18;
-    --gold-hover-bg:rgba(201,168,76,.06);
-  }
-  html[data-theme="light"]{
-    color-scheme:light;
-    --bg:#f3f1eb; --navy:#ebe8e1; --graphite:#ffffff; --panel:#e8e5de;
-    --border:#d8d2c6; --gold:#9a7b2e; --gold-dim:#c4a85a;
-    --chrome:#5c6b82; --chrome-bright:#2a3548;
-    --text-primary:#141c2e; --text-secondary:#4d5a70; --text-muted:#8a96a8;
-    --accent-blue:#2f6bc4; --accent-teal:#167a68;
-    --signal-green:#1a9d5c; --signal-red:#c94a3a; --signal-amber:#c48612;
-    --header-bg:rgba(255,255,255,.94); --sidebar-bg:rgba(255,255,255,.82);
-    --card-grad-1:rgba(255,255,255,.98); --card-grad-2:rgba(243,241,235,.95);
-    --gcard-bg:rgba(255,255,255,.92); --gcard-hover:rgba(255,255,255,1);
-    --bubble-bg:rgba(255,255,255,.95); --bubble-accent:rgba(47,107,196,.25);
-    --user-bubble-bg:rgba(47,107,196,.1); --user-bubble-border:rgba(47,107,196,.35);
-    --input-bg:rgba(255,255,255,.95); --field-bg:#ffffff;
-    --overlay-bg:rgba(20,28,46,.4); --nav-active-bg:rgba(154,123,46,.1);
-    --pitem-hover:rgba(243,241,235,.9); --bar-track:rgba(216,210,198,.8);
-    --ai-av-bg:linear-gradient(135deg,#ebe8e1,#d8d2c6);
-    --blob-opacity:.1;
-    --gold-hover-bg:rgba(154,123,46,.08);
-  }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
@@ -71,6 +33,8 @@
   .blob{position:absolute;width:720px;height:720px;border-radius:50%;filter:blur(120px);opacity:var(--blob-opacity);transition:opacity .25s}
   .blob.b1{background:radial-gradient(circle,#3b7dd8,transparent 60%);top:-200px;left:-200px;animation:drift1 28s ease-in-out infinite}
   .blob.b2{background:radial-gradient(circle,#1d8f7a,transparent 60%);bottom:-260px;right:-180px;animation:drift2 34s ease-in-out infinite}
+  .blob.b3{background:radial-gradient(circle,var(--gold),transparent 65%);top:35%;left:42%;width:480px;height:480px;opacity:calc(var(--blob-opacity)*.55);animation:drift3 42s ease-in-out infinite}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,40px) scale(1.08)}}
   @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(120px,80px)}}
   @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-140px,-90px)}}
 
@@ -96,14 +60,15 @@
   header{
     display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) auto;align-items:center;
     padding:0 22px; gap:24px;
-    background:var(--header-bg); backdrop-filter:blur(20px);
+    background:var(--header-bg); backdrop-filter:blur(24px) saturate(1.15);
+    -webkit-backdrop-filter:blur(24px) saturate(1.15);
     transition:background .25s ease,border-color .25s;
     border-bottom:1px solid var(--border);
   }
   .brand-mark{display:flex;align-items:center;gap:12px}
   .brand-text{display:flex;flex-direction:column;line-height:1}
-  .logo .name{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;color:var(--text-primary);letter-spacing:.02em}
-  .logo .sub{font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--text-muted);margin-top:5px}
+  .logo .name{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:23px;color:var(--text-primary);letter-spacing:.03em}
+  .logo .sub{font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-dim);margin-top:6px}
 
   .ticker-wrap{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
   .ticker-track{display:flex;width:max-content;will-change:transform;animation:tickerScroll 90s linear infinite}
@@ -135,7 +100,7 @@
   .theme-btn.active{background:var(--nav-active-bg);color:var(--gold)}
 
   /* SIDEBAR */
-  aside.left{border-right:1px solid var(--border);background:var(--sidebar-bg);transition:background .25s;display:flex;flex-direction:column;overflow:hidden}
+  aside.left{border-right:1px solid var(--border);background:var(--sidebar-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background .25s;display:flex;flex-direction:column;overflow:hidden}
   .sidebar-body{flex:1;overflow-y:auto;padding:18px 0 12px}
   .sidebar-footer{flex-shrink:0;padding:14px 18px 18px;border-top:1px solid var(--border)}
   .sidebar-about-link{display:block;text-align:center;margin-bottom:12px;font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:color .15s}
@@ -166,14 +131,15 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
   .section-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
-  .section-h h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:20px;color:var(--text-primary);letter-spacing:.01em}
+  .section-h h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--text-primary);letter-spacing:.02em}
   .section-h .meta{font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
 
   /* Featured cards */
   .featured{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:34px}
-  .fcard{position:relative;display:flex;flex-direction:column;min-height:168px;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:20px 22px;cursor:pointer;transition:all .2s;overflow:hidden}
-  .fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-  .fcard:hover{border-color:var(--gold-dim);transform:translateY(-1px)}
+  .fcard{position:relative;display:flex;flex-direction:column;min-height:168px;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;cursor:pointer;overflow:hidden}
+  .fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.7;z-index:1}
+  .fcard:hover{border-color:var(--gold-dim)}
+  .fcard h3,.fcard .news-teaser,.fcard .meta-row,.gcard h4,.gcard .news-teaser,.gcard .card-read-hint{position:relative;z-index:1}
   .fcard h3{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;line-height:1.28;color:var(--text-primary);margin-bottom:12px}
   .fcard .news-teaser,.gcard .news-teaser{font-size:13px;line-height:1.62;color:var(--text-secondary);margin:0;flex:1;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
   .fcard .news-teaser{-webkit-line-clamp:4}
@@ -194,8 +160,8 @@
 
   /* Grid cards */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .gcard{position:relative;display:flex;flex-direction:column;background:var(--gcard-bg);border:1px solid var(--border);padding:18px 18px 16px;min-height:140px;cursor:pointer;transition:all .18s;overflow:hidden}
-  .gcard:hover{border-color:var(--chrome);background:var(--gcard-hover)}
+  .gcard{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--card-grad-1),var(--gcard-bg));border:1px solid var(--border);padding:20px 20px 18px;min-height:148px;cursor:pointer;overflow:hidden}
+  .gcard:hover{border-color:var(--gold-dim);background:var(--gcard-hover)}
   .gcard h4{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:17px;line-height:1.32;color:var(--text-primary);margin-bottom:10px;letter-spacing:.01em}
   .gcard .news-teaser{-webkit-line-clamp:3;font-size:12.5px}
   .gcat,.gmeta,.gbar{display:none}
@@ -308,7 +274,7 @@
   .pitem .ts{color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px}
 
   /* RIGHT SIDEBAR */
-  aside.right{border-left:1px solid var(--border);overflow-y:auto;background:var(--sidebar-bg);padding:18px;transition:background .25s}
+  aside.right{border-left:1px solid var(--border);overflow-y:auto;background:var(--sidebar-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:20px;transition:background .25s}
   .r-h{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
   .r-section{margin-bottom:26px}
   .narr{padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s}
@@ -693,8 +659,8 @@
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 <link rel="modulepreload" href="/js/dlmm-bot.mjs" />
 </head>
-<body>
-<div class="ambient"><div class="blob b1"></div><div class="blob b2"></div></div>
+<body class="el-premium">
+<div class="ambient"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
 <div class="app">
   <header>

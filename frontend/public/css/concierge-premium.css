@@ -1,0 +1,328 @@
+/**
+ * Concierge Premium — institutional polish layer.
+ * Apply on body.el-premium or globally via shared imports.
+ */
+
+/* —— Global refinements —— */
+::selection {
+  background: rgba(201, 168, 76, 0.28);
+  color: var(--text-primary, var(--el-text));
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border, var(--el-border));
+  border-radius: var(--el-radius-xs);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dim, var(--el-gold-dim));
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold-dim, var(--el-gold-dim));
+  outline-offset: 2px;
+}
+
+/* Subtle vignette + top gold hairline on premium surfaces */
+body.el-premium::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(201, 168, 76, 0.06), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(0, 0, 0, 0.35), transparent 50%);
+}
+
+body.el-premium .app,
+body.el-premium .agent-home-shell,
+body.el-premium .pg-shell,
+body.el-premium .docs-layout,
+body.el-premium .int-wrap,
+body.el-premium .tok-page,
+body.el-premium .about-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— Shared theme toggle (Lounge + Agent nav) —— */
+.el-theme-toggle,
+.theme-toggle {
+  display: flex;
+  border: 1px solid var(--border, var(--el-border));
+  border-radius: var(--el-radius-xs);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.12);
+}
+html[data-theme="light"] .el-theme-toggle,
+html[data-theme="light"] .theme-toggle {
+  background: rgba(255, 255, 255, 0.5);
+}
+.el-theme-toggle .theme-btn,
+.theme-toggle .theme-btn {
+  font-family: "Outfit", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 7px 11px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, var(--el-text-secondary));
+  cursor: pointer;
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+.el-theme-toggle .theme-btn:hover,
+.theme-toggle .theme-btn:hover {
+  color: var(--text-primary, var(--el-text));
+}
+.el-theme-toggle .theme-btn.active,
+.theme-toggle .theme-btn.active {
+  background: var(--nav-active-bg);
+  color: var(--gold, var(--el-gold));
+}
+
+/* —— Institutional header —— */
+body.el-premium header,
+body.el-premium .pg-topnav {
+  position: relative;
+  box-shadow: var(--el-shadow-sm), inset 0 -1px 0 var(--el-border-subtle);
+}
+body.el-premium header::before,
+body.el-premium .pg-topnav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold, var(--el-gold)) 18%,
+    var(--el-gold-bright, #e8c968) 50%,
+    var(--gold, var(--el-gold)) 82%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* —— Premium cards —— */
+.el-card,
+.fcard,
+.gcard,
+.doc-card,
+.card,
+.docs-card,
+.pcard,
+.int-card,
+.tok-card {
+  border-radius: var(--el-radius-md);
+  box-shadow: var(--el-shadow-card);
+  transition:
+    border-color var(--el-duration-fast) var(--el-ease),
+    box-shadow var(--el-duration) var(--el-ease),
+    transform var(--el-duration) var(--el-ease),
+    background var(--el-duration-fast) var(--el-ease);
+}
+.fcard,
+.gcard,
+.doc-card {
+  position: relative;
+  overflow: hidden;
+}
+.fcard::after,
+.gcard::after,
+.doc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.045) 0%, transparent 42%);
+}
+html[data-theme="light"] .fcard::after,
+html[data-theme="light"] .gcard::after,
+html[data-theme="light"] .doc-card::after {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.7) 0%, transparent 50%);
+}
+.fcard:hover,
+.gcard:hover,
+.doc-card:hover {
+  box-shadow: var(--el-shadow-card), var(--el-shadow-glow-gold);
+  transform: translateY(-2px);
+}
+
+/* —— Buttons —— */
+.btn,
+.agent-cta-btn,
+.pg-btn,
+.int-btn {
+  border-radius: var(--el-radius-sm);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+.btn.gold,
+.agent-cta-btn.gold {
+  box-shadow: 0 0 0 0 rgba(201, 168, 76, 0);
+}
+.btn.gold:hover,
+.agent-cta-btn.gold:hover {
+  box-shadow: var(--el-shadow-glow-gold);
+}
+
+/* —— Agent nav polish —— */
+.pg-topnav {
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  background: var(--header-bg, rgba(8, 10, 15, 0.92)) !important;
+  height: 56px;
+}
+.pg-nav a {
+  border-radius: var(--el-radius-sm);
+  transition: all var(--el-duration-fast) var(--el-ease);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+}
+.pg-nav a.active {
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.15);
+}
+.pg-logo {
+  font-family: "Cormorant Garamond", serif !important;
+  font-size: 18px !important;
+  letter-spacing: 0.03em !important;
+}
+.pg-logo-dim {
+  font-family: "DM Mono", monospace;
+  font-size: 14px;
+}
+
+/* Status pill — institutional live indicator */
+.el-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: var(--el-radius-pill);
+  border: 1px solid var(--border, var(--el-border));
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-secondary, var(--el-text-secondary));
+}
+html[data-theme="light"] .el-status-pill {
+  background: rgba(255, 255, 255, 0.7);
+}
+.el-status-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal-green, var(--el-signal-green));
+  box-shadow: 0 0 8px var(--signal-green, var(--el-signal-green));
+  animation: el-pulse 1.8s ease-in-out infinite;
+}
+@keyframes el-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+/* —— Docs —— */
+.docs-sidebar {
+  backdrop-filter: blur(12px);
+  background: var(--sidebar-bg, #060810);
+}
+.docs-title {
+  letter-spacing: 0.01em;
+}
+.doc-card {
+  padding: 20px 22px;
+}
+.doc-card .card-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--el-radius-sm);
+  border: 1px solid var(--border);
+  background: var(--nav-active-bg);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* —— Agent landing —— */
+.agent-headline {
+  font-family: "Cormorant Garamond", serif !important;
+  font-weight: 300 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.08 !important;
+}
+.agent-headline .line1 {
+  font-weight: 300;
+}
+.agent-headline .line2 {
+  font-weight: 400;
+  font-style: italic;
+  text-shadow: 0 0 40px rgba(201, 168, 76, 0.18);
+}
+.agent-badge {
+  border-radius: var(--el-radius-pill);
+  box-shadow: var(--el-shadow-sm);
+}
+.agent-cta-row {
+  border-radius: var(--el-radius-md);
+  box-shadow: var(--el-shadow-md);
+}
+
+/* —— About page —— */
+.about-shell .card {
+  border-radius: var(--el-radius-md);
+  box-shadow: var(--el-shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.about-shell .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.45;
+}
+
+/* —— Concierge input —— */
+.conc-input-wrap {
+  box-shadow: var(--el-shadow-md) !important;
+  border-radius: var(--el-radius-xl) !important;
+}
+.conc-input-wrap:focus-within {
+  box-shadow: var(--el-shadow-md), var(--el-shadow-glow-gold) !important;
+  border-color: var(--gold-dim) !important;
+}
+
+/* —— Section typography —— */
+body.el-premium .section-h h2,
+body.el-premium .docs-title,
+body.el-premium .int-headline {
+  text-shadow: 0 1px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* —— Footer —— */
+.agent-site-footer {
+  border-top: 1px solid var(--border, var(--el-border));
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.15));
+}
