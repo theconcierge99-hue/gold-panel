@@ -45,10 +45,11 @@ async function load() {
   const c = countBySegment();
 
   try {
-    const [x402, config, agentCard] = await Promise.all([
+    const [x402, config, agentCard, tokenPay] = await Promise.all([
       fetchJson("/.well-known/x402").catch(() => null),
       fetchJson("/api/x402-config").catch(() => null),
       fetchJson("/.well-known/agent-card.json").catch(() => null),
+      fetchJson("/api/token-pay").catch(() => null),
     ]);
 
     const cards = [];
@@ -68,6 +69,16 @@ async function load() {
         `<p>Networks, pricing flags, zauth discovery links — no secrets.</p>
         ${discLink("/api/x402-config", `${origin}/api/x402-config`)}
         ${config ? preHtml(JSON.stringify(config, null, 2).slice(0, 2500)) : ""}`,
+      ),
+    );
+
+    cards.push(
+      discCard(
+        "Token Pay",
+        `<p>Native SPL x402 self-settle — default merchant <strong>SOON</strong>. DexScreener pricing; multi-merchant registry for external projects.</p>
+        ${discLink("/api/token-pay", `${origin}/api/token-pay`)}
+        ${discLink("/docs/payment/token-pay", `${origin}/docs/payment/token-pay — docs`)}
+        ${tokenPay ? preHtml(JSON.stringify(tokenPay, null, 2).slice(0, 2000)) : ""}`,
       ),
     );
 

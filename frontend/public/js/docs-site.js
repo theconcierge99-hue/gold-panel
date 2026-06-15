@@ -8,6 +8,7 @@
     ]},
     { label: "Payment", items: [
       { id: "payment-x402", href: "/docs/payment/x402", title: "x402 Protocol" },
+      { id: "payment-token-pay", href: "/docs/payment/token-pay", title: "Token Pay (SOON)" },
       { id: "payment-mpp", href: "/docs/payment/mpp", title: "MPP & AgentCash" },
       { id: "payment-paysh", href: "/docs/payment/paysh", title: "pay.sh" },
     ]},

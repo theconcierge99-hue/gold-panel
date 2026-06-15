@@ -60,7 +60,7 @@
         <a class="doc-card" href="/docs/playground">
           <div class="card-icon">◆</div>
           <h4>Executive Lounge</h4>
-          <p>Use Concierge in the browser — Phantom or OKX wallet, x402 USDC.</p>
+          <p>Use Concierge in the browser — Phantom or OKX wallet, x402 USDC or SOON (coming soon).</p>
         </a>
       </div>
 
@@ -76,6 +76,11 @@
           <div class="card-icon">$</div>
           <h4>PayAI</h4>
           <p>Primary USDC settlement on Base and Solana.</p>
+        </a>
+        <a class="doc-card" href="/docs/payment/token-pay">
+          <div class="card-icon">◎</div>
+          <h4>Token Pay (SOON)</h4>
+          <p>Native SPL x402 self-settle · DexScreener price · multi-merchant registry.</p>
         </a>
         <a class="doc-card" href="/docs/payment/mpp">
           <div class="card-icon">⬡</div>
@@ -164,7 +169,12 @@
         <a class="doc-card" href="/docs/payment/x402">
           <div class="card-icon">$</div>
           <h4>x402 Payments</h4>
-          <p>HTTP 402, PAYMENT-SIGNATURE, Solana and Base USDC.</p>
+          <p>HTTP 402, PAYMENT-SIGNATURE, USDC on Solana/Base, SOON self-settle.</p>
+        </a>
+        <a class="doc-card" href="/token">
+          <div class="card-icon">◈</div>
+          <h4>SOON Token</h4>
+          <p>Utility token draft — holder tiers, DLMM gate, Token Pay merchant #0.</p>
         </a>
       </div>
 
@@ -189,7 +199,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></
         </div>
         <div class="step">
           <h4>Pay via x402</h4>
-          <p>The server returns <strong>402 Payment Required</strong> with pricing in <code>PAYMENT-REQUIRED</code>. Your agent or wallet signs USDC and retries with <code>PAYMENT-SIGNATURE</code>.</p>
+          <p>The server returns <strong>402 Payment Required</strong> with pricing in <code>PAYMENT-REQUIRED</code>. Your agent or wallet signs USDC (PayAI/Dexter) or, on Concierge in the Lounge, <strong>SOON</strong> via self-settle when live — then retries with <code>PAYMENT-SIGNATURE</code>.</p>
         </div>
         <div class="step">
           <h4>Get intelligence</h4>

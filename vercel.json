@@ -106,6 +106,10 @@
       "destination": "/docs-payment-paysh.html"
     },
     {
+      "source": "/docs/payment/token-pay",
+      "destination": "/docs-payment-token-pay.html"
+    },
+    {
       "source": "/docs/corbits",
       "destination": "/docs-corbits.html"
     },

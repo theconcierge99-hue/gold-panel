@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Token Pay Platform — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Token Pay — native SPL token x402 self-settle. SOON is the default merchant; DexScreener pricing; multi-project registry." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/payment/token-pay" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="payment-token-pay">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Payment</div>
+      <h1 class="docs-title">Token Pay Platform</h1>
+      <p class="docs-lead">
+        Let each project monetize its <strong>native SPL token</strong> via x402 <strong>self-settle</strong> — without building RPC, price oracle, or on-chain verification infra.
+        The default merchant today is <strong>SOON</strong> (Concierge utility token).
+      </p>
+
+      <div class="card">
+        <p><strong>Concierge Token Pay</strong> complements USDC settlement via <a href="/docs/integration/payai">PayAI</a> / <a href="/docs/integration/dexter">Dexter</a>. Users pay in the project token on Solana (user pays SOL gas); the server verifies the transfer on-chain — no facilitator hot wallet.</p>
+        <p style="margin-top:12px"><strong>Status:</strong> SOON appears in the Lounge payment modal as <em>Coming soon</em> until the token launches. After launch, set <code>SOON_TOKEN_MINT</code> on Vercel — pricing flows from DexScreener with <code>SOON_USDC_RATE</code> as fallback.</p>
+      </div>
+
+      <h2 class="docs-h2">vs USDC facilitators</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th></th><th>PayAI / Dexter</th><th>Token Pay</th></tr></thead>
+          <tbody>
+            <tr><td>Model</td><td>Facilitator (gasless USDC)</td><td><strong>Self-settle</strong> (user pays SOL gas)</td></tr>
+            <tr><td>Asset</td><td>USDC</td><td><strong>Project native token</strong></td></tr>
+            <tr><td>Price</td><td>Fixed USDC list price</td><td>DexScreener + env fallback</td></tr>
+            <tr><td>Phase 1 route</td><td>All paid APIs</td><td><code>POST /api/concierge</code> (more routes later)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Public APIs</h2>
+      <div class="card">
+        <ul>
+          <li><code>GET /api/token-pay</code> — platform meta + merchant registry</li>
+          <li><code>GET /api/token-pay?merchant=soon</code> — single merchant config</li>
+          <li><code>GET /api/x402-config</code> — includes <code>tokenPay</code> (and legacy <code>soonX402</code>)</li>
+        </ul>
+<pre><code>curl -s https://conc-exe.xyz/api/token-pay | jq '.defaultMerchant'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">x402 accept (self-settle)</h2>
+      <div class="card">
+        <p>When live, Concierge <code>402</code> responses include an extra Solana accept alongside USDC:</p>
+<pre><code>{
+  "scheme": "exact",
+  "network": "solana:…",
+  "amount": "&lt;atomic SOON&gt;",
+  "asset": "&lt;SOON mint&gt;",
+  "payTo": "&lt;X402_SOL_PAY_TO&gt;",
+  "extra": {
+    "settlement": "self",
+    "merchantId": "soon",
+    "name": "SOON",
+    "decimals": 6
+  }
+}</code></pre>
+        <p>Executive Lounge signs <code>transferChecked</code> in the browser; the Edge API simulates, broadcasts, and confirms the merchant token delta.</p>
+      </div>
+
+      <h2 class="docs-h2">Environment (SOON merchant)</h2>
+      <div class="card">
+<pre><code>TOKEN_PAY_DEFAULT_MERCHANT=soon
+SOON_TOKEN_MINT=           # set after pump.fun launch
+SOON_TOKEN_DECIMALS=6
+SOON_PRICE_SOURCE=dexscreener
+SOON_PRICE_MAX_AGE_SEC=60
+SOON_USDC_RATE=0.00008     # fallback
+X402_SOL_PAY_TO=           # merchant receive (USDC + SOON)</code></pre>
+        <p>Add external projects later via <code>TOKEN_PAY_MERCHANTS_JSON</code>. See <a href="/docs/architecture">Architecture</a> and repository <code>docs/token-pay-platform.md</code> for the full module layout.</p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/token">SOON tokenomics</a> — holder tiers, DLMM gate, draft status</li>
+          <li><a href="/lounge">Executive Lounge</a> — pay modal lists USDC + SOON (coming soon)</li>
+          <li><a href="/docs/payment/x402">x402 Protocol</a> — USDC flow via PayAI/Dexter</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/payment/x402">x402 USDC</a>
+        <a class="btn" href="/token">SOON token</a>
+        <a class="btn" href="/docs/pricing">Pricing</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge · Not financial advice</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>
