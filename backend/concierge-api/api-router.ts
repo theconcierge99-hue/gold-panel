@@ -6,7 +6,6 @@ import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concie
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
 import handleConcierge from "./routes/concierge";
-import handleDlmmConfig from "./routes/dlmm-config";
 import handleLoungeRwaRecordMint from "./routes/lounge-rwa-record-mint";
 import handleLoungeSignalOpen from "./routes/lounge-signal-open";
 import handleLoungeSignalPublish from "./routes/lounge-signal-publish";
@@ -33,7 +32,6 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/agent-identity": handleAgentIdentity,
   "/api/agent-identity-card": handleAgentIdentityCard,
   "/api/concierge": handleConcierge,
-  "/api/dlmm-config": handleDlmmConfig,
   "/api/lounge-rwa-record-mint": handleLoungeRwaRecordMint,
   "/api/lounge-signal-open": handleLoungeSignalOpen,
   "/api/lounge-signal-publish": handleLoungeSignalPublish,
@@ -55,12 +53,17 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/zauth-status": handleZauthStatus,
 };
 
-export function dispatchApiRoute(request: Request): Promise<Response> {
+export async function dispatchApiRoute(request: Request): Promise<Response> {
   const pathname = new URL(request.url).pathname;
 
   const intelKind = resolveIntelKindFromRequest(request);
   if (intelKind) {
     return handleConciergeIntelRoute(request, intelKind);
+  }
+
+  if (pathname === "/api/dlmm-config") {
+    const { default: handleDlmmConfig } = await import("./routes/dlmm-config");
+    return handleDlmmConfig(request);
   }
 
   const handler = EXACT_ROUTES[pathname];
