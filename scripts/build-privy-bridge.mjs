@@ -7,12 +7,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bufferShim = join(root, "scripts", "buffer-shim.js");
 
 await esbuild.build({
-  entryPoints: ["lib/privy-wallet-bridge.ts"],
+  entryPoints: ["frontend/lib/privy-wallet-bridge.ts"],
   bundle: true,
   format: "esm",
   platform: "browser",
   target: ["es2020"],
-  outfile: join(root, "public/js/privy-bridge.mjs"),
+  outfile: join(root, "frontend/public/js/privy-bridge.mjs"),
   minify: true,
   inject: [bufferShim],
   define: { global: "globalThis" },
@@ -20,5 +20,5 @@ await esbuild.build({
 });
 
 const buildId = Date.now().toString(36);
-writeFileSync(join(root, "public/js/privy-build-id.txt"), buildId);
+writeFileSync(join(root, "frontend/public/js/privy-build-id.txt"), buildId);
 console.log(`Built public/js/privy-bridge.mjs (build ${buildId})`);

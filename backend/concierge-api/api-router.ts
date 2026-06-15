@@ -1,6 +1,6 @@
 /**
- * Dispatched from api/[...path].ts. Handler modules live in lib/concierge-api/
- * (outside /api) so Vercel does not register each file as its own function.
+ * Dispatched from api/[...path].ts (root shim → backend/api). Handlers live in
+ * backend/concierge-api/ so Vercel does not register each file as its own function.
  */
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";

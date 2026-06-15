@@ -10,5 +10,5 @@ try {
 } catch {
   sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "unknown";
 }
-writeFileSync(join(root, "public/deploy-version.txt"), `${sha}\n`);
+writeFileSync(join(root, "frontend/public/deploy-version.txt"), `${sha}\n`);
 console.log(`deploy-version.txt → ${sha}`);
