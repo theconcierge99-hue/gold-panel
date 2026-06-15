@@ -21,14 +21,19 @@ import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
 import { priceUsdcForResource, atomicAmountForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
-import { getSoonDecimals, getSoonMint } from "./soon-token";
 import {
-  SOON_X402_RESOURCE_KINDS,
-  formatSoonUiFromAtomic,
-  isSoonX402Enabled,
-  soonAtomicForUsdcAsync,
-} from "./soon-x402";
-import { isSelfSettleRequirement, verifyAndSettleSoonSelf, type SoonPaymentPayload } from "./x402-soon-settle";
+  buildTokenPayAcceptExtra,
+  formatTokenPayUiFromAtomic,
+  getDefaultTokenPayMerchant,
+  isTokenPayX402Live,
+  tokenPayAtomicForResourceAsync,
+  tokenPaySupportsResource,
+} from "./token-pay";
+import {
+  isTokenPaySelfSettleRequirement,
+  verifyAndSettleTokenPaySelf,
+  type TokenPayPaymentPayload,
+} from "./token-pay";
 
 export type { X402ResourceKind };
 
@@ -256,22 +261,18 @@ async function buildAcceptsAsync(
       extra: { feePayer: DEXTER_FACILITATOR.solanaFeePayer },
     });
 
-    if (SOON_X402_RESOURCE_KINDS.has(kind) && isSoonX402Enabled()) {
-      const soonMint = getSoonMint()!;
-      const soonAmount = await soonAtomicForUsdcAsync(priceUsdcForResource(kind));
-      if (soonAmount) {
+    const tokenMerchant = getDefaultTokenPayMerchant();
+    if (tokenPaySupportsResource(kind, tokenMerchant) && isTokenPayX402Live(tokenMerchant)) {
+      const tokenAmount = await tokenPayAtomicForResourceAsync(priceUsdcForResource(kind), tokenMerchant);
+      if (tokenAmount && tokenMerchant.mint) {
         accepts.push({
           scheme: "exact",
           network: nets.sol,
-          amount: soonAmount,
-          asset: soonMint,
+          amount: tokenAmount,
+          asset: tokenMerchant.mint,
           payTo: sol,
           maxTimeoutSeconds: 120,
-          extra: {
-            settlement: "self",
-            name: "SOON",
-            decimals: getSoonDecimals(),
-          },
+          extra: buildTokenPayAcceptExtra(tokenMerchant),
         });
       }
     }
@@ -387,8 +388,8 @@ async function verifyAndSettle(
   transaction: string;
   network?: string;
 }> {
-  if (isSelfSettleRequirement(matched)) {
-    return verifyAndSettleSoonSelf(paymentPayload as SoonPaymentPayload, matched);
+  if (isTokenPaySelfSettleRequirement(matched)) {
+    return verifyAndSettleTokenPaySelf(paymentPayload as TokenPayPaymentPayload, matched);
   }
 
   const primary = resolveFacilitatorForRequirement(matched);
@@ -470,13 +471,14 @@ export async function buildPaymentRequiredResponse(
   };
 
   const usdcPrice = priceUsdcForResource(kind);
-  const soonAtomic =
-    SOON_X402_RESOURCE_KINDS.has(kind) && isSoonX402Enabled()
-      ? await soonAtomicForUsdcAsync(usdcPrice)
+  const tokenMerchant = getDefaultTokenPayMerchant();
+  const tokenAtomic =
+    tokenPaySupportsResource(kind, tokenMerchant) && isTokenPayX402Live(tokenMerchant)
+      ? await tokenPayAtomicForResourceAsync(usdcPrice, tokenMerchant)
       : null;
-  const soonLabel =
-    soonAtomic != null
-      ? ` or ${formatSoonUiFromAtomic(soonAtomic)} SOON`
+  const tokenLabel =
+    tokenAtomic != null
+      ? ` or ${formatTokenPayUiFromAtomic(tokenAtomic, tokenMerchant)}`
       : "";
 
   const clientMessage =
@@ -490,7 +492,7 @@ export async function buildPaymentRequiredResponse(
       priceLabel:
         kind === "signal-publish"
           ? "$1.00"
-          : `${X402_PRICE_LABEL}${soonLabel}`,
+          : `${X402_PRICE_LABEL}${tokenLabel}`,
       resource: kind,
     }),
     {

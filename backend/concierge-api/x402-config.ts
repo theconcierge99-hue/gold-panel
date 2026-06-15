@@ -8,15 +8,19 @@ import {
 } from "./x402-address";
 import { merchantHasTokenAccount, merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
 import {
-  formatSoonUiFromAtomic,
-  getSoonUsdcRate,
-  getSoonUsdcRateAsync,
-  isSoonX402Enabled,
-  soonAtomicForUsdc,
-  soonAtomicForUsdcAsync,
-} from "./soon-x402";
-import { getSoonPriceSource } from "./soon-price";
-import { getSoonDecimals, getSoonMint } from "./soon-token";
+  buildTokenPayAcceptExtra,
+  formatTokenPayUiFromAtomic,
+  getDefaultTokenPayMerchant,
+  getDefaultTokenPayMerchantId,
+  getTokenPayPlatformMeta,
+  getTokenPayUsdRateAsync,
+  isTokenPayX402Live,
+  listTokenPayMerchants,
+  toPublicMerchant,
+  tokenPayAtomicForResourceAsync,
+  tokenPayAtomicForResourceSync,
+  tokenPaySupportsResource,
+} from "./token-pay";
 
 import {
   X402_READ_PRICE_ATOMIC,
@@ -229,19 +233,39 @@ export function getPublicX402Config() {
     dexter: dexterDiscoveryLinks(resolveX402SiteOrigin()),
     zauthTelemetryEnabled: isZauthProviderEnabled(),
     privyWalletEnabled: isPrivyEnabled(),
-    soonX402: {
-      enabled: isSoonX402Enabled(),
-      mint: getSoonMint(),
-      decimals: getSoonDecimals(),
-      priceSource: getSoonPriceSource(),
-      usdcRate: getSoonUsdcRate(),
-      conciergeAtomic: soonAtomicForUsdc(X402_READ_PRICE_USDC),
-      conciergeLabel:
-        isSoonX402Enabled() && soonAtomicForUsdc(X402_READ_PRICE_USDC)
-          ? `${formatSoonUiFromAtomic(soonAtomicForUsdc(X402_READ_PRICE_USDC)!)} SOON`
-          : undefined,
-      note: "Post-launch: set SOON_TOKEN_MINT on Vercel. Price from DexScreener (cached ~60s); SOON_USDC_RATE is fallback.",
+    tokenPay: {
+      platform: getTokenPayPlatformMeta(),
+      defaultMerchantId: getDefaultTokenPayMerchantId(),
+      merchants: listTokenPayMerchants().map(toPublicMerchant),
+      default: (() => {
+        const m = getDefaultTokenPayMerchant();
+        return {
+          id: m.id,
+          symbol: m.symbol,
+          name: m.name,
+          mint: m.mint,
+          decimals: m.decimals,
+          live: isTokenPayX402Live(m),
+          comingSoonMessage: m.comingSoonMessage,
+          conciergeAtomic: tokenPayAtomicForResourceSync(X402_READ_PRICE_USDC, m),
+        };
+      })(),
     },
+    /** @deprecated Use tokenPay — kept for existing Lounge clients */
+    soonX402: (() => {
+      const m = getDefaultTokenPayMerchant();
+      const atomic = tokenPayAtomicForResourceSync(X402_READ_PRICE_USDC, m);
+      return {
+        enabled: isTokenPayX402Live(m),
+        mint: m.mint,
+        decimals: m.decimals,
+        priceSource: m.price.source,
+        usdcRate: m.price.fallbackUsd,
+        conciergeAtomic: atomic,
+        conciergeLabel: atomic ? formatTokenPayUiFromAtomic(atomic, m) : undefined,
+        note: "See tokenPay — set SOON_TOKEN_MINT after launch.",
+      };
+    })(),
   };
 }
 
@@ -267,38 +291,53 @@ export function getSolanaRpcUrlForServer(): string {
 export async function getPublicX402ConfigAsync() {
   const base = getPublicX402Config();
   const { evm, sol } = getMerchantAddresses();
+  const merchant = getDefaultTokenPayMerchant();
   let solMerchantUsdcAta: boolean | null = null;
-  let solMerchantSoonAta: boolean | null = null;
-  const soonMint = getSoonMint();
+  let solMerchantTokenAta: boolean | null = null;
   if (sol) {
     try {
       solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, getSolanaRpcUrlForServer());
     } catch {
       solMerchantUsdcAta = null;
     }
-    if (soonMint && isSoonX402Enabled()) {
+    if (merchant.mint && isTokenPayX402Live(merchant)) {
       try {
-        solMerchantSoonAta = await merchantHasTokenAccount(sol, soonMint, getSolanaRpcUrlForServer());
+        solMerchantTokenAta = await merchantHasTokenAccount(
+          sol,
+          merchant.mint,
+          getSolanaRpcUrlForServer(),
+        );
       } catch {
-        solMerchantSoonAta = null;
+        solMerchantTokenAta = null;
       }
     }
   }
-  const soonPrice = soonMint && isSoonX402Enabled() ? await getSoonUsdcRateAsync() : null;
-  const soonAtomic =
-    soonPrice != null ? await soonAtomicForUsdcAsync(X402_READ_PRICE_USDC) : null;
+  const tokenPrice = merchant.mint && isTokenPayX402Live(merchant)
+    ? await getTokenPayUsdRateAsync(merchant)
+    : null;
+  const tokenAtomic =
+    tokenPrice != null ? await tokenPayAtomicForResourceAsync(X402_READ_PRICE_USDC, merchant) : null;
   return {
     ...base,
     evmPayTo: evm ?? undefined,
     solPayTo: sol ?? undefined,
     solMerchantUsdcAta,
-    acceptsSoonSol: isSoonX402Enabled() && !!sol && soonAtomic != null,
-    solMerchantSoonAta,
-    soonMint: soonMint ?? undefined,
-    soonUsdcRate: soonPrice?.usd ?? undefined,
-    soonPriceSource: soonPrice?.source ?? undefined,
-    soonConciergeAtomic: soonAtomic ?? undefined,
+    acceptsTokenPaySol: isTokenPayX402Live(merchant) && !!sol && tokenAtomic != null,
+    acceptsSoonSol: isTokenPayX402Live(merchant) && !!sol && tokenAtomic != null,
+    solMerchantTokenAta,
+    solMerchantSoonAta: solMerchantTokenAta,
+    tokenPayMint: merchant.mint ?? undefined,
+    soonMint: merchant.mint ?? undefined,
+    tokenPaySymbol: merchant.symbol,
+    tokenUsdcRate: tokenPrice?.usd ?? undefined,
+    soonUsdcRate: tokenPrice?.usd ?? undefined,
+    tokenPriceSource: tokenPrice?.source ?? undefined,
+    soonPriceSource: tokenPrice?.source ?? undefined,
+    tokenConciergeAtomic: tokenAtomic ?? undefined,
+    soonConciergeAtomic: tokenAtomic ?? undefined,
+    tokenConciergeLabel:
+      tokenAtomic != null ? formatTokenPayUiFromAtomic(tokenAtomic, merchant) : undefined,
     soonConciergeLabel:
-      soonAtomic != null ? `${formatSoonUiFromAtomic(soonAtomic)} SOON` : undefined,
+      tokenAtomic != null ? formatTokenPayUiFromAtomic(tokenAtomic, merchant) : undefined,
   };
 }

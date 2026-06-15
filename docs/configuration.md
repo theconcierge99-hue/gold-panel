@@ -80,9 +80,9 @@ Executive Lounge **DLMM Bot** (`/lounge` → DLMM Bot) is gated by **connected S
 | `SOON_PRICE_SOURCE` | `dexscreener` (default) or `env` (static rate only). |
 | `SOON_PRICE_MAX_AGE_SEC` | In-memory DexScreener cache TTL per Edge isolate (default `60`, max `300`). |
 | `SOON_USDC_RATE` | Fallback USD price per 1 SOON when DexScreener fails or `SOON_PRICE_SOURCE=env`. |
-| `SOON_X402_ENABLED` | Set `false` to disable SOON pay even when mint is set. |
+| `SOON_X402_ENABLED` | Set `false` to disable token pay even when mint is set. |
 
-**Concierge SOON x402:** enabled when `SOON_TOKEN_MINT` is set. Price is fetched from DexScreener (cached); `SOON_USDC_RATE` is fallback. Pre-launch: leave mint unset.
+**Token Pay platform:** see [token-pay-platform.md](token-pay-platform.md). Default merchant SOON; `GET /api/token-pay`. Concierge token x402 enabled when `SOON_TOKEN_MINT` is set.
 
 **Requires:** `SOLANA_RPC_URL` (Helius recommended) for `/api/solana-rpc-send` used by client DLMM txs.
 

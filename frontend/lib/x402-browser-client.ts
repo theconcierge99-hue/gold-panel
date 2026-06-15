@@ -9,6 +9,10 @@ import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { SolanaExactPhantomScheme } from "./x402-solana-phantom-scheme";
 import { SolanaSelfSettleScheme } from "./x402-solana-self-scheme";
 import {
+  TOKEN_PAY_COMING_SOON_DEFAULT,
+  TOKEN_PAY_DEFAULT_SYMBOL,
+} from "./token-pay-client";
+import {
   createPublicClient,
   createWalletClient,
   custom,
@@ -21,17 +25,43 @@ import { base, baseSepolia } from "viem/chains";
 export const PRICE_ATOMIC = 100_000n;
 const PRICE_USDC = 0.1;
 
-/** Shown when SOON pay is listed but not live yet (pre-launch). */
-export const SOON_PAY_COMING_SOON =
-  "SOON — not available yet. Will unlock after token launch.";
+/** @deprecated Use TOKEN_PAY_COMING_SOON_DEFAULT */
+export const SOON_PAY_COMING_SOON = TOKEN_PAY_COMING_SOON_DEFAULT;
 
-function isSoonPayLive(serverConfig: X402ServerPayConfig): boolean {
-  return !!(
-    serverConfig.acceptsSoonSol &&
-    serverConfig.soonMint &&
-    serverConfig.soonConciergeAtomic &&
-    serverConfig.solPayToReady
-  );
+export type X402ServerPayConfig = {
+  acceptsEvm?: boolean;
+  acceptsSol?: boolean;
+  evmPayToReady?: boolean;
+  solPayToReady?: boolean;
+  hasCustomSolRpc?: boolean;
+  solPayTo?: string;
+  evmPayTo?: string;
+  solMerchantUsdcAta?: boolean | null;
+  /** Token Pay (default merchant) */
+  tokenPaySymbol?: string;
+  acceptsTokenPaySol?: boolean;
+  tokenPayMint?: string;
+  tokenUsdcRate?: number;
+  tokenConciergeAtomic?: string;
+  solMerchantTokenAta?: boolean | null;
+  tokenComingSoonMessage?: string;
+  /** Legacy SOON field aliases */
+  acceptsSoonSol?: boolean;
+  soonMint?: string;
+  soonUsdcRate?: number;
+  soonConciergeAtomic?: string;
+  solMerchantSoonAta?: boolean | null;
+};
+
+function tokenSymbol(serverConfig: X402ServerPayConfig): string {
+  return serverConfig.tokenPaySymbol?.trim() || TOKEN_PAY_DEFAULT_SYMBOL;
+}
+
+function isTokenPayLive(serverConfig: X402ServerPayConfig): boolean {
+  const mint = serverConfig.tokenPayMint || serverConfig.soonMint;
+  const atomic = serverConfig.tokenConciergeAtomic || serverConfig.soonConciergeAtomic;
+  const accepts = serverConfig.acceptsTokenPaySol ?? serverConfig.acceptsSoonSol;
+  return !!(accepts && mint && atomic && serverConfig.solPayToReady);
 }
 
 function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
@@ -81,25 +111,6 @@ const erc20BalanceAbi = [
 export type WalletSession = {
   evm?: { address: string; wallet: string } | null;
   sol?: { address: string; wallet: string } | null;
-};
-
-export type X402ServerPayConfig = {
-  acceptsEvm?: boolean;
-  acceptsSol?: boolean;
-  evmPayToReady?: boolean;
-  solPayToReady?: boolean;
-  /** Server has SOLANA_RPC_URL configured (RPC URL is never sent to the browser) */
-  hasCustomSolRpc?: boolean;
-  /** Merchant receive addresses (public) */
-  solPayTo?: string;
-  evmPayTo?: string;
-  /** false when merchant has never received USDC on Solana (ATA missing) */
-  solMerchantUsdcAta?: boolean | null;
-  acceptsSoonSol?: boolean;
-  soonMint?: string;
-  soonUsdcRate?: number;
-  soonConciergeAtomic?: string;
-  solMerchantSoonAta?: boolean | null;
 };
 
 export type PayChain = "evm" | "sol" | "soon";
@@ -156,9 +167,9 @@ const BASE_HTTP_RPC = {
   testnet: "https://sepolia.base.org",
 } as const;
 
-function formatSoon(atomic: bigint): string {
+function formatToken(atomic: bigint, symbol: string): string {
   const whole = atomic / 1_000_000n;
-  return `${whole.toLocaleString("en-US")} SOON`;
+  return `${whole.toLocaleString("en-US")} ${symbol}`;
 }
 
 async function solTokenBalanceViaApi(
@@ -472,10 +483,14 @@ export async function getPaymentChainOptions(
     });
   }
 
-  if (isSoonPayLive(serverConfig)) {
+  if (isTokenPayLive(serverConfig)) {
+    const sym = tokenSymbol(serverConfig);
+    const mint = serverConfig.tokenPayMint || serverConfig.soonMint!;
     const hasWallet = !!session.sol?.address;
     const solProv = solanaProvider(session);
-    const needAtomic = BigInt(serverConfig.soonConciergeAtomic!);
+    const needAtomic = BigInt(
+      serverConfig.tokenConciergeAtomic || serverConfig.soonConciergeAtomic!,
+    );
     let bal = 0n;
     let balanceUnknown = false;
     let disabledReason: string | undefined;
@@ -486,27 +501,30 @@ export async function getPaymentChainOptions(
         session.sol?.wallet === "privy"
           ? "Privy Solana wallet not ready — reconnect Privy"
           : "Solana provider not found — reopen Phantom/OKX";
-    } else if (serverConfig.solMerchantSoonAta === false) {
-      disabledReason =
-        "Merchant cannot receive SOON yet — send a tiny SOON once to the merchant wallet, or pay with USDC";
+    } else if (
+      (serverConfig.solMerchantTokenAta ?? serverConfig.solMerchantSoonAta) === false
+    ) {
+      disabledReason = `Merchant cannot receive ${sym} yet — send a tiny ${sym} once to the merchant wallet, or pay with USDC`;
     } else {
-      const soonBal = await solTokenBalanceViaApi(session.sol!.address, serverConfig.soonMint!);
-      bal = soonBal.balance;
-      balanceUnknown = soonBal.unknown;
+      const tokenBal = await solTokenBalanceViaApi(session.sol!.address, mint);
+      bal = tokenBal.balance;
+      balanceUnknown = tokenBal.unknown;
     }
     const sufficient = balanceUnknown || bal >= needAtomic;
+    const rate =
+      serverConfig.tokenUsdcRate ?? serverConfig.soonUsdcRate;
     const rateHint =
-      serverConfig.soonUsdcRate && serverConfig.soonUsdcRate > 0
+      rate && rate > 0
         ? `≈ ${PRICE_USDC} USDC · you pay SOL gas`
         : "Self-settle · you pay SOL gas";
     options.push({
       chain: "soon",
-      label: "SOON",
+      label: sym,
       sublabel: rateHint,
       balanceUsdc: hasWallet && solProv
         ? balanceUnknown
           ? "Check wallet"
-          : formatSoon(bal)
+          : formatToken(bal, sym)
         : "—",
       balanceAtomic: bal,
       sufficient,
@@ -515,20 +533,22 @@ export async function getPaymentChainOptions(
       disabledReason:
         disabledReason ??
         (!sufficient && hasWallet && !balanceUnknown
-          ? `Need at least ${formatSoon(needAtomic)} for this action`
+          ? `Need at least ${formatToken(needAtomic, sym)} for this action`
           : undefined),
     });
   } else if (x402ChainsConfigured(serverConfig)) {
+    const sym = tokenSymbol(serverConfig);
     options.push({
       chain: "soon",
-      label: "SOON",
+      label: sym,
       sublabel: "Solana · pegged to USDC price",
       balanceUsdc: "—",
       balanceAtomic: 0n,
       sufficient: false,
       available: false,
       comingSoon: true,
-      disabledReason: SOON_PAY_COMING_SOON,
+      disabledReason:
+        serverConfig.tokenComingSoonMessage || TOKEN_PAY_COMING_SOON_DEFAULT,
     });
   }
 

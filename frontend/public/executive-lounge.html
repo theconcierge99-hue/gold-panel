@@ -2486,6 +2486,7 @@
   }
 
   function x402ServerPayConfig(cfg){
+    const tp = cfg?.tokenPay?.default || {};
     return {
       acceptsEvm: !!cfg.acceptsEvm,
       acceptsSol: !!cfg.acceptsSol,
@@ -2495,11 +2496,18 @@
       solPayTo: cfg.solPayTo || undefined,
       evmPayTo: cfg.evmPayTo || undefined,
       solMerchantUsdcAta: cfg.solMerchantUsdcAta,
-      acceptsSoonSol: !!cfg.acceptsSoonSol,
-      soonMint: cfg.soonMint || undefined,
-      soonUsdcRate: cfg.soonUsdcRate,
-      soonConciergeAtomic: cfg.soonConciergeAtomic,
-      solMerchantSoonAta: cfg.solMerchantSoonAta,
+      tokenPaySymbol: cfg.tokenPaySymbol || tp.symbol || 'SOON',
+      acceptsTokenPaySol: !!(cfg.acceptsTokenPaySol ?? cfg.acceptsSoonSol),
+      tokenPayMint: cfg.tokenPayMint || cfg.soonMint || tp.mint || undefined,
+      tokenUsdcRate: cfg.tokenUsdcRate ?? cfg.soonUsdcRate,
+      tokenConciergeAtomic: cfg.tokenConciergeAtomic || cfg.soonConciergeAtomic || tp.conciergeAtomic,
+      solMerchantTokenAta: cfg.solMerchantTokenAta ?? cfg.solMerchantSoonAta,
+      tokenComingSoonMessage: tp.comingSoonMessage,
+      acceptsSoonSol: !!(cfg.acceptsTokenPaySol ?? cfg.acceptsSoonSol),
+      soonMint: cfg.tokenPayMint || cfg.soonMint || undefined,
+      soonUsdcRate: cfg.tokenUsdcRate ?? cfg.soonUsdcRate,
+      soonConciergeAtomic: cfg.tokenConciergeAtomic || cfg.soonConciergeAtomic,
+      solMerchantSoonAta: cfg.solMerchantTokenAta ?? cfg.solMerchantSoonAta,
     };
   }
 
