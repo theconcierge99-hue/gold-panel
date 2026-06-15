@@ -74,6 +74,37 @@ function sumParsedTokenBalances(rows: unknown[] | undefined): bigint {
   return total;
 }
 
+/** Token balance in atomic units; null when RPC failed */
+export async function getSolTokenBalanceAtomic(
+  ownerAddress: string,
+  mint: string,
+  rpcUrl: string,
+): Promise<bigint | null> {
+  const result = await solanaRpcCall<{ value?: unknown[] }>(rpcUrl, "getTokenAccountsByOwner", [
+    ownerAddress,
+    { mint },
+    { encoding: "jsonParsed" },
+  ]);
+  if (result === null) return null;
+  return sumParsedTokenBalances(result.value);
+}
+
+/** True when merchant has a token account for mint */
+export async function merchantHasTokenAccount(
+  ownerAddress: string,
+  mint: string,
+  rpcUrl?: string,
+): Promise<boolean | null> {
+  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? "https://solana-rpc.publicnode.com";
+  const result = await solanaRpcCall<{ value?: unknown[] }>(url, "getTokenAccountsByOwner", [
+    ownerAddress,
+    { mint },
+    { encoding: "jsonParsed" },
+  ]);
+  if (result === null) return null;
+  return (result.value?.length ?? 0) > 0;
+}
+
 /** USDC balance in atomic units (6 decimals); null when RPC failed */
 export async function getSolUsdcBalanceAtomic(
   ownerAddress: string,

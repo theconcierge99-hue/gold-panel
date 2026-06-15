@@ -7,6 +7,7 @@ import { wrapFetchWithPayment } from "@x402/fetch";
 import type { ClientEvmSigner } from "@x402/evm";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { SolanaExactPhantomScheme } from "./x402-solana-phantom-scheme";
+import { SolanaSelfSettleScheme } from "./x402-solana-self-scheme";
 import {
   createPublicClient,
   createWalletClient,
@@ -74,9 +75,14 @@ export type X402ServerPayConfig = {
   evmPayTo?: string;
   /** false when merchant has never received USDC on Solana (ATA missing) */
   solMerchantUsdcAta?: boolean | null;
+  acceptsSoonSol?: boolean;
+  soonMint?: string;
+  soonUsdcRate?: number;
+  soonConciergeAtomic?: string;
+  solMerchantSoonAta?: boolean | null;
 };
 
-export type PayChain = "evm" | "sol";
+export type PayChain = "evm" | "sol" | "soon";
 
 export type ChainPayOption = {
   chain: PayChain;
@@ -127,6 +133,28 @@ const BASE_HTTP_RPC = {
   mainnet: "https://mainnet.base.org",
   testnet: "https://sepolia.base.org",
 } as const;
+
+function formatSoon(atomic: bigint): string {
+  const whole = atomic / 1_000_000n;
+  return `${whole.toLocaleString("en-US")} SOON`;
+}
+
+async function solTokenBalanceViaApi(
+  owner: string,
+  mint: string,
+): Promise<{ balance: bigint; unknown: boolean }> {
+  try {
+    const res = await fetch(
+      `/api/sol-usdc-balance?owner=${encodeURIComponent(owner)}&mint=${encodeURIComponent(mint)}`,
+      { cache: "no-store" },
+    );
+    const data = (await res.json()) as { balanceAtomic?: string | null; ok?: boolean };
+    if (!res.ok || data.balanceAtomic == null) return { balance: 0n, unknown: true };
+    return { balance: BigInt(data.balanceAtomic), unknown: false };
+  } catch {
+    return { balance: 0n, unknown: true };
+  }
+}
 
 function formatUsdc(atomic: bigint): string {
   const whole = atomic / 1_000_000n;
@@ -422,6 +450,59 @@ export async function getPaymentChainOptions(
     });
   }
 
+  if (
+    serverConfig.acceptsSoonSol &&
+    serverConfig.soonMint &&
+    serverConfig.soonConciergeAtomic &&
+    serverConfig.solPayToReady
+  ) {
+    const hasWallet = !!session.sol?.address;
+    const solProv = solanaProvider(session);
+    const needAtomic = BigInt(serverConfig.soonConciergeAtomic);
+    let bal = 0n;
+    let balanceUnknown = false;
+    let disabledReason: string | undefined;
+    if (!hasWallet) {
+      disabledReason = "Connect Solana in your wallet";
+    } else if (!solProv) {
+      disabledReason =
+        session.sol?.wallet === "privy"
+          ? "Privy Solana wallet not ready — reconnect Privy"
+          : "Solana provider not found — reopen Phantom/OKX";
+    } else if (serverConfig.solMerchantSoonAta === false) {
+      disabledReason =
+        "Merchant cannot receive SOON yet — send a tiny SOON once to the merchant wallet, or pay with USDC";
+    } else {
+      const soonBal = await solTokenBalanceViaApi(session.sol!.address, serverConfig.soonMint);
+      bal = soonBal.balance;
+      balanceUnknown = soonBal.unknown;
+    }
+    const sufficient = balanceUnknown || bal >= needAtomic;
+    const rateHint =
+      serverConfig.soonUsdcRate && serverConfig.soonUsdcRate > 0
+        ? `≈ ${PRICE_USDC} USDC · you pay SOL gas`
+        : "Self-settle · you pay SOL gas";
+    options.push({
+      chain: "soon",
+      label: "SOON (Solana)",
+      sublabel: rateHint,
+      balanceUsdc: hasWallet && solProv
+        ? balanceUnknown
+          ? "Check wallet"
+          : formatSoon(bal)
+        : "—",
+      balanceAtomic: bal,
+      sufficient,
+      balanceUnknown,
+      available: hasWallet && !!solProv && !disabledReason,
+      disabledReason:
+        disabledReason ??
+        (!sufficient && hasWallet && !balanceUnknown
+          ? `Need at least ${formatSoon(needAtomic)} for this action`
+          : undefined),
+    });
+  }
+
   return options;
 }
 
@@ -435,6 +516,10 @@ function paymentRequirementsSelector(preferred: PayChain) {
   return (_version: number, accepts: PaymentRequirements[]) => {
     const sol = accepts.filter((a) => String(a.network).startsWith("solana:"));
     const evm = accepts.filter((a) => String(a.network).startsWith("eip155:"));
+    const soon = sol.filter((a) => a.extra?.settlement === "self");
+    const usdcSol = sol.filter((a) => a.extra?.settlement !== "self");
+    if (preferred === "soon" && soon.length) return soon[0];
+    if (preferred === "sol" && usdcSol.length) return usdcSol[0];
     if (preferred === "sol" && sol.length) return sol[0];
     if (preferred === "evm" && evm.length) return evm[0];
     return accepts[0];
@@ -461,8 +546,10 @@ async function resolvePaymentChain(
   const opts = await getPaymentChainOptions(session, networkMode, server);
   const usable = opts.filter((o) => o.available && (o.sufficient || o.balanceUnknown));
   if (usable.length) {
+    const soon = usable.find((o) => o.chain === "soon");
     const sol = usable.find((o) => o.chain === "sol");
     const evm = usable.find((o) => o.chain === "evm");
+    if (soon?.sufficient && !sol?.sufficient && !evm?.sufficient) return "soon";
     if (sol?.sufficient && !evm?.sufficient) return "sol";
     if (evm?.sufficient && !sol?.sufficient) return "evm";
     return usable.sort((a, b) =>
@@ -522,6 +609,18 @@ export async function createX402PaidFetch(
         publicClient.readContract(args as Parameters<typeof publicClient.readContract>[0]),
     };
     registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
+  } else if (preferred === "soon") {
+    const solProv = solanaProvider(session)!;
+    client.register(
+      nets.solNetwork,
+      new SolanaSelfSettleScheme(
+        solProv as {
+          signTransaction: (tx: import("@solana/web3.js").VersionedTransaction) => Promise<import("@solana/web3.js").VersionedTransaction>;
+        },
+        session.sol!.address,
+        solRpcProxyUrl(),
+      ),
+    );
   } else {
     const solProv = solanaProvider(session)!;
     client.register(
@@ -537,7 +636,7 @@ export async function createX402PaidFetch(
   }
 
   const paidFetch = wrapFetchWithPayment(fetch, client);
-  if (preferred !== "sol") return paidFetch;
+  if (preferred !== "sol" && preferred !== "soon") return paidFetch;
 
   return async (url, options) => {
     installSolanaRpcProxyFetch();

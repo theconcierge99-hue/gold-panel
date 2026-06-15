@@ -6,7 +6,17 @@ import {
   normalizeEvmPayTo,
   normalizeSolPayTo,
 } from "./x402-address";
-import { merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
+import { merchantHasTokenAccount, merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
+import {
+  formatSoonUiFromAtomic,
+  getSoonUsdcRate,
+  getSoonUsdcRateAsync,
+  isSoonX402Enabled,
+  soonAtomicForUsdc,
+  soonAtomicForUsdcAsync,
+} from "./soon-x402";
+import { getSoonPriceSource } from "./soon-price";
+import { getSoonDecimals, getSoonMint } from "./soon-token";
 
 import {
   X402_READ_PRICE_ATOMIC,
@@ -219,6 +229,19 @@ export function getPublicX402Config() {
     dexter: dexterDiscoveryLinks(resolveX402SiteOrigin()),
     zauthTelemetryEnabled: isZauthProviderEnabled(),
     privyWalletEnabled: isPrivyEnabled(),
+    soonX402: {
+      enabled: isSoonX402Enabled(),
+      mint: getSoonMint(),
+      decimals: getSoonDecimals(),
+      priceSource: getSoonPriceSource(),
+      usdcRate: getSoonUsdcRate(),
+      conciergeAtomic: soonAtomicForUsdc(X402_READ_PRICE_USDC),
+      conciergeLabel:
+        isSoonX402Enabled() && soonAtomicForUsdc(X402_READ_PRICE_USDC)
+          ? `${formatSoonUiFromAtomic(soonAtomicForUsdc(X402_READ_PRICE_USDC)!)} SOON`
+          : undefined,
+      note: "Post-launch: set SOON_TOKEN_MINT on Vercel. Price from DexScreener (cached ~60s); SOON_USDC_RATE is fallback.",
+    },
   };
 }
 
@@ -245,17 +268,37 @@ export async function getPublicX402ConfigAsync() {
   const base = getPublicX402Config();
   const { evm, sol } = getMerchantAddresses();
   let solMerchantUsdcAta: boolean | null = null;
+  let solMerchantSoonAta: boolean | null = null;
+  const soonMint = getSoonMint();
   if (sol) {
     try {
       solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, getSolanaRpcUrlForServer());
     } catch {
       solMerchantUsdcAta = null;
     }
+    if (soonMint && isSoonX402Enabled()) {
+      try {
+        solMerchantSoonAta = await merchantHasTokenAccount(sol, soonMint, getSolanaRpcUrlForServer());
+      } catch {
+        solMerchantSoonAta = null;
+      }
+    }
   }
+  const soonPrice = soonMint && isSoonX402Enabled() ? await getSoonUsdcRateAsync() : null;
+  const soonAtomic =
+    soonPrice != null ? await soonAtomicForUsdcAsync(X402_READ_PRICE_USDC) : null;
   return {
     ...base,
     evmPayTo: evm ?? undefined,
     solPayTo: sol ?? undefined,
     solMerchantUsdcAta,
+    acceptsSoonSol: isSoonX402Enabled() && !!sol && soonAtomic != null,
+    solMerchantSoonAta,
+    soonMint: soonMint ?? undefined,
+    soonUsdcRate: soonPrice?.usd ?? undefined,
+    soonPriceSource: soonPrice?.source ?? undefined,
+    soonConciergeAtomic: soonAtomic ?? undefined,
+    soonConciergeLabel:
+      soonAtomic != null ? `${formatSoonUiFromAtomic(soonAtomic)} SOON` : undefined,
   };
 }

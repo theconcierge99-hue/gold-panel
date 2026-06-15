@@ -19,8 +19,16 @@ import {
 } from "./x402-facilitator";
 import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
-import { atomicAmountForResource, priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
+import { priceUsdcForResource, atomicAmountForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
+import { getSoonDecimals, getSoonMint } from "./soon-token";
+import {
+  SOON_X402_RESOURCE_KINDS,
+  formatSoonUiFromAtomic,
+  isSoonX402Enabled,
+  soonAtomicForUsdcAsync,
+} from "./soon-x402";
+import { isSelfSettleRequirement, verifyAndSettleSoonSelf } from "./x402-soon-settle";
 
 export type { X402ResourceKind };
 
@@ -210,7 +218,10 @@ function normalizeSolanaNetwork(network: string): string {
   return network;
 }
 
-function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequirement[] {
+async function buildAcceptsAsync(
+  request: Request,
+  kind: X402ResourceKind,
+): Promise<X402AcceptRequirement[]> {
   const nets = getX402NetworkProfile();
   const { evm, sol } = getMerchantAddresses();
   const amount = atomicAmountForResource(kind);
@@ -244,6 +255,26 @@ function buildAccepts(request: Request, kind: X402ResourceKind): X402AcceptRequi
       ...solBase,
       extra: { feePayer: DEXTER_FACILITATOR.solanaFeePayer },
     });
+
+    if (SOON_X402_RESOURCE_KINDS.has(kind) && isSoonX402Enabled()) {
+      const soonMint = getSoonMint()!;
+      const soonAmount = await soonAtomicForUsdcAsync(priceUsdcForResource(kind));
+      if (soonAmount) {
+        accepts.push({
+          scheme: "exact",
+          network: nets.sol,
+          amount: soonAmount,
+          asset: soonMint,
+          payTo: sol,
+          maxTimeoutSeconds: 120,
+          extra: {
+            settlement: "self",
+            name: "SOON",
+            decimals: getSoonDecimals(),
+          },
+        });
+      }
+    }
   }
 
   if (!accepts.length) {
@@ -356,6 +387,10 @@ async function verifyAndSettle(
   transaction: string;
   network?: string;
 }> {
+  if (isSelfSettleRequirement(matched)) {
+    return verifyAndSettleSoonSelf(paymentPayload, matched);
+  }
+
   const primary = resolveFacilitatorForRequirement(matched);
   const facilitators: X402FacilitatorProfile[] = [primary];
   const fallback = getX402FacilitatorFallback();
@@ -413,7 +448,7 @@ export async function buildPaymentRequiredResponse(
   cors: Record<string, string>,
   error = "PAYMENT-SIGNATURE header is required",
 ): Promise<Response> {
-  const accepts = buildAccepts(request, kind);
+  const accepts = await buildAcceptsAsync(request, kind);
   const meta = RESOURCE_META[kind];
   const listing = x402ServiceListingMeta(
     `${request.headers.get("x-forwarded-proto") || "https"}://${request.headers.get("host") || "conc-exe.xyz"}`,
@@ -434,6 +469,16 @@ export async function buildPaymentRequiredResponse(
     extensions: buildBazaarExtension(kind),
   };
 
+  const usdcPrice = priceUsdcForResource(kind);
+  const soonAtomic =
+    SOON_X402_RESOURCE_KINDS.has(kind) && isSoonX402Enabled()
+      ? await soonAtomicForUsdcAsync(usdcPrice)
+      : null;
+  const soonLabel =
+    soonAtomic != null
+      ? ` or ${formatSoonUiFromAtomic(soonAtomic)} SOON`
+      : "";
+
   const clientMessage =
     error === "PAYMENT-SIGNATURE header is required" ? "Payment required" : error;
 
@@ -441,11 +486,11 @@ export async function buildPaymentRequiredResponse(
     JSON.stringify({
       error: clientMessage,
       detail: error,
-      priceUsdc: priceUsdcForResource(kind),
+      priceUsdc: usdcPrice,
       priceLabel:
         kind === "signal-publish"
           ? "$1.00"
-          : X402_PRICE_LABEL,
+          : `${X402_PRICE_LABEL}${soonLabel}`,
       resource: kind,
     }),
     {
@@ -502,7 +547,7 @@ export async function requireX402Payment(
       };
     }
 
-    const accepts = buildAccepts(request, kind);
+    const accepts = await buildAcceptsAsync(request, kind);
     const matched = findMatchingRequirement(accepts, paymentPayload);
     if (!matched) {
       return {
@@ -534,7 +579,7 @@ export async function requireX402Payment(
   } catch (e) {
     if (
       e instanceof Error &&
-      /Payment verification failed|Payment settlement failed/i.test(e.message)
+      (/Payment verification failed|Payment settlement failed|SOON payment/i.test(e.message))
     ) {
       return {
         ok: false,

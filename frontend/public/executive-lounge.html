@@ -2494,11 +2494,21 @@
       solPayTo: cfg.solPayTo || undefined,
       evmPayTo: cfg.evmPayTo || undefined,
       solMerchantUsdcAta: cfg.solMerchantUsdcAta,
+      acceptsSoonSol: !!cfg.acceptsSoonSol,
+      soonMint: cfg.soonMint || undefined,
+      soonUsdcRate: cfg.soonUsdcRate,
+      soonConciergeAtomic: cfg.soonConciergeAtomic,
+      solMerchantSoonAta: cfg.solMerchantSoonAta,
     };
   }
 
   function formatPaymentError(err, preferredChain){
     const m = err?.message || String(err);
+    if(preferredChain === 'soon'){
+      if(/Payment cancelled/i.test(m)) return m;
+      if(/Insufficient SOON|No SOON token account|Merchant SOON account/i.test(m)) return m;
+      if(/SOL for fees/i.test(m)) return m;
+    }
     if(preferredChain === 'sol'){
       if(/Need at least .* USDC on Base/i.test(m)){
         return 'Wrong payment chain — you chose Solana. Hard refresh (Ctrl+F5), open payment again, and select Solana only.';
@@ -2717,7 +2727,7 @@
       x402ServerPayConfig(cfg),
       { preferredChain },
     );
-    const chainHint = preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
+    const chainHint = preferredChain === 'soon' ? 'SOON (Solana)' : preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
     const agentId = typeof window.elGetStoredAgentId === 'function' ? window.elGetStoredAgentId() : null;
     const baseOpts = options || {};
@@ -2726,7 +2736,7 @@
     const fetchOpts = Object.assign({}, baseOpts, { headers });
     if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
     else if(u.includes('/api/lounge-signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
-    else if(u.includes('/api/concierge')) toast('Approve 0.1 USDC on '+chainHint+' in your wallet…');
+    else if(u.includes('/api/concierge')) toast('Approve payment on '+chainHint+' in your wallet…');
     try{
       return await paidFetch(url, fetchOpts);
     }catch(e){
@@ -2937,7 +2947,7 @@
       const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
       preferredChain = await showPaymentConfirm({
         title: payload.mode === 'enhance' ? 'AI enhance signal' : 'Concierge chat',
-        subtitle: '0.1 USDC per message · choose payment chain',
+        subtitle: '0.1 USDC or SOON · choose payment method',
         story: preview,
         confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
       });
