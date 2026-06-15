@@ -1,1 +1,7 @@
-export { config, default } from "../backend/api/[...path].ts";
+import { dispatchApiRoute } from "../backend/concierge-api/api-router";
+
+export const config = { runtime: "edge" };
+
+export default function handler(request: Request): Promise<Response> {
+  return dispatchApiRoute(request);
+}
