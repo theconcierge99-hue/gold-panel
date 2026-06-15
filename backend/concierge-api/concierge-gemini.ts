@@ -221,9 +221,38 @@ async function geminiGenerateImage(
   throw new Error("Image generation unavailable for this API key");
 }
 
+function normalizeConciergeReplyHtml(html: string): string {
+  let out = html.trim();
+  if (!out) return out;
+  out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/<p(\s[^>]*)?>([\s\S]*?)<\/p>/gi, (full, _attrs, inner) => {
+    if (/class="[^"]*conc-section/.test(full)) return full;
+    let sections = inner.split(/(?=\d+\.\s*<strong>)/i);
+    if (sections.length <= 1) sections = inner.split(/(?:<br\s*\/?>\s*)+(?=\d+\.\s)/i);
+    if (sections.length <= 1) return full;
+    return sections
+      .map((part: string) => {
+        const t = part.trim();
+        if (!t) return "";
+        const isNum = /^\d+\./.test(t.replace(/<[^>]+>/g, "").trim());
+        return `<p class="${isNum ? "conc-section" : "conc-block"}">${t}</p>`;
+      })
+      .filter(Boolean)
+      .join("");
+  });
+  out = out.replace(
+    /(<\/strong>)\s+(<strong>([A-Za-z0-9][^<]{0,48}:)<\/strong>)/g,
+    '$1<br class="conc-gap"/>$2',
+  );
+  return out;
+}
+
 function wrapHtmlParagraphs(reply: string): string {
-  if (reply.includes("<p>")) return reply;
-  return `<p>${reply.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
+  let html = reply.trim();
+  if (!html.includes("<p>")) {
+    html = `<p>${html.replace(/\n\n/g, "</p><p>").replace(/\n/g, " ")}</p>`;
+  }
+  return normalizeConciergeReplyHtml(html);
 }
 
 async function resolveIntelligenceContext(

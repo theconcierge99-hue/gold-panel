@@ -243,9 +243,18 @@
   .msg .bubble{max-width:100%;font-size:14px;line-height:1.65}
   .msg.ai .bubble{background:transparent;border:none;padding:0;color:var(--text-primary)}
   .msg.user .bubble{background:var(--user-bubble-bg);border:1px solid var(--user-bubble-border);padding:12px 16px;border-radius:20px 20px 4px 20px;color:var(--text-primary)}
-  .msg.ai .bubble p{margin-bottom:10px}
+  .msg.ai .bubble{font-size:14.5px;line-height:1.72;letter-spacing:.01em}
+  .msg.ai .bubble p{margin-bottom:14px}
   .msg.ai .bubble p:last-child{margin-bottom:0}
-  .msg.ai .bubble strong{color:var(--gold);font-weight:400}
+  .msg.ai .bubble p.conc-section{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  .msg.ai .bubble p.conc-section:last-child{border-bottom:none;padding-bottom:0}
+  .msg.ai .bubble p.conc-section > strong:first-child{display:block;margin-bottom:10px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;line-height:1.35;letter-spacing:.02em}
+  .msg.ai .bubble p.conc-block{margin-bottom:16px}
+  .msg.ai .bubble strong{color:var(--gold);font-weight:500}
+  .msg.ai .bubble br.conc-gap{display:block;content:'';margin-top:10px}
+  .msg.ai .bubble ul,.msg.ai .bubble ol{margin:10px 0 14px 1.25em;padding-left:.5em}
+  .msg.ai .bubble li{margin-bottom:8px;line-height:1.65}
+  .msg.ai .bubble code{font-family:'Outfit',monospace;font-size:12px;background:var(--nav-active-bg);padding:2px 7px;border-radius:4px;color:var(--text-secondary)}
   .msg.ai .bubble .conc-img{margin-top:12px;border:1px solid var(--border);max-width:100%;border-radius:8px;display:block}
   .typing{display:flex;gap:5px;padding:4px 0}
   .typing span{width:6px;height:6px;border-radius:50%;background:var(--chrome);animation:tp 1.2s infinite}
@@ -3181,10 +3190,38 @@
   initMarketFeeds();
   syncMobileNav('lounge');
 
+  function formatConciergeReply(raw){
+    if(!raw || typeof raw!=='string') return '';
+    let html = raw.trim();
+    html = html.replace(/<script[\s\S]*?<\/script>/gi,'');
+    while(/\*\*[^*]+\*\*/.test(html))
+      html = html.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    if(!/<p[\s>]/i.test(html)){
+      const blocks = html.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+      html = blocks.length
+        ? blocks.map(b=>`<p>${b.replace(/\n/g,'<br/>')}</p>`).join('')
+        : `<p>${html}</p>`;
+    }
+    html = html.replace(/<p(\s[^>]*)?>([\s\S]*?)<\/p>/gi,(full,attrs,inner)=>{
+      if(/class="[^"]*conc-section/.test(full)) return full;
+      let sections = inner.split(/(?=\d+\.\s*<strong>)/i);
+      if(sections.length<=1)
+        sections = inner.split(/(?:<br\s*\/?>\s*)+(?=\d+\.\s)/i);
+      if(sections.length<=1) return full;
+      return sections.map(part=>{
+        const t = part.trim();
+        if(!t) return '';
+        const isNum = /^\d+\./.test(t.replace(/<[^>]+>/g,'').trim());
+        return `<p class="${isNum?'conc-section':'conc-block'}">${t}</p>`;
+      }).filter(Boolean).join('');
+    });
+    html = html.replace(/(<\/strong>)\s+(<strong>([A-Za-z0-9][^<]{0,48}:)<\/strong>)/g,'$1<br class="conc-gap"/>$2');
+    return html;
+  }
   function addAi(html, extra, trackSession){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
-    let inner=html;
+    let inner=formatConciergeReply(html);
     const imgs = extra?.images||[];
     if(imgs.length){
       imgs.forEach(src=>{
