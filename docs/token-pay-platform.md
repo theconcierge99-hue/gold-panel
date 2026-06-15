@@ -17,7 +17,7 @@ Today the **default merchant is SOON** (Concierge utility token). UI may still s
 
 Pitch:
 
-> Setiap project monetize native token-nya via x402 tanpa bangun infra sendiri — self-settle, DexScreener price, plug ke Concierge-style stack.
+> Every project can monetize its native token via x402 without building its own infra — self-settle, DexScreener price, plug into a Concierge-style stack.
 
 ---
 
