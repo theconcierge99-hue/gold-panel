@@ -66,6 +66,22 @@ Fund treasury wallets with USDC. Reader payment (0.1 USDC) still settles to merc
 
 Check readiness: `GET /api/x402-config` → `creatorInstantPayoutReady`.
 
+## SOON token & DLMM bot (manual · wallet-signed)
+
+Executive Lounge **DLMM Bot** (`/lounge` → DLMM Bot) is gated by **connected Solana wallet** + **SOON hold** (when mint is configured). All liquidity txs are signed in the user wallet (Phantom / OKX / Privy) — no server hot key.
+
+| Variable | Description |
+|----------|-------------|
+| `SOON_TOKEN_MINT` | SPL mint address (base58) after SOON launches. **Unset** = token not live; bot stays locked unless preview. |
+| `SOON_MINT` | Alias for `SOON_TOKEN_MINT`. |
+| `SOON_TOKEN_DECIMALS` | Token decimals (default `6`). |
+| `SOON_DLMM_MIN_HOLD` | Minimum SOON balance to unlock DLMM bot (default `50000` = Desk tier). |
+| `SOON_GATE_PREVIEW` | Set `true` to unlock DLMM UI **without** SOON hold (dev/staging only). |
+
+**API:** `GET /api/dlmm-config?owner=<solana>&sort=apy` — pool list + gate status.
+
+**Requires:** `SOLANA_RPC_URL` (Helius recommended) for `/api/solana-rpc-send` used by client DLMM txs.
+
 ## CORS
 
 | Variable | Description |
