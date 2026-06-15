@@ -74,7 +74,24 @@ function originMatchesRequestHost(request: Request, origin: string): boolean {
 
 export function isOriginAllowed(request: Request): boolean {
   const origin = requestOrigin(request);
-  if (!origin) return !isProduction();
+  if (!origin) {
+    if (!isProduction()) return true;
+    // Same-origin GET fetch() omits Origin; Sec-Fetch-Site / Referer still identify the page.
+    const fetchSite = request.headers.get("sec-fetch-site");
+    if (fetchSite === "same-origin" || fetchSite === "same-site") return true;
+    const referer = request.headers.get("referer");
+    if (referer) {
+      try {
+        const refOrigin = new URL(referer).origin;
+        if (getAllowedOrigins().includes(refOrigin) || originMatchesRequestHost(request, refOrigin)) {
+          return true;
+        }
+      } catch {
+        /* ignore malformed referer */
+      }
+    }
+    return false;
+  }
 
   if (getAllowedOrigins().includes(origin)) return true;
   return originMatchesRequestHost(request, origin);
