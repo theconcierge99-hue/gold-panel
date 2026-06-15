@@ -21,6 +21,26 @@ import { base, baseSepolia } from "viem/chains";
 export const PRICE_ATOMIC = 100_000n;
 const PRICE_USDC = 0.1;
 
+/** Shown when SOON pay is listed but not live yet (pre-launch). */
+export const SOON_PAY_COMING_SOON =
+  "SOON — not available yet. Will unlock after token launch.";
+
+function isSoonPayLive(serverConfig: X402ServerPayConfig): boolean {
+  return !!(
+    serverConfig.acceptsSoonSol &&
+    serverConfig.soonMint &&
+    serverConfig.soonConciergeAtomic &&
+    serverConfig.solPayToReady
+  );
+}
+
+function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
+  return !!(
+    (serverConfig.acceptsEvm && serverConfig.evmPayToReady) ||
+    (serverConfig.acceptsSol && serverConfig.solPayToReady)
+  );
+}
+
 const USDC = {
   mainnet: {
     evm: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as const,
@@ -94,6 +114,8 @@ export type ChainPayOption = {
   available: boolean;
   balanceUnknown?: boolean;
   disabledReason?: string;
+  /** Listed for visibility but not payable yet (pre-launch SOON). */
+  comingSoon?: boolean;
 };
 
 export type X402PaidFetchOptions = {
@@ -450,15 +472,10 @@ export async function getPaymentChainOptions(
     });
   }
 
-  if (
-    serverConfig.acceptsSoonSol &&
-    serverConfig.soonMint &&
-    serverConfig.soonConciergeAtomic &&
-    serverConfig.solPayToReady
-  ) {
+  if (isSoonPayLive(serverConfig)) {
     const hasWallet = !!session.sol?.address;
     const solProv = solanaProvider(session);
-    const needAtomic = BigInt(serverConfig.soonConciergeAtomic);
+    const needAtomic = BigInt(serverConfig.soonConciergeAtomic!);
     let bal = 0n;
     let balanceUnknown = false;
     let disabledReason: string | undefined;
@@ -473,7 +490,7 @@ export async function getPaymentChainOptions(
       disabledReason =
         "Merchant cannot receive SOON yet — send a tiny SOON once to the merchant wallet, or pay with USDC";
     } else {
-      const soonBal = await solTokenBalanceViaApi(session.sol!.address, serverConfig.soonMint);
+      const soonBal = await solTokenBalanceViaApi(session.sol!.address, serverConfig.soonMint!);
       bal = soonBal.balance;
       balanceUnknown = soonBal.unknown;
     }
@@ -484,7 +501,7 @@ export async function getPaymentChainOptions(
         : "Self-settle · you pay SOL gas";
     options.push({
       chain: "soon",
-      label: "SOON (Solana)",
+      label: "SOON",
       sublabel: rateHint,
       balanceUsdc: hasWallet && solProv
         ? balanceUnknown
@@ -500,6 +517,18 @@ export async function getPaymentChainOptions(
         (!sufficient && hasWallet && !balanceUnknown
           ? `Need at least ${formatSoon(needAtomic)} for this action`
           : undefined),
+    });
+  } else if (x402ChainsConfigured(serverConfig)) {
+    options.push({
+      chain: "soon",
+      label: "SOON",
+      sublabel: "Solana · pegged to USDC price",
+      balanceUsdc: "—",
+      balanceAtomic: 0n,
+      sufficient: false,
+      available: false,
+      comingSoon: true,
+      disabledReason: SOON_PAY_COMING_SOON,
     });
   }
 

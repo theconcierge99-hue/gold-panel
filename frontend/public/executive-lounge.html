@@ -521,6 +521,7 @@
   .pay-chain-opt .pc-bal{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:6px}
   .pay-chain-opt .pc-warn{font-size:10px;color:var(--signal-red);margin-top:4px}
   .pay-chain-opt .pc-rec{font-size:9px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
+  .pay-chain-opt .pc-soon{font-size:9px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
   .pay-loading{font-size:12px;color:var(--text-muted);padding:20px 0;text-align:center}
   .btn.sm{padding:5px 10px;font-size:9px}
   #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
@@ -2172,7 +2173,7 @@
         toast('Choose payment chain (1 USDC)…');
         chain=await showPaymentConfirm({
           title:'Publish signal',
-          subtitle:'One-time anti-spam fee · choose payment chain',
+          subtitle:'One-time anti-spam fee · USDC or SOON (coming soon)',
           story:title,
           confirmLabel:'Pay 1 USDC & publish',
           amountUsdc:cfg.signalPublishUsdc||1,
@@ -2682,13 +2683,15 @@
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
       const rec = !dis && o.chain==='sol' && solReady && !evmReady;
+      const soonBadge = o.comingSoon ? ' <span class="pc-soon">Coming soon</span>' : '';
       const warn = o.disabledReason ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
+      const balLine = o.comingSoon ? '' : '<div class="pc-bal">Balance: '+escapeHtml(o.balanceUsdc)+'</div>';
       return `<label class="pay-chain-opt${dis?' disabled':''}" data-chain="${o.chain}">
         <input type="radio" name="payChain" value="${o.chain}" ${dis?'disabled':''} />
         <div class="pc-body">
-          <div class="pc-title">${escapeHtml(o.label)}${rec?' <span class="pc-rec">Recommended</span>':''}</div>
+          <div class="pc-title">${escapeHtml(o.label)}${rec?' <span class="pc-rec">Recommended</span>':''}${soonBadge}</div>
           <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
-          <div class="pc-bal">Balance: ${escapeHtml(o.balanceUsdc)}</div>
+          ${balLine}
           ${warn}
         </div>
       </label>`;
@@ -2861,7 +2864,7 @@
     try{
       payChain = await showPaymentConfirm({
         title: 'Open creator signal',
-        subtitle: 'One-time unlock · 0.1 USDC',
+        subtitle: '0.1 USDC or SOON · choose payment method',
         story: title || source || signalId,
         confirmLabel: 'Pay & read signal',
         amountUsdc: cfg.signalOpenUsdc || 0.1,
@@ -2905,7 +2908,7 @@
     try{
       payChain = await showPaymentConfirm({
         title: 'Open article',
-        subtitle: 'One-time unlock · 0.1 USDC',
+        subtitle: '0.1 USDC or SOON · choose payment method',
         story: title,
         confirmLabel: 'Pay & open article',
         openArticleTab: true,
