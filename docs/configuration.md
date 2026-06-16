@@ -101,14 +101,17 @@ Example row:
   "payTo": "PartnerSolanaWallet…",
   "priceSource": "dexscreener",
   "fallbackUsd": 0.001,
-  "resourceKinds": ["concierge"],
+  "resourceKinds": ["external", "concierge"],
+  "allowedOrigins": ["https://api.acme.xyz"],
   "x402Enabled": true
 }
 ```
 
 Reserved merchant id: `soon` (cannot be registered via JSON). Merchant is **live** when mint + payTo + resolvable price + `x402Enabled`.
 
-**APIs:** `GET /api/token-pay` · `GET /api/x402-config` → `tokenPay.merchants[]`
+**APIs:** `GET /api/token-pay` · `GET/POST /api/token-pay-build-accept` · `POST /api/token-pay-verify` · `GET /api/x402-config` → `tokenPay.merchants[]`
+
+**SDK:** `packages/token-x402` (`@conc-exe/token-x402`)
 
 **Operator docs:** [token-pay-platform.md](token-pay-platform.md) (repository). Beta review: Telegram [@Theconcierge33](https://t.me/Theconcierge33).
 

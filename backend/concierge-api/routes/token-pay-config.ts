@@ -46,6 +46,8 @@ async function enrichMerchantPublic(
         discoverUrl: `${origin}/agent/discover`,
         dashboardUrl: `${origin}/agent/token-pay?merchant=${encodeURIComponent(merchant.id)}`,
         analyticsUrl: `${origin}/api/token-pay-analytics?merchant=${encodeURIComponent(merchant.id)}`,
+        buildAcceptUrl: `${origin}/api/token-pay-build-accept?merchant=${encodeURIComponent(merchant.id)}`,
+        partnerVerifyUrl: `${origin}/api/token-pay-verify`,
         docsUrl: `${origin}/docs/payment/token-pay`,
       },
     };
@@ -71,6 +73,8 @@ async function enrichMerchantPublic(
       discoverUrl: `${origin}/agent/discover`,
       dashboardUrl: `${origin}/agent/token-pay?merchant=${encodeURIComponent(merchant.id)}`,
       analyticsUrl: `${origin}/api/token-pay-analytics?merchant=${encodeURIComponent(merchant.id)}`,
+      buildAcceptUrl: `${origin}/api/token-pay-build-accept?merchant=${encodeURIComponent(merchant.id)}`,
+      partnerVerifyUrl: `${origin}/api/token-pay-verify`,
       docsUrl: `${origin}/docs/payment/token-pay`,
     },
   };
@@ -116,6 +120,8 @@ export default async function handleTokenPayConfig(request: Request): Promise<Re
         discoverUrl: `${siteOrigin(request)}/agent/discover`,
         dashboardUrl: `${siteOrigin(request)}/agent/token-pay`,
         analyticsUrl: `${siteOrigin(request)}/api/token-pay-analytics`,
+        buildAcceptUrl: `${siteOrigin(request)}/api/token-pay-build-accept`,
+        partnerVerifyUrl: `${siteOrigin(request)}/api/token-pay-verify`,
         docsUrl: `${siteOrigin(request)}/docs/payment/token-pay`,
         probe402Hint:
           "POST /api/concierge without PAYMENT-SIGNATURE → decode PAYMENT-REQUIRED → find accept with extra.merchantId",

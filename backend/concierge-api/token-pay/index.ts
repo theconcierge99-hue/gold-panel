@@ -50,4 +50,14 @@ export { getTokenPayMerchantReadiness } from "./readiness";
 export type { TokenPayMerchantReadiness, TokenPayMerchantStatus } from "./readiness";
 export { scheduleTokenPaySettlementRecord, getTokenPayMerchantAnalytics } from "./analytics-store";
 export type { TokenPayMerchantAnalytics, TokenPaySettlementRecord } from "./analytics-store";
+export {
+  TOKEN_PAY_EXTERNAL_RESOURCE_KIND,
+  assertPartnerOrigin,
+  buildTokenPayPartnerAcceptAsync,
+  clampPartnerUsdAmount,
+  merchantSupportsExternal,
+  tokenPayAcceptMatches,
+  verifyTokenPayPartnerPayment,
+} from "./partner";
+export { b64DecodeJson, b64EncodeJson } from "./b64-json";
 export { SOON_MERCHANT_ID, buildSoonMerchantFromEnv } from "./merchants/soon";

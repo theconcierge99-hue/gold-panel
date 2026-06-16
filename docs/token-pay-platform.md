@@ -82,7 +82,9 @@ Legacy shims (do not add logic here):
 | `GET /api/token-pay` | Platform meta + all merchants |
 | `GET /api/token-pay?merchant=soon` | Single merchant public config |
 | `GET /api/x402-config` | Includes `tokenPay` + legacy `soonX402` |
-| `GET /api/sol-usdc-balance?mint=` | SPL balance for pay modal |
+| `GET /api/token-pay-analytics` | Per-merchant stats |
+| `GET/POST /api/token-pay-build-accept` | Server-built accept for partner APIs (`resourceKind: external`) |
+| `POST /api/token-pay-verify` | Verify + settle partner payments (PAYMENT-SIGNATURE) |
 
 All routes go through **existing** Edge router `api/[...path]` — no new Vercel serverless function.
 
@@ -174,7 +176,8 @@ TOKEN_PAY_MERCHANTS_JSON=[
     "payTo": "MerchantSolanaReceiveWallet…",
     "fallbackUsd": 0.001,
     "priceSource": "dexscreener",
-    "resourceKinds": ["concierge"]
+    "resourceKinds": ["external", "concierge"],
+    "allowedOrigins": ["https://api.acme.xyz"]
   }
 ]
 ```
@@ -202,8 +205,8 @@ Pay modal lists every registered merchant — live tokens are payable; pre-launc
 | **0** ✅ | `token-pay/` module, SOON shims, `/api/token-pay` | Vercel Hobby |
 | **1** | SOON live on Concierge (set mint) | Hobby |
 | **2** ✅ | Multi-merchant `402` accepts + `TOKEN_PAY_MERCHANTS_JSON` beta + docs | Hobby |
-| **3** | npm SDK `@conc-exe/token-x402` | npm |
-| **4** | Hosted verify on `pay.conc-exe.xyz` (isolated service) | Railway / CF Workers |
+| **3** ✅ | npm SDK `@conc-exe/token-x402` + partner build/verify APIs | Hobby (Edge router) |
+| **4** ✅ | Hosted verify on `conc-exe.xyz` / `pay.conc-exe.xyz` | Hobby — same deploy |
 | **5** | Optional gasless (Kora / Turnkey) | Dedicated wallet ops |
 
 ---
@@ -260,9 +263,9 @@ Public APIs never expose partner `payTo` addresses (only `payToReady` / ATA stat
 |------|----------|-------------------|
 | **Direct API** | User/agent wallet | Your `payTo` on each Concierge paid route |
 | **Your app wrapping Concierge** | Your UI triggers self-settle | Your `payTo` |
-| **Agent / `pay curl`** | Agent wallet selects your token accept | Your `payTo` |
+| **Partner API** | User wallet on your domain | Your `payTo` via `/api/token-pay-verify` |
 
-Settlement verification runs on `conc-exe.xyz` for registered `resourceKinds`. Hosted verify on your own domain (npm SDK) is on the roadmap (Phase 3–4).
+Settlement verification runs on `conc-exe.xyz` for registered `resourceKinds` including **`external`** (partner-owned APIs via `/api/token-pay-verify`).
 
 ---
 

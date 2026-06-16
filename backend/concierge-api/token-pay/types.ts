@@ -28,8 +28,10 @@ export type TokenPayMerchant = {
     usdMin: number | null;
     usdMax: number | null;
   };
-  /** x402 resource kinds that may list this token, e.g. concierge. */
+  /** x402 resource kinds that may list this token, e.g. concierge, external. */
   resourceKinds: string[];
+  /** Origins allowed to call partner build/verify APIs (browser). Omit = any origin. */
+  allowedOrigins?: string[];
   /** Shown in pay modal when mint unset (pre-launch). */
   comingSoonMessage: string;
 };
@@ -67,6 +69,7 @@ export type TokenPayPublicMerchant = {
   priceSource: TokenPayPriceSource;
   fallbackUsd?: number;
   resourceKinds: string[];
+  allowedOrigins?: string[];
   comingSoonMessage: string;
 };
 

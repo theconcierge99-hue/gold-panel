@@ -62,7 +62,9 @@
         <ul>
           <li><code>GET /api/token-pay</code> — platform meta + merchant registry + readiness</li>
           <li><code>GET /api/token-pay-analytics?merchant=ID</code> — tx count, volume, daily chart data</li>
-          <li><code>GET /api/x402-config</code> — <code>tokenPay.merchants[]</code> for pay clients</li>
+          <li><code>GET /api/token-pay-build-accept</code> — server-built accept for partner APIs</li>
+          <li><code>POST /api/token-pay-verify</code> — verify + settle on partner domains</li>
+          <li><code>GET /api/x402-config</code> — includes <code>tokenPay</code> config for your accept builder</li>
         </ul>
       </div>
 
@@ -88,7 +90,8 @@
   "payTo": "YourSolanaReceiveWallet…",
   "priceSource": "dexscreener",
   "fallbackUsd": 0.001,
-  "resourceKinds": ["concierge"],
+  "resourceKinds": ["external", "concierge"],
+  "allowedOrigins": ["https://api.acme.xyz", "https://acme.xyz"],
   "x402Enabled": true
 }</code></pre>
         <p>Required: unique <code>id</code>, live <code>mint</code>, your <code>payTo</code> wallet, and <code>decimals</code>.
@@ -131,6 +134,44 @@
           <li>Open the signature on Solscan — your <code>payTo</code> token balance increased</li>
           <li>Dashboard tx count increments (requires KV in production for persistent analytics)</li>
         </ol>
+      </div>
+
+      <h2 class="docs-h2">Token Pay on your own API (partner verify)</h2>
+      <div class="card">
+        <p>
+          Gate <strong>your</strong> endpoints (e.g. <code>api.acme.xyz</code>) with x402 + your native token.
+          Concierge builds the accept, verifies the on-chain payment, and credits your <code>payTo</code> wallet —
+          no extra Vercel functions (uses the existing Edge router).
+        </p>
+
+        <h3 class="docs-h3">Merchant setup</h3>
+        <p>Include <code>"external"</code> in <code>resourceKinds</code>. Optional <code>allowedOrigins</code> restricts browser calls to build/verify APIs.</p>
+<pre><code>curl -s "https://conc-exe.xyz/api/token-pay?merchant=acme&amp;resource=external" | jq '.merchant.readiness'</code></pre>
+
+        <h3 class="docs-h3">1. Build accept (your backend)</h3>
+<pre><code>curl -s -X POST https://conc-exe.xyz/api/token-pay-build-accept \
+  -H "Content-Type: application/json" \
+  -d '{"merchantId":"acme","usdAmount":0.1,"resourceUrl":"https://api.acme.xyz/v1/intel"}'</code></pre>
+        <p>Returns <code>accept</code> — use it in your <code>402</code> + <code>PAYMENT-REQUIRED</code> response.</p>
+
+        <h3 class="docs-h3">2. User pays (wallet signs SPL transfer)</h3>
+        <p>Same self-settle flow as Concierge routes — client signs <code>transferChecked</code> to your <code>payTo</code>.</p>
+
+        <h3 class="docs-h3">3. Verify via Concierge</h3>
+<pre><code>curl -s -X POST https://conc-exe.xyz/api/token-pay-verify \
+  -H "Content-Type: application/json" \
+  -H "PAYMENT-SIGNATURE: &lt;base64 payment payload&gt;" \
+  -d '{"merchantId":"acme","usdAmount":0.1,"resourceUrl":"https://api.acme.xyz/v1/intel"}'</code></pre>
+        <p>On success: HTTP <strong>200</strong>, JSON with <code>transaction</code>, header <code>PAYMENT-RESPONSE</code>. Then return your API response to the user.</p>
+
+        <h3 class="docs-h3">SDK — <code>@conc-exe/token-x402</code></h3>
+        <p>TypeScript helper in <code>packages/token-x402</code> (monorepo). Wraps build + verify:</p>
+<pre><code>import { createConciergeTokenPayClient } from "@conc-exe/token-x402";
+
+const tp = createConciergeTokenPayClient({ origin: "https://conc-exe.xyz" });
+const { accept } = await tp.buildAccept({ merchantId: "acme", usdAmount: 0.1, resourceUrl });
+const verified = await tp.verifyPayment({ merchantId: "acme", usdAmount: 0.1, resourceUrl, paymentSignature });</code></pre>
+        <p>Optional dedicated host: point <code>pay.conc-exe.xyz</code> to the same Vercel project (add domain in Vercel) and use it as <code>origin</code>.</p>
       </div>
 
       <h2 class="docs-h2">Verify connection &amp; monitor usage</h2>
@@ -246,7 +287,8 @@ curl -s -X POST https://conc-exe.xyz/api/concierge \
             <tr><td><code>priceSource</code></td><td>no</td><td><code>dexscreener</code> (default) or <code>env</code></td></tr>
             <tr><td><code>fallbackUsd</code></td><td>recommended</td><td>USD per 1 token when oracle fails</td></tr>
             <tr><td><code>usdMin</code> / <code>usdMax</code></td><td>no</td><td>Price sanity bounds</td></tr>
-            <tr><td><code>resourceKinds</code></td><td>no</td><td>Which paid APIs list your token (default <code>["concierge"]</code>)</td></tr>
+            <tr><td><code>resourceKinds</code></td><td>no</td><td><code>concierge</code>, <code>external</code> (your own API), etc.</td></tr>
+            <tr><td><code>allowedOrigins</code></td><td>no</td><td>Browser origins allowed for build/verify APIs</td></tr>
             <tr><td><code>x402Enabled</code></td><td>no</td><td>Set <code>false</code> to disable without removing row</td></tr>
           </tbody>
         </table>
@@ -298,7 +340,8 @@ curl -s -X POST https://conc-exe.xyz/api/concierge \
     "payTo": "YourSolanaReceiveWallet…",
     "priceSource": "dexscreener",
     "fallbackUsd": 0.001,
-    "resourceKinds": ["concierge"],
+    "resourceKinds": ["external", "concierge"],
+    "allowedOrigins": ["https://api.acme.xyz"],
     "x402Enabled": true
   }
 ]</code></pre>

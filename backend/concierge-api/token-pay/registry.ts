@@ -42,6 +42,7 @@ type JsonMerchantRow = {
   usdMin?: number;
   usdMax?: number;
   resourceKinds?: string[];
+  allowedOrigins?: string[];
   comingSoonMessage?: string;
 };
 
@@ -65,6 +66,12 @@ function parseJsonMerchants(solPayTo: string | null): TokenPayMerchant[] {
 
         const source =
           (row.priceSource ?? "dexscreener").trim().toLowerCase() === "env" ? "env" : "dexscreener";
+        const resourceKinds = Array.isArray(row.resourceKinds)
+          ? row.resourceKinds.map(String)
+          : ["concierge"];
+        const allowedOrigins = Array.isArray(row.allowedOrigins)
+          ? row.allowedOrigins.map((o) => String(o).trim()).filter(Boolean)
+          : undefined;
         return {
           id,
           symbol: (row.symbol ?? id).trim() || id,
@@ -87,7 +94,8 @@ function parseJsonMerchants(solPayTo: string | null): TokenPayMerchant[] {
             usdMin: typeof row.usdMin === "number" && row.usdMin > 0 ? row.usdMin : null,
             usdMax: typeof row.usdMax === "number" && row.usdMax > 0 ? row.usdMax : null,
           },
-          resourceKinds: Array.isArray(row.resourceKinds) ? row.resourceKinds.map(String) : ["concierge"],
+          resourceKinds,
+          allowedOrigins: allowedOrigins?.length ? allowedOrigins : undefined,
           comingSoonMessage:
             (row.comingSoonMessage ?? "").trim() ||
             `${row.symbol ?? id} — not available yet.`,
@@ -162,6 +170,7 @@ export function toPublicMerchant(merchant: TokenPayMerchant): TokenPayPublicMerc
     priceSource: merchant.price.source,
     fallbackUsd: merchant.price.fallbackUsd ?? undefined,
     resourceKinds: merchant.resourceKinds,
+    allowedOrigins: merchant.allowedOrigins,
     comingSoonMessage: merchant.comingSoonMessage,
   };
 }
