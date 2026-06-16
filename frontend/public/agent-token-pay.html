@@ -49,6 +49,15 @@
       <button type="button" class="tp-refresh" id="tp-refresh">Refresh</button>
     </div>
 
+    <div class="tp-api-row" id="tp-api-row" hidden>
+      <label class="tp-field tp-field--grow">
+        <span>Your API URL</span>
+        <input type="url" id="tp-api-url" placeholder="https://api.acme.xyz/v1/intel" autocomplete="url" spellcheck="false" aria-label="Partner API URL for x402 gate" />
+      </label>
+      <button type="button" class="tp-refresh" id="tp-test-accept">Test build-accept</button>
+    </div>
+    <div id="tp-accept-probe" class="tp-accept-probe" hidden></div>
+
     <div id="tp-status" class="tp-status">Loading…</div>
 
     <section class="tp-grid" id="tp-grid" hidden>

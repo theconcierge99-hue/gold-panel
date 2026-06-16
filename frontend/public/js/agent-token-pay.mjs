@@ -4,10 +4,18 @@ renderAgentTopNav("token-pay");
 
 const merchantSel = document.getElementById("tp-merchant");
 const resourceSel = document.getElementById("tp-resource");
+const apiUrlRow = document.getElementById("tp-api-row");
+const apiUrlInput = document.getElementById("tp-api-url");
+const testAcceptBtn = document.getElementById("tp-test-accept");
+const acceptProbeEl = document.getElementById("tp-accept-probe");
 const daysSel = document.getElementById("tp-days");
 const refreshBtn = document.getElementById("tp-refresh");
 const statusEl = document.getElementById("tp-status");
 const gridEl = document.getElementById("tp-grid");
+
+let lastBuildAcceptLinks = null;
+let lastMerchantId = null;
+let acceptProbeOk = false;
 
 function escapeHtml(s) {
   return String(s)
@@ -38,6 +46,82 @@ function formatAtomic(atomic, symbol, decimals = 6) {
   }
 }
 
+function isExternalResource() {
+  return resourceSel?.value === "external";
+}
+
+function getApiUrl() {
+  return apiUrlInput?.value?.trim() ?? "";
+}
+
+function isValidApiUrl(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function updateApiUrlVisibility() {
+  if (!apiUrlRow) return;
+  if (isExternalResource()) apiUrlRow.removeAttribute("hidden");
+  else apiUrlRow.setAttribute("hidden", "hidden");
+}
+
+function buildAcceptHref(links, merchantId) {
+  const base = (links?.buildAccept ?? "/api/token-pay-build-accept").replace(/\?.*$/, "");
+  const params = new URLSearchParams();
+  params.set("merchant", merchantId);
+  params.set("usd", "0.1");
+  const api = getApiUrl();
+  if (api) params.set("resourceUrl", api);
+  return `${base}?${params}`;
+}
+
+function renderAcceptProbe(message, ok) {
+  if (!acceptProbeEl) return;
+  if (!message) {
+    acceptProbeEl.setAttribute("hidden", "hidden");
+    acceptProbeEl.textContent = "";
+    acceptProbeOk = false;
+    return;
+  }
+  acceptProbeEl.textContent = message;
+  acceptProbeEl.className = `tp-accept-probe ${ok ? "ok" : "warn"}`;
+  acceptProbeEl.removeAttribute("hidden");
+  acceptProbeOk = !!ok;
+}
+
+async function probeBuildAccept(merchantId, links) {
+  if (!isExternalResource()) {
+    renderAcceptProbe("", false);
+    return;
+  }
+  const api = getApiUrl();
+  if (!api) {
+    renderAcceptProbe("Enter your API URL, then Test build-accept.", false);
+    return;
+  }
+  if (!isValidApiUrl(api)) {
+    renderAcceptProbe("Invalid API URL — use https://…", false);
+    return;
+  }
+  renderAcceptProbe("Probing build-accept…", false);
+  try {
+    const res = await fetch(buildAcceptHref(links, merchantId), {
+      headers: { Accept: "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    const amt = data.accept?.amount;
+    const sym = data.label ?? "token";
+    renderAcceptProbe(`build-accept OK · ${sym} · amount ${amt}`, true);
+  } catch (e) {
+    renderAcceptProbe(`build-accept failed: ${e?.message || e}`, false);
+  }
+}
 function resourceLabel(kind) {
   if (kind === "external") return "external (your API)";
   if (kind === "concierge") return "concierge (Concierge API)";
@@ -58,6 +142,10 @@ async function loadMerchants() {
 
   const r = params.get("resource");
   if (r && resourceSel) resourceSel.value = r;
+
+  const apiQ = params.get("apiUrl") || params.get("resourceUrl");
+  if (apiQ && apiUrlInput) apiUrlInput.value = apiQ;
+  updateApiUrlVisibility();
 }
 
 function renderChart(daily) {
@@ -77,19 +165,27 @@ function renderChart(daily) {
     .join("");
 }
 
-function renderPartnerLinks(links, merchantMeta, resourceKind) {
+function renderPartnerLinks(links, merchantMeta, resourceKind, merchantId) {
   const el = document.getElementById("tp-partner-links");
   if (!el || !links) return;
 
   const kinds = merchantMeta?.resourceKinds ?? [];
   const hasExternal = kinds.includes("external");
   const hasConcierge = kinds.includes("concierge");
+  const buildHref = merchantId ? buildAcceptHref(links, merchantId) : `${links.buildAccept}&usd=0.1`;
 
   const rows = [
     { label: "Merchant config", href: links.config },
-    { label: "Build accept (GET probe)", href: `${links.buildAccept}&usd=0.1` },
+    { label: "Build accept (GET probe)", href: buildHref },
     { label: "Integration docs", href: links.docs },
   ];
+
+  const apiHint =
+    resourceKind === "external"
+      ? isValidApiUrl(getApiUrl())
+        ? `<p class="tp-hint">Gating <code>${escapeHtml(getApiUrl())}</code> — use build-accept with <code>resourceUrl</code> on your 402.</p>`
+        : `<p class="tp-hint">Enter your API URL above, then Test build-accept.</p>`
+      : "";
 
   el.innerHTML = `
     <h3>Integration APIs</h3>
@@ -107,6 +203,7 @@ function renderPartnerLinks(links, merchantMeta, resourceKind) {
         .join("")}
     </ul>
     <p class="tp-hint">Partner verify: <code>POST ${escapeHtml(links.partnerVerify || "/api/token-pay-verify")}</code> + <code>PAYMENT-SIGNATURE</code> header</p>
+    ${apiHint}
     ${hasExternal ? `<p class="tp-hint">Flow: build-accept → your 402 → wallet sign → token-pay-verify</p>` : ""}
     ${hasConcierge && !hasExternal ? `<p class="tp-hint">Concierge-only merchant — switch Resource to <code>concierge</code> for readiness.</p>` : ""}`;
   el.removeAttribute("hidden");
@@ -133,7 +230,9 @@ function renderVerify(readiness, analytics, resourceKind, merchantMeta) {
     resourceKind === "external"
       ? [
           { ok: hasExternal, text: '"external" enabled for partner API gate' },
+          { ok: isValidApiUrl(getApiUrl()), text: "Partner API URL configured" },
           { ok: readiness?.acceptReady, text: "build-accept ready (acceptReady for external)" },
+          { ok: acceptProbeOk, text: "build-accept probe OK for your API URL" },
           { ok: externalSettlements, text: "At least one external settlement recorded" },
         ]
       : [
@@ -222,6 +321,7 @@ async function loadDashboard() {
   const days = daysSel?.value ?? "14";
   if (!merchantId) return;
 
+  updateApiUrlVisibility();
   await syncResourceDefault(merchantId);
   const resourceKind = resourceSel?.value ?? "concierge";
 
@@ -245,7 +345,9 @@ async function loadDashboard() {
     const solscanTx = data.links?.solscanTx ?? "https://solscan.io/tx/";
 
     renderReadiness(readiness, resourceKind, merchantMeta);
-    renderPartnerLinks(data.links, merchantMeta, resourceKind);
+    lastBuildAcceptLinks = data.links;
+    lastMerchantId = merchantId;
+    renderPartnerLinks(data.links, merchantMeta, resourceKind, merchantId);
     document.getElementById("tp-tx-count").textContent = String(a?.txCount ?? 0);
     document.getElementById("tp-volume").textContent = a?.volumeLabel ?? "0";
     document.getElementById("tp-last").textContent = a?.lastTxAt ? fmtTime(a.lastTxAt) : "—";
@@ -261,6 +363,14 @@ async function loadDashboard() {
     renderRecent(a?.recent ?? [], data.symbol, solscanTx);
     renderVerify(readiness, a, resourceKind, merchantMeta);
 
+    if (isExternalResource()) {
+      await probeBuildAccept(merchantId, data.links);
+      renderVerify(readiness, a, resourceKind, merchantMeta);
+      renderPartnerLinks(data.links, merchantMeta, resourceKind, merchantId);
+    } else {
+      renderAcceptProbe("", false);
+    }
+
     if (statusEl) {
       const kvNote = a?.kvEnabled ? "" : " · dev mode (in-memory stats)";
       statusEl.textContent = `Merchant ${merchantId} · ${resourceLabel(resourceKind)} · ${readiness?.status ?? "unknown"}${kvNote}`;
@@ -271,6 +381,9 @@ async function loadDashboard() {
     const url = new URL(location.href);
     url.searchParams.set("merchant", merchantId);
     url.searchParams.set("resource", resourceKind);
+    const api = getApiUrl();
+    if (api && isExternalResource()) url.searchParams.set("apiUrl", api);
+    else url.searchParams.delete("apiUrl");
     history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString());
   } catch (e) {
     if (statusEl) {
@@ -281,9 +394,47 @@ async function loadDashboard() {
 }
 
 merchantSel?.addEventListener("change", loadDashboard);
-resourceSel?.addEventListener("change", loadDashboard);
+resourceSel?.addEventListener("change", () => {
+  updateApiUrlVisibility();
+  loadDashboard();
+});
 daysSel?.addEventListener("change", loadDashboard);
 refreshBtn?.addEventListener("click", loadDashboard);
+
+testAcceptBtn?.addEventListener("click", async () => {
+  const merchantId = merchantSel?.value;
+  if (!merchantId || !isExternalResource()) return;
+  const links = lastBuildAcceptLinks;
+  if (!links) return;
+  await probeBuildAccept(merchantId, links);
+  try {
+    const res = await fetch(
+      `/api/token-pay-analytics?merchant=${encodeURIComponent(merchantId)}&days=${encodeURIComponent(daysSel?.value ?? "14")}&resource=external`,
+      { headers: { Accept: "application/json" } },
+    );
+    const data = await res.json();
+    if (res.ok) renderVerify(data.readiness, data.analytics, "external", data.merchant);
+  } catch {
+    /* probe message already shown */
+  }
+});
+
+let apiUrlDebounce;
+apiUrlInput?.addEventListener("input", () => {
+  clearTimeout(apiUrlDebounce);
+  apiUrlDebounce = setTimeout(() => {
+    const url = new URL(location.href);
+    const api = getApiUrl();
+    if (api && isExternalResource()) url.searchParams.set("apiUrl", api);
+    else url.searchParams.delete("apiUrl");
+    history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString());
+    acceptProbeOk = false;
+    renderAcceptProbe("", false);
+    if (lastBuildAcceptLinks && lastMerchantId) {
+      renderPartnerLinks(lastBuildAcceptLinks, null, resourceSel?.value ?? "external", lastMerchantId);
+    }
+  }, 400);
+});
 
 await loadMerchants();
 await loadDashboard();
