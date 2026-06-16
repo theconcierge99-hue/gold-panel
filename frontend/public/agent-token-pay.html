@@ -23,13 +23,20 @@
 
     <header class="res-hero tp-hero">
       <h1>Token Pay (Beta) Dashboard</h1>
-      <p class="res-lead">Beta analytics per merchant — readiness, settlements, volume, and on-chain proof. Data updates after each successful Token Pay self-settle.</p>
+      <p class="res-lead">Per-merchant readiness, settlements, and volume — Concierge routes and partner APIs (<code>external</code>). Updates after each successful Token Pay self-settle.</p>
     </header>
 
     <div class="tp-toolbar">
       <label class="tp-field">
         <span>Merchant</span>
         <select id="tp-merchant" aria-label="Select merchant"></select>
+      </label>
+      <label class="tp-field">
+        <span>Resource</span>
+        <select id="tp-resource" aria-label="Readiness resource kind">
+          <option value="concierge" selected>concierge (Concierge API)</option>
+          <option value="external">external (your API)</option>
+        </select>
       </label>
       <label class="tp-field">
         <span>Range</span>
@@ -54,13 +61,15 @@
       <article class="tp-card">
         <h3>Volume</h3>
         <p class="tp-stat" id="tp-volume">—</p>
-        <p class="tp-stat-sub">Cumulative on Concierge routes</p>
+        <p class="tp-stat-sub">Cumulative settlements (Concierge + partner APIs)</p>
       </article>
       <article class="tp-card">
         <h3>Last payment</h3>
         <p class="tp-stat tp-stat--sm" id="tp-last">—</p>
         <p class="tp-stat-sub" id="tp-last-link"></p>
       </article>
+
+      <article class="tp-card tp-card--wide" id="tp-partner-links" hidden></article>
 
       <article class="tp-card tp-card--wide">
         <h3>Daily transactions</h3>
@@ -78,9 +87,9 @@
       </article>
 
       <article class="tp-card tp-card--wide tp-verify">
-        <h3>Verify connection (beta checklist)</h3>
+        <h3>Verify connection</h3>
         <ol class="tp-verify-list" id="tp-verify"></ol>
-        <p class="tp-hint">Full guide: <a href="/docs/payment/token-pay">docs/payment/token-pay</a> · Discover: <a href="/agent/discover">/agent/discover</a></p>
+        <p class="tp-hint">Guide: <a href="/docs/payment/token-pay">docs/payment/token-pay</a> · SDK: <code>packages/token-x402</code> (<code>@conc-exe/token-x402</code>)</p>
       </article>
     </section>
   </main>

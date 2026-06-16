@@ -40,18 +40,32 @@ export default async function handleTokenPayAnalytics(request: Request): Promise
     getTokenPayMerchantReadiness(merchant, resourceKind, X402_READ_PRICE_USDC),
   ]);
 
+  const host = request.headers.get("host") || "conc-exe.xyz";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  const origin = `${proto}://${host}`;
+  const enc = encodeURIComponent(merchantId);
+
   return new Response(
     JSON.stringify({
       merchantId,
       symbol: merchant.symbol,
       days,
+      resourceKind,
+      merchant: {
+        resourceKinds: merchant.resourceKinds,
+        allowedOrigins: merchant.allowedOrigins,
+      },
       analytics,
       readiness,
       links: {
-        config: `/api/token-pay?merchant=${encodeURIComponent(merchantId)}`,
+        config: `${origin}/api/token-pay?merchant=${enc}`,
+        buildAccept: `${origin}/api/token-pay-build-accept?merchant=${enc}`,
+        partnerVerify: `${origin}/api/token-pay-verify`,
+        analytics: `${origin}/api/token-pay-analytics?merchant=${enc}`,
+        dashboard: `${origin}/agent/token-pay?merchant=${enc}`,
+        docs: `${origin}/docs/payment/token-pay`,
         solscanTx: "https://solscan.io/tx/",
         solscanAccount: "https://solscan.io/account/",
-        docs: "/docs/payment/token-pay",
       },
     }),
     {
