@@ -23,7 +23,7 @@
       <div class="card">
         <p><strong>Production base:</strong> <code>https://conc-exe.xyz</code></p>
         <p><strong>Runtime:</strong> Vercel Edge · <code>/api/*</code></p>
-        <p><strong>Auth:</strong> None — x402 USDC per paid route. Optional <code>X-Agent-Id: agt_…</code> after <a href="/docs/api/agent-identity" class="gold-link">agent registration</a>.</p>
+        <p><strong>Auth:</strong> None — x402 per paid route (USDC via PayAI/Dexter, or native SPL via <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> when merchants are live). Optional <code>X-Agent-Id: agt_…</code> after <a href="/docs/api/agent-identity" class="gold-link">agent registration</a>.</p>
       </div>
 
       <h2 class="docs-h2">Endpoint map</h2>
@@ -49,10 +49,11 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></
             <tr><td><code>GET /.well-known/x402</code></td><td>Paid route fan-out · MPPscan / x402scan links</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry (<code>agt_…</code>) and Concierge services</td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Networks, <code>discovery.protocols</code>, pricing (no secrets)</td></tr>
+            <tr><td><code>GET /api/token-pay</code></td><td>Token Pay merchant registry — beta partner onboarding</td></tr>
             <tr><td><code>402</code> + Bazaar</td><td>Runtime input/output schemas for AgentCash probes</td></tr>
           </tbody>
         </table>
-        <p class="note">Guides: <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> · <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></p>
+        <p class="note">Guides: <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> · <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> · <a href="/docs/payment/token-pay" class="gold-link">Token Pay beta</a></p>
       </div>
 
       <h2 class="docs-h2">Verdict signals (Intel)</h2>

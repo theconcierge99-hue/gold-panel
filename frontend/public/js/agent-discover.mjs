@@ -75,10 +75,11 @@ async function load() {
     cards.push(
       discCard(
         "Token Pay",
-        `<p>Native SPL x402 self-settle — default merchant <strong>SOON</strong>. DexScreener pricing; multi-merchant registry for external projects.</p>
+        `<p>Native SPL x402 self-settle — multi-merchant registry. Check <code>readiness.status</code> per merchant (<code>ready</code> = will appear in 402 accepts).</p>
         ${discLink("/api/token-pay", `${origin}/api/token-pay`)}
-        ${discLink("/docs/payment/token-pay", `${origin}/docs/payment/token-pay — docs`)}
-        ${tokenPay ? preHtml(JSON.stringify(tokenPay, null, 2).slice(0, 2000)) : ""}`,
+        ${discLink("/docs/payment/token-pay", `${origin}/docs/payment/token-pay — verify guide`)}
+        ${tokenPay ? `<p class="res-disc-hint">acceptReady: <strong>${tokenPay.acceptReadyCount ?? tokenPay.merchants?.filter((m) => m.readiness?.acceptReady).length ?? 0}</strong> / ${tokenPay.merchants?.length ?? 0} merchants</p>` : ""}
+        ${tokenPay ? preHtml(JSON.stringify(tokenPay, null, 2).slice(0, 2500)) : ""}`,
       ),
     );
 

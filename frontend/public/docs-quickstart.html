@@ -33,7 +33,7 @@
   -H "Content-Type: application/json" \
   -d '{"mode":"chat","message":"BTC outlook 24h"}' \
   -D - -o /dev/null | head -20</code></pre>
-        <p>Expect <strong>402</strong> and a <code>PAYMENT-REQUIRED</code> header (base64 JSON with <code>accepts</code> for Base and/or Solana USDC).</p>
+        <p>Expect <strong>402</strong> and a <code>PAYMENT-REQUIRED</code> header (base64 JSON with <code>accepts</code> for Base and/or Solana USDC, plus optional Token Pay entries when merchants are live).</p>
       </div>
 
       <h2 class="docs-h2">2. Sign and pay (x402 client)</h2>
@@ -85,6 +85,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge \
             <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402/mpp payment metadata</td></tr>
             <tr><td><code>GET /.well-known/x402</code></td><td>x402 resource fan-out</td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Public payment flags (no secrets)</td></tr>
+            <tr><td><code>GET /api/token-pay</code></td><td>Token Pay merchant registry (beta partners)</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry</td></tr>
           </tbody>
         </table>
@@ -95,6 +96,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge \
         <a class="btn" href="/docs/api/concierge">Concierge Chat API</a>
         <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
+        <a class="btn" href="/docs/payment/token-pay">Token Pay beta</a>
       </div>
       <p class="docs-foot">Concierge · Executive Lounge</p>
     </div>

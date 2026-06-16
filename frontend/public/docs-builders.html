@@ -45,7 +45,19 @@
           <li>Retry same request with <code>PAYMENT-SIGNATURE</code> header</li>
           <li><strong>200</strong> → JSON response + <code>PAYMENT-RESPONSE</code> settlement header</li>
         </ol>
-        <p class="note">Use an <a class="ext" href="https://docs.payai.network/x402/reference" target="_blank" rel="noopener">x402 HTTP client</a> to automate steps 2–3. See <a href="/docs/quickstart" class="gold-link">Quickstart</a>.</p>
+        <p class="note">Use an <a class="ext" href="https://docs.payai.network/x402/reference" target="_blank" rel="noopener">x402 HTTP client</a> to automate steps 2–3. See <a href="/docs/quickstart" class="gold-link">Quickstart</a>. For native SPL tokens, see <a href="/docs/payment/token-pay" class="gold-link">Token Pay beta</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Token Pay beta (native SPL)</h2>
+      <div class="card">
+        <p>Other Solana projects can register their token so users pay Concierge with <strong>your SPL</strong> instead of USDC on supported routes (default: <code>POST /api/concierge</code>).</p>
+        <ol style="margin:0 0 0 18px;font-size:14px;line-height:1.75;color:var(--text-secondary)">
+          <li>Contact Concierge for beta review (<a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram</a>)</li>
+          <li>Provide mint, decimals, <code>payTo</code> wallet, pricing (DexScreener or <code>fallbackUsd</code>)</li>
+          <li>After deploy: verify <code>GET /api/token-pay</code> shows <code>live: true</code></li>
+          <li>Integrators decode <code>402</code> accepts with <code>extra.merchantId</code> + <code>extra.settlement: "self"</code></li>
+        </ol>
+        <p style="margin-top:12px"><a href="/docs/payment/token-pay" class="gold-link">Full Token Pay beta guide →</a></p>
       </div>
 
       <h2 class="docs-h2">Twelve endpoints — pick by use case</h2>

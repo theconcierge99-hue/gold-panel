@@ -8,7 +8,6 @@ import {
 } from "./x402-address";
 import { merchantHasTokenAccount, merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
 import {
-  buildTokenPayAcceptExtra,
   formatTokenPayUiFromAtomic,
   getDefaultTokenPayMerchant,
   getDefaultTokenPayMerchantId,
@@ -19,7 +18,6 @@ import {
   toPublicMerchant,
   tokenPayAtomicForResourceAsync,
   tokenPayAtomicForResourceSync,
-  tokenPaySupportsResource,
 } from "./token-pay";
 
 import {
@@ -291,53 +289,91 @@ export function getSolanaRpcUrlForServer(): string {
 export async function getPublicX402ConfigAsync() {
   const base = getPublicX402Config();
   const { evm, sol } = getMerchantAddresses();
-  const merchant = getDefaultTokenPayMerchant();
+  const defaultMerchant = getDefaultTokenPayMerchant();
+  const rpc = getSolanaRpcUrlForServer();
+
   let solMerchantUsdcAta: boolean | null = null;
-  let solMerchantTokenAta: boolean | null = null;
   if (sol) {
     try {
-      solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, getSolanaRpcUrlForServer());
+      solMerchantUsdcAta = await merchantHasUsdcTokenAccount(sol, rpc);
     } catch {
       solMerchantUsdcAta = null;
     }
-    if (merchant.mint && isTokenPayX402Live(merchant)) {
-      try {
-        solMerchantTokenAta = await merchantHasTokenAccount(
-          sol,
-          merchant.mint,
-          getSolanaRpcUrlForServer(),
-        );
-      } catch {
-        solMerchantTokenAta = null;
-      }
-    }
   }
-  const tokenPrice = merchant.mint && isTokenPayX402Live(merchant)
-    ? await getTokenPayUsdRateAsync(merchant)
-    : null;
-  const tokenAtomic =
-    tokenPrice != null ? await tokenPayAtomicForResourceAsync(X402_READ_PRICE_USDC, merchant) : null;
+
+  const enrichedMerchants = await Promise.all(
+    listTokenPayMerchants().map(async (m) => {
+      const publicM = toPublicMerchant(m);
+      const payTo = (m.payTo ?? sol ?? "").trim() || null;
+      let merchantTokenAta: boolean | null = null;
+      if (payTo && m.mint && isTokenPayX402Live(m)) {
+        try {
+          merchantTokenAta = await merchantHasTokenAccount(payTo, m.mint, rpc);
+        } catch {
+          merchantTokenAta = null;
+        }
+      }
+      const tokenPrice = isTokenPayX402Live(m) ? await getTokenPayUsdRateAsync(m) : null;
+      const tokenAtomic =
+        tokenPrice != null
+          ? await tokenPayAtomicForResourceAsync(X402_READ_PRICE_USDC, m)
+          : null;
+      return {
+        ...publicM,
+        payToReady: !!(payTo && m.mint && isTokenPayX402Live(m)),
+        merchantTokenAta,
+        usdcRate: tokenPrice?.usd,
+        priceSource: tokenPrice?.source,
+        conciergeAtomic: tokenAtomic ?? undefined,
+        conciergeLabel:
+          tokenAtomic != null ? formatTokenPayUiFromAtomic(tokenAtomic, m) : undefined,
+      };
+    }),
+  );
+
+  const liveMerchants = enrichedMerchants.filter((m) => m.live && m.conciergeAtomic);
+  const defaultEnriched =
+    enrichedMerchants.find((m) => m.id === defaultMerchant.id) ?? enrichedMerchants[0];
+  const anyTokenPayLive = liveMerchants.length > 0;
+
   return {
     ...base,
     evmPayTo: evm ?? undefined,
     solPayTo: sol ?? undefined,
     solMerchantUsdcAta,
-    acceptsTokenPaySol: isTokenPayX402Live(merchant) && !!sol && tokenAtomic != null,
-    acceptsSoonSol: isTokenPayX402Live(merchant) && !!sol && tokenAtomic != null,
-    solMerchantTokenAta,
-    solMerchantSoonAta: solMerchantTokenAta,
-    tokenPayMint: merchant.mint ?? undefined,
-    soonMint: merchant.mint ?? undefined,
-    tokenPaySymbol: merchant.symbol,
-    tokenUsdcRate: tokenPrice?.usd ?? undefined,
-    soonUsdcRate: tokenPrice?.usd ?? undefined,
-    tokenPriceSource: tokenPrice?.source ?? undefined,
-    soonPriceSource: tokenPrice?.source ?? undefined,
-    tokenConciergeAtomic: tokenAtomic ?? undefined,
-    soonConciergeAtomic: tokenAtomic ?? undefined,
-    tokenConciergeLabel:
-      tokenAtomic != null ? formatTokenPayUiFromAtomic(tokenAtomic, merchant) : undefined,
-    soonConciergeLabel:
-      tokenAtomic != null ? formatTokenPayUiFromAtomic(tokenAtomic, merchant) : undefined,
+    acceptsTokenPaySol: anyTokenPayLive && !!sol,
+    acceptsSoonSol: anyTokenPayLive && !!sol,
+    solMerchantTokenAta: defaultEnriched?.merchantTokenAta ?? null,
+    solMerchantSoonAta: defaultEnriched?.merchantTokenAta ?? null,
+    tokenPayMint: defaultEnriched?.mint,
+    soonMint: defaultEnriched?.mint,
+    tokenPaySymbol: defaultEnriched?.symbol ?? defaultMerchant.symbol,
+    tokenUsdcRate: defaultEnriched?.usdcRate,
+    soonUsdcRate: defaultEnriched?.usdcRate,
+    tokenPriceSource: defaultEnriched?.priceSource,
+    soonPriceSource: defaultEnriched?.priceSource,
+    tokenConciergeAtomic: defaultEnriched?.conciergeAtomic,
+    soonConciergeAtomic: defaultEnriched?.conciergeAtomic,
+    tokenConciergeLabel: defaultEnriched?.conciergeLabel,
+    soonConciergeLabel: defaultEnriched?.conciergeLabel,
+    tokenPay: {
+      ...base.tokenPay,
+      liveMerchantCount: liveMerchants.length,
+      merchants: enrichedMerchants,
+      default: defaultEnriched
+        ? {
+            id: defaultEnriched.id,
+            symbol: defaultEnriched.symbol,
+            name: defaultEnriched.name,
+            mint: defaultEnriched.mint,
+            decimals: defaultEnriched.decimals,
+            live: defaultEnriched.live,
+            comingSoonMessage: defaultEnriched.comingSoonMessage,
+            conciergeAtomic: defaultEnriched.conciergeAtomic,
+            conciergeLabel: defaultEnriched.conciergeLabel,
+            merchantTokenAta: defaultEnriched.merchantTokenAta,
+          }
+        : base.tokenPay.default,
+    },
   };
 }

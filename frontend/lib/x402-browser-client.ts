@@ -28,6 +28,20 @@ const PRICE_USDC = 0.1;
 /** @deprecated Use TOKEN_PAY_COMING_SOON_DEFAULT */
 export const SOON_PAY_COMING_SOON = TOKEN_PAY_COMING_SOON_DEFAULT;
 
+export type TokenPayMerchantConfig = {
+  id: string;
+  symbol: string;
+  name?: string;
+  mint?: string;
+  decimals?: number;
+  live?: boolean;
+  accepts?: boolean;
+  usdcRate?: number;
+  conciergeAtomic?: string;
+  comingSoonMessage?: string;
+  merchantTokenAta?: boolean | null;
+};
+
 export type X402ServerPayConfig = {
   acceptsEvm?: boolean;
   acceptsSol?: boolean;
@@ -37,7 +51,9 @@ export type X402ServerPayConfig = {
   solPayTo?: string;
   evmPayTo?: string;
   solMerchantUsdcAta?: boolean | null;
-  /** Token Pay (default merchant) */
+  /** All registered Token Pay merchants (beta multi-merchant). */
+  tokenMerchants?: TokenPayMerchantConfig[];
+  /** Token Pay (default merchant — legacy flat fields) */
   tokenPaySymbol?: string;
   acceptsTokenPaySol?: boolean;
   tokenPayMint?: string;
@@ -53,15 +69,50 @@ export type X402ServerPayConfig = {
   solMerchantSoonAta?: boolean | null;
 };
 
+export type PaySelection = {
+  chain: PayChain;
+  merchantId?: string;
+};
+
 function tokenSymbol(serverConfig: X402ServerPayConfig): string {
   return serverConfig.tokenPaySymbol?.trim() || TOKEN_PAY_DEFAULT_SYMBOL;
 }
 
-function isTokenPayLive(serverConfig: X402ServerPayConfig): boolean {
+function tokenMerchantsFromConfig(serverConfig: X402ServerPayConfig): TokenPayMerchantConfig[] {
+  if (serverConfig.tokenMerchants?.length) return serverConfig.tokenMerchants;
+  const sym = serverConfig.tokenPaySymbol?.trim() || TOKEN_PAY_DEFAULT_SYMBOL;
   const mint = serverConfig.tokenPayMint || serverConfig.soonMint;
   const atomic = serverConfig.tokenConciergeAtomic || serverConfig.soonConciergeAtomic;
   const accepts = serverConfig.acceptsTokenPaySol ?? serverConfig.acceptsSoonSol;
-  return !!(accepts && mint && atomic && serverConfig.solPayToReady);
+  return [
+    {
+      id: "soon",
+      symbol: sym,
+      mint,
+      live: !!(accepts && mint && atomic && serverConfig.solPayToReady),
+      accepts: !!accepts,
+      usdcRate: serverConfig.tokenUsdcRate ?? serverConfig.soonUsdcRate,
+      conciergeAtomic: atomic,
+      comingSoonMessage: serverConfig.tokenComingSoonMessage,
+      merchantTokenAta: serverConfig.solMerchantTokenAta ?? serverConfig.solMerchantSoonAta,
+    },
+  ];
+}
+
+function isTokenMerchantLive(
+  merchant: TokenPayMerchantConfig,
+  serverConfig: X402ServerPayConfig,
+): boolean {
+  return !!(
+    merchant.live &&
+    merchant.mint &&
+    merchant.conciergeAtomic &&
+    serverConfig.solPayToReady
+  );
+}
+
+function anyTokenPayLive(serverConfig: X402ServerPayConfig): boolean {
+  return tokenMerchantsFromConfig(serverConfig).some((m) => isTokenMerchantLive(m, serverConfig));
 }
 
 function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
@@ -117,6 +168,10 @@ export type PayChain = "evm" | "sol" | "soon";
 
 export type ChainPayOption = {
   chain: PayChain;
+  /** Unique key for UI selection when multiple token merchants exist. */
+  optionId: string;
+  merchantId?: string;
+  mint?: string;
   label: string;
   sublabel: string;
   balanceUsdc: string;
@@ -131,6 +186,7 @@ export type ChainPayOption = {
 
 export type X402PaidFetchOptions = {
   preferredChain?: PayChain;
+  preferredTokenMerchantId?: string;
 };
 
 type PhantomSolanaProvider = {
@@ -423,6 +479,7 @@ export async function getPaymentChainOptions(
     const sufficient = bal >= PRICE_ATOMIC;
     options.push({
       chain: "evm",
+      optionId: "evm",
       label: "Base (EVM)",
       sublabel: hasWallet ? shortAddr(session.evm!.address, "evm") : "Not connected",
       balanceUsdc: hasWallet && provider ? formatUsdc(bal) : "—",
@@ -464,6 +521,7 @@ export async function getPaymentChainOptions(
     const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
     options.push({
       chain: "sol",
+      optionId: "sol",
       label: "Solana",
       sublabel: hasWallet ? shortAddr(session.sol!.address, "sol") : "Not connected",
       balanceUsdc: hasWallet && solProv
@@ -483,63 +541,91 @@ export async function getPaymentChainOptions(
     });
   }
 
-  if (isTokenPayLive(serverConfig)) {
-    const sym = tokenSymbol(serverConfig);
-    const mint = serverConfig.tokenPayMint || serverConfig.soonMint!;
-    const hasWallet = !!session.sol?.address;
-    const solProv = solanaProvider(session);
-    const needAtomic = BigInt(
-      serverConfig.tokenConciergeAtomic || serverConfig.soonConciergeAtomic!,
-    );
-    let bal = 0n;
-    let balanceUnknown = false;
-    let disabledReason: string | undefined;
-    if (!hasWallet) {
-      disabledReason = "Connect Solana in your wallet";
-    } else if (!solProv) {
-      disabledReason =
-        session.sol?.wallet === "privy"
-          ? "Privy Solana wallet not ready — reconnect Privy"
-          : "Solana provider not found — reopen Phantom/OKX";
-    } else if (
-      (serverConfig.solMerchantTokenAta ?? serverConfig.solMerchantSoonAta) === false
-    ) {
-      disabledReason = `Merchant cannot receive ${sym} yet — send a tiny ${sym} once to the merchant wallet, or pay with USDC`;
-    } else {
-      const tokenBal = await solTokenBalanceViaApi(session.sol!.address, mint);
-      bal = tokenBal.balance;
-      balanceUnknown = tokenBal.unknown;
+  const merchants = tokenMerchantsFromConfig(serverConfig);
+  for (const merchant of merchants) {
+    const sym = merchant.symbol || TOKEN_PAY_DEFAULT_SYMBOL;
+    const optionId = `token:${merchant.id}`;
+
+    if (isTokenMerchantLive(merchant, serverConfig)) {
+      const mint = merchant.mint!;
+      const hasWallet = !!session.sol?.address;
+      const solProv = solanaProvider(session);
+      const needAtomic = BigInt(merchant.conciergeAtomic!);
+      let bal = 0n;
+      let balanceUnknown = false;
+      let disabledReason: string | undefined;
+      if (!hasWallet) {
+        disabledReason = "Connect Solana in your wallet";
+      } else if (!solProv) {
+        disabledReason =
+          session.sol?.wallet === "privy"
+            ? "Privy Solana wallet not ready — reconnect Privy"
+            : "Solana provider not found — reopen Phantom/OKX";
+      } else if (merchant.merchantTokenAta === false) {
+        disabledReason = `Merchant cannot receive ${sym} yet — send a tiny ${sym} once to the merchant wallet, or pay with USDC`;
+      } else {
+        const tokenBal = await solTokenBalanceViaApi(session.sol!.address, mint);
+        bal = tokenBal.balance;
+        balanceUnknown = tokenBal.unknown;
+      }
+      const sufficient = balanceUnknown || bal >= needAtomic;
+      const rate = merchant.usdcRate;
+      const rateHint =
+        rate && rate > 0
+          ? `≈ ${PRICE_USDC} USDC · you pay SOL gas`
+          : "Self-settle · you pay SOL gas";
+      options.push({
+        chain: "soon",
+        optionId,
+        merchantId: merchant.id,
+        mint,
+        label: sym,
+        sublabel: rateHint,
+        balanceUsdc: hasWallet && solProv
+          ? balanceUnknown
+            ? "Check wallet"
+            : formatToken(bal, sym)
+          : "—",
+        balanceAtomic: bal,
+        sufficient,
+        balanceUnknown,
+        available: hasWallet && !!solProv && !disabledReason,
+        disabledReason:
+          disabledReason ??
+          (!sufficient && hasWallet && !balanceUnknown
+            ? `Need at least ${formatToken(needAtomic, sym)} for this action`
+            : undefined),
+      });
+      continue;
     }
-    const sufficient = balanceUnknown || bal >= needAtomic;
-    const rate =
-      serverConfig.tokenUsdcRate ?? serverConfig.soonUsdcRate;
-    const rateHint =
-      rate && rate > 0
-        ? `≈ ${PRICE_USDC} USDC · you pay SOL gas`
-        : "Self-settle · you pay SOL gas";
-    options.push({
-      chain: "soon",
-      label: sym,
-      sublabel: rateHint,
-      balanceUsdc: hasWallet && solProv
-        ? balanceUnknown
-          ? "Check wallet"
-          : formatToken(bal, sym)
-        : "—",
-      balanceAtomic: bal,
-      sufficient,
-      balanceUnknown,
-      available: hasWallet && !!solProv && !disabledReason,
-      disabledReason:
-        disabledReason ??
-        (!sufficient && hasWallet && !balanceUnknown
-          ? `Need at least ${formatToken(needAtomic, sym)} for this action`
-          : undefined),
-    });
-  } else if (x402ChainsConfigured(serverConfig)) {
+
+    if (!merchant.live && x402ChainsConfigured(serverConfig)) {
+      options.push({
+        chain: "soon",
+        optionId,
+        merchantId: merchant.id,
+        mint: merchant.mint,
+        label: sym,
+        sublabel: "Solana · pegged to USDC price",
+        balanceUsdc: "—",
+        balanceAtomic: 0n,
+        sufficient: false,
+        available: false,
+        comingSoon: true,
+        disabledReason:
+          merchant.comingSoonMessage ||
+          serverConfig.tokenComingSoonMessage ||
+          TOKEN_PAY_COMING_SOON_DEFAULT,
+      });
+    }
+  }
+
+  if (!anyTokenPayLive(serverConfig) && !merchants.some((m) => !m.live) && x402ChainsConfigured(serverConfig)) {
     const sym = tokenSymbol(serverConfig);
     options.push({
       chain: "soon",
+      optionId: "token:soon",
+      merchantId: "soon",
       label: sym,
       sublabel: "Solana · pegged to USDC price",
       balanceUsdc: "—",
@@ -561,18 +647,37 @@ function shortAddr(addr: string, chain: "evm" | "sol"): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
 
-function paymentRequirementsSelector(preferred: PayChain) {
+function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: string) {
   return (_version: number, accepts: PaymentRequirements[]) => {
     const sol = accepts.filter((a) => String(a.network).startsWith("solana:"));
     const evm = accepts.filter((a) => String(a.network).startsWith("eip155:"));
     const soon = sol.filter((a) => a.extra?.settlement === "self");
     const usdcSol = sol.filter((a) => a.extra?.settlement !== "self");
-    if (preferred === "soon" && soon.length) return soon[0];
+    if (preferred === "soon" && soon.length) {
+      if (preferredMerchantId) {
+        const match = soon.find((a) => a.extra?.merchantId === preferredMerchantId);
+        if (match) return match;
+      }
+      return soon[0];
+    }
     if (preferred === "sol" && usdcSol.length) return usdcSol[0];
     if (preferred === "sol" && sol.length) return sol[0];
     if (preferred === "evm" && evm.length) return evm[0];
     return accepts[0];
   };
+}
+
+function findPayOption(
+  opts: ChainPayOption[],
+  chain?: PayChain,
+  merchantId?: string,
+): ChainPayOption | undefined {
+  if (merchantId) {
+    const byMerchant = opts.find((o) => o.merchantId === merchantId);
+    if (byMerchant) return byMerchant;
+  }
+  if (chain) return opts.find((o) => o.chain === chain);
+  return undefined;
 }
 
 async function resolvePaymentChain(
@@ -581,10 +686,11 @@ async function resolvePaymentChain(
   server: X402ServerPayConfig,
   preferred?: PayChain,
   provider?: EIP1193Provider,
+  preferredMerchantId?: string,
 ): Promise<PayChain> {
   if (preferred) {
     const opts = await getPaymentChainOptions(session, networkMode, server);
-    const pick = opts.find((o) => o.chain === preferred);
+    const pick = findPayOption(opts, preferred, preferredMerchantId);
     if (!pick?.available) throw new Error(pick?.disabledReason || "Selected chain is not available");
     if (!pick.sufficient && !pick.balanceUnknown) {
       throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
@@ -628,9 +734,12 @@ export async function createX402PaidFetch(
     serverConfig,
     options.preferredChain,
     provider,
+    options.preferredTokenMerchantId,
   );
 
-  const client = new x402Client(paymentRequirementsSelector(preferred));
+  const client = new x402Client(
+    paymentRequirementsSelector(preferred, options.preferredTokenMerchantId),
+  );
 
   if (preferred === "evm") {
     if (!provider) throw new Error("EVM wallet not connected — connect Base (Ethereum) in your wallet");

@@ -18,6 +18,7 @@ import handleRwaBadges from "./routes/rwa-badges";
 import handleRwaMetadata from "./routes/rwa-metadata";
 import handleRwaToken from "./routes/rwa-token";
 import handleSolUsdcBalance from "./routes/sol-usdc-balance";
+import handleTokenPayAnalytics from "./routes/token-pay-analytics";
 import handleTokenPayConfig from "./routes/token-pay-config";
 import handleSolanaRpc from "./routes/solana-rpc";
 import handleSolanaRpcSend from "./routes/solana-rpc-send";
@@ -46,6 +47,7 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/rwa-token": handleRwaToken,
   "/api/sol-usdc-balance": handleSolUsdcBalance,
   "/api/token-pay": handleTokenPayConfig,
+  "/api/token-pay-analytics": handleTokenPayAnalytics,
   "/api/solana-rpc": handleSolanaRpc,
   "/api/solana-rpc-send": handleSolanaRpcSend,
   "/api/well-known-agent-card": handleWellKnownAgentCard,

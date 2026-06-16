@@ -1842,7 +1842,7 @@
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title,summary,categories:cats,creatorWallet,creatorChain}),
-      },{preferredChain:chain});
+      },payFetchOpts(chain));
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       let clientMintOk=false;
@@ -2145,7 +2145,22 @@
   }
 
   function x402ServerPayConfig(cfg){
-    const tp = cfg?.tokenPay?.default || {};
+    const tp = cfg?.tokenPay || {};
+    const def = tp.default || {};
+    const merchants = Array.isArray(tp.merchants)
+      ? tp.merchants.map(m => ({
+          id: m.id,
+          symbol: m.symbol,
+          name: m.name,
+          mint: m.mint,
+          decimals: m.decimals,
+          live: m.live,
+          usdcRate: m.usdcRate,
+          conciergeAtomic: m.conciergeAtomic,
+          comingSoonMessage: m.comingSoonMessage,
+          merchantTokenAta: m.merchantTokenAta,
+        }))
+      : [];
     return {
       acceptsEvm: !!cfg.acceptsEvm,
       acceptsSol: !!cfg.acceptsSol,
@@ -2155,13 +2170,14 @@
       solPayTo: cfg.solPayTo || undefined,
       evmPayTo: cfg.evmPayTo || undefined,
       solMerchantUsdcAta: cfg.solMerchantUsdcAta,
-      tokenPaySymbol: cfg.tokenPaySymbol || tp.symbol || 'SOON',
+      tokenMerchants: merchants,
+      tokenPaySymbol: cfg.tokenPaySymbol || def.symbol || 'SOON',
       acceptsTokenPaySol: !!(cfg.acceptsTokenPaySol ?? cfg.acceptsSoonSol),
-      tokenPayMint: cfg.tokenPayMint || cfg.soonMint || tp.mint || undefined,
+      tokenPayMint: cfg.tokenPayMint || cfg.soonMint || def.mint || undefined,
       tokenUsdcRate: cfg.tokenUsdcRate ?? cfg.soonUsdcRate,
-      tokenConciergeAtomic: cfg.tokenConciergeAtomic || cfg.soonConciergeAtomic || tp.conciergeAtomic,
+      tokenConciergeAtomic: cfg.tokenConciergeAtomic || cfg.soonConciergeAtomic || def.conciergeAtomic,
       solMerchantTokenAta: cfg.solMerchantTokenAta ?? cfg.solMerchantSoonAta,
-      tokenComingSoonMessage: tp.comingSoonMessage,
+      tokenComingSoonMessage: def.comingSoonMessage,
       acceptsSoonSol: !!(cfg.acceptsTokenPaySol ?? cfg.acceptsSoonSol),
       soonMint: cfg.tokenPayMint || cfg.soonMint || undefined,
       soonUsdcRate: cfg.tokenUsdcRate ?? cfg.soonUsdcRate,
@@ -2170,7 +2186,8 @@
     };
   }
 
-  function formatPaymentError(err, preferredChain){
+  function formatPaymentError(err, preferred){
+    const preferredChain = typeof preferred === 'string' ? preferred : preferred?.chain;
     const m = err?.message || String(err);
     if(preferredChain === 'soon'){
       if(/Payment cancelled/i.test(m)) return m;
@@ -2263,18 +2280,33 @@
   }
 
   let _payModalDeferred = null;
-  let _selectedPayChain = null;
+  let _selectedPayOption = null;
   let _payModalOpensArticle = false;
+
+  function normalizePaySelection(sel){
+    if(!sel) return null;
+    if(typeof sel === 'string') return { chain: sel, merchantId: undefined, optionId: sel };
+    return sel;
+  }
+
+  function payFetchOpts(sel){
+    const p = normalizePaySelection(sel);
+    if(!p) return {};
+    return {
+      preferredChain: p.chain,
+      preferredTokenMerchantId: p.merchantId,
+    };
+  }
 
   function closePayModal(confirmed){
     document.getElementById('payOverlay').classList.remove('show');
     if(_payModalDeferred){
       const d = _payModalDeferred;
       _payModalDeferred = null;
-      if(confirmed && _selectedPayChain) d.resolve(_selectedPayChain);
+      if(confirmed && _selectedPayOption) d.resolve(_selectedPayOption);
       else d.reject(new Error('Payment cancelled'));
     }
-    _selectedPayChain = null;
+    _selectedPayOption = null;
     _payModalOpensArticle = false;
     if(!confirmed && _articleTab && !_articleTab.closed){
       try{ _articleTab.close(); }catch(_){}
@@ -2282,22 +2314,34 @@
     }
   }
 
-  function selectPayChain(chain){
-    _selectedPayChain = chain;
+  function selectPayOption(optionId){
+    _selectedPayOption = null;
     document.querySelectorAll('.pay-chain-opt').forEach(el=>{
-      const on = el.dataset.chain === chain && !el.classList.contains('disabled');
+      const on = el.dataset.optionId === optionId && !el.classList.contains('disabled');
       el.classList.toggle('sel', on);
       const inp = el.querySelector('input[type=radio]');
       if(inp) inp.checked = on;
+      if(on){
+        _selectedPayOption = {
+          chain: el.dataset.chain,
+          merchantId: el.dataset.merchantId || undefined,
+          optionId,
+        };
+      }
     });
     const btn = document.getElementById('payConfirmBtn');
-    const opt = document.querySelector('.pay-chain-opt[data-chain="'+chain+'"]');
+    const opt = document.querySelector('.pay-chain-opt[data-option-id="'+optionId+'"]');
     const ok = opt && !opt.classList.contains('disabled');
     btn.disabled = !ok;
   }
 
+  function selectPayChain(chain){
+    const el = document.querySelector('.pay-chain-opt[data-chain="'+chain+'"]:not(.disabled)');
+    if(el?.dataset.optionId) selectPayOption(el.dataset.optionId);
+  }
+
   function confirmPayModal(){
-    if(!_selectedPayChain) return;
+    if(!_selectedPayOption) return;
     if(_payModalOpensArticle){
       _articleTab = window.open('about:blank', '_blank');
       if(_articleTab){
@@ -2329,7 +2373,7 @@
     document.getElementById('payConfirmBtn').textContent = opts.confirmLabel || 'Pay & continue';
     document.getElementById('payConfirmBtn').disabled = true;
     document.getElementById('payChainList').innerHTML = '<div class="pay-loading">Loading USDC balances…</div>';
-    _selectedPayChain = null;
+    _selectedPayOption = null;
     _payModalOpensArticle = !!opts.openArticleTab;
     document.getElementById('payOverlay').classList.add('show');
 
@@ -2353,8 +2397,9 @@
       const soonBadge = o.comingSoon ? ' <span class="pc-soon">Coming soon</span>' : '';
       const warn = o.disabledReason ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
       const balLine = o.comingSoon ? '' : '<div class="pc-bal">Balance: '+escapeHtml(o.balanceUsdc)+'</div>';
-      return `<label class="pay-chain-opt${dis?' disabled':''}" data-chain="${o.chain}">
-        <input type="radio" name="payChain" value="${o.chain}" ${dis?'disabled':''} />
+      const merchantAttr = o.merchantId ? ' data-merchant-id="'+escapeHtml(o.merchantId)+'"' : '';
+      return `<label class="pay-chain-opt${dis?' disabled':''}" data-option-id="${escapeHtml(o.optionId)}" data-chain="${o.chain}"${merchantAttr}>
+        <input type="radio" name="payChain" value="${escapeHtml(o.optionId)}" ${dis?'disabled':''} />
         <div class="pc-body">
           <div class="pc-title">${escapeHtml(o.label)}${rec?' <span class="pc-rec">Recommended</span>':''}${soonBadge}</div>
           <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
@@ -2367,7 +2412,7 @@
     list.querySelectorAll('.pay-chain-opt').forEach(el=>{
       el.addEventListener('click', ()=>{
         if(el.classList.contains('disabled')) return;
-        selectPayChain(el.dataset.chain);
+        selectPayOption(el.dataset.optionId);
       });
     });
 
@@ -2375,7 +2420,7 @@
       || chainOpts.find(o=>o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available)
       || chainOpts.find(o=>o.available);
-    if(defaultOpt) selectPayChain(defaultOpt.chain);
+    if(defaultOpt) selectPayOption(defaultOpt.optionId);
 
     return new Promise((resolve, reject)=>{
       _payModalDeferred = { resolve, reject };
@@ -2395,9 +2440,14 @@
       getWalletSession(),
       x402NetworkMode(cfg),
       x402ServerPayConfig(cfg),
-      { preferredChain },
+      {
+        preferredChain,
+        preferredTokenMerchantId: payOpts?.preferredTokenMerchantId,
+      },
     );
-    const chainHint = preferredChain === 'soon' ? 'SOON (Solana)' : preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
+    const chainHint = preferredChain === 'soon'
+      ? (payOpts?.preferredTokenMerchantId ? payOpts.preferredTokenMerchantId+' (Solana)' : 'native token (Solana)')
+      : preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
     const u = String(url);
     const agentId = typeof window.elGetStoredAgentId === 'function' ? window.elGetStoredAgentId() : null;
     const baseOpts = options || {};
@@ -2515,12 +2565,12 @@
       toast('Payments disabled — cannot unlock signal');
       return;
     }
-    async function payAndOpen(chain){
+    async function payAndOpen(sel){
       const res = await paidApiFetch('/api/lounge-signal-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signalId }),
-      }, { preferredChain: chain });
+      }, payFetchOpts(sel));
       const data = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       if(data.signal) showSignalReader(data.signal, { rwa: data.rwa, badge: data.readerBadge });
@@ -2559,12 +2609,12 @@
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    async function payAndOpenArticle(chain){
+    async function payAndOpenArticle(sel){
       const res = await paidApiFetch('/api/news-open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, title, source }),
-      }, { preferredChain: chain });
+      }, payFetchOpts(sel));
       const data = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.detail||data.error||('HTTP '+res.status));
       const target = data.url || url;
@@ -2601,12 +2651,12 @@
       try{ await showPaySetupModal(cfg); }catch(_){}
       throw new Error('Payments not configured on server');
     }
-    async function payConcierge(chain){
+    async function payConcierge(sel){
       const res = await paidApiFetch('/api/concierge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      }, { preferredChain: chain });
+      }, payFetchOpts(sel));
       const text = await res.text();
       let data = {};
       try { data = JSON.parse(text); } catch { /* non-JSON */ }

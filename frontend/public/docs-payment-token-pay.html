@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Token Pay Platform — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Token Pay — native SPL token x402 self-settle. SOON is the default merchant; DexScreener pricing; multi-project registry." />
+<meta name="description" content="Concierge Token Pay beta — register your native SPL token for x402 self-settle. Multi-merchant registry, DexScreener pricing, onboarding guide for external projects." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/payment/token-pay" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -29,6 +29,113 @@
         <p style="margin-top:12px"><strong>Status:</strong> SOON appears in the Lounge payment modal as <em>Coming soon</em> until the token launches. After launch, set <code>SOON_TOKEN_MINT</code> on Vercel — pricing flows from DexScreener with <code>SOON_USDC_RATE</code> as fallback.</p>
       </div>
 
+      <h2 class="docs-h2">Beta: Native Token x402 Option</h2>
+      <div class="card">
+        <p>
+          <strong>Token Pay Beta</strong> lets your project monetize its <strong>own native SPL token</strong> as an
+          <strong>x402</strong> payment option (in addition to USDC routes).
+          Users sign the token transfer in their wallet; Concierge verifies and settles via <strong>self-settle</strong> on-chain.
+        </p>
+
+        <p style="margin-top:12px">
+          <strong>Goal:</strong> give other projects a reliable payment rail for native tokens
+          without building RPC, price oracle, or on-chain verification infra.
+        </p>
+
+        <h3 class="docs-h3">What you provide (from your side)</h3>
+        <ul>
+          <li><strong>Token mint</strong> (live on Solana) + <strong>decimals</strong></li>
+          <li><strong>Merchant receive wallet</strong> for the x402 accept (the address that receives the token)</li>
+          <li><strong>Pricing preference</strong>: DexScreener (recommended) or a static USD fallback</li>
+          <li><strong>Integration scope</strong>: which Concierge “resource kinds” your project wants to accept</li>
+        </ul>
+
+        <h3 class="docs-h3">What Concierge handles (no hot keys)</h3>
+        <ul>
+          <li>Token amount resolution from USDC list pricing</li>
+          <li>Return a token accept inside the <code>402</code> response</li>
+          <li>Simulate → broadcast → confirm → verify the token delta on-chain</li>
+        </ul>
+
+        <h3 class="docs-h3">Beta endpoints</h3>
+        <ul>
+          <li><code>GET /api/token-pay</code> — platform meta + merchant registry</li>
+          <li><code>GET /api/x402-config</code> — includes <code>tokenPay</code> config for your accept builder</li>
+        </ul>
+
+        <p style="margin-top:12px">
+          Want beta access? Send a request on Telegram:
+          <a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Request Token Pay Beta</a>.
+        </p>
+        <p style="margin-top:12px">
+          <strong>Live today:</strong> yes — for beta partners after Concierge adds your row to
+          <code>TOKEN_PAY_MERCHANTS_JSON</code> on the production deploy and redeploys.
+          This is <strong>operator-reviewed beta</strong> (not a public self-signup API yet).
+          SOON stays <em>Coming soon</em> until <code>SOON_TOKEN_MINT</code> is set.
+        </p>
+      </div>
+
+      <h2 class="docs-h2">Verify connection &amp; monitor usage</h2>
+      <div class="card">
+        <p>Token Pay does <strong>not</strong> have a separate marketplace dashboard (yet). Use the checks below — similar spirit to <a href="/docs/integration/zauth">zauth status</a> or <a href="/docs/integration/x402scan">x402scan</a>, but scoped to your merchant row.</p>
+
+        <h3 class="docs-h3">1. Readiness API (before any user pays)</h3>
+        <p>After Concierge registers your merchant, poll:</p>
+<pre><code>curl -s "https://conc-exe.xyz/api/token-pay?merchant=YOUR_ID" | jq '.merchant.readiness'</code></pre>
+        <p>Target: <code>status: "ready"</code> and <code>acceptReady: true</code>. If not, read <code>blockers[]</code> (missing ATA, price, mint, etc.).</p>
+        <table>
+          <thead><tr><th>status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>ready</code></td><td>Will appear in 402 accepts for the probed resource</td></tr>
+            <tr><td><code>ata_missing</code></td><td>Send a tiny token transfer to <code>payTo</code> once</td></tr>
+            <tr><td><code>price_unavailable</code></td><td>Set <code>fallbackUsd</code> or list on DexScreener</td></tr>
+            <tr><td><code>coming_soon</code></td><td>Mint not live yet (e.g. SOON pre-launch)</td></tr>
+          </tbody>
+        </table>
+        <p>Browser UI: <a href="/agent/discover">Agent Discover</a> · <a href="/agent/token-pay">Token Pay Dashboard</a> shows live readiness + settlement analytics.</p>
+
+        <h3 class="docs-h3">2. 402 accept probe (integration wired)</h3>
+<pre><code>curl -s -X POST https://conc-exe.xyz/api/concierge \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"chat","message":"probe"}' -D - -o /dev/null 2>&1 | grep -i payment-required</code></pre>
+        <p>Decode the base64 <code>PAYMENT-REQUIRED</code> header → <code>accepts[]</code> must include your token with <code>extra.merchantId: "YOUR_ID"</code> and <code>extra.settlement: "self"</code>.</p>
+
+        <h3 class="docs-h3">3. Successful payment (end-to-end)</h3>
+        <ul>
+          <li><strong>HTTP 200</strong> on the paid route + JSON body (e.g. <code>reply</code> for Concierge)</li>
+          <li>Response header <code>PAYMENT-RESPONSE</code> (base64) contains <code>transaction</code> = Solana signature</li>
+          <li>On-chain: open the signature in Solscan — merchant <code>payTo</code> token balance increased</li>
+          <li>Optional: if Concierge has <code>ZAUTH_API_KEY</code>, successful paid calls also report to <a href="/api/zauth-status">zauth Provider Hub</a> (includes tx hash — works for Token Pay too)</li>
+        </ul>
+
+        <h3 class="docs-h3">vs zauth / x402scan</h3>
+        <table>
+          <thead><tr><th>Tool</th><th>What you see for Token Pay</th></tr></thead>
+          <tbody>
+            <tr><td><strong><code>GET /api/token-pay</code></strong></td><td>Per-merchant <code>readiness</code>, pricing, <code>acceptReady</code> — your primary health check</td></tr>
+            <tr><td><strong><a href="/agent/token-pay">/agent/token-pay</a></strong></td><td>Per-merchant dashboard — readiness, tx count, volume chart, recent settlements + Solscan</td></tr>
+            <tr><td><strong><a href="/agent/discover">/agent/discover</a></strong></td><td>Live registry + readiness counts in the UI</td></tr>
+            <tr><td><strong><a href="/api/zauth-status">zauth</a></strong></td><td>Settlement telemetry after real paid calls (not per-merchant dashboard)</td></tr>
+            <tr><td><strong>x402scan</strong></td><td>conc-exe.xyz resource volume — USDC-heavy today; token self-settle volume may be less visible</td></tr>
+            <tr><td><strong>Solana explorer</strong></td><td>Definitive proof — token credited to your <code>payTo</code> wallet</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Beta: use readiness API + <a href="/agent/token-pay">Token Pay Dashboard</a> + one test payment + Solscan for definitive on-chain proof.</p>
+      </div>
+
+      <h2 class="docs-h2">Security model (per merchant)</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Funds isolation</strong> — each partner must set their own <code>payTo</code> wallet; token payments never fall back to Concierge’s <code>X402_SOL_PAY_TO</code>.</li>
+          <li><strong>Registry gate</strong> — settlement re-checks <code>merchantId</code>, mint, payTo, and <code>resourceKinds</code> against the server registry before broadcast.</li>
+          <li><strong>402 matching</strong> — payment must match an accept the server issued (scheme, network, amount, asset, payTo).</li>
+          <li><strong>On-chain verify</strong> — simulate → broadcast → confirm → verify token delta to the merchant wallet.</li>
+          <li><strong>Price guards</strong> — optional <code>usdMin</code> / <code>usdMax</code> per merchant; DexScreener cache per merchant id.</li>
+          <li><strong>No hot wallet</strong> — Concierge never holds partner private keys; users sign transfers in their own wallet.</li>
+        </ul>
+        <p style="margin-top:12px">Reserved slug <code>soon</code> cannot be registered via JSON. External merchant ids must be lowercase <code>a-z0-9_-</code> (max 16 partners per deploy).</p>
+      </div>
+
       <h2 class="docs-h2">vs USDC facilitators</h2>
       <div class="card">
         <table>
@@ -49,18 +156,115 @@
           <li><code>GET /api/token-pay?merchant=soon</code> — single merchant config</li>
           <li><code>GET /api/x402-config</code> — includes <code>tokenPay</code> (and legacy <code>soonX402</code>)</li>
         </ul>
-<pre><code>curl -s https://conc-exe.xyz/api/token-pay | jq '.defaultMerchant'</code></pre>
+<pre><code>curl -s https://conc-exe.xyz/api/token-pay | jq '{live: .liveMerchantCount, merchants: [.merchants[] | {id, symbol, live, conciergeAtomic}]}'
+
+curl -s "https://conc-exe.xyz/api/token-pay?merchant=acme" | jq '.merchant'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Pay with a partner token (agents &amp; apps)</h2>
+      <div class="card">
+        <p>After your merchant is live, callers can pay Concierge with <strong>your SPL token</strong> instead of USDC:</p>
+        <ol>
+          <li><code>POST /api/concierge</code> (or another route in your <code>resourceKinds</code>) → receive <strong>402</strong> + <code>PAYMENT-REQUIRED</code></li>
+          <li>Decode <code>accepts</code> — pick the entry where <code>extra.settlement === "self"</code> and <code>extra.merchantId === "your-id"</code></li>
+          <li>Sign an SPL <code>transferChecked</code> to <code>payTo</code> for <code>amount</code> atomic units of <code>asset</code> (mint)</li>
+          <li>Retry with <code>PAYMENT-SIGNATURE</code> — server simulates, broadcasts, confirms on-chain delta</li>
+        </ol>
+        <p class="note">USDC routes still use PayAI/Dexter facilitators. Token Pay accepts are separate Solana entries in the same <code>accepts</code> array. Browser reference: <code>frontend/lib/x402-browser-client.ts</code> + <code>x402-solana-self-scheme.ts</code>.</p>
+<pre><code># Inspect accepts (decode PAYMENT-REQUIRED header from 402)
+curl -s -X POST https://conc-exe.xyz/api/concierge \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"chat","message":"test"}' -D - -o /dev/null 2>&1 | grep -i payment-required</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Merchant JSON fields</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>yes</td><td>Stable slug (<code>a-z0-9_-</code>, 2–32 chars). Reserved: <code>soon</code></td></tr>
+            <tr><td><code>symbol</code></td><td>yes</td><td>Ticker shown in UI</td></tr>
+            <tr><td><code>mint</code></td><td>yes</td><td>SPL mint (base58)</td></tr>
+            <tr><td><code>payTo</code></td><td>yes</td><td><strong>Your</strong> Solana receive wallet — required for external merchants</td></tr>
+            <tr><td><code>decimals</code></td><td>yes</td><td>Token decimals (usually <code>6</code>)</td></tr>
+            <tr><td><code>priceSource</code></td><td>no</td><td><code>dexscreener</code> (default) or <code>env</code></td></tr>
+            <tr><td><code>fallbackUsd</code></td><td>recommended</td><td>USD per 1 token when oracle fails</td></tr>
+            <tr><td><code>usdMin</code> / <code>usdMax</code></td><td>no</td><td>Price sanity bounds</td></tr>
+            <tr><td><code>resourceKinds</code></td><td>no</td><td>Which paid APIs list your token (default <code>["concierge"]</code>)</td></tr>
+            <tr><td><code>x402Enabled</code></td><td>no</td><td>Set <code>false</code> to disable without removing row</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Resource kinds</h2>
+      <div class="card">
+        <p>Your token appears in <code>402</code> accepts only for routes listed in <code>resourceKinds</code>:</p>
+        <table>
+          <thead><tr><th>resourceKind</th><th>API route</th><th>USDC price</th></tr></thead>
+          <tbody>
+            <tr><td><code>concierge</code></td><td><code>POST /api/concierge</code></td><td>$0.10</td></tr>
+            <tr><td><code>news</code></td><td><code>POST /api/news-open</code></td><td>$0.10</td></tr>
+            <tr><td><code>signal-open</code></td><td><code>POST /api/lounge-signal-open</code></td><td>$0.10</td></tr>
+            <tr><td><code>signal-publish</code></td><td><code>POST /api/lounge-signal-publish</code></td><td>$1.00</td></tr>
+            <tr><td><code>intel-*</code></td><td><code>POST /api/concierge-intel-*</code></td><td>$0.10</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Beta default is <code>["concierge"]</code>. Ask Concierge to enable more routes when you expand integration.</p>
+      </div>
+
+      <h2 class="docs-h2">Beta onboarding (external projects)</h2>
+      <div class="card">
+        <p>
+          Register your project on Concierge via <code>TOKEN_PAY_MERCHANTS_JSON</code> in Vercel.
+          When your merchant is <strong>live</strong> (mint + payTo + resolvable price), every <code>402</code> response
+          for matching resource kinds includes a <strong>self-settle</strong> accept for your token — alongside USDC.
+        </p>
+
+        <h3 class="docs-h3">Checklist</h3>
+        <ol>
+          <li>Set <code>X402_SOL_PAY_TO</code> (Concierge merchant wallet) — required for any Solana pay route</li>
+          <li>Add your row to <code>TOKEN_PAY_MERCHANTS_JSON</code> with <code>mint</code>, <code>payTo</code> (your receive wallet), <code>decimals</code></li>
+          <li>Ensure merchant wallet has an ATA for your mint (send a tiny amount once)</li>
+          <li>Set <code>fallbackUsd</code> or rely on DexScreener for live price</li>
+          <li>Confirm <code>GET /api/x402-config</code> shows your merchant <code>live: true</code> and <code>conciergeAtomic</code></li>
+          <li>Trigger <code>POST /api/concierge</code> without payment — inspect <code>PAYMENT-REQUIRED</code> for your <code>merchantId</code> accept</li>
+        </ol>
+
+        <h3 class="docs-h3">Example registry row</h3>
+<pre><code>TOKEN_PAY_MERCHANTS_JSON=[
+  {
+    "id": "acme",
+    "symbol": "ACME",
+    "name": "ACME Protocol",
+    "mint": "YourMintBase58…",
+    "decimals": 6,
+    "payTo": "YourSolanaReceiveWallet…",
+    "priceSource": "dexscreener",
+    "fallbackUsd": 0.001,
+    "resourceKinds": ["concierge"],
+    "x402Enabled": true
+  }
+]</code></pre>
+        <p>
+          <code>resourceKinds</code> controls which paid APIs list your token:
+          <code>concierge</code>, <code>news</code>, <code>signal-open</code>, <code>signal-publish</code>, and intel routes as configured.
+          Multiple live merchants appear as separate options in the Lounge pay modal.
+        </p>
+        <p style="margin-top:12px">
+          Beta access / review:
+          <a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram — Theconcierge33</a>
+        </p>
       </div>
 
       <h2 class="docs-h2">x402 accept (self-settle)</h2>
       <div class="card">
-        <p>When live, Concierge <code>402</code> responses include an extra Solana accept alongside USDC:</p>
+        <p>When live, Concierge <code>402</code> responses include one or more Solana token accepts alongside USDC (one per live merchant):</p>
 <pre><code>{
   "scheme": "exact",
   "network": "solana:…",
   "amount": "&lt;atomic SOON&gt;",
   "asset": "&lt;SOON mint&gt;",
-  "payTo": "&lt;X402_SOL_PAY_TO&gt;",
+  "payTo": "&lt;merchant receive wallet&gt;",
   "extra": {
     "settlement": "self",
     "merchantId": "soon",
@@ -80,14 +284,26 @@ SOON_PRICE_SOURCE=dexscreener
 SOON_PRICE_MAX_AGE_SEC=60
 SOON_USDC_RATE=0.00008     # fallback
 X402_SOL_PAY_TO=           # merchant receive (USDC + SOON)</code></pre>
-        <p>Add external projects later via <code>TOKEN_PAY_MERCHANTS_JSON</code>. See <a href="/docs/architecture">Architecture</a> and repository <code>docs/token-pay-platform.md</code> for the full module layout.</p>
+        <p>Add external projects via <code>TOKEN_PAY_MERCHANTS_JSON</code> (see onboarding above). SOON uses <code>X402_SOL_PAY_TO</code> for receive. See <a href="/docs/architecture">Architecture</a> and <code>docs/token-pay-platform.md</code> in the repository.</p>
+      </div>
+
+      <h2 class="docs-h2">For your community (end users)</h2>
+      <div class="card">
+        <p>Once live, your token appears in the <a href="/lounge">Executive Lounge</a> pay modal alongside USDC. Users need:</p>
+        <ul>
+          <li>Phantom or OKX with Solana connected</li>
+          <li>Enough of your token for the quoted atomic amount</li>
+          <li>A small amount of SOL for transaction fees (self-settle)</li>
+        </ul>
+        <p>Promote: <code>GET /api/token-pay?merchant=YOUR_ID</code> for live pricing labels and <code>conciergeAtomic</code> amounts.</p>
       </div>
 
       <h2 class="docs-h2">Related</h2>
       <div class="card">
         <ul>
           <li><a href="/token">SOON tokenomics</a> — holder tiers, draft status</li>
-          <li><a href="/lounge">Executive Lounge</a> — pay modal lists USDC + SOON (coming soon)</li>
+          <li><a href="/lounge">Executive Lounge</a> — pay modal lists USDC + all live Token Pay merchants</li>
+          <li><a href="/docs/builders">For Builders</a> — integration paths for agents</li>
           <li><a href="/docs/payment/x402">x402 Protocol</a> — USDC flow via PayAI/Dexter</li>
         </ul>
       </div>

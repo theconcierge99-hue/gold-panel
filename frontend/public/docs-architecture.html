@@ -25,7 +25,7 @@
           <li><strong>UI</strong> — <code>executive-lounge.html</code>, <code>x402-pay.mjs</code>, <code>agent-identity.mjs</code></li>
           <li><strong>APIs</strong> — Vercel Edge <code>/api/*</code></li>
           <li><strong>AI</strong> — Google Gemini 2.5 Flash (text + image models)</li>
-          <li><strong>Payments</strong> — x402 v2 · PayAI (primary) + Dexter fallback · USDC on Base / Solana · OpenDexter discovery</li>
+          <li><strong>Payments</strong> — x402 v2 · PayAI (primary) + Dexter fallback · USDC on Base / Solana · <a href="/docs/payment/token-pay">Token Pay</a> native SPL self-settle (multi-merchant)</li>
           <li><strong>Storage</strong> — Redis/KV (signals, RWA, agent registry, lounge memory)</li>
           <li><strong>Trust</strong> — optional <a class="ext" href="https://zauth.inc/" target="_blank" rel="noopener">zauth</a> directory + Provider Hub telemetry</li>
         </ul>
@@ -65,6 +65,8 @@
           <tbody>
             <tr><td><code>GEMINI_API_KEY</code></td><td>Concierge AI</td></tr>
             <tr><td><code>X402_EVM_PAY_TO</code> / <code>X402_SOL_PAY_TO</code></td><td>USDC receive addresses</td></tr>
+            <tr><td><code>TOKEN_PAY_MERCHANTS_JSON</code></td><td>External Token Pay merchants (beta) — see <a href="/docs/payment/token-pay" class="gold-link">guide</a></td></tr>
+            <tr><td><code>SOON_TOKEN_MINT</code></td><td>Default SOON merchant mint (post-launch)</td></tr>
             <tr><td><code>KV_REST_*</code></td><td>Signals, agents, memory</td></tr>
             <tr><td><code>SOLANA_RPC_URL</code></td><td>Helius for wallet + NFT mint proxy</td></tr>
             <tr><td><code>ZAUTH_API_KEY</code></td><td>Provider Hub telemetry (optional)</td></tr>

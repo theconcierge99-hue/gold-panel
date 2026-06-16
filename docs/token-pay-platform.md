@@ -2,6 +2,8 @@
 
 **Concierge Token Pay** lets each project monetize its **native SPL token** via **x402 self-settle** — without building RPC, price oracle, or on-chain verification infra.
 
+**Public documentation (for integrators):** https://conc-exe.xyz/docs/payment/token-pay
+
 Today the **default merchant is SOON** (Concierge utility token). UI may still say “SOON”; swap branding via env (`TOKEN_PAY_SOON_SYMBOL`) or add merchants in `TOKEN_PAY_MERCHANTS_JSON`.
 
 ---
@@ -169,6 +171,7 @@ TOKEN_PAY_MERCHANTS_JSON=[
     "name": "Acme Token",
     "mint": "MintBase58…",
     "decimals": 6,
+    "payTo": "MerchantSolanaReceiveWallet…",
     "fallbackUsd": 0.001,
     "priceSource": "dexscreener",
     "resourceKinds": ["concierge"]
@@ -183,10 +186,10 @@ TOKEN_PAY_MERCHANTS_JSON=[
 | File | Role |
 |------|------|
 | `frontend/lib/token-pay-client.ts` | Brand constants + map `/api/x402-config` → pay modal |
-| `frontend/lib/x402-browser-client.ts` | Pay chain `soon` = token pay (generic) |
+| `frontend/lib/x402-browser-client.ts` | Pay chain `soon` = token pay; **multi-merchant** via `tokenPay.merchants` |
 | `frontend/lib/x402-solana-self-scheme.ts` | Wallet signing for any SPL in accept |
 
-Pay modal always lists token row (coming soon pre-launch). Chain id remains `"soon"` in UI code for backward compatibility — rename to `"token"` in a future breaking change.
+Pay modal lists every registered merchant — live tokens are payable; pre-launch rows show “Coming soon”. Chain id remains `"soon"` in UI code for backward compatibility.
 
 ---
 
@@ -196,20 +199,57 @@ Pay modal always lists token row (coming soon pre-launch). Chain id remains `"so
 |-------|-------------|-------|
 | **0** ✅ | `token-pay/` module, SOON shims, `/api/token-pay` | Vercel Hobby |
 | **1** | SOON live on Concierge (set mint) | Hobby |
-| **2** | Merchant JSON + docs for external integrators | Hobby + KV optional |
+| **2** ✅ | Multi-merchant `402` accepts + `TOKEN_PAY_MERCHANTS_JSON` beta + docs | Hobby |
 | **3** | npm SDK `@conc-exe/token-x402` | npm |
 | **4** | Hosted verify on `pay.conc-exe.xyz` (isolated service) | Railway / CF Workers |
 | **5** | Optional gasless (Kora / Turnkey) | Dedicated wallet ops |
 
 ---
 
-## Integrator checklist (future)
+## Verify & monitor (beta)
 
-1. Register merchant (`TOKEN_PAY_MERCHANTS_JSON` or dashboard).
-2. Set `payTo` + create token ATA on merchant wallet.
-3. List liquidity on DexScreener (or set `priceSource=env`).
-4. Add x402 middleware calling Concierge verify pattern or hosted API.
-5. Ship browser client with `SolanaSelfSettleScheme`.
+Partners can verify integration and monitor usage via API + dashboard:
+
+| Step | Command / URL | Pass criteria |
+|------|----------------|---------------|
+| Readiness | `GET /api/token-pay?merchant=YOUR_ID` | `readiness.status === "ready"` · `acceptReady === true` |
+| **Dashboard** | **`/agent/token-pay?merchant=YOUR_ID`** | Readiness badge, tx count, volume chart, recent settlements + Solscan links |
+| Analytics API | `GET /api/token-pay-analytics?merchant=YOUR_ID&days=14` | JSON totals, daily rollups, recent tx list |
+| Discover UI | `/agent/discover` | Token Pay card shows your merchant + readiness |
+| 402 probe | `POST /api/concierge` without payment | Decoded `accepts[]` includes your `merchantId` + `settlement: "self"` |
+| E2E payment | Paid call with Token Pay | `200` + `PAYMENT-RESPONSE` tx · Solscan shows credit to `payTo` |
+| zauth (optional) | `/api/zauth-status` | Reports successful settlements when `ZAUTH_API_KEY` is set |
+
+`readiness.blockers[]` explains misconfiguration (ATA, price, mint, resourceKinds).
+
+**Persistence:** settlement analytics use Vercel KV when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set; otherwise stats are in-memory per Edge isolate (dev only).
+
+---
+
+## Security (per merchant)
+
+| Control | What it does |
+|---------|----------------|
+| **Dedicated `payTo`** | JSON merchants must set their own Solana receive wallet — no fallback to Concierge `X402_SOL_PAY_TO`. |
+| **Registry authorization** | Before settle: `merchantId`, mint, payTo, and `resourceKinds` are re-checked against `TOKEN_PAY_MERCHANTS_JSON`. |
+| **402 accept matching** | Client payment must match server-built accept (amount, asset, payTo, network). |
+| **On-chain delta** | Confirmed tx must increase merchant token balance by ≥ required atomic amount. |
+| **Price bounds** | Per-merchant `usdMin` / `usdMax` optional; DexScreener cache keyed by merchant id. |
+| **Reserved ids** | `soon` cannot be hijacked via JSON; max 16 external merchants per deploy. |
+| **No facilitator keys** | Self-settle — user wallet signs; server only verifies via RPC. |
+
+Public APIs never expose partner `payTo` addresses (only `payToReady` / ATA status).
+
+---
+
+## Integrator checklist (beta)
+
+1. Register merchant in `TOKEN_PAY_MERCHANTS_JSON` (or contact Telegram for review).
+2. Set `payTo` + create token ATA on merchant wallet (one tiny transfer).
+3. List liquidity on DexScreener (or set `priceSource=env` + `fallbackUsd`).
+4. Confirm `GET /api/x402-config` → `tokenPay.merchants[]` shows `live: true` and `conciergeAtomic`.
+5. Trigger a paid route (e.g. `POST /api/concierge`) — `PAYMENT-REQUIRED` must include your `merchantId` accept.
+6. Browser: `SolanaSelfSettleScheme` + `extra.merchantId` selector (see `x402-browser-client.ts`).
 
 ---
 

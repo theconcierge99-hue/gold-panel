@@ -23,7 +23,7 @@
 
     <header class="res-hero">
       <h1>Concierge Agent Endpoints</h1>
-      <p class="res-lead">Twelve intelligence endpoints paid via x402 on Solana and Base — USDC (PayAI/Dexter) plus <strong>SOON</strong> self-settle on Concierge when live. No API keys. Payment is the only gate.</p>
+      <p class="res-lead">Twelve intelligence endpoints paid via x402 on Solana and Base — USDC (PayAI/Dexter) plus <strong>Token Pay</strong> native tokens on supported routes when merchants are live. No API keys. Payment is the only gate.</p>
       <p class="res-base">Base URL: <code id="res-base-url"></code></p>
     </header>
 
@@ -37,7 +37,7 @@
     <aside class="res-integrate">
       <div class="res-integrate-eyebrow">Install on your agent</div>
       <h3>AgentCash · pay.sh · x402 · Token Pay</h3>
-      <p>Same twelve routes — USDC via facilitators. Concierge chat also supports native <strong>SOON</strong> (self-settle) in the Lounge after token launch. Registry: <code>GET /api/token-pay</code>.</p>
+      <p>Same twelve routes — USDC via facilitators. <code>POST /api/concierge</code> also accepts live Token Pay merchants (self-settle SPL). Partner onboarding: <a href="/docs/payment/token-pay">Token Pay beta</a> · registry <code>GET /api/token-pay</code>.</p>
       <p class="res-disc-hint"><code>npx agentcash add https://conc-exe.xyz</code></p>
       <p class="res-disc-hint"><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></p>
       <div class="res-integrate-actions">

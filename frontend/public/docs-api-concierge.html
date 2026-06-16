@@ -22,7 +22,16 @@
       <p class="docs-lead">Natural-language market and DeFi intelligence — one paid turn at a time.</p>
 
       <div class="card">
-        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> · Gemini 2.5 Flash with live market, DeFi desk (TVL, Meteora DLMM yields, whales, verdict), lounge memory, and optional trading-plan structure.</p>
+        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> (or equivalent in a live <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> merchant token on Solana) · Gemini 2.5 Flash with live market, DeFi desk (TVL, Meteora DLMM yields, whales, verdict), lounge memory, and optional trading-plan structure.</p>
+      </div>
+
+      <h2 class="docs-h2">Payment options</h2>
+      <div class="card">
+        <ul>
+          <li><strong>USDC</strong> — Base or Solana via PayAI/Dexter (standard x402 client)</li>
+          <li><strong>Native SPL</strong> — Token Pay self-settle when your merchant is registered and live (<code>GET /api/token-pay?merchant=YOUR_ID</code>)</li>
+        </ul>
+        <p>402 responses may include multiple <code>accepts</code>. Pick token pay when <code>extra.settlement === "self"</code> and <code>extra.merchantId</code> matches your registry row.</p>
       </div>
 
       <h2 class="docs-h2">Request body</h2>
@@ -77,6 +86,7 @@
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/quickstart">Quickstart</a>
+        <a class="btn" href="/docs/payment/token-pay">Token Pay beta</a>
         <a class="btn" href="/docs/api/intel">DeFi Intel</a>
         <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       </div>

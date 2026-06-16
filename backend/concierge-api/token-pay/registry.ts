@@ -9,6 +9,14 @@ import type { TokenPayMerchant, TokenPayPlatformMeta, TokenPayPublicMerchant } f
 const PLATFORM_NAME = "Concierge Token Pay";
 const PLATFORM_VERSION = "0.1.0";
 
+/** Reserved slugs — cannot be registered via TOKEN_PAY_MERCHANTS_JSON. */
+const RESERVED_MERCHANT_IDS = new Set([SOON_MERCHANT_ID]);
+
+/** External merchant slug: lowercase letter first, then [a-z0-9_-], 2–32 chars total. */
+const MERCHANT_ID_RE = /^[a-z][a-z0-9_-]{1,31}$/;
+
+const MAX_JSON_MERCHANTS = 16;
+
 let registryCache: { merchants: Map<string, TokenPayMerchant>; defaultId: string } | null = null;
 
 function solPayToFromEnv(): string | null {
@@ -44,21 +52,29 @@ function parseJsonMerchants(solPayTo: string | null): TokenPayMerchant[] {
     const rows = JSON.parse(raw) as JsonMerchantRow[];
     if (!Array.isArray(rows)) return [];
     return rows
+      .slice(0, MAX_JSON_MERCHANTS)
       .map((row): TokenPayMerchant | null => {
-        const id = (row.id ?? "").trim();
-        if (!id) return null;
+        const id = (row.id ?? "").trim().toLowerCase();
+        if (!id || RESERVED_MERCHANT_IDS.has(id) || !MERCHANT_ID_RE.test(id)) return null;
+
+        const payTo = normalizeSolPayTo(row.payTo ?? "");
+        if (!payTo) return null;
+
+        const mint = normalizeSolanaMint(row.mint ?? "");
+        if (!mint) return null;
+
         const source =
           (row.priceSource ?? "dexscreener").trim().toLowerCase() === "env" ? "env" : "dexscreener";
         return {
           id,
           symbol: (row.symbol ?? id).trim() || id,
           name: (row.name ?? row.symbol ?? id).trim() || id,
-          mint: normalizeSolanaMint(row.mint ?? ""),
+          mint,
           decimals:
             typeof row.decimals === "number" && row.decimals >= 0 && row.decimals <= 12
               ? Math.floor(row.decimals)
               : 6,
-          payTo: (row.payTo ?? solPayTo ?? "").trim() || solPayTo,
+          payTo,
           x402Enabled: row.x402Enabled !== false,
           price: {
             source,

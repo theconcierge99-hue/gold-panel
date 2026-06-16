@@ -80,7 +80,39 @@ SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_
 | `SOON_USDC_RATE` | Fallback USD price per 1 SOON when DexScreener fails or `SOON_PRICE_SOURCE=env`. |
 | `SOON_X402_ENABLED` | Set `false` to disable token pay even when mint is set. |
 
-**Token Pay platform:** see [token-pay-platform.md](token-pay-platform.md). Default merchant SOON; `GET /api/token-pay`. Concierge token x402 enabled when `SOON_TOKEN_MINT` is set.
+### External merchants (Token Pay beta)
+
+Register partner projects on the same Concierge deployment. **Public guide:** [conc-exe.xyz/docs/payment/token-pay](https://conc-exe.xyz/docs/payment/token-pay).
+
+| Variable | Description |
+|----------|-------------|
+| `TOKEN_PAY_MERCHANTS_JSON` | JSON array of merchant rows (max 16). Each row **must** include `id`, `symbol`, `mint`, `decimals`, `payTo` (partner wallet — no fallback to `X402_SOL_PAY_TO`). |
+| `TOKEN_PAY_DEFAULT_MERCHANT` | Default merchant slug (default `soon`). |
+
+Example row:
+
+```json
+{
+  "id": "acme",
+  "symbol": "ACME",
+  "name": "ACME Protocol",
+  "mint": "MintBase58…",
+  "decimals": 6,
+  "payTo": "PartnerSolanaWallet…",
+  "priceSource": "dexscreener",
+  "fallbackUsd": 0.001,
+  "resourceKinds": ["concierge"],
+  "x402Enabled": true
+}
+```
+
+Reserved merchant id: `soon` (cannot be registered via JSON). Merchant is **live** when mint + payTo + resolvable price + `x402Enabled`.
+
+**APIs:** `GET /api/token-pay` · `GET /api/x402-config` → `tokenPay.merchants[]`
+
+**Operator docs:** [token-pay-platform.md](token-pay-platform.md) (repository). Beta review: Telegram [@Theconcierge33](https://t.me/Theconcierge33).
+
+Concierge token x402 for SOON is enabled when `SOON_TOKEN_MINT` is set. Partner tokens are enabled per JSON row when live.
 
 **DLMM yields:** Concierge AI and `/api/concierge-intel-yields` use the Meteora DLMM API for live pool intel. Users deploy liquidity on [Meteora](https://app.meteora.ag/dlmm) — no in-app LP UI in the Lounge.
 

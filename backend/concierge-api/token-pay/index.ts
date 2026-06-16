@@ -30,15 +30,24 @@ export {
   tokenAtomicForUsdcSync,
   tokenAtomicForUsdcWithRate,
 } from "./amount";
-export { isTokenPaySelfSettleRequirement, verifyAndSettleTokenPaySelf } from "./self-settle";
+export { assertTokenPaySelfSettleAuthorized, isTokenPaySelfSettleRequirement } from "./security";
+export { verifyAndSettleTokenPaySelf } from "./self-settle";
 export {
   buildTokenPayAcceptExtra,
+  buildTokenPayAcceptsForResourceAsync,
+  formatTokenPayPriceLabelsForResourceAsync,
   formatTokenPayUiFromAtomic,
   getTokenPayMerchantForX402,
   getTokenPayUsdRateAsync,
   isTokenPayX402Live,
+  listTokenPayMerchantsForResource,
   tokenPayAtomicForResourceAsync,
   tokenPayAtomicForResourceSync,
   tokenPaySupportsResource,
 } from "./x402";
+export type { TokenPayAcceptBuildInput } from "./x402";
+export { getTokenPayMerchantReadiness } from "./readiness";
+export type { TokenPayMerchantReadiness, TokenPayMerchantStatus } from "./readiness";
+export { scheduleTokenPaySettlementRecord, getTokenPayMerchantAnalytics } from "./analytics-store";
+export type { TokenPayMerchantAnalytics, TokenPaySettlementRecord } from "./analytics-store";
 export { SOON_MERCHANT_ID, buildSoonMerchantFromEnv } from "./merchants/soon";

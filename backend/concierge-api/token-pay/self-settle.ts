@@ -3,7 +3,11 @@
  */
 import { getSolanaRpcUrlForServer } from "../x402-config";
 import { solanaRpcCallEx } from "../x402-solana-rpc";
+import { assertTokenPaySelfSettleAuthorized } from "./security";
+import { scheduleTokenPaySettlementRecord } from "./analytics-store";
 import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
+
+export { isTokenPaySelfSettleRequirement } from "./security";
 
 type TokenBalanceRow = {
   owner?: string;
@@ -23,10 +27,6 @@ type GetTxDetail = {
     postTokenBalances?: TokenBalanceRow[];
   };
 };
-
-export function isTokenPaySelfSettleRequirement(req: { extra?: Record<string, unknown> }): boolean {
-  return req.extra?.settlement === "self";
-}
 
 function tokenSymbolFromExtra(extra?: Record<string, unknown>): string {
   const name = extra?.name;
@@ -86,8 +86,10 @@ async function waitForConfirmation(rpc: string, signature: string, attempts = 25
 export async function verifyAndSettleTokenPaySelf(
   paymentPayload: TokenPayPaymentPayload,
   matched: TokenPaySelfSettleRequirement,
+  resourceKind: string,
 ): Promise<{ payer: string; transaction: string; network: string }> {
-  const symbol = tokenSymbolFromExtra(matched.extra);
+  const merchant = assertTokenPaySelfSettleAuthorized(matched, resourceKind);
+  const symbol = merchant.symbol || tokenSymbolFromExtra(matched.extra);
   const payload = paymentPayload.payload;
   const txB64 =
     payload && typeof payload === "object" && "transaction" in payload
@@ -151,6 +153,17 @@ export async function verifyAndSettleTokenPaySelf(
   if (!payer) {
     throw new Error("Could not read fee payer from confirmed transaction");
   }
+
+  const merchantId =
+    typeof matched.extra?.merchantId === "string" ? matched.extra.merchantId.trim() : merchant.id;
+  scheduleTokenPaySettlementRecord({
+    merchantId,
+    mint: matched.asset,
+    amountAtomic: matched.amount,
+    resourceKind,
+    payer,
+    tx: signature,
+  });
 
   return {
     payer,

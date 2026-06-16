@@ -74,6 +74,10 @@
       "destination": "/agent-discover.html"
     },
     {
+      "source": "/agent/token-pay",
+      "destination": "/agent-token-pay.html"
+    },
+    {
       "source": "/lounge",
       "destination": "/executive-lounge.html"
     },

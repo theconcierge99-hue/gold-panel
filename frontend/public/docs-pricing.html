@@ -56,6 +56,13 @@
         <p class="note">Signal unlock fees split 50% creator / 50% merchant when payout treasuries are configured. Solana NFT mint after publish requires ~0.03 SOL in Phantom for gas.</p>
       </div>
 
+      <h2 class="docs-h2">Token Pay (native SPL)</h2>
+      <div class="card">
+        <p>List prices are pegged to <strong>0.1 USDC</strong> (or route-specific USDC amounts). Registered merchants convert that to token atomic units via DexScreener + fallback rate.</p>
+        <p>Example: <code>GET /api/token-pay?merchant=acme</code> returns <code>conciergeAtomic</code> and <code>conciergeLabel</code> for display. Users pay SOL gas for self-settle transfers.</p>
+        <p><a href="/docs/payment/token-pay" class="gold-link">Token Pay beta guide</a> — onboarding for other projects.</p>
+      </div>
+
       <h2 class="docs-h2">MPP listing (AgentCash)</h2>
       <div class="card">
         <p>Same prices appear on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> as USD per call. Install all routes:</p>
@@ -74,6 +81,7 @@
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/payment/x402">x402 Protocol</a>
+        <a class="btn" href="/docs/payment/token-pay">Token Pay beta</a>
         <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/quickstart">Quickstart</a>
       </div>

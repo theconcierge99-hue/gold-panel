@@ -22,12 +22,8 @@ import { buildBazaarExtension } from "./x402-discovery";
 import { priceUsdcForResource, atomicAmountForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
 import {
-  buildTokenPayAcceptExtra,
-  formatTokenPayUiFromAtomic,
-  getDefaultTokenPayMerchant,
-  isTokenPayX402Live,
-  tokenPayAtomicForResourceAsync,
-  tokenPaySupportsResource,
+  buildTokenPayAcceptsForResourceAsync,
+  formatTokenPayPriceLabelsForResourceAsync,
 } from "./token-pay";
 import {
   isTokenPaySelfSettleRequirement,
@@ -261,21 +257,13 @@ async function buildAcceptsAsync(
       extra: { feePayer: DEXTER_FACILITATOR.solanaFeePayer },
     });
 
-    const tokenMerchant = getDefaultTokenPayMerchant();
-    if (tokenPaySupportsResource(kind, tokenMerchant) && isTokenPayX402Live(tokenMerchant)) {
-      const tokenAmount = await tokenPayAtomicForResourceAsync(priceUsdcForResource(kind), tokenMerchant);
-      if (tokenAmount && tokenMerchant.mint) {
-        accepts.push({
-          scheme: "exact",
-          network: nets.sol,
-          amount: tokenAmount,
-          asset: tokenMerchant.mint,
-          payTo: sol,
-          maxTimeoutSeconds: 120,
-          extra: buildTokenPayAcceptExtra(tokenMerchant),
-        });
-      }
-    }
+    const tokenAccepts = await buildTokenPayAcceptsForResourceAsync({
+      resourceKind: kind,
+      usdcAmount: priceUsdcForResource(kind),
+      network: nets.sol,
+      fallbackSolPayTo: sol,
+    });
+    accepts.push(...tokenAccepts);
   }
 
   if (!accepts.length) {
@@ -383,13 +371,18 @@ function isFacilitatorOutageError(e: unknown): boolean {
 async function verifyAndSettle(
   paymentPayload: PaymentPayloadV2,
   matched: X402AcceptRequirement,
+  resourceKind: X402ResourceKind,
 ): Promise<{
   payer: string;
   transaction: string;
   network?: string;
 }> {
   if (isTokenPaySelfSettleRequirement(matched)) {
-    return verifyAndSettleTokenPaySelf(paymentPayload as TokenPayPaymentPayload, matched);
+    return verifyAndSettleTokenPaySelf(
+      paymentPayload as TokenPayPaymentPayload,
+      matched,
+      resourceKind,
+    );
   }
 
   const primary = resolveFacilitatorForRequirement(matched);
@@ -471,15 +464,8 @@ export async function buildPaymentRequiredResponse(
   };
 
   const usdcPrice = priceUsdcForResource(kind);
-  const tokenMerchant = getDefaultTokenPayMerchant();
-  const tokenAtomic =
-    tokenPaySupportsResource(kind, tokenMerchant) && isTokenPayX402Live(tokenMerchant)
-      ? await tokenPayAtomicForResourceAsync(usdcPrice, tokenMerchant)
-      : null;
-  const tokenLabel =
-    tokenAtomic != null
-      ? ` or ${formatTokenPayUiFromAtomic(tokenAtomic, tokenMerchant)}`
-      : "";
+  const tokenLabels = await formatTokenPayPriceLabelsForResourceAsync(kind, usdcPrice);
+  const tokenLabel = tokenLabels.length ? ` or ${tokenLabels.join(" or ")}` : "";
 
   const clientMessage =
     error === "PAYMENT-SIGNATURE header is required" ? "Payment required" : error;
@@ -563,7 +549,7 @@ export async function requireX402Payment(
       };
     }
 
-    const settle = await verifyAndSettle(paymentPayload, matched);
+    const settle = await verifyAndSettle(paymentPayload, matched, kind);
 
     const paymentResponseHeader = b64EncodeJson({
       success: true,

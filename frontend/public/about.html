@@ -84,18 +84,19 @@
       <li>Discoverable via <code>openapi.json</code> and <code>/.well-known/x402</code> for agents and marketplaces.</li>
       <li>Listed on <strong><a href="https://www.x402scan.com/" target="_blank" rel="noopener noreferrer">x402scan</a></strong> and <strong><a href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener noreferrer">MPPscan</a></strong> (Machine Payments Protocol).</li>
     </ul>
-    <p class="pricing">Open article · Concierge message · Unlock signal: <strong>0.1 USDC</strong> each (or <strong>SOON</strong> on Concierge via Token Pay after launch)</p>
+    <p class="pricing">Open article · Concierge message · Unlock signal: <strong>0.1 USDC</strong> each — or a <strong>registered native token</strong> via <a href="/docs/payment/token-pay">Token Pay beta</a> (SOON after launch)</p>
   </div>
 
   <div class="card">
     <h2>Token Pay &amp; SOON</h2>
-    <p><strong><a href="/token">SOON</a></strong> is the Concierge utility token (draft until launch). <strong>Token Pay</strong> is our native-token x402 layer: projects can monetize their SPL token via self-settle (DexScreener price, no facilitator wallet) — SOON is merchant #0.</p>
+    <p><strong><a href="/token">SOON</a></strong> is the Concierge utility token (draft until launch). <strong><a href="/docs/payment/token-pay">Token Pay</a></strong> is our native-token x402 layer: other Solana projects can register their SPL token for self-settle payments on Concierge APIs — SOON is merchant #0.</p>
     <ul>
-      <li>Lounge payment modal lists <strong>USDC</strong> (PayAI/Dexter) and <strong>SOON</strong> (coming soon until mint is live).</li>
-      <li>Phase 1: <code>POST /api/concierge</code> · public registry at <code>GET /api/token-pay</code>.</li>
-      <li>Holder perks: Concierge credits, intel discounts, signal rebates — see <a href="/token">tokenomics</a>.</li>
+      <li>Lounge payment modal lists <strong>USDC</strong> (PayAI/Dexter) plus every <strong>live</strong> Token Pay merchant (SOON shows <em>Coming soon</em> until mint is set).</li>
+      <li>Beta partners: operator-reviewed onboarding via <code>TOKEN_PAY_MERCHANTS_JSON</code> · registry <code>GET /api/token-pay</code>.</li>
+      <li>Phase 1 route: <code>POST /api/concierge</code> · more <code>resourceKinds</code> on request.</li>
+      <li>Holder perks for SOON: Concierge credits, intel discounts, signal rebates — see <a href="/token">tokenomics</a>.</li>
     </ul>
-    <p>Docs: <a href="/docs/payment/token-pay">Token Pay platform</a> · <a href="/docs/payment/x402">x402 USDC</a></p>
+    <p>Docs: <a href="/docs/payment/token-pay">Token Pay beta guide</a> · <a href="/docs/payment/x402">x402 USDC</a> · <a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Request beta on Telegram</a></p>
   </div>
 
   <div class="card">

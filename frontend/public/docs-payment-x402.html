@@ -37,9 +37,10 @@
         <ul>
           <li><strong>Base</strong> — USDC (configure <code>X402_EVM_PAY_TO</code>)</li>
           <li><strong>Solana</strong> — USDC via PayAI/Dexter (optional <code>X402_SOL_PAY_TO</code>)</li>
-          <li><strong>Solana</strong> — <strong>SOON</strong> (native token) via <a href="/docs/payment/token-pay">Token Pay self-settle</a> on <code>POST /api/concierge</code> when the mint is configured (Lounge UI today: coming soon)</li>
+          <li><strong>Solana</strong> — native project tokens via <a href="/docs/payment/token-pay">Token Pay self-settle</a> (one accept per live merchant; <code>extra.settlement: "self"</code>)</li>
+          <li><strong>SOON</strong> — Concierge default merchant; appears when <code>SOON_TOKEN_MINT</code> is set (UI: coming soon until launch)</li>
         </ul>
-        <p>Check <code>accepts</code> in the 402 body or <code>GET /api/x402-config</code> / <code>GET /api/token-pay</code> for what your deployment enables.</p>
+        <p>Check <code>accepts</code> in the 402 body or <code>GET /api/x402-config</code> / <code>GET /api/token-pay</code> for enabled merchants. Beta partners register via <a href="/docs/payment/token-pay">Token Pay onboarding</a>.</p>
       </div>
 
       <h2 class="docs-h2">Headers</h2>
@@ -63,7 +64,7 @@
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/quickstart">Quickstart</a>
-        <a class="btn" href="/docs/payment/token-pay">Token Pay (SOON)</a>
+        <a class="btn" href="/docs/payment/token-pay">Token Pay (beta)</a>
         <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
         <a class="btn" href="/docs/pricing">Pricing</a>
       </div>
