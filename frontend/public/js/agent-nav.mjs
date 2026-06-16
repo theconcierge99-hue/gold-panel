@@ -56,7 +56,7 @@ export function renderAgentTopNav(activeId) {
     { id: "endpoints", href: "/agent/endpoints", label: "Endpoints" },
     { id: "playground", href: "/agent/playground", label: "Playground" },
     { id: "discover", href: "/agent/discover", label: "Discover" },
-    { id: "token-pay", href: "/agent/token-pay", label: "Token Pay" },
+    { id: "token-pay", href: "/agent/token-pay", label: "Token Pay (Beta)" },
     { id: "identity", href: "/agent/identity", label: "Identity" },
     { id: "lounge", href: "/lounge", label: "Lounge" },
     { id: "concierge", href: "/lounge#concierge", label: "Concierge AI" },

@@ -22,7 +22,6 @@
       <p class="docs-lead">
         Let each project monetize its <strong>native SPL token</strong> via x402 <strong>self-settle</strong> — without building RPC, price oracle, or on-chain verification infra.
         The default merchant today is <strong>SOON</strong> (Concierge utility token).
-        <strong>Beta</strong> means the platform is still early and APIs may evolve — integrations are <strong>live today</strong> for registered merchants.
       </p>
 
       <div class="card">
@@ -42,11 +41,6 @@
           <strong>For developers:</strong> register your token once on Concierge. After your merchant is live, callers can pay
           with <strong>your token</strong> on supported x402 routes — revenue lands in your <code>payTo</code> wallet.
           No need to build RPC, price oracle, or settlement verification yourself.
-        </p>
-
-        <p style="margin-top:12px" class="note">
-          <strong>Beta label</strong> = early-stage product (docs and fields may change). It does <em>not</em> mean “waitlist only” —
-          other teams can integrate and go live after merchant registration.
         </p>
 
         <h3 class="docs-h3">What you provide</h3>
@@ -79,9 +73,12 @@
           for x402-gated APIs — whether they call Concierge directly or your app wraps Concierge calls.
         </p>
 
-        <h3 class="docs-h3">Step 1 — Register your merchant</h3>
-        <p>Contact Concierge with your project details (<a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram</a>).
-          After review, your row is added to <code>TOKEN_PAY_MERCHANTS_JSON</code> on the production deploy.</p>
+        <h3 class="docs-h3">Step 1 — Configure your merchant</h3>
+        <p>Add your row to <code>TOKEN_PAY_MERCHANTS_JSON</code> in environment variables, then redeploy:</p>
+        <ul>
+          <li><strong>Local test</strong> — copy <code>.env.example</code>, set <code>TOKEN_PAY_MERCHANTS_JSON</code>, run <code>npm run dev</code></li>
+          <li><strong>Production</strong> — append your row in Vercel env on the Concierge deploy and redeploy</li>
+        </ul>
 <pre><code>{
   "id": "acme",
   "symbol": "ACME",
@@ -95,7 +92,9 @@
   "x402Enabled": true
 }</code></pre>
         <p>Required: unique <code>id</code>, live <code>mint</code>, your <code>payTo</code> wallet, and <code>decimals</code>.
-          Create an ATA on <code>payTo</code> by sending a tiny amount of your token once.</p>
+          Create an ATA on <code>payTo</code> by sending a tiny amount of your token once.
+          Stuck after fixing <code>readiness.blockers</code>? Contact the Concierge team on
+          <a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram</a>.</p>
 
         <h3 class="docs-h3">Step 2 — Confirm readiness (before launch)</h3>
 <pre><code>curl -s "https://conc-exe.xyz/api/token-pay?merchant=acme" | jq '.merchant.readiness'</code></pre>
@@ -136,10 +135,10 @@
 
       <h2 class="docs-h2">Verify connection &amp; monitor usage</h2>
       <div class="card">
-        <p>Token Pay includes a per-merchant dashboard. Use the checks below — similar spirit to <a href="/docs/integration/zauth">zauth status</a> or <a href="/docs/integration/x402scan">x402scan</a>, but scoped to your merchant row.</p>
+        <p>Token Pay includes a per-merchant dashboard. Use the Concierge checks below to verify and monitor your merchant.</p>
 
         <h3 class="docs-h3">1. Readiness API (before any user pays)</h3>
-        <p>After Concierge registers your merchant, poll:</p>
+        <p>After your merchant row is deployed, poll:</p>
 <pre><code>curl -s "https://conc-exe.xyz/api/token-pay?merchant=YOUR_ID" | jq '.merchant.readiness'</code></pre>
         <p>Target: <code>status: "ready"</code> and <code>acceptReady: true</code>. If not, read <code>blockers[]</code> (missing ATA, price, mint, etc.).</p>
         <table>
@@ -164,22 +163,20 @@
           <li><strong>HTTP 200</strong> on the paid route + JSON body (e.g. <code>reply</code> for Concierge)</li>
           <li>Response header <code>PAYMENT-RESPONSE</code> (base64) contains <code>transaction</code> = Solana signature</li>
           <li>On-chain: open the signature in Solscan — merchant <code>payTo</code> token balance increased</li>
-          <li>Optional: if Concierge has <code>ZAUTH_API_KEY</code>, successful paid calls also report to <a href="/api/zauth-status">zauth Provider Hub</a> (includes tx hash — works for Token Pay too)</li>
         </ul>
 
-        <h3 class="docs-h3">vs zauth / x402scan</h3>
+        <h3 class="docs-h3">Concierge monitoring tools</h3>
         <table>
-          <thead><tr><th>Tool</th><th>What you see for Token Pay</th></tr></thead>
+          <thead><tr><th>Tool</th><th>What you see</th></tr></thead>
           <tbody>
-            <tr><td><strong><code>GET /api/token-pay</code></strong></td><td>Per-merchant <code>readiness</code>, pricing, <code>acceptReady</code> — your primary health check</td></tr>
-            <tr><td><strong><a href="/agent/token-pay">/agent/token-pay</a></strong></td><td>Per-merchant dashboard — readiness, tx count, volume chart, recent settlements + Solscan</td></tr>
-            <tr><td><strong><a href="/agent/discover">/agent/discover</a></strong></td><td>Live registry + readiness counts in the UI</td></tr>
-            <tr><td><strong><a href="/api/zauth-status">zauth</a></strong></td><td>Settlement telemetry after real paid calls (not per-merchant dashboard)</td></tr>
-            <tr><td><strong>x402scan</strong></td><td>conc-exe.xyz resource volume — USDC-heavy today; token self-settle volume may be less visible</td></tr>
-            <tr><td><strong>Solana explorer</strong></td><td>Definitive proof — token credited to your <code>payTo</code> wallet</td></tr>
+            <tr><td><strong><code>GET /api/token-pay</code></strong></td><td>Per-merchant <code>readiness</code>, pricing, <code>acceptReady</code></td></tr>
+            <tr><td><strong><a href="/agent/token-pay">/agent/token-pay</a></strong></td><td>Dashboard — readiness, tx count, volume chart, recent settlements + Solscan</td></tr>
+            <tr><td><strong><a href="/agent/discover">/agent/discover</a></strong></td><td>Live registry + readiness counts</td></tr>
+            <tr><td><strong><code>GET /api/token-pay-analytics</code></strong></td><td>JSON totals, daily rollups, recent tx list</td></tr>
+            <tr><td><strong>Solana explorer</strong></td><td>On-chain proof — token credited to your <code>payTo</code> wallet</td></tr>
           </tbody>
         </table>
-        <p class="note">Beta: use readiness API + <a href="/agent/token-pay">Token Pay Dashboard</a> + one test payment + Solscan for definitive on-chain proof.</p>
+        <p class="note">Use readiness API + <a href="/agent/token-pay">Token Pay Dashboard</a> + one test payment + Solscan for definitive proof.</p>
       </div>
 
       <h2 class="docs-h2">Security model (per merchant)</h2>
@@ -274,19 +271,19 @@ curl -s -X POST https://conc-exe.xyz/api/concierge \
       <h2 class="docs-h2">Merchant registration checklist</h2>
       <div class="card">
         <p>
-          Register your token on Concierge via <code>TOKEN_PAY_MERCHANTS_JSON</code> (operator adds after review).
+          Add your token via <code>TOKEN_PAY_MERCHANTS_JSON</code> in environment variables and redeploy.
           When your merchant is <strong>live</strong> (mint + payTo + resolvable price), every <code>402</code> response
           for matching resource kinds includes a <strong>self-settle</strong> accept for your token — alongside USDC.
         </p>
 
         <h3 class="docs-h3">Checklist</h3>
         <ol>
-          <li>Contact Concierge with mint, <code>payTo</code>, decimals, and desired <code>resourceKinds</code></li>
+          <li>Add your row to <code>TOKEN_PAY_MERCHANTS_JSON</code> (local <code>.env</code> or Vercel env) and redeploy</li>
           <li>Ensure <code>payTo</code> wallet has an ATA for your mint (send a tiny amount once)</li>
           <li>Set <code>fallbackUsd</code> or list on DexScreener for live price</li>
           <li>Confirm <code>GET /api/token-pay?merchant=YOUR_ID</code> → <code>readiness.acceptReady: true</code></li>
           <li>Confirm <code>GET /api/x402-config</code> shows your merchant <code>live: true</code> and <code>conciergeAtomic</code></li>
-          <li>Trigger a test paid call — inspect <code>PAYMENT-REQUIRED</code> for your <code>merchantId</code> accept</li>
+          <li>Run a test paid call — inspect <code>PAYMENT-REQUIRED</code> for your <code>merchantId</code> accept</li>
           <li>Verify Solscan + <a href="/agent/token-pay">dashboard</a> after first settlement</li>
         </ol>
 
@@ -311,7 +308,7 @@ curl -s -X POST https://conc-exe.xyz/api/concierge \
           Multiple live merchants appear as separate options in the Lounge pay modal.
         </p>
         <p style="margin-top:12px">
-          Registration / questions:
+          Need help after self-service setup?
           <a href="https://t.me/Theconcierge33" target="_blank" rel="noopener noreferrer">Telegram — Theconcierge33</a>
         </p>
       </div>

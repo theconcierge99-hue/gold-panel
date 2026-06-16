@@ -6,8 +6,6 @@
 
 Today the **default merchant is SOON** (Concierge utility token). UI may still say “SOON”; swap branding via env (`TOKEN_PAY_SOON_SYMBOL`) or add merchants in `TOKEN_PAY_MERCHANTS_JSON`.
 
-**Beta** = early-stage platform (APIs may evolve). Integrations are **live** for registered merchants — other teams can ship today after merchant registration.
-
 ---
 
 ## Positioning
@@ -181,7 +179,7 @@ TOKEN_PAY_MERCHANTS_JSON=[
 ]
 ```
 
-Contact Concierge to register (operator adds row + redeploy). See public guide: **Integrate Token Pay in your project**.
+Add your row to `TOKEN_PAY_MERCHANTS_JSON` in env and redeploy (local `.env` or Vercel). See public guide: **Integrate Token Pay in your project**. Contact Concierge team only if blockers persist after self-service setup.
 
 ---
 
@@ -210,9 +208,9 @@ Pay modal lists every registered merchant — live tokens are payable; pre-launc
 
 ---
 
-## Verify & monitor (beta)
+## Verify & monitor
 
-Partners can verify integration and monitor usage via API + dashboard:
+Partners verify and monitor via Concierge APIs + dashboard:
 
 | Step | Command / URL | Pass criteria |
 |------|----------------|---------------|
@@ -222,7 +220,6 @@ Partners can verify integration and monitor usage via API + dashboard:
 | Discover UI | `/agent/discover` | Token Pay card shows your merchant + readiness |
 | 402 probe | `POST /api/concierge` without payment | Decoded `accepts[]` includes your `merchantId` + `settlement: "self"` |
 | E2E payment | Paid call with Token Pay | `200` + `PAYMENT-RESPONSE` tx · Solscan shows credit to `payTo` |
-| zauth (optional) | `/api/zauth-status` | Reports successful settlements when `ZAUTH_API_KEY` is set |
 
 `readiness.blockers[]` explains misconfiguration (ATA, price, mint, resourceKinds).
 
@@ -248,13 +245,14 @@ Public APIs never expose partner `payTo` addresses (only `payToReady` / ATA stat
 
 ## Integrator checklist
 
-1. Contact Concierge to register merchant in `TOKEN_PAY_MERCHANTS_JSON`.
+1. Add your row to `TOKEN_PAY_MERCHANTS_JSON` in env (local or Vercel) and redeploy.
 2. Set `payTo` + create token ATA on merchant wallet (one tiny transfer).
 3. List liquidity on DexScreener (or set `priceSource=env` + `fallbackUsd`).
 4. Confirm `GET /api/token-pay?merchant=ID` → `readiness.acceptReady === true`.
 5. Confirm `GET /api/x402-config` → `tokenPay.merchants[]` shows `live: true` and `conciergeAtomic`.
 6. Wire x402 client: decode `402` accepts, pick `extra.merchantId` + `extra.settlement: "self"`, sign SPL transfer, retry with `PAYMENT-SIGNATURE`.
 7. End-to-end test: HTTP 200 + Solscan credit to `payTo` + `/agent/token-pay` analytics.
+8. Stuck? Contact Concierge team on Telegram.
 
 ### Integration paths
 
