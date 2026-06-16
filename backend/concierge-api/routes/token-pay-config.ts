@@ -3,7 +3,7 @@
  * Optional: ?merchant=acme · ?resource=concierge (readiness probe resource)
  */
 import { corsHeadersFor } from "../concierge-security";
-import { X402_READ_PRICE_USDC } from "../x402-config";
+import { X402_READ_PRICE_USDC } from "../x402-pricing";
 import {
   formatTokenPayUiFromAtomic,
   getDefaultTokenPayMerchant,

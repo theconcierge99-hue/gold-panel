@@ -6,7 +6,7 @@ import { corsHeadersFor } from "../concierge-security";
 import { getTokenPayMerchant, listTokenPayMerchants } from "../token-pay";
 import { getTokenPayMerchantAnalytics } from "../token-pay/analytics-store";
 import { getTokenPayMerchantReadiness } from "../token-pay/readiness";
-import { X402_READ_PRICE_USDC } from "../x402-config";
+import { X402_READ_PRICE_USDC } from "../x402-pricing";
 
 export default async function handleTokenPayAnalytics(request: Request): Promise<Response> {
   const cors = corsHeadersFor(request);
