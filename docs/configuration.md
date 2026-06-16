@@ -80,7 +80,7 @@ SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_
 | `SOON_USDC_RATE` | Fallback USD price per 1 SOON when DexScreener fails or `SOON_PRICE_SOURCE=env`. |
 | `SOON_X402_ENABLED` | Set `false` to disable token pay even when mint is set. |
 
-### External merchants (Token Pay beta)
+### Partner merchants (Token Pay)
 
 Register partner projects on the same Concierge deployment. **Public guide:** [conc-exe.xyz/docs/payment/token-pay](https://conc-exe.xyz/docs/payment/token-pay).
 

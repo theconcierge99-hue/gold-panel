@@ -6,6 +6,8 @@
 
 Today the **default merchant is SOON** (Concierge utility token). UI may still say “SOON”; swap branding via env (`TOKEN_PAY_SOON_SYMBOL`) or add merchants in `TOKEN_PAY_MERCHANTS_JSON`.
 
+**Beta** = early-stage platform (APIs may evolve). Integrations are **live** for registered merchants — other teams can ship today after merchant registration.
+
 ---
 
 ## Positioning
@@ -161,7 +163,7 @@ TOKEN_PAY_DEFAULT_MERCHANT=soon
 # X402_SOL_PAY_TO=…
 ```
 
-### Add external project (Phase 2)
+### Add partner merchant
 
 ```env
 TOKEN_PAY_MERCHANTS_JSON=[
@@ -178,6 +180,8 @@ TOKEN_PAY_MERCHANTS_JSON=[
   }
 ]
 ```
+
+Contact Concierge to register (operator adds row + redeploy). See public guide: **Integrate Token Pay in your project**.
 
 ---
 
@@ -235,21 +239,32 @@ Partners can verify integration and monitor usage via API + dashboard:
 | **402 accept matching** | Client payment must match server-built accept (amount, asset, payTo, network). |
 | **On-chain delta** | Confirmed tx must increase merchant token balance by ≥ required atomic amount. |
 | **Price bounds** | Per-merchant `usdMin` / `usdMax` optional; DexScreener cache keyed by merchant id. |
-| **Reserved ids** | `soon` cannot be hijacked via JSON; max 16 external merchants per deploy. |
+| **Reserved ids** | `soon` cannot be hijacked via JSON; max 16 partner merchants per deploy. |
 | **No facilitator keys** | Self-settle — user wallet signs; server only verifies via RPC. |
 
 Public APIs never expose partner `payTo` addresses (only `payToReady` / ATA status).
 
 ---
 
-## Integrator checklist (beta)
+## Integrator checklist
 
-1. Register merchant in `TOKEN_PAY_MERCHANTS_JSON` (or contact Telegram for review).
+1. Contact Concierge to register merchant in `TOKEN_PAY_MERCHANTS_JSON`.
 2. Set `payTo` + create token ATA on merchant wallet (one tiny transfer).
 3. List liquidity on DexScreener (or set `priceSource=env` + `fallbackUsd`).
-4. Confirm `GET /api/x402-config` → `tokenPay.merchants[]` shows `live: true` and `conciergeAtomic`.
-5. Trigger a paid route (e.g. `POST /api/concierge`) — `PAYMENT-REQUIRED` must include your `merchantId` accept.
-6. Browser: `SolanaSelfSettleScheme` + `extra.merchantId` selector (see `x402-browser-client.ts`).
+4. Confirm `GET /api/token-pay?merchant=ID` → `readiness.acceptReady === true`.
+5. Confirm `GET /api/x402-config` → `tokenPay.merchants[]` shows `live: true` and `conciergeAtomic`.
+6. Wire x402 client: decode `402` accepts, pick `extra.merchantId` + `extra.settlement: "self"`, sign SPL transfer, retry with `PAYMENT-SIGNATURE`.
+7. End-to-end test: HTTP 200 + Solscan credit to `payTo` + `/agent/token-pay` analytics.
+
+### Integration paths
+
+| Path | Who pays | Where revenue goes |
+|------|----------|-------------------|
+| **Direct API** | User/agent wallet | Your `payTo` on each Concierge paid route |
+| **Your app wrapping Concierge** | Your UI triggers self-settle | Your `payTo` |
+| **Agent / `pay curl`** | Agent wallet selects your token accept | Your `payTo` |
+
+Settlement verification runs on `conc-exe.xyz` for registered `resourceKinds`. Hosted verify on your own domain (npm SDK) is on the roadmap (Phase 3–4).
 
 ---
 

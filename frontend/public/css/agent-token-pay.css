@@ -60,24 +60,3 @@
   .tp-grid{grid-template-columns:1fr}
   .tp-card--readiness,.tp-card--wide{grid-column:1}
 }
-
-/* Home page quick rail */
-.agent-home-layout{display:flex;flex:1;min-height:calc(100vh - 52px)}
-.agent-home-rail{
-  width:56px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:12px 0;border-right:1px solid var(--pg-panel-border);
-  background:rgba(10,14,20,.94);backdrop-filter:blur(8px);z-index:15;
-}
-.agent-home-rail a{
-  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
-  font-size:9px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;
-  color:var(--pg-muted);padding:10px 6px;border-radius:4px;white-space:nowrap;
-}
-.agent-home-rail a:hover{color:var(--pg-text);background:rgba(255,255,255,.04)}
-.agent-home-rail a.rail-highlight{color:var(--pg-accent);border:1px solid rgba(201,168,76,.35)}
-.agent-home-rail a.rail-active{color:var(--pg-accent);background:var(--pg-accent-glow)}
-.agent-hero-wrap{flex:1;min-width:0}
-@media(max-width:640px){
-  .agent-home-rail{width:44px;padding:8px 0}
-  .agent-home-rail a{font-size:8px;padding:8px 4px}
-}

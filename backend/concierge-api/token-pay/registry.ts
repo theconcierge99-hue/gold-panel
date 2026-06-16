@@ -1,5 +1,5 @@
 /**
- * Token Pay merchant registry — env-backed today, JSON extensible for external projects.
+ * Token Pay merchant registry — env-backed today, JSON extensible for partner projects.
  */
 import { cleanEnvAddress, normalizeSolPayTo } from "../x402-address";
 import { normalizeSolanaMint } from "./mint";
