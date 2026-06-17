@@ -45,10 +45,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-partner-logo{
   width:24px;height:24px;object-fit:contain;flex-shrink:0;display:block;
 }
-.int-logo-mark{
-  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  border-radius:6px;border:1px solid var(--int-gold-dim);font-size:11px;font-weight:600;color:var(--int-gold-dim);
-}
+.int-partner-logo--zai{border-radius:6px}
 .int-partner-logo--card{width:28px;height:28px}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
 
@@ -128,7 +125,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-card{
   padding:18px 18px 16px;border:1px solid var(--int-border);background:var(--int-panel);
   border-radius:8px;text-decoration:none;color:inherit;display:flex;flex-direction:column;
-  min-height:160px;transition:border-color .15s,background .15s;
+  min-height:0;transition:border-color .15s,background .15s;
 }
 a.int-card:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
 .int-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
@@ -141,7 +138,7 @@ a.int-card:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
   font-family:'DM Mono',monospace;font-size:10px;color:var(--int-dim);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
 }
-.int-card p{font-size:13px;color:var(--int-muted);line-height:1.55;flex:1}
+.int-card-desc{font-size:13px;color:var(--int-muted);line-height:1.5;flex:1}
 .int-card-link{
   margin-top:12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--int-dim);
