@@ -62,7 +62,8 @@ const doc = {
       post: {
         operationId: "tokenPayVerify",
         summary: "Verify and settle partner Token Pay",
-        description: "After wallet signs SPL transfer, verify on-chain delta via Concierge.",
+        description:
+          "After wallet signs SPL transfer. Server rebuilds expected accept from merchantId/usdAmount and rejects unless PAYMENT-SIGNATURE accepted matches (including atomic amount); on-chain merchant token delta must be >= matched.amount.",
         tags: ["Token Pay"],
         parameters: [
           {
@@ -113,42 +114,6 @@ const doc = {
           },
         },
         responses: { "200": { description: "readiness preview" } },
-      },
-    },
-    "/api/concierge": {
-      post: {
-        operationId: "conciergeWithTokenPay",
-        summary: "Concierge AI (USDC or native token when merchant live)",
-        description:
-          "Example Concierge paid route — 402 accepts may include Token Pay SPL self-settle when merchants are registered.",
-        tags: ["Token Pay"],
-        "x-payment-info": {
-          price: { mode: "fixed", currency: "USD", amount: "0.100000" },
-          protocols: [{ x402: { network: "solana", facilitator: "https://facilitator.payai.network" } }],
-          offers: [
-            {
-              protocol: "x402",
-              amount: "100000",
-              currency: "USDC",
-              description: "$0.10 USDC or native SPL via Token Pay self-settle",
-            },
-          ],
-        },
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  mode: { type: "string", enum: ["chat", "enhance", "image"] },
-                  message: { type: "string" },
-                },
-              },
-            },
-          },
-        },
-        responses: { "402": { description: "Payment required" }, "200": { description: "Concierge reply" } },
       },
     },
   },

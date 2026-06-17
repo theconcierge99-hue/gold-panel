@@ -12,7 +12,7 @@
 - [MPP & AgentCash](https://conc-exe.xyz/docs/payment/mpp): MPPscan listing, twelve routes, agentcash add install.
 - [pay.sh](https://conc-exe.xyz/docs/payment/paysh): pay CLI catalog — sandbox curl, Claude/Codex MCP, pay-skills listing.
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
-- [Corbits](https://conc-exe.xyz/docs/corbits): Marketplace, Discovery, Faremeter x402, Interchange governance map.
+- [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini chat, enhance, image.
 - [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields (Meteora DLMM), whales, wallet, verdict.

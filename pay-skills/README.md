@@ -22,3 +22,18 @@ npm run paysh:validate        # pay catalog check (402 probe + Solana USDC)
 After merge, Concierge appears on [pay.sh](https://pay.sh/) within minutes.
 
 Site docs: [conc-exe.xyz/docs/payment/paysh](https://conc-exe.xyz/docs/payment/paysh)
+
+---
+
+## Token Pay (`conc-exe/token-pay`)
+
+**Target path:** `providers/conc-exe/token-pay/` · **Catalog FQN:** `conc-exe/token-pay`
+
+Provider dir contains **only** `PAY.md` + `openapi.json` (per pay-skills CONTRIBUTING).
+
+```bash
+npm run paysh:sync-token-pay-openapi
+npm run paysh:validate:token-pay
+```
+
+Copy `pay-skills/conc-exe/token-pay/` → fork `providers/conc-exe/token-pay/` · npm SDK: `@conc-exe/token-x402`

@@ -20,16 +20,20 @@
       <div class="docs-eyebrow">Integrations</div>
       <h1 class="docs-title">Corbits</h1>
       <p class="docs-lead">
-        <a class="ext" href="https://www.corbits.dev/" target="_blank" rel="noopener">Corbits</a> runs agent operations for neoteams — governance, discovery, marketplace, and x402 payments. Concierge is an <strong>API provider</strong>; most value is <strong>Marketplace + Discovery</strong>, not replacing PayAI on origin.
+        <a class="ext" href="https://www.corbits.dev/" target="_blank" rel="noopener">Corbits</a> runs agent operations for neoteams — governance, discovery, marketplace, and x402 payments. Concierge is an <strong>API provider</strong>. <strong>Primary discovery:</strong> direct origin + <a href="/docs/payment/paysh">pay.sh</a> (Solana Foundation catalog).
       </p>
+
+      <div class="card" style="border-color:rgba(251,191,36,.35);margin-bottom:20px">
+        <p><strong>ABK Labs hosted services (June 2026):</strong> Faremeter’s hosted <strong>Marketplace, Facilitator, and Discovery</strong> shut down <strong>26 June 2026</strong>. Concierge production is unaffected — we settle USDC via <strong>PayAI</strong> (recommended replacement) and list agents on <strong>pay.sh</strong>. Corbits sections below are <strong>optional</strong>; confirm current availability with <a class="ext" href="https://www.corbits.dev/" target="_blank" rel="noopener">corbits.dev</a>.</p>
+      </div>
 
       <h2 class="docs-h2">Integration map</h2>
       <div class="card">
         <table>
           <thead><tr><th>Corbits product</th><th>Role for Concierge</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td><strong>Marketplace</strong></td><td>Proxy + x402 in front of <code>conc-exe.xyz</code></td><td>Ready to register</td></tr>
-            <tr><td><strong>Discovery</strong></td><td>Catalog search for agents</td><td>After Marketplace</td></tr>
+            <tr><td><strong>Marketplace</strong></td><td>Proxy + x402 in front of <code>conc-exe.xyz</code></td><td>Optional — confirm post–Jun 2026</td></tr>
+            <tr><td><strong>Discovery</strong></td><td>Catalog search for agents</td><td>Optional; prefer <a href="/docs/payment/paysh">pay.sh</a></td></tr>
             <tr><td><strong>Faremeter / Flex</strong></td><td>x402 payment rail (same family as PayAI)</td><td>Compatible today</td></tr>
             <tr><td><strong>Interchange</strong></td><td>Govern agents <em>calling</em> Concierge</td><td>Optional (client SDK)</td></tr>
           </tbody>
@@ -56,8 +60,8 @@
 
       <h2 class="docs-h2">3. Faremeter / Flex vs direct origin</h2>
       <div class="card">
-        <p>Concierge already uses <strong>x402 v2</strong> + <strong>PayAI</strong> on <code>https://conc-exe.xyz</code>. That matches Faremeter’s protocol expectations for Marketplace proxies.</p>
-        <p>Keep direct origin for MPPscan / AgentCash; add Corbits proxy as a <strong>second front door</strong> for enterprise discovery and analytics.</p>
+        <p>Concierge already uses <strong>x402 v2</strong> + <strong>PayAI</strong> on <code>https://conc-exe.xyz</code> — ABK’s recommended facilitator after hosted Faremeter facilitator shutdown. Token Pay uses <strong>self-settle SPL</strong> (no facilitator).</p>
+        <p>Keep direct origin for <a href="/docs/payment/paysh">pay.sh</a>, MPPscan, and AgentCash. Corbits proxy remains an optional second front door.</p>
       </div>
 
       <h2 class="docs-h2">4. Interchange (enterprise agents)</h2>
@@ -77,16 +81,16 @@ await Interchange.register({
       <div class="card">
         <ol style="margin:0 0 0 18px;font-size:14px;color:var(--text-secondary);line-height:1.7">
           <li>Validate <code>npx -y @agentcash/discovery@latest discover https://conc-exe.xyz</code></li>
-          <li>Create Marketplace proxy → backend <code>https://conc-exe.xyz</code></li>
-          <li>Submit proxy to Discovery</li>
+          <li>List on <a href="/docs/payment/paysh">pay.sh</a> via <a class="ext" href="https://github.com/solana-foundation/pay-skills" target="_blank" rel="noopener">pay-skills</a> (primary catalog)</li>
+          <li>Optional: Create Corbits Marketplace proxy → backend <code>https://conc-exe.xyz</code></li>
+          <li>Optional: Submit proxy to Corbits Discovery</li>
           <li>Set <code>MPPSCAN_SERVER_URL</code> in Vercel if using MPPscan profile links</li>
-          <li>Optional: <a class="ext" href="https://www.corbits.dev/" target="_blank" rel="noopener">Book a Corbits demo</a></li>
         </ol>
       </div>
 
       <div class="cta-row">
-        <a class="btn gold" href="https://www.corbits.dev/marketplace" target="_blank" rel="noopener">Corbits Marketplace</a>
-        <a class="btn" href="/docs/payment/paysh">pay.sh</a>
+        <a class="btn gold" href="/docs/payment/paysh">pay.sh (primary)</a>
+        <a class="btn" href="https://www.corbits.dev/marketplace" target="_blank" rel="noopener">Corbits Marketplace</a>
         <a class="btn" href="/integrations">Integrations page</a>
         <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
       </div>

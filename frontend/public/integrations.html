@@ -97,7 +97,7 @@
       <h2 class="int-headline" id="distribution-h" style="font-size:clamp(22px,3.5vw,30px)">Listed on <em>independent registries</em></h2>
     </header>
     <p class="int-lead" style="margin-bottom:24px">
-      Paid routes are discoverable via OpenAPI and x402 fan-out. Concierge Agent is listed on <strong>MPPscan</strong> (AgentCash), <strong>Corbits Marketplace</strong> (x402 proxy), and compatible with <strong>pay.sh</strong> (agent CLI catalog). Settlement runs through <strong>PayAI</strong> (primary) with <strong><a href="https://dexter.cash/" target="_blank" rel="noopener noreferrer">Dexter</a></strong> as fallback — auto-listed on <strong>OpenDexter</strong> after Dexter settlements. Optional zauth telemetry reports settlements for trust scoring.
+      Paid routes are discoverable via OpenAPI and x402 fan-out. Primary agent catalog: <strong><a href="/docs/payment/paysh">pay.sh</a></strong> (Solana Foundation). Also listed on <strong>MPPscan</strong> (AgentCash). <strong>Corbits Marketplace</strong> is an optional x402 proxy — ABK hosted Marketplace/Discovery winds down 26 Jun 2026; confirm availability at <a href="/docs/corbits">corbits docs</a>. Settlement: <strong>PayAI</strong> (primary) + <strong><a href="https://dexter.cash/" target="_blank" rel="noopener noreferrer">Dexter</a></strong> fallback.
     </p>
     <div class="int-registry" id="int-registry">
       <div class="int-registry-bar">
@@ -215,7 +215,7 @@
           <span class="int-tag">Marketplace</span>
         </div>
         <p class="int-card-sub">Agent operations</p>
-        <p>Concierge Agent on Corbits Marketplace — x402 proxy for twelve pay-per-call routes (backend <code>conc-exe.xyz</code>). $0.10 USDC per call, $1 publish; MPP + x402 compatible.</p>
+        <p>Optional Corbits Marketplace proxy for twelve pay-per-call routes (backend <code>conc-exe.xyz</code>). Primary discovery: <a href="/docs/payment/paysh">pay.sh</a>. ABK hosted Marketplace/Discovery shuts down 26 Jun 2026 — see <a href="/docs/corbits">corbits docs</a>.</p>
         <span class="int-card-link">Integration docs →</span>
       </a>
       <a class="int-card" href="/docs/api/overview">

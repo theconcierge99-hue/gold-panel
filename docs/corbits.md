@@ -2,7 +2,29 @@
 
 [Corbits](https://www.corbits.dev/) is an **Agent Operations** platform (neoteams): governance (**Interchange**), service discovery (**Discovery**), API monetization (**Marketplace**), and x402 payments (**Flex** / **Faremeter**).
 
-Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery and Marketplace expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **twelve pay-per-call routes**, and **MPP/AgentCash** discovery.
+Concierge Agent (`https://conc-exe.xyz`) already ships what agents expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **twelve pay-per-call routes**, and **MPP/AgentCash** discovery.
+
+## ABK Labs hosted services (June 2026)
+
+**ABK Labs** (Faremeter) is winding down its **hosted Marketplace, Facilitator, and Discovery** services effective **26 June 2026**. Concierge **production** is unaffected:
+
+| Layer | Concierge today | After shutdown |
+|-------|-----------------|----------------|
+| **Facilitator (USDC)** | [PayAI](https://payai.network) primary · Dexter fallback | ✅ No change — PayAI is ABK’s recommended replacement |
+| **Token Pay (SPL)** | Self-settle on origin | ✅ No facilitator dependency |
+| **Agent discovery** | Direct origin + MPPscan + x402scan | ✅ No change |
+
+**Primary catalog path going forward:** [pay.sh](https://pay.sh/) via [solana-foundation/pay-skills](https://github.com/solana-foundation/pay-skills) — PRs submitted for `conc-exe/concierge-agent` and `conc-exe/token-pay`.
+
+Corbits sections below remain **optional** (proxy / Interchange). Confirm current availability with [corbits.dev](https://www.corbits.dev/) as ABK shifts focus to the Corbits Platform.
+
+## Recommended discovery order (2026)
+
+1. **Direct origin** — `https://conc-exe.xyz` + `openapi.json` + `/.well-known/x402`
+2. **[pay.sh](https://pay.sh/)** — `pay curl` / Claude / Codex MCP ([docs](paysh.md))
+3. **MPPscan / AgentCash** — [mpp.md](mppscan.md)
+4. **x402scan** — [x402scan.md](x402scan.md)
+5. **Corbits Marketplace + Discovery** — optional second front door (see below)
 
 ## What integrates today (no Corbits account required)
 
@@ -43,7 +65,7 @@ Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery an
 
 **Docs:** [Marketplace overview](https://docs.corbits.dev/marketplace/overview) · [Marketplace product](https://www.corbits.dev/marketplace)
 
-**Status:** Ready to register (operator action).
+**Status:** Optional — confirm with Corbits after ABK hosted Marketplace/Discovery wind-down (June 2026). Prefer **pay.sh** catalog for new listings.
 
 ---
 
@@ -55,7 +77,7 @@ Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery an
 
 **Docs:** [Discovery overview](https://docs.corbits.dev/discovery/overview)
 
-**Status:** After Marketplace listing.
+**Status:** After Marketplace listing (optional; pay.sh is the primary agent catalog).
 
 ---
 
@@ -63,11 +85,11 @@ Concierge Agent (`https://conc-exe.xyz`) already ships what Corbits Discovery an
 
 **What:** Faremeter = x402 payment framework; Flex = accept agent payments quickly.
 
-**Fit:** Concierge already settles via **PayAI** + x402 v2 on Solana/Base. No migration required to “support” Faremeter — Marketplace proxy uses the same protocol family.
+**Fit:** Concierge already settles via **PayAI** + x402 v2 on Solana/Base. No migration required — PayAI is the recommended facilitator after ABK hosted Faremeter facilitator shutdown.
 
-**Optional:** Run Faremeter facilitator alongside or instead of PayAI only if Corbits proxy requires it (follow their control-plane setup).
+**Optional:** Do not run a Faremeter facilitator on Concierge origin; PayAI + Dexter cover USDC settlement.
 
-**Status:** Compatible today.
+**Status:** Compatible today (PayAI on origin).
 
 ---
 
@@ -99,11 +121,11 @@ const agent = await Interchange.register({
 
 ## Recommended rollout order
 
-1. **Keep** direct origin `https://conc-exe.xyz` (MPPscan, AgentCash, pay.sh, browsers).
-2. **Register** [Marketplace](https://www.corbits.dev/marketplace) proxy → backend conc-exe.xyz.
-3. **List** proxy on [Discovery](https://docs.corbits.dev/discovery/overview).
-4. **Document** Interchange for teams that need spend caps + audit on agents calling you.
-5. **Optional:** Book [Corbits demo](https://www.corbits.dev/) for Control Plane + Solana settlement tuning.
+1. **Keep** direct origin `https://conc-exe.xyz` (pay.sh, MPPscan, AgentCash, browsers).
+2. **List on pay.sh** — merge PR to [pay-skills](https://github.com/solana-foundation/pay-skills) (`conc-exe/concierge-agent`, `conc-exe/token-pay`).
+3. **Optional:** Register [Corbits Marketplace](https://www.corbits.dev/marketplace) proxy → backend conc-exe.xyz (confirm availability post–June 2026).
+4. **Optional:** List Corbits proxy on [Discovery](https://docs.corbits.dev/discovery/overview).
+5. **Optional:** Document Interchange for teams that need spend caps + audit on agents calling you.
 
 ## What we do not duplicate
 
@@ -111,7 +133,7 @@ const agent = await Interchange.register({
 |---------|------------------------|
 | Marketplace proxy URL | Direct x402 on origin (simpler for integrators) |
 | Interchange policies | `agt_` + optional `X-Agent-Id` |
-| Discovery index | MPPscan + x402scan + pay.sh + `/openapi.json` |
+| Discovery index | **pay.sh** + MPPscan + x402scan + `/openapi.json` |
 
 Running **both** direct origin and Corbits proxy is valid: direct for open agents, Corbits proxy for enterprise discovery and dashboard analytics.
 
