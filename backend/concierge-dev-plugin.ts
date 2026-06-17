@@ -75,7 +75,7 @@ async function handleConcierge(
 
   try {
     const raw = await readBodyWithLimit(request);
-    const { mode, message, history, signal, market } = validateConciergeRequest(raw);
+    const { mode, message, history, signal, market, agentModel } = validateConciergeRequest(raw);
     const result = await runConciergeGemini({
       apiKey: apiKey!,
       mode,
@@ -83,6 +83,7 @@ async function handleConcierge(
       history,
       signal,
       market,
+      agentModel,
     });
     return { status: 200, json: result };
   } catch (e) {

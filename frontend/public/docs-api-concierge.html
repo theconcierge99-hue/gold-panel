@@ -22,7 +22,7 @@
       <p class="docs-lead">Natural-language market and DeFi intelligence — one paid turn at a time.</p>
 
       <div class="card">
-        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> (or equivalent in a live <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> merchant token on Solana) · Gemini 2.5 Flash with live market, DeFi desk (TVL, Meteora DLMM yields, whales, verdict), lounge memory, and optional trading-plan structure.</p>
+        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> (or equivalent in a live <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> merchant token on Solana) · <strong>Gemini 2.5 Flash</strong> (default) or optional <strong>GLM-4.7 Flash</strong> (Z.ai free tier) with live market, DeFi desk, lounge memory, and trading-plan structure.</p>
       </div>
 
       <h2 class="docs-h2">Payment options</h2>
@@ -43,8 +43,10 @@
     { "role": "user", "text": "…" },
     { "role": "model", "text": "…" }
   ],
-  "market": []
+  "market": [],
+  "agentModel": "gemini"
 }</code></pre>
+        <p>Optional <code>agentModel</code>: <code>gemini</code> (default) or <code>glm-4.7-flash</code> (Z.ai — server needs <code>GLM_API_KEY</code>). Image, enhance, and trading-plan paths always use Gemini. GLM failures fall back to Gemini (<code>modelFallback: true</code>).</p>
         <table>
           <thead><tr><th>mode</th><th>Purpose</th></tr></thead>
           <tbody>
@@ -63,6 +65,7 @@
   "topics": ["crypto", "defi"],
   "marketLive": [{ "symbol": "BTC", "price": "…", "change": "…" }],
   "dataAsOf": "2026-05-21T12:00:00.000Z",
+  "modelUsed": "gemini-2.5-flash",
   "images": ["data:image/png;base64,…"]
 }</code></pre>
         <p>Yield / DLMM questions use live <strong>Meteora DLMM API</strong> + DeFi Llama in the prompt. DLLM typos are interpreted as DLMM.</p>

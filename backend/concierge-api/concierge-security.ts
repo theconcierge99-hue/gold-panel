@@ -1,5 +1,7 @@
 import type { ChatTurn, ConciergeMode } from "./concierge-gemini";
 import type { MarketTick } from "./concierge-brain";
+import type { ConciergeAgentModelId } from "./concierge-llm-models";
+import { parseConciergeAgentModel } from "./concierge-llm-models";
 
 /** Vercel Hobby–safe limits (cost + abuse protection) */
 export const LIMITS = {
@@ -17,6 +19,7 @@ export type ConciergeRequest = {
   history: ChatTurn[];
   signal?: { title?: string; summary?: string };
   market: MarketTick[];
+  agentModel: ConciergeAgentModelId;
 };
 
 export function isProduction(): boolean {
@@ -154,7 +157,7 @@ export function validateConciergeRequest(raw: unknown): ConciergeRequest {
     }
   }
 
-  return { mode, message, history, signal, market };
+  return { mode, message, history, signal, market, agentModel: parseConciergeAgentModel(body.agentModel) };
 }
 
 export async function readBodyWithLimit(request: Request): Promise<unknown> {
@@ -202,6 +205,8 @@ export function sanitizePublicError(error: unknown): string {
 
   if (
     msg.includes("GEMINI_API_KEY") ||
+    msg.includes("GLM_API_KEY") ||
+    msg.includes("ZAI_API_KEY") ||
     msg.includes("API key") ||
     msg.includes("API_KEY")
   ) {

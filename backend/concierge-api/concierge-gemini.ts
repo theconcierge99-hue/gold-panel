@@ -35,6 +35,8 @@ import {
   formatLiveMarketForPrompt,
   type LiveMarketSnapshot,
 } from "./market-data";
+import { GLM_CHAT_MODEL_ID, glmApiKeyFromEnv, glmChatCompletion } from "./concierge-glm";
+import type { ConciergeAgentModelId } from "./concierge-llm-models";
 import { withTimeout } from "./with-timeout";
 
 export type ChatTurn = { role: "user" | "model"; text: string };
@@ -365,6 +367,16 @@ async function resolveIntelligenceContext(
   return { intelBlock, ticks, snapshot, loungeMemoryBlock };
 }
 
+type ConciergeChatResult = {
+  reply: string;
+  images?: string[];
+  topics?: string[];
+  marketLive?: MarketTick[];
+  dataAsOf?: string;
+  modelUsed?: string;
+  modelFallback?: boolean;
+};
+
 export async function runConciergeGemini(options: {
   apiKey: string;
   mode: ConciergeMode;
@@ -373,16 +385,8 @@ export async function runConciergeGemini(options: {
   signal?: { title?: string; summary?: string };
   market?: MarketTick[];
   liveSnapshot?: LiveMarketSnapshot | null;
-}): Promise<
-  | {
-      reply: string;
-      images?: string[];
-      topics?: string[];
-      marketLive?: MarketTick[];
-      dataAsOf?: string;
-    }
-  | { title: string; summary: string; implication: string }
-> {
+  agentModel?: ConciergeAgentModelId;
+}): Promise<ConciergeChatResult | { title: string; summary: string; implication: string }> {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
   const { message, history = [], signal, market = [] } = options;
   const queryMessage = normalizeConciergeDeFiMessage(message);
@@ -498,20 +502,52 @@ export async function runConciergeGemini(options: {
     userMessage: message,
     recentUserMessages: recentUser,
   });
+  const historyForLlm = history.map((h) => ({
+    role: h.role,
+    text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
+  }));
+  const genConfig = generationConfigForMode(responseMode);
+  const agentModel = options.agentModel ?? "gemini";
+
+  if (agentModel === "glm-4.7-flash" && !requireTradingPlan) {
+    const glmKey = glmApiKeyFromEnv();
+    if (glmKey) {
+      try {
+        const text = await glmChatCompletion({
+          apiKey: glmKey,
+          systemPrompt,
+          history: historyForLlm.slice(-historyTurns),
+          message,
+          recentUserMessages: recentUser,
+          maxTokens: Number(genConfig.maxOutputTokens ?? 3072),
+          temperature: Number(genConfig.temperature ?? 0.55),
+          timeoutMs: GEMINI_CALL_MS,
+        });
+        return {
+          reply: wrapHtmlParagraphs(text),
+          topics,
+          modelUsed: GLM_CHAT_MODEL_ID,
+          ...meta,
+        };
+      } catch (e) {
+        console.warn(
+          "[concierge-gemini] GLM failed, fallback Gemini",
+          e instanceof Error ? e.message : e,
+        );
+      }
+    } else {
+      console.warn("[concierge-gemini] GLM_API_KEY missing, fallback Gemini");
+    }
+  }
+
   const geminiPayload = {
     systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents: buildContents(
-      history.map((h) => ({
-        role: h.role,
-        text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
-      })),
-      message,
-      historyTurns,
-      recentUser,
-    ),
-    generationConfig: generationConfigForMode(responseMode),
+    contents: buildContents(historyForLlm, message, historyTurns, recentUser),
+    generationConfig: genConfig,
   };
   let reply = "";
+  let modelUsed: string | undefined;
+  const glmFallback = agentModel === "glm-4.7-flash";
   const chatModels = requireTradingPlan ? TRADING_PLAN_MODELS : STANDARD_MODELS;
   const chatTimeout = requireTradingPlan ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
   const geminiDeadline = requireTradingPlan ? Date.now() + GEMINI_TRADING_BUDGET_MS : 0;
@@ -525,6 +561,7 @@ export async function runConciergeGemini(options: {
       const { text } = await geminiCall(apiKey, model, geminiPayload, modelTimeout);
       if (text) {
         reply = text;
+        modelUsed = model;
         break;
       }
       errors.push(`${model}: empty`);
@@ -536,6 +573,12 @@ export async function runConciergeGemini(options: {
     throw new Error(errors[0] || "Concierge timed out — try again in a moment");
   }
 
-  return { reply: wrapHtmlParagraphs(reply), topics, ...meta };
+  return {
+    reply: wrapHtmlParagraphs(reply),
+    topics,
+    modelUsed: modelUsed ?? chatModels[0],
+    ...(glmFallback ? { modelFallback: true } : {}),
+    ...meta,
+  };
 }
 

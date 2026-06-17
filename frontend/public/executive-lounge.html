@@ -190,11 +190,20 @@
 
   .concierge-shell{display:flex;flex-direction:column;flex:1;min-height:0;height:100%;background:var(--bg);position:relative}
   .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
-  .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:default;text-align:left}
+  .conc-model-wrap{position:relative}
+  .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:pointer;text-align:left;border-radius:8px;padding:4px 8px;margin:-4px -8px;transition:background .15s;font:inherit;color:inherit}
+  .conc-model:hover,.conc-model[aria-expanded="true"]{background:var(--nav-active-bg)}
   .conc-model-text{display:flex;flex-direction:column;gap:5px;line-height:1}
   .conc-model-title{display:inline-flex;align-items:center;gap:8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text-primary);letter-spacing:.02em}
   .conc-model .chev{font-size:11px;color:var(--text-muted);font-family:'Outfit',sans-serif}
   .conc-model-sub{font-family:'Outfit',sans-serif;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
+  .conc-model-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:228px;padding:6px;background:var(--header-bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:40;display:none}
+  .conc-model-menu.open{display:block}
+  .conc-model-opt{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 12px;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;color:var(--text-primary);font-family:'Outfit',sans-serif}
+  .conc-model-opt:hover{background:var(--nav-active-bg)}
+  .conc-model-opt.active{background:var(--nav-active-bg)}
+  .conc-model-opt-name{font-weight:500;font-size:13px}
+  .conc-model-opt-sub{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)}
 
   .conc-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
   .conc-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .25s}
@@ -718,11 +727,23 @@
     <section class="view" id="view-concierge">
       <div class="concierge-shell" id="conciergeShell">
         <div class="conc-topbar">
-          <div class="conc-model" aria-label="Concierge AI">
-            <img class="el-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="54" height="54" />
-            <div class="conc-model-text">
-              <div class="conc-model-title">Concierge <span class="chev">▾</span></div>
-              <div class="conc-model-sub">Your Intelligence Partner</div>
+          <div class="conc-model-wrap">
+            <button type="button" class="conc-model" id="concModelBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="concModelMenu" aria-label="Concierge AI model">
+              <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="54" height="54" />
+              <div class="conc-model-text">
+                <div class="conc-model-title">Concierge <span class="chev">▾</span></div>
+                <div class="conc-model-sub" id="concModelSub">Gemini Flash · Default</div>
+              </div>
+            </button>
+            <div class="conc-model-menu" id="concModelMenu" role="listbox" aria-label="Agent model">
+              <button type="button" class="conc-model-opt active" role="option" data-model="gemini" aria-selected="true">
+                <span class="conc-model-opt-name">Gemini Flash</span>
+                <span class="conc-model-opt-sub">Default · Google AI</span>
+              </button>
+              <button type="button" class="conc-model-opt" role="option" data-model="glm-4.7-flash" aria-selected="false">
+                <span class="conc-model-opt-name">GLM-4.7 Flash</span>
+                <span class="conc-model-opt-sub">Z.ai · free tier</span>
+              </button>
             </div>
           </div>
           <button type="button" class="conc-drawer-btn" id="concHistBtn" aria-label="Chat history" onclick="toggleConcDrawer()">
@@ -1774,6 +1795,7 @@
     closeAllDrawers();
     syncMobileNav(v);
     if(v==='concierge'){
+      initConciergeModelPicker();
       if(!window._chatInit){ window._chatInit=true; ensureConciergeSession(); }
       else { renderConciergeHistory(); }
       syncConciergeLayout();
@@ -1958,13 +1980,66 @@
     return false;
   }
 
-  // CHAT (Gemini via /api/concierge — Vercel Hobby serverless + local dev middleware)
+  // CHAT (Gemini + optional GLM via /api/concierge — Vercel Hobby Edge + local dev middleware)
   const CONC_SESSIONS_KEY = 'el-concierge-sessions';
   const CONC_CURRENT_KEY = 'el-concierge-current';
+  const CONC_AGENT_MODEL_KEY = 'el-concierge-agent-model';
+  const CONCIERGE_AGENT_MODELS = {
+    gemini: { id: 'gemini', label: 'Gemini Flash', subtitle: 'Default · Google AI' },
+    'glm-4.7-flash': { id: 'glm-4.7-flash', label: 'GLM-4.7 Flash', subtitle: 'Z.ai · free tier' },
+  };
   const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];
   window._sessionMessages = [];
   window._currentSessionId = null;
+
+  function getConciergeAgentModel(){
+    const raw = localStorage.getItem(CONC_AGENT_MODEL_KEY);
+    return raw === 'glm-4.7-flash' ? 'glm-4.7-flash' : 'gemini';
+  }
+  function syncConciergeModelUi(){
+    const model = getConciergeAgentModel();
+    const meta = CONCIERGE_AGENT_MODELS[model] || CONCIERGE_AGENT_MODELS.gemini;
+    const sub = document.getElementById('concModelSub');
+    if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : 'Free tier');
+    document.querySelectorAll('.conc-model-opt').forEach(btn=>{
+      const on = btn.dataset.model === model;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+  function closeConcModelMenu(){
+    const menu = document.getElementById('concModelMenu');
+    const btn = document.getElementById('concModelBtn');
+    menu?.classList.remove('open');
+    btn?.setAttribute('aria-expanded', 'false');
+  }
+  function initConciergeModelPicker(){
+    if(window._concModelInit) return;
+    window._concModelInit = true;
+    syncConciergeModelUi();
+    const btn = document.getElementById('concModelBtn');
+    const menu = document.getElementById('concModelMenu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const open = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    menu.querySelectorAll('.conc-model-opt').forEach(opt=>{
+      opt.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = opt.dataset.model === 'glm-4.7-flash' ? 'glm-4.7-flash' : 'gemini';
+        localStorage.setItem(CONC_AGENT_MODEL_KEY, id);
+        syncConciergeModelUi();
+        closeConcModelMenu();
+      });
+    });
+    document.addEventListener('click', closeConcModelMenu);
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape') closeConcModelMenu();
+    });
+  }
 
   function genSessionId(){ return 's_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7); }
   function loadAllSessions(){
@@ -2971,6 +3046,7 @@
       message,
       history: window._chatHistory,
       market: getMarketContext(),
+      agentModel: getConciergeAgentModel(),
     };
   }
 
