@@ -23,6 +23,8 @@
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
 - [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, agent cards. List on [MPPscan](https://www.mppscan.com/register).
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
+- [SOON Token](https://conc-exe.xyz/token): Tokenomics — 55/20/15/10 split, SOON pay burns, holder tiers.
+- [SOON Transparency](https://conc-exe.xyz/token/transparency): Weekly buyback and burn reports (post-T0).
 
 ## OpenAPI
 

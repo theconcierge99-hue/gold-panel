@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<title>Token — SOON (draft)</title>
+<title>SOON Token — Concierge Utility</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Utility-heavy token for Executive Lounge — desk credits, agent tiers, and revenue-linked buyback tied to x402 Concierge payments. Launch SOON." />
+<meta name="description" content="SOON tokenomics for Concierge — revenue-linked buyback, SOON payment burns, holder tiers, and transparent weekly reports on conc-exe.xyz." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/token" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -23,141 +23,206 @@
   </div>
 
   <header class="tok-hero">
-    <p class="tok-eyebrow">Utility token · draft</p>
+    <p class="tok-eyebrow">Utility token</p>
     <div class="tok-title-row">
       <h1 class="tok-name">SOON</h1>
       <span class="tok-symbol">SOON</span>
-      <span class="tok-soon-badge">Draft</span>
+      <span class="tok-soon-badge">Pre-launch</span>
     </div>
     <p class="tok-draft-note">
-      <strong>Draft only.</strong> Name and ticker are <strong>SOON</strong> until final branding. No contract address, no Pump.fun link, and no purchase yet.
+      Contract address and Pump.fun link publish at <strong>T0</strong>. Tokenomics below are the operating policy — not financial advice.
     </p>
     <p class="tok-lead">
-      <strong>SOON</strong> ties the agent economy to the Concierge desk: pay-per-call USDC via x402 today, holder benefits on Lounge
-      and Agent routes, and <em>revenue-linked</em> buyback as paid usage grows.
+      <strong>SOON</strong> ties the agent economy to the Concierge desk: pay-per-call x402 today, holder utility on Lounge and Agent routes,
+      and <em>revenue-linked</em> buyback plus on-chain burns when users pay in SOON.
     </p>
     <div class="tok-pills">
-      <span class="tok-pill">Solana · Pump.fun (planned)</span>
-      <span class="tok-pill">12 x402 routes · $0.10 USDC</span>
-      <span class="tok-pill">Buyback from desk revenue</span>
+      <span class="tok-pill">Solana · Pump.fun → Raydium</span>
+      <span class="tok-pill">12 x402 routes · from $0.10</span>
+      <span class="tok-pill">55% ops · 25% to token · 20% treasury</span>
+      <span class="tok-pill"><a href="/token/transparency" style="color:inherit;text-decoration:none">Weekly transparency →</a></span>
     </div>
   </header>
 
-  <section class="tok-section" aria-labelledby="utility-h">
-    <h2 id="utility-h">What <em>utility</em> means</h2>
-    <p>Every feature ties to live product usage on conc-exe.xyz — Concierge AI, Intel APIs, Lounge wire, and agent identity.</p>
-    <div class="tok-grid">
-      <div class="tok-card">
-        <h3>Concierge credits</h3>
-        <p>Hold <strong>SOON</strong> → monthly free or discounted Concierge messages in the Lounge (tiered).</p>
-      </div>
-      <div class="tok-card">
-        <h3>Intel bundle discount</h3>
-        <p>Agents pay <strong>$0.08</strong> per Intel call (vs $0.10) on TVL, yields, whales, wallet, verdict routes.</p>
-      </div>
-      <div class="tok-card">
-        <h3>Agent card badge</h3>
-        <p><code>agt_…</code> identities with minimum hold → verified desk badge on Discover.</p>
-      </div>
-      <div class="tok-card">
-        <h3>Publish rebate</h3>
-        <p>Creator signal publish ($1 USDC) → partial rebate in <strong>SOON</strong> from treasury (not new inflation).</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="tok-section" aria-labelledby="tiers-h">
-    <h2 id="tiers-h">Holder <em>tiers</em> (planned)</h2>
-    <p>Snapshot + 7-day minimum hold. Amounts are draft and will be announced before launch.</p>
+  <section class="tok-section" aria-labelledby="policy-h">
+    <h2 id="policy-h">Operating <em>policy</em></h2>
+    <p>All percentages apply to <strong>net protocol revenue</strong> — USDC that remains with the protocol after creator splits and facilitator costs.</p>
     <div class="tok-table-wrap">
       <table class="tok-table">
         <thead>
-          <tr><th>Tier</th><th>Hold (draft)</th><th>Utility</th></tr>
+          <tr><th>Revenue source</th><th>Counted toward net</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>Desk</strong></td><td>50k SOON</td><td>3 Concierge credits / month, profile badge</td></tr>
-          <tr><td><strong>Agent</strong></td><td>250k SOON</td><td>Intel $0.08, Discover priority</td></tr>
-          <tr><td><strong>Institutional</strong></td><td>1M+ SOON</td><td>Higher rate limits, macro webhook beta</td></tr>
+          <tr><td>Concierge, Intel, news unlock</td><td><strong>100%</strong> merchant share</td></tr>
+          <tr><td>Signal publish ($1)</td><td><strong>100%</strong></td></tr>
+          <tr><td>Signal unlock ($0.10)</td><td><strong>50%</strong> merchant share only</td></tr>
+          <tr><td>Pay in SOON (Token Pay)</td><td>Separate burn path — not in USDC buckets</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <section class="tok-section" aria-labelledby="revenue-h">
-    <h2 id="revenue-h">Revenue-linked <em>buyback</em></h2>
-    <p>Buyback funded only from real x402 USDC inflow — transparent weekly reports (tx links).</p>
-    <div class="tok-flow" aria-label="Revenue split draft">
-      <span>USDC in (x402)</span>
+  <section class="tok-section" aria-labelledby="usdc-h">
+    <h2 id="usdc-h">USDC <em>revenue split</em></h2>
+    <div class="tok-flow" aria-label="Net USDC revenue allocation">
+      <span>Net USDC</span>
       <span class="tok-flow-arrow">→</span>
-      <span>70% ops</span>
+      <span>55% ops</span>
       <span class="tok-flow-arrow">·</span>
-      <span>15% treasury</span>
+      <span>20% treasury</span>
       <span class="tok-flow-arrow">·</span>
-      <span>10% buyback</span>
+      <span>15% buyback</span>
       <span class="tok-flow-arrow">·</span>
-      <span>5% LP</span>
+      <span>10% LP</span>
     </div>
-    <p>Each buyback: <strong>60% burn</strong> · <strong>40% LP / staking</strong>. Milestone burns when cumulative paid calls hit protocol targets.</p>
+    <p>From the <strong>15% buyback</strong> budget: <strong>60% burn</strong> · <strong>40% LP add</strong> (~9% and ~6% of net revenue respectively).</p>
+    <div class="tok-grid">
+      <div class="tok-card">
+        <h3>Operations (55%)</h3>
+        <p>Infrastructure, RPC, AI inference, support, and a three-month runway reserve.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Treasury (20%)</h3>
+        <p>Holder credits, publisher rebates, and grants — funded without new mints.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Buyback (15%)</h3>
+        <p>Weekly Jupiter purchase when net ≥ <strong>$40</strong> (otherwise rolls to next week).</p>
+      </div>
+      <div class="tok-card">
+        <h3>LP depth (10%)</h3>
+        <p>Raydium liquidity after migrate — healthier charts, less dump risk.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tok-section" aria-labelledby="soon-pay-h">
+    <h2 id="soon-pay-h">Pay in <em>SOON</em></h2>
+    <p>Token Pay self-settle on Solana — each payment is verifiable on-chain.</p>
+    <div class="tok-flow" aria-label="SOON payment split">
+      <span>SOON received</span>
+      <span class="tok-flow-arrow">→</span>
+      <span>80% burn</span>
+      <span class="tok-flow-arrow">·</span>
+      <span>20% treasury</span>
+    </div>
+    <p><strong>8% discount</strong> vs USDC when checkout uses SOON (e.g. $0.10 call → $0.092 equivalent in SOON).</p>
+  </section>
+
+  <section class="tok-section" aria-labelledby="utility-h">
+    <h2 id="utility-h">Holder <em>utility</em></h2>
+    <p>Snapshot + 7-day minimum hold. Benefits ship in phases after T0.</p>
+    <div class="tok-grid">
+      <div class="tok-card">
+        <h3>Concierge credits</h3>
+        <p>Monthly free or discounted Concierge messages in the Lounge (tiered).</p>
+      </div>
+      <div class="tok-card">
+        <h3>Intel discount</h3>
+        <p>Agents pay <strong>$0.08</strong> per Intel call (vs $0.10) on TVL, yields, whales, wallet, verdict.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Agent badge</h3>
+        <p><code>agt_…</code> identities with minimum hold → verified desk badge on Discover.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Publish rebate</h3>
+        <p>Signal publish ($1) → partial SOON rebate from treasury (not inflation).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tok-section" aria-labelledby="tiers-h">
+    <h2 id="tiers-h">Holder <em>tiers</em></h2>
+    <div class="tok-table-wrap">
+      <table class="tok-table">
+        <thead>
+          <tr><th>Tier</th><th>Minimum hold</th><th>Utility</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Desk</strong></td><td>50,000 SOON</td><td>3 Concierge credits / month · profile badge</td></tr>
+          <tr><td><strong>Agent</strong></td><td>250,000 SOON</td><td>Intel $0.08 · Discover priority</td></tr>
+          <tr><td><strong>Institutional</strong></td><td>1,000,000+ SOON</td><td>Higher rate limits · macro webhook beta</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tok-section" aria-labelledby="milestones-h">
+    <h2 id="milestones-h">Milestone <em>burns</em></h2>
+    <p>One-time burns from protocol treasury SOON (not from operations budget) when cumulative net revenue hits:</p>
+    <div class="tok-table-wrap">
+      <table class="tok-table">
+        <thead>
+          <tr><th>Cumulative net revenue</th><th>Treasury burn</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>$25,000</strong></td><td>5,000,000 SOON</td></tr>
+          <tr><td><strong>$100,000</strong></td><td>15,000,000 SOON</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="tok-section" aria-labelledby="routes-h">
-    <h2 id="routes-h">Tied to <em>12 live routes</em></h2>
+    <h2 id="routes-h">Tied to <em>live routes</em></h2>
     <div class="tok-table-wrap">
       <table class="tok-table">
         <thead>
           <tr><th>Route</th><th>Price</th><th>Token hook</th></tr>
         </thead>
         <tbody>
-          <tr><td>Concierge chat</td><td>$0.10 USDC</td><td>Credits / discount</td></tr>
-          <tr><td>News / wire unlock</td><td>$0.10 USDC</td><td>Credits</td></tr>
-          <tr><td>Signal open</td><td>$0.10 USDC</td><td>Discount</td></tr>
-          <tr><td>intel-tvl · yields · whales · wallet · verdict</td><td>$0.10 each</td><td>10-call bundles for holders</td></tr>
-          <tr><td>Signal publish</td><td>$1.00 USDC</td><td>Publisher rebate</td></tr>
+          <tr><td>Concierge chat</td><td>$0.10</td><td>Credits · SOON pay −8%</td></tr>
+          <tr><td>News / wire unlock</td><td>$0.10</td><td>Credits</td></tr>
+          <tr><td>Signal open</td><td>$0.10</td><td>Discount · 50% to creator</td></tr>
+          <tr><td>intel-tvl · yields · whales · wallet · verdict</td><td>$0.10 each</td><td>Holder Intel discount</td></tr>
+          <tr><td>Signal publish</td><td>$1.00</td><td>Publisher rebate</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section class="tok-section" aria-labelledby="supply-h">
-    <h2 id="supply-h">Supply <em>draft</em> (post-migrate)</h2>
+    <h2 id="supply-h">Supply <em>allocation</em> (post-migrate)</h2>
     <div class="tok-table-wrap">
       <table class="tok-table">
         <thead>
           <tr><th>Bucket</th><th>%</th><th>Notes</th></tr>
         </thead>
         <tbody>
-          <tr><td>Public (curve + Raydium)</td><td>65–72%</td><td>Market liquidity</td></tr>
-          <tr><td>Protocol treasury</td><td>18–22%</td><td>Multisig, buyback, LP, grants</td></tr>
-          <tr><td>Team</td><td>8–10%</td><td>12-month vest after 60-day cliff</td></tr>
-          <tr><td>Community / agents</td><td>5–7%</td><td>Early <code>agt_</code>, testers, TG</td></tr>
+          <tr><td>Public (curve + Raydium)</td><td><strong>68%</strong></td><td>Market liquidity</td></tr>
+          <tr><td>Protocol treasury</td><td><strong>20%</strong></td><td>Multisig 2-of-3 · buyback milestones · LP · grants</td></tr>
+          <tr><td>Team</td><td><strong>9%</strong></td><td>12-month vest · 90-day cliff</td></tr>
+          <tr><td>Community / agents</td><td><strong>3%</strong></td><td>Early <code>agt_</code> · testers · 6-month linear</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section class="tok-section" aria-labelledby="roadmap-h">
-    <h2 id="roadmap-h">90-day <em>roadmap</em></h2>
+    <h2 id="roadmap-h">Launch <em>roadmap</em></h2>
     <div class="tok-grid">
-      <div class="tok-card"><h3>T0 · Launch</h3><p>Pump.fun → migrate → LP. Publish CA with full utility roadmap and live product links.</p></div>
-      <div class="tok-card"><h3>Week 1</h3><p>Holder allowlist, Concierge credits live, first buyback window announced.</p></div>
-      <div class="tok-card"><h3>Week 2–4</h3><p>Intel discount, agent badge on Discover, weekly buyback report.</p></div>
-      <div class="tok-card"><h3>Month 2–3</h3><p>Staking for credits, optional pay-in-token pilot on one route.</p></div>
+      <div class="tok-card"><h3>T0 · Launch</h3><p>Pump.fun → migrate → Raydium LP. Publish CA, utility live, transparency page active.</p></div>
+      <div class="tok-card"><h3>Week 1</h3><p>Holder snapshot, Concierge credits, first buyback window (if threshold met).</p></div>
+      <div class="tok-card"><h3>Week 2–4</h3><p>Intel discount, agent badge on Discover, weekly transparency report.</p></div>
+      <div class="tok-card"><h3>Month 2+</h3><p>SOON checkout on Concierge routes · milestone burns as revenue scales.</p></div>
     </div>
   </section>
 
   <section class="tok-section">
     <p class="tok-disclaimer">
-      <strong>Not financial advice.</strong> SOON is experimental. No guaranteed returns, yield, or profit.
+      <strong>Not financial advice.</strong> SOON is experimental utility for the Concierge desk. No guaranteed returns, yield, or profit.
       Token launch involves high risk including total loss. Utility features ship in phases; dates may change.
       Consult qualified counsel before participating in any token sale or trading.
     </p>
   </section>
 
   <footer class="tok-foot">
-    <a class="tok-btn gold" href="/agent">Concierge Agent</a>
+    <a class="tok-btn gold" href="/token/transparency">Transparency</a>
+    <a class="tok-btn" href="/agent">Concierge Agent</a>
     <a class="tok-btn" href="/lounge">Executive Lounge</a>
-    <a class="tok-btn" href="/docs">Documentation</a>
-    <span class="tok-btn disabled" aria-disabled="true">Pump.fun · SOON</span>
+    <a class="tok-btn" href="/docs/payment/token-pay">Token Pay</a>
+    <span class="tok-btn disabled" aria-disabled="true">Pump.fun · at T0</span>
   </footer>
 </div>
 </body>

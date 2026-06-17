@@ -54,6 +54,10 @@
       "destination": "/token.html"
     },
     {
+      "source": "/token/transparency",
+      "destination": "/token-transparency.html"
+    },
+    {
       "source": "/agent",
       "destination": "/agent.html"
     },

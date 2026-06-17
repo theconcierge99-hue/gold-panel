@@ -79,6 +79,30 @@ html[data-theme="light"] .tok-disclaimer{background:rgba(250,248,244,.8)}
 .tok-btn.gold:hover{background:var(--tok-glow)}
 .tok-btn.disabled{opacity:.45;pointer-events:none;cursor:not-allowed}
 
+.tok-stat-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;
+}
+.tok-stat{
+  padding:16px;border:1px solid var(--tok-border);background:var(--tok-panel);border-radius:8px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.tok-stat-label{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--tok-dim);
+}
+.tok-stat-value{font-size:18px;font-weight:600;color:var(--tok-text);letter-spacing:.01em}
+.tok-stat-sub{font-size:11px;color:var(--tok-muted);line-height:1.45}
+
+.tok-inline-link{color:var(--tok-gold);text-decoration:none}
+.tok-inline-link:hover{text-decoration:underline}
+
+.tok-table--reports td{font-size:11px}
+.tok-report-placeholder td{
+  text-align:center;color:var(--tok-dim);font-size:13px;padding:24px 16px!important;
+}
+.tok-report-note{
+  margin-top:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--tok-dim);letter-spacing:.06em;
+}
+
 @media(max-width:640px){
   .tok-wrap{padding:20px 16px 40px}
   .tok-table{font-size:11px}

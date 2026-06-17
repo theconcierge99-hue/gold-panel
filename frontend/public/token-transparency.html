@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>SOON Transparency — Concierge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Weekly SOON buyback and burn transparency for Concierge — net x402 revenue, Jupiter swaps, and on-chain burn links." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/token/transparency" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/brand-logo.css" />
+<link rel="stylesheet" href="/css/token.css" />
+</head>
+<body class="tok-page el-premium">
+<div class="tok-wrap">
+  <div class="tok-top">
+    <a class="tok-back" href="/token">← SOON tokenomics</a>
+    <div class="tok-brand">
+      <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="48" height="48" />
+      <span>CONCIERGE<em>_</em></span>
+    </div>
+  </div>
+
+  <header class="tok-hero">
+    <p class="tok-eyebrow">Transparency</p>
+    <h1 class="tok-name" style="margin-bottom:12px">Weekly <em style="font-style:italic;color:var(--tok-gold)">reports</em></h1>
+    <p class="tok-lead">
+      Buyback and burn activity tied to real x402 usage. Reports publish every <strong>Monday (UTC)</strong> after T0 launch,
+      with Solscan links for swaps and burns.
+    </p>
+    <div class="tok-pills">
+      <span class="tok-pill">Min buyback $40 / week</span>
+      <span class="tok-pill">Net revenue only</span>
+      <span class="tok-pill">SOON pay · 80% burn / tx</span>
+    </div>
+  </header>
+
+  <section class="tok-section" aria-labelledby="summary-h">
+    <h2 id="summary-h">Policy <em>summary</em></h2>
+    <div class="tok-stat-grid">
+      <div class="tok-stat">
+        <span class="tok-stat-label">USDC net split</span>
+        <span class="tok-stat-value">55 · 20 · 15 · 10</span>
+        <span class="tok-stat-sub">ops · treasury · buyback · LP</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">Buyback split</span>
+        <span class="tok-stat-value">60% burn</span>
+        <span class="tok-stat-sub">40% LP add</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">SOON payment</span>
+        <span class="tok-stat-value">80% burn</span>
+        <span class="tok-stat-sub">20% treasury · 8% vs USDC discount</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">Cumulative net</span>
+        <span class="tok-stat-value" id="tok-cumulative">—</span>
+        <span class="tok-stat-sub">Milestone burns at $25k · $100k</span>
+      </div>
+    </div>
+    <p style="margin-top:16px">Full policy: <a href="/token" class="tok-inline-link">/token</a></p>
+  </section>
+
+  <section class="tok-section" aria-labelledby="reports-h">
+    <h2 id="reports-h">Weekly <em>ledger</em></h2>
+    <p>Each row: net USDC in the period, buyback executed, SOON burned (buyback + direct SOON payments), and LP added.</p>
+    <div class="tok-table-wrap">
+      <table class="tok-table tok-table--reports">
+        <thead>
+          <tr>
+            <th>Week ending (UTC)</th>
+            <th>Net USDC</th>
+            <th>Buyback USDC</th>
+            <th>SOON burned</th>
+            <th>LP add</th>
+            <th>Links</th>
+          </tr>
+        </thead>
+        <tbody id="tok-report-body">
+          <tr class="tok-report-placeholder">
+            <td colspan="6">Reports begin after T0 (token launch). Check back here for Solscan swap and burn transactions.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tok-report-note" id="tok-report-note">Last updated: pre-launch · policy effective at T0</p>
+  </section>
+
+  <section class="tok-section" aria-labelledby="how-h">
+    <h2 id="how-h">How we <em>count</em></h2>
+    <div class="tok-grid">
+      <div class="tok-card">
+        <h3>Net USDC</h3>
+        <p>Merchant USDC from x402 settles minus creator share on signal unlocks. Facilitator fees are negligible on current tiers.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Buyback window</h3>
+        <p>If weekly net buyback budget is under <strong>$40</strong>, funds roll forward — no forced micro-swaps.</p>
+      </div>
+      <div class="tok-card">
+        <h3>SOON payments</h3>
+        <p>Each Token Pay transfer: <strong>80%</strong> burned in-period, <strong>20%</strong> to treasury. Listed in weekly SOON burned column.</p>
+      </div>
+      <div class="tok-card">
+        <h3>Verification</h3>
+        <p>All burns and swaps link to Solana explorers. Treasury multisig address published at T0.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tok-section">
+    <p class="tok-disclaimer">
+      Transparency reports are operational disclosures, not investment advice. Figures are best-effort from on-chain and facilitator records.
+      Rounding and timing (UTC week boundaries) may cause small differences vs wallet dashboards.
+    </p>
+  </section>
+
+  <footer class="tok-foot">
+    <a class="tok-btn gold" href="/token">Tokenomics</a>
+    <a class="tok-btn" href="/docs/payment/token-pay">Token Pay</a>
+    <a class="tok-btn" href="/agent/endpoints">API routes</a>
+    <a class="tok-btn" href="/lounge">Lounge</a>
+  </footer>
+</div>
+<script>
+(function () {
+  /** Post-launch: replace REPORTS array and set cumulative. Until T0, table shows placeholder. */
+  var REPORTS = [];
+
+  var body = document.getElementById("tok-report-body");
+  var cumulativeEl = document.getElementById("tok-cumulative");
+  var noteEl = document.getElementById("tok-report-note");
+
+  if (!REPORTS.length) return;
+
+  var cumulative = 0;
+  body.innerHTML = "";
+  REPORTS.forEach(function (row) {
+    cumulative += row.netUsd || 0;
+    var tr = document.createElement("tr");
+    var links = (row.links || [])
+      .map(function (l) {
+        return '<a class="tok-inline-link" href="' + l.url + '" target="_blank" rel="noopener noreferrer">' + l.label + "</a>";
+      })
+      .join(" · ");
+    tr.innerHTML =
+      "<td>" + row.weekEnd + "</td>" +
+      "<td>$" + row.netUsd.toFixed(2) + "</td>" +
+      "<td>$" + row.buybackUsd.toFixed(2) + "</td>" +
+      "<td>" + row.soonBurned.toLocaleString() + "</td>" +
+      "<td>$" + row.lpUsd.toFixed(2) + "</td>" +
+      "<td>" + (links || "—") + "</td>";
+    body.appendChild(tr);
+  });
+
+  if (cumulativeEl) cumulativeEl.textContent = "$" + cumulative.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  if (noteEl) noteEl.textContent = "Last updated: " + REPORTS[0].weekEnd + " UTC";
+})();
+</script>
+</body>
+</html>
