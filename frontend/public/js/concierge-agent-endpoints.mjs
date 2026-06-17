@@ -18,13 +18,14 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     method: "POST",
     path: "/api/concierge",
     name: "Concierge chat",
-    description: "One Gemini turn — macro, geo, technicals, DeFi desk, trading plans (HTML reply).",
+    description: "Concierge chat — Gemini (default) or GLM-4.7 Flash; macro, DeFi desk, trading plans (HTML reply).",
     priceUsd: "0.10",
     sampleBody: {
       mode: "chat",
       message: "Hottest Meteora DLMM pools — IL risks?",
       history: [],
       market: [],
+      agentModel: "gemini",
     },
   },
   {

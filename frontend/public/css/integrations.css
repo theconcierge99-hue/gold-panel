@@ -45,6 +45,10 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-partner-logo{
   width:24px;height:24px;object-fit:contain;flex-shrink:0;display:block;
 }
+.int-logo-mark{
+  width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  border-radius:6px;border:1px solid var(--int-gold-dim);font-size:11px;font-weight:600;color:var(--int-gold-dim);
+}
 .int-partner-logo--card{width:28px;height:28px}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
 

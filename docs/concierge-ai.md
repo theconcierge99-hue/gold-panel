@@ -1,6 +1,6 @@
 # Concierge AI
 
-Concierge is the in-lounge research desk powered by **Google Gemini**. It answers market questions, drafts trading frameworks, enhances signal copy, and optionally generates chart-style visuals.
+Concierge is the in-lounge research desk powered by **Google Gemini** (default) with optional **GLM-4.7 Flash** (Z.ai) for standard chat. It answers market questions, drafts trading frameworks, enhances signal copy, and optionally generates chart-style visuals.
 
 **Endpoint:** `POST /api/concierge`  
 **Price:** 0.1 USDC per request (chat and image modes; enhance is invoked from Create Signal).
@@ -90,9 +90,12 @@ Implementation:
   "mode": "chat",
   "message": "Explain the Fed impact on DXY and BTC this week.",
   "history": [],
-  "market": []
+  "market": [],
+  "agentModel": "gemini"
 }
 ```
+
+Optional `agentModel`: `gemini` (default) or `glm-4.7-flash`. Trading-plan, image, and enhance paths always use Gemini. GLM requires `GLM_API_KEY` on the server and falls back to Gemini on error.
 
 ## Response example (chat)
 
@@ -101,17 +104,25 @@ Implementation:
   "reply": "<p>...</p>",
   "topics": ["macro", "crypto"],
   "marketLive": [{ "symbol": "BTC", "price": "...", "change": "..." }],
-  "dataAsOf": "2026-05-21T12:00:00.000Z"
+  "dataAsOf": "2026-05-21T12:00:00.000Z",
+  "modelUsed": "gemini-2.5-flash"
 }
 ```
 
 ## Models
 
-Configured in `api/lib/concierge-gemini.ts` with fallback list:
+| Model | When | Notes |
+|-------|------|-------|
+| **Gemini 2.5 Flash** | Default; all modes | `GEMINI_API_KEY` — fallback list in `concierge-gemini.ts` |
+| **GLM-4.7 Flash** | Optional chat only | `GLM_API_KEY` (Z.ai) — `agentModel: "glm-4.7-flash"` |
+
+Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 
 - `gemini-2.5-flash`
 - `gemini-2.5-flash-lite`
 - `gemini-2.0-flash`
+
+GLM adapter: `backend/concierge-api/concierge-glm.ts` · registry: `concierge-llm-models.ts`
 
 ## External integration (agents)
 
@@ -128,6 +139,7 @@ Other projects can call Concierge over HTTPS with **x402 payment only** — no A
 | File | Role |
 |------|------|
 | `api/concierge.ts` | Edge handler |
-| `api/lib/concierge-gemini.ts` | Gemini API calls |
+| `api/lib/concierge-gemini.ts` | Gemini + GLM routing |
+| `api/lib/concierge-glm.ts` | Z.ai OpenAI-compatible client |
 | `api/lib/concierge-brain.ts` | Prompts + language |
 | `public/executive-lounge.html` | Chat UI |

@@ -742,7 +742,7 @@
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="glm-4.7-flash" aria-selected="false">
                 <span class="conc-model-opt-name">GLM-4.7 Flash</span>
-                <span class="conc-model-opt-sub">Z.ai · free tier</span>
+                <span class="conc-model-opt-sub">Z.ai</span>
               </button>
             </div>
           </div>
@@ -1986,7 +1986,7 @@
   const CONC_AGENT_MODEL_KEY = 'el-concierge-agent-model';
   const CONCIERGE_AGENT_MODELS = {
     gemini: { id: 'gemini', label: 'Gemini Flash', subtitle: 'Default · Google AI' },
-    'glm-4.7-flash': { id: 'glm-4.7-flash', label: 'GLM-4.7 Flash', subtitle: 'Z.ai · free tier' },
+    'glm-4.7-flash': { id: 'glm-4.7-flash', label: 'GLM-4.7 Flash', subtitle: 'Z.ai' },
   };
   const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];
@@ -2001,7 +2001,7 @@
     const model = getConciergeAgentModel();
     const meta = CONCIERGE_AGENT_MODELS[model] || CONCIERGE_AGENT_MODELS.gemini;
     const sub = document.getElementById('concModelSub');
-    if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : 'Free tier');
+    if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : meta.subtitle);
     document.querySelectorAll('.conc-model-opt').forEach(btn=>{
       const on = btn.dataset.model === model;
       btn.classList.toggle('active', on);

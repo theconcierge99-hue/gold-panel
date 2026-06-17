@@ -1,4 +1,4 @@
-/** Concierge chat agent models (Gemini default + optional GLM free tier). */
+/** Concierge chat agent models (Gemini default + optional GLM). */
 export const CONCIERGE_AGENT_MODELS = {
   gemini: {
     id: "gemini",
@@ -9,7 +9,7 @@ export const CONCIERGE_AGENT_MODELS = {
   "glm-4.7-flash": {
     id: "glm-4.7-flash",
     label: "GLM-4.7 Flash",
-    subtitle: "Z.ai · free tier",
+    subtitle: "Z.ai",
     provider: "glm",
   },
 } as const;

@@ -6,7 +6,14 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 
 | Variable | Description |
 |----------|-------------|
-| `GEMINI_API_KEY` | Google AI Studio key for Concierge. Restrict by HTTP referrer in Google Cloud (production domain + `*.vercel.app`). |
+| `GEMINI_API_KEY` | Google AI Studio key for Concierge (required). Restrict by HTTP referrer in Google Cloud (production domain + `*.vercel.app`). |
+
+## Optional — Concierge agent models
+
+| Variable | Description |
+|----------|-------------|
+| `GLM_API_KEY` | Z.ai API key for optional `agentModel: "glm-4.7-flash"` on `POST /api/concierge` chat. Alias: `ZAI_API_KEY`. Falls back to Gemini if unset. |
+| `GLM_API_BASE_URL` | Default `https://api.z.ai/api/paas/v4` — override only if Z.ai changes endpoint. |
 
 ## x402 payments
 
