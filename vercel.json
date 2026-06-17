@@ -146,6 +146,10 @@
       "destination": "/docs-integration-x402scan.html"
     },
     {
+      "source": "/docs/integration/poncho",
+      "destination": "/docs-integration-poncho.html"
+    },
+    {
       "source": "/docs/integration/zauth",
       "destination": "/docs-integration-zauth.html"
     },

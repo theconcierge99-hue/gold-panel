@@ -13,15 +13,16 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/docs` | Documentation (web) |
 | `https://your-domain.com/docs/agents` | Concierge API for agents & integrators (x402) |
 | `https://your-domain.com/docs/agent-identity` | Agent identity (`agt_…`), wallets, agent cards |
-| `https://your-domain.com/docs/intel` | Concierge Intel APIs (TVL, yields, whales, wallet, verdict) |
+| `https://your-domain.com/docs/intel` | Concierge Intel APIs (macro, wire, TVL, yields, whales, wallet, verdict, alpha) |
 | `https://your-domain.com/deploy-version.txt` | Deployed git commit (verify production build) |
 | `https://your-domain.com/api/market` | Free headline + signal feed (JSON) |
 | `https://your-domain.com/api/x402-config` | Public payment + RWA readiness flags |
 | `https://your-domain.com/.well-known/x402` | x402 resource fan-out (discovery) |
 | `https://your-domain.com/openapi.json` | OpenAPI + x-payment-info (x402 + MPP discovery) |
 | `https://your-domain.com/docs/builders` | Builder integration guide — x402, OpenAPI, code examples |
-| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, twelve-route structure |
+| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, fifteen-route structure |
 | `https://your-domain.com/docs/payment/paysh` | pay.sh CLI catalog — `pay curl`, Claude/Codex MCP, pay-skills listing |
+| `https://your-domain.com/docs/integration/poncho` | Poncho marketplace — macro, wire, intel via x402 (no API key) |
 
 ## Core features
 

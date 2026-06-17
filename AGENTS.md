@@ -10,6 +10,12 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 - **Handlers:** `backend/concierge-api/` — keep new handlers **outside** root `/api/` (Vercel Hobby ≤12 serverless functions)
 - **x402 / Token Pay:** `backend/concierge-api/token-pay/` · partner APIs `/api/token-pay-build-accept`, `/api/token-pay-verify` · SDK `packages/token-x402`
 - **x402 / OpenAPI:** `backend/concierge-api/x402-server.ts`, `x402-discovery.ts`
+- **Research intel (Poncho / x402scan):** `concierge-research-intel.ts` — `intel-macro`, `intel-wire` (15 pay-per-call routes total)
+
+## Integrations
+
+- **Poncho** — `/docs/integration/poncho` · discoverable via x402scan; no Concierge API key for consumers
+- **x402scan / MPPscan / pay.sh** — discovery + AgentCash settlement
 
 ## Grok Build
 

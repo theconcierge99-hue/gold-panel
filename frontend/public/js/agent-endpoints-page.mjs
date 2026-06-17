@@ -31,6 +31,7 @@ if (chipsEl) {
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",
+  research: "Research",
   intel: "DeFi Intel",
   alpha: "Alpha Intel",
   lounge: "Lounge",
@@ -49,6 +50,7 @@ function renderFilters() {
   const segments = [
     { id: "all", label: "All" },
     { id: "concierge", label: "Concierge" },
+    { id: "research", label: "Research" },
     { id: "intel", label: "DeFi Intel" },
     { id: "alpha", label: "Alpha Intel" },
     { id: "lounge", label: "Lounge" },
@@ -97,7 +99,7 @@ function renderCatalog() {
     if (!grouped[ep.segment]) grouped[ep.segment] = [];
     grouped[ep.segment].push(ep);
   }
-  const order = ["concierge", "intel", "alpha", "lounge"];
+  const order = ["concierge", "research", "intel", "alpha", "lounge"];
   listEl.innerHTML = order
     .filter((seg) => grouped[seg]?.length)
     .map((seg) => {

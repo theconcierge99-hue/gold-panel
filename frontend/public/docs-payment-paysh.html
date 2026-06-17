@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>pay.sh — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Call Concierge Agent from pay.sh — pay CLI, Claude, Codex. Twelve x402 routes, sandbox wallet, no API keys." />
+<meta name="description" content="Call Concierge Agent from pay.sh — pay CLI, Claude, Codex. Fifteen x402 routes, sandbox wallet, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/payment/paysh" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -25,7 +25,7 @@
 
       <div class="card">
         <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
-        <p><strong>Service:</strong> Concierge Agent API · twelve pay-per-call routes</p>
+        <p><strong>Service:</strong> Concierge Agent API · fifteen pay-per-call routes</p>
         <p><strong>Settlement:</strong> x402 USDC via PayAI (primary; Dexter fallback on Solana/Base)</p>
         <p><strong>Expected catalog FQN:</strong> <code>conc-exe/concierge-agent</code></p>
         <p><strong>Catalog:</strong> <a class="ext" href="https://pay.sh/api/catalog" target="_blank" rel="noopener">pay.sh/api/catalog ↗</a></p>
@@ -83,7 +83,7 @@ pay skills search "defi"</code></pre>
         <p>After listing, agents discover Concierge via <code>pay skills search</code> instead of hardcoding URLs.</p>
       </div>
 
-      <h2 class="docs-h2">Twelve routes</h2>
+      <h2 class="docs-h2">Fifteen routes</h2>
       <div class="card">
         <table>
           <thead><tr><th>Route</th><th>Price</th><th>Segment</th></tr></thead>
@@ -97,6 +97,9 @@ pay skills search "defi"</code></pre>
             <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
             <tr><td><code>POST /api/concierge-intel-listing</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
             <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-macro</code></td><td>$0.10</td><td>Research</td></tr>
+            <tr><td><code>POST /api/concierge-intel-wire</code></td><td>$0.10</td><td>Research</td></tr>
+            <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
             <tr><td><code>POST /api/news-open</code></td><td>$0.10</td><td>Lounge</td></tr>
             <tr><td><code>POST /api/lounge-signal-open</code></td><td>$0.10</td><td>Lounge</td></tr>
             <tr><td><code>POST /api/lounge-signal-publish</code></td><td>$1.00</td><td>Lounge</td></tr>
@@ -122,7 +125,7 @@ pay skills search "defi"</code></pre>
       <div class="card">
         <ul>
           <li><a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> — <code>npx agentcash add https://conc-exe.xyz</code></li>
-          <li><a class="ext" href="https://www.x402scan.com/resources/register" target="_blank" rel="noopener">x402scan</a> — x402 ecosystem registry</li>
+          <li><a href="/docs/integration/poncho" class="gold-link">Poncho</a> — agent marketplace (no Concierge API key)</li>
           <li><a href="/docs/corbits" class="gold-link">Corbits Marketplace</a> — hosted proxy for enterprise buyers</li>
           <li><a href="/integrations" class="gold-link">Integrations</a> — full partner stack</li>
         </ul>

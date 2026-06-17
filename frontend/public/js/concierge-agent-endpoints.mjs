@@ -5,6 +5,7 @@ export const CONCIERGE_AGENT_ORIGIN =
 export const CONCIERGE_AGENT_SEGMENTS = [
   { id: "all", label: "All" },
   { id: "concierge", label: "Concierge" },
+  { id: "research", label: "Research" },
   { id: "intel", label: "DeFi Intel" },
   { id: "alpha", label: "Alpha Intel" },
   { id: "lounge", label: "Lounge" },
@@ -119,6 +120,26 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { message: "scalp BTC 15m entry stop", symbols: ["BTC"], intervals: ["5m", "15m"] },
   },
   {
+    id: "intel-macro",
+    segment: "research",
+    method: "POST",
+    path: "/api/concierge-intel-macro",
+    name: "Intel — Macro",
+    description: "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH, Fear & Greed, Treasury yields, central-bank calendar.",
+    priceUsd: "0.10",
+    sampleBody: {},
+  },
+  {
+    id: "intel-wire",
+    segment: "research",
+    method: "POST",
+    path: "/api/concierge-intel-wire",
+    name: "Intel — Wire",
+    description: "Wire headline digest — live RSS plus Lounge feed; optional category or message filter.",
+    priceUsd: "0.10",
+    sampleBody: { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
+  },
+  {
     id: "news-open",
     segment: "lounge",
     method: "POST",
@@ -164,5 +185,6 @@ export function countBySegment() {
   const alpha = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "alpha").length;
   const lounge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "lounge").length;
   const concierge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "concierge").length;
-  return { total, intel, alpha, lounge, concierge };
+  const research = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "research").length;
+  return { total, intel, alpha, lounge, concierge, research };
 }

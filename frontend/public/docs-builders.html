@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>For Builders — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, twelve JSON endpoints, no API keys." />
+<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, fifteen JSON endpoints, Poncho marketplace, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/builders" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -61,12 +61,14 @@
         <p style="margin-top:12px"><a href="/docs/payment/token-pay" class="gold-link">Full Token Pay (Beta) integration guide →</a></p>
       </div>
 
-      <h2 class="docs-h2">Twelve endpoints — pick by use case</h2>
+      <h2 class="docs-h2">Fifteen endpoints — pick by use case</h2>
       <div class="card">
         <table>
           <thead><tr><th>Segment</th><th>Path</th><th>When to use</th></tr></thead>
           <tbody>
             <tr><td>Chat</td><td><code>POST /api/concierge</code></td><td>Natural language — trading plans, macro, geo, DeFi Q&amp;A (HTML <code>reply</code>)</td></tr>
+            <tr><td><strong>Research</strong></td><td><code>POST /api/concierge-intel-macro</code></td><td>SPX, VIX, DXY, Fear &amp; Greed, Treasury yields — Poncho / agents</td></tr>
+            <tr><td><strong>Research</strong></td><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest — category or message filter</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-tvl</code></td><td>Chain + protocol TVL snapshot</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-yields</code></td><td>Screened yield pools (Meteora DLMM, Jupiter, …)</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-whales</code></td><td>BTC/ETH/SOL top-trader positioning</td></tr>
@@ -75,12 +77,13 @@
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops — insider-first synthesis</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move candidates (up or down)</td></tr>
+            <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-scalp</code></td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/news-open</code></td><td>Unlock wire article URL</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-publish</code></td><td>Publish creator signal ($1)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-open</code></td><td>Unlock creator signal summary</td></tr>
           </tbody>
         </table>
-        <p><strong>Structured JSON</strong> → Intel + Alpha routes. <strong>HTML narrative</strong> → Concierge chat. Details: <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> · <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a></p>
+        <p><strong>Structured JSON</strong> → Research + Intel + Alpha routes. <strong>HTML narrative</strong> → Concierge chat. Agent marketplaces: <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/integration/x402scan" class="gold-link">x402scan</a>. Details: <a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a></p>
       </div>
 
       <h2 class="docs-h2">Example — probe Alpha Intel (curl)</h2>

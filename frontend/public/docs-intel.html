@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<title>DeFi Intel — Concierge Documentation</title>
+<title>Intel APIs — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Integrate Concierge DeFi intelligence: TVL, yields, whales, wallet snapshot, and desk verdict via separate x402 endpoints." />
+<meta name="description" content="Integrate Concierge intel APIs — macro, wire, DeFi TVL, yields, whales, wallet, verdict, and alpha desks via x402." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/api/intel" />
@@ -19,8 +19,8 @@
     <div class="docs-content">
       <div class="docs-topbar"><a href="/docs/api/overview">← API Overview</a></div>
       <div class="docs-eyebrow">API Reference</div>
-      <h1 class="docs-title">DeFi Intel</h1>
-      <p class="docs-lead">Five x402 endpoints for structured desk data — no Gemini, fast JSON.</p>
+      <h1 class="docs-title">Intel APIs</h1>
+      <p class="docs-lead">Structured JSON desks — research (macro, wire), DeFi intel, alpha, and verdict. No Gemini on intel routes; fast agent JSON. Listed on <a href="/docs/integration/poncho" class="gold-link">Poncho</a> and <a href="/docs/integration/x402scan" class="gold-link">x402scan</a>.</p>
 
   <nav class="toc">
     <div class="toc-title">On this page</div>
@@ -28,6 +28,8 @@
       <li><a href="#overview">Overview</a></li>
       <li><a href="#payment">x402 payment</a></li>
       <li><a href="#endpoints">Endpoints</a></li>
+      <li><a href="#macro">Macro</a></li>
+      <li><a href="#wire">Wire</a></li>
       <li><a href="#tvl">TVL</a></li>
       <li><a href="#yields">Yields</a></li>
       <li><a href="#whales">Whales</a></li>
@@ -45,6 +47,8 @@
       <table>
         <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
         <tbody>
+          <tr><td><code>POST /api/concierge-intel-macro</code></td><td>Macro snapshot — SPX, VIX, DXY, yields, calendar</td></tr>
+          <tr><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest (RSS + Lounge memory)</td></tr>
           <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>Chain + protocol TVL</td></tr>
           <tr><td><code>POST /api/concierge-intel-yields</code></td><td>Jupiter, Meteora, DLMM, lending pools</td></tr>
           <tr><td><code>POST /api/concierge-intel-whales</code></td><td>Top-trader positioning (BTC/ETH/SOL)</td></tr>
@@ -53,9 +57,10 @@
           <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops (insider-first alpha)</td></tr>
           <tr><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
           <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move up/down candidates</td></tr>
+          <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
         </tbody>
       </table>
-      <p class="note">Discovery: <a class="ext" href="/openapi.json">openapi.json</a> · <a class="ext" href="/.well-known/x402">/.well-known/x402</a> · <a href="/docs/payment/mpp">MPPscan / AgentCash</a> · <a href="/docs/builders" class="gold-link">For Builders</a></p>
+      <p class="note">Discovery: <a class="ext" href="/openapi.json">openapi.json</a> · <a class="ext" href="/.well-known/x402">/.well-known/x402</a> · <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/payment/mpp">MPPscan / AgentCash</a> · <a href="/docs/builders" class="gold-link">For Builders</a></p>
     </div>
   </section>
 
@@ -80,6 +85,30 @@
   "message": "optional context string"
 }</code></pre>
       <p>All endpoints accept an empty JSON object <code>{}</code> unless noted.</p>
+    </div>
+  </section>
+
+  <section id="macro">
+    <h2>Macro — <code>POST /api/concierge-intel-macro</code></h2>
+    <div class="card">
+      <p><strong>Body:</strong> <code>{}</code> (optional <code>message</code> for logging)</p>
+      <p><strong>Response:</strong> <code>marks[]</code> (SPX, VIX, DXY, GOLD, BTC, ETH), <code>sentiment</code> (Fear &amp; Greed), <code>macro</code> (Treasury yields, upcoming central-bank events, headlines).</p>
+      <p>Tagged <strong>Research</strong> in OpenAPI for agent marketplaces (e.g. Poncho).</p>
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'</code></pre>
+    </div>
+  </section>
+
+  <section id="wire">
+    <h2>Wire — <code>POST /api/concierge-intel-wire</code></h2>
+    <div class="card">
+<pre><code>{
+  "category": "Geopolitics",
+  "message": "Middle East oil supply",
+  "limit": 8
+}</code></pre>
+      <p><strong>Response:</strong> <code>headlines[]</code> with <code>title</code>, <code>source</code>, <code>origin</code> (<code>live</code> | <code>lounge</code>). Use <code>POST /api/news-open</code> to unlock a full article URL.</p>
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
+  -d '{"category":"Macro","limit":5}'</code></pre>
     </div>
   </section>
 

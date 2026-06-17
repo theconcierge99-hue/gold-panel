@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Poncho — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Use Concierge Agent from Poncho — pay-per-call macro, wire, DeFi intel, and chat via x402. No Concierge API keys required." />
+<meta property="og:image" content="https://conc-exe.xyz/images/integrations/poncho.png" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/poncho" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-poncho">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <div class="docs-integration-brand">
+        <img src="/images/integrations/poncho.png" alt="Poncho" width="52" height="52" />
+        <h1 class="docs-title">Poncho</h1>
+      </div>
+      <p class="docs-lead">
+        <a class="ext" href="https://tryponcho.com/" target="_blank" rel="noopener">Poncho</a> is a conversational agent with a marketplace of pay-per-use tools. Concierge Agent is listed on <a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — Poncho discovers our routes and settles USDC per call via AgentCash. <strong>No Concierge API key</strong> is required.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live on x402scan · discoverable by Poncho marketplace</p>
+        <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>Poncho:</strong> <a class="ext" href="https://tryponcho.com/" target="_blank" rel="noopener">tryponcho.com ↗</a></p>
+        <p><strong>Registry:</strong> <a class="ext" href="https://www.x402scan.com/" target="_blank" rel="noopener">x402scan.com ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="card">
+        <ol>
+          <li>You describe an outcome in Poncho chat (macro snapshot, wire headlines, DeFi intel, …).</li>
+          <li>Poncho searches its tool marketplace and selects a Concierge route from <code>openapi.json</code> / x402scan.</li>
+          <li>AgentCash pays <strong>$0.10 USDC</strong> per call (or sandbox equivalent).</li>
+          <li>JSON or HTML result appears inline — no API keys, no Concierge signup.</li>
+        </ol>
+        <p class="note">Hosting your own Poncho agent (<code>poncho.config.js</code>) uses <code>PONCHO_AUTH_TOKEN</code> for <em>your</em> deployment — not for calling Concierge as a consumer.</p>
+      </div>
+
+      <h2 class="docs-h2">Research routes (non-trading)</h2>
+      <div class="card">
+        <p>OpenAPI tags <strong>Research</strong>, <strong>News</strong>, and <strong>Utility</strong> help Poncho route beyond trading desks:</p>
+        <table>
+          <thead><tr><th>Route</th><th>Use in Poncho</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge-intel-macro</code></td><td>SPX, VIX, DXY, gold, BTC/ETH, Fear &amp; Greed, Treasury yields, central-bank calendar</td></tr>
+            <tr><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest — live RSS + Lounge memory; optional <code>category</code> / <code>message</code></td></tr>
+            <tr><td><code>POST /api/concierge</code></td><td>Natural-language research chat (Gemini or GLM-4.7 Flash)</td></tr>
+            <tr><td><code>POST /api/news-open</code></td><td>Unlock full article URL from the wire</td></tr>
+          </tbody>
+        </table>
+        <p>Full catalog: <a href="/agent/endpoints" class="gold-link">15 endpoints</a> · <a href="/openapi.json" target="_blank" rel="noopener">openapi.json</a></p>
+      </div>
+
+      <h2 class="docs-h2">Example prompts (Poncho chat)</h2>
+      <div class="card">
+<pre><code>Call Concierge intel-macro and summarize SPX, VIX, and Fear &amp; Greed.
+
+Get Concierge intel-wire headlines about geopolitics — limit 8.
+
+What paid routes does Concierge Agent API offer?</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Test without Poncho</h2>
+      <div class="card">
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
+  -d '{"category":"Geopolitics","limit":5}'
+
+curl -s https://conc-exe.xyz/openapi.json | jq '.paths | keys | length'</code></pre>
+        <p>Expect <strong>15</strong> paths after deploy. See <a href="/docs/quickstart" class="gold-link">Quickstart</a> · <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — discovery registry Poncho uses</li>
+          <li><a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></li>
+          <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a></li>
+          <li><a href="/docs/builders" class="gold-link">For Builders</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://tryponcho.com/" target="_blank" rel="noopener">Open Poncho ↗</a>
+        <a class="btn" href="https://www.x402scan.com/" target="_blank" rel="noopener">x402scan ↗</a>
+        <a class="btn" href="/agent/endpoints">Endpoints</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · Poncho marketplace · <a href="https://tryponcho.com/" class="ext" target="_blank" rel="noopener">tryponcho.com</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

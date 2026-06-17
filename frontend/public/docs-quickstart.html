@@ -57,7 +57,16 @@
         <p>Alpha desks (airdrop, listing, momentum):</p>
 <pre><code>POST /api/concierge-intel-momentum
 { "message": "BTC volatility", "limit": 5, "includeInsider": true }</code></pre>
-        <p>See <a href="/docs/api/intel" class="gold-link">DeFi Intel</a> · full builder guide: <a href="/docs/builders" class="gold-link">For Builders</a>.</p>
+        <p>See <a href="/docs/api/intel" class="gold-link">Intel APIs</a> · full builder guide: <a href="/docs/builders" class="gold-link">For Builders</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">Research intel (Poncho-friendly)</h2>
+      <div class="card">
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
+  -d '{"category":"Geopolitics","limit":5}'</code></pre>
+        <p>Also callable from <a href="/docs/integration/poncho" class="gold-link">Poncho</a> via x402scan discovery. See <a href="/docs/api/intel" class="gold-link">Intel APIs</a>.</p>
       </div>
 
       <h2 class="docs-h2">pay.sh (fastest for agents)</h2>

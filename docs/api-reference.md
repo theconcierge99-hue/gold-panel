@@ -100,6 +100,8 @@ Structured JSON for agents — see [concierge-intel.md](concierge-intel.md) · w
 
 | POST | Purpose |
 |------|---------|
+| `/api/concierge-intel-macro` | Macro snapshot — SPX, VIX, DXY, yields, calendar |
+| `/api/concierge-intel-wire` | Wire headline digest (RSS + Lounge memory) |
 | `/api/concierge-intel-tvl` | Chain + protocol TVL (DeFi Llama) |
 | `/api/concierge-intel-yields` | Yield pools (Jupiter, Meteora, DLMM, …) |
 | `/api/concierge-intel-whales` | Top-trader positioning (Binance) |
@@ -108,6 +110,9 @@ Structured JSON for agents — see [concierge-intel.md](concierge-intel.md) · w
 | `/api/concierge-intel-airdrop` | Potential airdrops (insider-first alpha) |
 | `/api/concierge-intel-listing` | Potential exchange listings |
 | `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
+| `/api/concierge-intel-scalp` | BTC/ETH/BNB/SOL scalp desk (5m/15m) |
+
+Agent marketplaces: [Poncho](https://conc-exe.xyz/docs/integration/poncho) discovers routes via x402scan — no Concierge API key.
 
 ## Paid endpoints
 

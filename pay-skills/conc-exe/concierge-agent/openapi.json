@@ -3,14 +3,17 @@
   "info": {
     "title": "Concierge Agent API",
     "version": "4.0.0",
-    "description": "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
-    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI (primary) · Dexter (fallback)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m). Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
+    "description": "Market intelligence as a service — fifteen pay-per-call endpoints. Concierge AI, macro & wire research, DeFi intel, Alpha desks, and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
+    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI (primary) · Dexter (fallback)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-macro (empty body ok), intel-wire (category/message/limit), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m). Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
     "x-marketplace-tags": [
       "AI",
+      "Research",
+      "News",
       "Trading",
       "Search",
       "Crypto",
-      "RWA"
+      "RWA",
+      "Utility"
     ],
     "contact": {
       "name": "Concierge Agent",
@@ -20,13 +23,16 @@
   },
   "x-service-info": {
     "name": "Concierge Agent",
-    "description": "Market intelligence as a service — pay-per-call Concierge AI, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).",
+    "description": "Market intelligence as a service — pay-per-call Concierge AI, macro & wire research, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).",
     "tags": [
       "AI",
+      "Research",
+      "News",
       "Trading",
       "Search",
       "Crypto",
-      "RWA"
+      "RWA",
+      "Utility"
     ],
     "iconUrl": "https://conc-exe.xyz/images/the-concierge-logo.png",
     "protocols": [
@@ -116,7 +122,8 @@
         },
         "tags": [
           "Search",
-          "Trading",
+          "News",
+          "Research",
           "RWA"
         ],
         "responses": {
@@ -288,6 +295,7 @@
         },
         "tags": [
           "AI",
+          "Research",
           "Trading",
           "RWA"
         ],
@@ -4149,10 +4157,780 @@
           }
         ]
       }
+    },
+    "/api/concierge-intel-macro": {
+      "post": {
+        "operationId": "intel_macro",
+        "summary": "Concierge Intel — Macro",
+        "description": "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH marks, Fear & Greed, Treasury yields, and central-bank calendar.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "Research",
+          "News",
+          "Utility"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "marks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "string"
+                          },
+                          "change24h": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "sentiment": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "type": "number"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "macro": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "marks": [
+                    {
+                      "symbol": "SPX",
+                      "price": "5,240.10",
+                      "change24h": "+0.42%"
+                    }
+                  ],
+                  "sentiment": {
+                    "index": 62,
+                    "label": "Greed"
+                  },
+                  "macro": {
+                    "upcomingEvents": [
+                      {
+                        "label": "FOMC decision",
+                        "when": "2026-03-18"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-macro"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "Optional context for logging"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "intel_macro_get",
+        "summary": "Concierge Intel — Macro (GET probe)",
+        "description": "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH marks, Fear & Greed, Treasury yields, and central-bank calendar. Probes return 402 without payment; use POST with JSON body after settlement.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "Research",
+          "News",
+          "Utility"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "marks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symbol": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "string"
+                          },
+                          "change24h": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "sentiment": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "type": "number"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "macro": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "marks": [
+                    {
+                      "symbol": "SPX",
+                      "price": "5,240.10",
+                      "change24h": "+0.42%"
+                    }
+                  ],
+                  "sentiment": {
+                    "index": 62,
+                    "label": "Greed"
+                  },
+                  "macro": {
+                    "upcomingEvents": [
+                      {
+                        "label": "FOMC decision",
+                        "when": "2026-03-18"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-macro"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/concierge-intel-wire": {
+      "post": {
+        "operationId": "intel_wire",
+        "summary": "Concierge Intel — Wire",
+        "description": "Wire headline digest — live RSS plus persisted Lounge feed; optional category or message filter.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "News",
+          "Research",
+          "Search"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "headlines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "origin": {
+                            "type": "string",
+                            "enum": [
+                              "live",
+                              "lounge"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "headlines"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "headlines": [
+                    {
+                      "title": "Oil supply risk rises on shipping disruption",
+                      "source": "Reuters",
+                      "category": "Geopolitics",
+                      "origin": "lounge"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-wire"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "Relevance filter for Lounge wire memory"
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "Category filter (Macro, Geopolitics, Crypto, …)"
+                  },
+                  "limit": {
+                    "type": "number",
+                    "description": "Max headlines 1–20 (default 10)"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "intel_wire_get",
+        "summary": "Concierge Intel — Wire (GET probe)",
+        "description": "Wire headline digest — live RSS plus persisted Lounge feed; optional category or message filter. Probes return 402 without payment; use POST with JSON body after settlement.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "News",
+          "Research",
+          "Search"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "headlines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "origin": {
+                            "type": "string",
+                            "enum": [
+                              "live",
+                              "lounge"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "headlines"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "headlines": [
+                    {
+                      "title": "Oil supply risk rises on shipping disruption",
+                      "source": "Reuters",
+                      "category": "Geopolitics",
+                      "origin": "lounge"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-wire"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ]
+      }
     }
   },
   "x-discovery": {
-    "ownershipProofs": [],
+    "ownershipProofs": [
+      "0xb85c83cc448edca8eb724f5d79b523faff9375a7"
+    ],
     "x402scan": "https://www.x402scan.com/resources/register",
     "mppscan": "https://www.mppscan.com/",
     "mppscanRegister": "https://www.mppscan.com/register",
@@ -4184,13 +4962,16 @@
     "payshCurlConcierge": "pay curl https://conc-exe.xyz/api/concierge -d '{\"mode\":\"chat\",\"message\":\"BTC outlook\"}'",
     "payshSandboxCurl": "pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'",
     "serviceName": "Concierge Agent",
-    "description": "Market intelligence as a service — pay-per-call Concierge AI, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).",
+    "description": "Market intelligence as a service — pay-per-call Concierge AI, macro & wire research, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).",
     "tags": [
       "AI",
+      "Research",
+      "News",
       "Trading",
       "Search",
       "Crypto",
-      "RWA"
+      "RWA",
+      "Utility"
     ],
     "iconUrl": "https://conc-exe.xyz/images/the-concierge-logo.png",
     "facilitator": "PayAI",
@@ -4214,6 +4995,10 @@
     {
       "name": "intel",
       "description": "Concierge DeFi intelligence APIs"
+    },
+    {
+      "name": "research",
+      "description": "Macro snapshot and wire headline digest"
     },
     {
       "name": "creator",

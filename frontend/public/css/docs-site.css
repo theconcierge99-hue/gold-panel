@@ -44,6 +44,10 @@ h3.docs-h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var
 .doc-card h4{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;margin-bottom:6px;color:var(--text-primary)}
 .doc-card p{font-size:13px;color:var(--text-secondary);margin:0}
 .doc-card .card-icon{font-size:18px;margin-bottom:8px;opacity:.85}
+.doc-card .card-logo{width:28px;height:28px;border-radius:6px;margin-bottom:8px;display:block;object-fit:cover}
+.docs-integration-brand{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.docs-integration-brand .docs-title{margin-bottom:0}
+.docs-integration-brand img{width:52px;height:52px;border-radius:8px;flex-shrink:0;object-fit:cover}
 .card,.docs-card{
   background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));
   border:1px solid var(--border);padding:22px 24px;margin-bottom:16px;

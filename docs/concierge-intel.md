@@ -1,6 +1,6 @@
 # Concierge Intel API (integrators)
 
-Structured DeFi desk data as **separate x402 endpoints** — **0.1 USDC** each, same payment flow as Concierge chat.
+Structured desk data as **separate x402 endpoints** — **0.1 USDC** each, same payment flow as Concierge chat. Includes **research** routes (`intel-macro`, `intel-wire`) for agent marketplaces like [Poncho](https://conc-exe.xyz/docs/integration/poncho).
 
 **Web:** `https://conc-exe.xyz/docs/intel`  
 **OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402`
@@ -9,6 +9,8 @@ Structured DeFi desk data as **separate x402 endpoints** — **0.1 USDC** each, 
 
 | Method | Path | Returns |
 |--------|------|---------|
+| POST | `/api/concierge-intel-macro` | SPX, VIX, DXY, Fear & Greed, Treasury yields, calendar |
+| POST | `/api/concierge-intel-wire` | Wire headline digest (RSS + Lounge memory) |
 | POST | `/api/concierge-intel-tvl` | Chain TVL + top protocols (DeFi Llama) |
 | POST | `/api/concierge-intel-yields` | Screened yield pools (Jupiter, Meteora, DLMM, …) |
 | POST | `/api/concierge-intel-whales` | Binance top-trader ratios (BTC/ETH/SOL) |
@@ -17,6 +19,12 @@ Structured DeFi desk data as **separate x402 endpoints** — **0.1 USDC** each, 
 | POST | `/api/concierge-intel-airdrop` | Potential airdrops — insider-first alpha desk |
 | POST | `/api/concierge-intel-listing` | Potential exchange listings — insider-first |
 | POST | `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
+| POST | `/api/concierge-intel-scalp` | BTC/ETH/BNB/SOL scalp desk (5m/15m) |
+
+### Research (macro / wire)
+
+- **`intel-macro`** — body `{}` ok; returns `marks[]`, `sentiment`, `macro` (yields, events, headlines).
+- **`intel-wire`** — optional `category`, `message`, `limit` (1–20); returns `headlines[]` with `origin`: `live` | `lounge`.
 
 ## Alpha desk methodology
 

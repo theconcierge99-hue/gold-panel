@@ -11,7 +11,7 @@ Concierge Agent already ships what pay.sh probes expect: **OpenAPI 3.1**, **402 
 | `GET /openapi.json` | Provider spec (committed snapshot in pay-skills PR) |
 | `402` + `PAYMENT-REQUIRED` | `pay curl` auto-settlement |
 | Solana USDC (PayAI) | Required for pay-skills CI probe |
-| Twelve POST routes | Catalog endpoints ($0.10 · $1.00 publish) |
+| Fifteen POST routes | Catalog endpoints ($0.10 · $1.00 publish) |
 | `GET` intel probes | Marketplace probes (402 until paid POST) |
 
 **Not routed through pay.sh gateway** — agents call `https://conc-exe.xyz` directly (same as MPPscan / x402scan). pay.sh is **discovery + CLI payment**, not a proxy.
@@ -33,6 +33,12 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-yields \
 # Alpha desk
 pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-momentum \
   -d '{"message":"BTC altcoin volatility","limit":5,"includeInsider":true}'
+
+# Research (Poncho / agent marketplaces)
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
+
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
+  -d '{"category":"Geopolitics","limit":5}'
 
 # Concierge AI chat
 pay --sandbox curl https://conc-exe.xyz/api/concierge \
@@ -60,7 +66,7 @@ pay --sandbox claude   # Pay MCP tools attached
 pay codex
 ```
 
-## Twelve routes (pay-per-call)
+## Fifteen routes (pay-per-call)
 
 | Path | Price | Segment |
 |------|-------|---------|
@@ -73,11 +79,14 @@ pay codex
 | `POST /api/concierge-intel-airdrop` | $0.10 | Alpha Intel |
 | `POST /api/concierge-intel-listing` | $0.10 | Alpha Intel |
 | `POST /api/concierge-intel-momentum` | $0.10 | Alpha Intel |
+| `POST /api/concierge-intel-macro` | $0.10 | Research |
+| `POST /api/concierge-intel-wire` | $0.10 | Research |
+| `POST /api/concierge-intel-scalp` | $0.10 | Alpha Intel |
 | `POST /api/news-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-publish` | $1.00 | Lounge |
 
-Full catalog: `/agent/endpoints` · OpenAPI: `/openapi.json`
+Full catalog: `/agent/endpoints` · Poncho: `/docs/integration/poncho` · OpenAPI: `/openapi.json`
 
 ## List on pay.sh (operator checklist)
 
@@ -96,7 +105,7 @@ Submission bundle lives in this repo: `pay-skills/conc-exe/concierge-agent/`.
    # or: pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md
    ```
 
-   Expected: **20/20 gates compatible with Solana** (12 POST paths + GET intel probes).
+   Expected: **20/20 gates compatible with Solana** (15 POST paths + GET intel probes).
 
 3. **Fork** [solana-foundation/pay-skills](https://github.com/solana-foundation/pay-skills) on GitHub, then:
 

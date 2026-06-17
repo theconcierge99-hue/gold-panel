@@ -117,6 +117,8 @@ body.res-page{
 .res-integrate-actions a:hover{border-color:var(--pg-accent-dim);color:var(--pg-text)}
 .res-integrate-actions a.primary{border-color:var(--pg-accent);color:var(--pg-accent)}
 .res-integrate-actions a.primary:hover{background:var(--pg-accent-glow)}
+.res-partner-link{display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
+.res-partner-link img{border-radius:4px;object-fit:cover}
 
 /* —— Discover —— */
 .res-status{

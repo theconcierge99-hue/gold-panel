@@ -46,6 +46,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
   width:24px;height:24px;object-fit:contain;flex-shrink:0;display:block;
 }
 .int-partner-logo--zai{border-radius:6px}
+.int-partner-logo--poncho{border-radius:6px}
 .int-partner-logo--card{width:28px;height:28px}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
 

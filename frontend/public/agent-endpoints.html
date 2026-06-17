@@ -5,7 +5,7 @@
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
 <title>Endpoints — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Agent API catalog — 12 x402 endpoints for chat, DeFi intel, Alpha desks, and Lounge. Pay per call, no API keys." />
+<meta name="description" content="Concierge Agent API catalog — 15 x402 endpoints for chat, research, DeFi intel, Alpha desks, and Lounge. Pay per call, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent/endpoints" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -23,7 +23,7 @@
 
     <header class="res-hero">
       <h1>Concierge Agent Endpoints</h1>
-      <p class="res-lead">Twelve intelligence endpoints paid via x402 on Solana and Base — USDC (PayAI/Dexter) plus <strong>Token Pay</strong> native tokens on supported routes when merchants are live. No API keys. Payment is the only gate.</p>
+      <p class="res-lead">Fifteen intelligence endpoints paid via x402 on Solana and Base — USDC (PayAI/Dexter) plus <strong>Token Pay</strong> native tokens on supported routes when merchants are live. Research routes (<code>intel-macro</code>, <code>intel-wire</code>) are tagged for agent marketplaces like Poncho. No API keys. Payment is the only gate.</p>
       <p class="res-base">Base URL: <code id="res-base-url"></code></p>
     </header>
 
@@ -37,9 +37,9 @@
     <aside class="res-integrate">
       <div class="res-integrate-eyebrow">Install on your agent</div>
       <h3>AgentCash · pay.sh · x402 · Token Pay</h3>
-      <p>Same twelve routes — USDC via facilitators. <code>POST /api/concierge</code> also accepts live Token Pay merchants (self-settle SPL). Partner onboarding: <a href="/docs/payment/token-pay">Token Pay beta</a> · registry <code>GET /api/token-pay</code>.</p>
+      <p>Same fifteen routes — USDC via facilitators. <code>POST /api/concierge</code> also accepts live Token Pay merchants (self-settle SPL). Partner onboarding: <a href="/docs/payment/token-pay">Token Pay beta</a> · registry <code>GET /api/token-pay</code>. <a href="/docs/integration/poncho" class="res-partner-link"><img src="/images/integrations/poncho.png" alt="" width="18" height="18" />Poncho</a> discovers routes via x402scan — no Concierge API key.</p>
       <p class="res-disc-hint"><code>npx agentcash add https://conc-exe.xyz</code></p>
-      <p class="res-disc-hint"><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></p>
+      <p class="res-disc-hint"><code>pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'</code></p>
       <div class="res-integrate-actions">
         <a class="primary" href="/agent/playground">Open Playground →</a>
         <a href="/docs/payment/paysh">pay.sh guide</a>

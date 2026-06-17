@@ -37,7 +37,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
 
 Path: `.grok/skills/concierge-intel/SKILL.md`
 
-Covers twelve x402 routes, sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
+Covers fifteen x402 routes (including `intel-macro` and `intel-wire` for Poncho), sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
 
 ## Headless (CI / scripts)
 
@@ -57,7 +57,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-verdict \
 
 Well-known x402 document includes `grokBuild`, `grokBuildGuide`, and install commands when deployed.
 
-Web guide: [/docs/grok-build](https://conc-exe.xyz/docs/grok-build) · Integrations: [/integrations](https://conc-exe.xyz/integrations)
+Web guide: [/docs/grok-build](https://conc-exe.xyz/docs/grok-build) · Integrations: [/integrations](https://conc-exe.xyz/integrations) · Poncho: [/docs/integration/poncho](https://conc-exe.xyz/docs/integration/poncho)
 
 ## Related
 
