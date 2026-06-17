@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node scripts/write-deploy-version.mjs && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
+    "build": "node scripts/write-deploy-version.mjs && npx tsx scripts/write-discovery-static.ts && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
     "build:privy": "node scripts/build-privy-bridge.mjs",
     "build:x402": "node scripts/build-x402-client.mjs",
     "build:agent-identity": "node scripts/build-agent-identity.mjs",

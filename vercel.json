@@ -34,6 +34,10 @@
       "destination": "/api/well-known-x402"
     },
     {
+      "source": "/.well-known/x402.json",
+      "destination": "/api/well-known-x402"
+    },
+    {
       "source": "/openapi.json",
       "destination": "/api/openapi"
     },
