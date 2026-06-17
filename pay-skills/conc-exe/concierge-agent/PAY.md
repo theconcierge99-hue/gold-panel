@@ -2,7 +2,7 @@
 name: concierge-agent
 title: "Concierge Agent"
 description: "Pay-per-call market intelligence for AI agents — Concierge chat, macro & wire research, DeFi intel, Alpha desks, and Lounge wire. x402 USDC on Solana, no API keys."
-use_case: "Use for autonomous agent market research, macro snapshots, wire monitoring, DeFi desk queries, airdrop hunting, exchange listing rumors, momentum scans, trading plan generation, wallet snapshots, and Poncho/x402scan marketplace calls without API keys or subscriptions."
+use_case: "Agent market research — macro, wire, DeFi intel, alpha desks, wallet snapshots. Callable from Poncho/x402scan. No API keys or subscriptions."
 category: finance
 service_url: https://conc-exe.xyz
 version: "4.0.0"

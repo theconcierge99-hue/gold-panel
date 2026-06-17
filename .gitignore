@@ -46,3 +46,7 @@ service-account*.json
 *.sln
 *.sw?
 .vercel
+
+# Generated at build (scripts/write-discovery-static.ts) — do not commit
+frontend/public/openapi.json
+frontend/public/.well-known/
