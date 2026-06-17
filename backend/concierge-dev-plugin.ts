@@ -13,6 +13,7 @@ import handleAgentIdentity from "./concierge-api/routes/agent-identity";
 import handleAgentIdentityCard from "./concierge-api/routes/agent-identity-card";
 import handleWellKnownAgentCard from "./concierge-api/routes/well-known-agent-card";
 import { handleConciergeIntelRoute } from "./concierge-api/concierge-intel-handler";
+import { dispatchApiRoute } from "./concierge-api/api-router";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -153,6 +154,32 @@ export function conciergeDevPlugin(): Plugin {
           for (const [k, v] of Object.entries(jsonHeaders)) res.setHeader(k, v);
           res.statusCode = res2.status;
           res.end(await res2.text());
+          return;
+        }
+
+        if (url?.startsWith("/api/") && url !== "/api/market" && url !== "/api/concierge" && !signalRoutes[url]) {
+          const chunks: Buffer[] = [];
+          req.on("data", (c) => chunks.push(c));
+          req.on("end", async () => {
+            const bodyText = Buffer.concat(chunks).toString("utf8");
+            const fullUrl = `http://localhost${req.url ?? url}`;
+            const fakeRequest = new Request(fullUrl, {
+              method: req.method,
+              headers: {
+                "content-type": req.headers["content-type"] ?? "application/json",
+                "content-length": String(Buffer.byteLength(bodyText)),
+                origin: req.headers.origin ?? "http://localhost:8080",
+              },
+              body: bodyText || undefined,
+            });
+            const res2 = await dispatchApiRoute(fakeRequest);
+            for (const [k, v] of res2.headers.entries()) {
+              if (k.toLowerCase() === "transfer-encoding") continue;
+              res.setHeader(k, v);
+            }
+            res.statusCode = res2.status;
+            res.end(Buffer.from(await res2.arrayBuffer()));
+          });
           return;
         }
 

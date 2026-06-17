@@ -8,6 +8,8 @@ Concierge **Token Pay (Beta)** SDK for partner APIs.
 npm install @conc-exe/token-x402
 ```
 
+Monorepo dev: `npm run token-x402:build` from repo root.
+
 Or copy from this monorepo: `packages/token-x402/src/index.ts`.
 
 ## Quick start (your API)
@@ -42,3 +44,13 @@ const result = await tp.verifyPayment({
 Add `"resourceKinds": ["external", "concierge"]` and optional `"allowedOrigins": ["https://api.acme.xyz"]` to `TOKEN_PAY_MERCHANTS_JSON`.
 
 Docs: https://conc-exe.xyz/docs/payment/token-pay
+
+## Publish to npm
+
+```bash
+cd packages/token-x402
+npm run build
+npm publish --access public
+```
+
+Requires npm login with publish rights to `@conc-exe` scope.

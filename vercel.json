@@ -78,6 +78,10 @@
       "destination": "/agent-token-pay.html"
     },
     {
+      "source": "/agent/token-pay/onboard",
+      "destination": "/agent-token-pay-onboard.html"
+    },
+    {
       "source": "/lounge",
       "destination": "/executive-lounge.html"
     },

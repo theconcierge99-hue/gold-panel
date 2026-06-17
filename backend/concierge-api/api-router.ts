@@ -21,6 +21,7 @@ import handleSolUsdcBalance from "./routes/sol-usdc-balance";
 import handleTokenPayAnalytics from "./routes/token-pay-analytics";
 import handleTokenPayBuildAccept from "./routes/token-pay-build-accept";
 import handleTokenPayConfig from "./routes/token-pay-config";
+import handleTokenPayPreview from "./routes/token-pay-preview";
 import handleTokenPayVerify from "./routes/token-pay-verify";
 import handleSolanaRpc from "./routes/solana-rpc";
 import handleSolanaRpcSend from "./routes/solana-rpc-send";
@@ -51,6 +52,7 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/token-pay": handleTokenPayConfig,
   "/api/token-pay-analytics": handleTokenPayAnalytics,
   "/api/token-pay-build-accept": handleTokenPayBuildAccept,
+  "/api/token-pay-preview": handleTokenPayPreview,
   "/api/token-pay-verify": handleTokenPayVerify,
   "/api/solana-rpc": handleSolanaRpc,
   "/api/solana-rpc-send": handleSolanaRpcSend,

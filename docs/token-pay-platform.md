@@ -84,6 +84,7 @@ Legacy shims (do not add logic here):
 | `GET /api/x402-config` | Includes `tokenPay` + legacy `soonX402` |
 | `GET /api/token-pay-analytics` | Per-merchant stats |
 | `GET/POST /api/token-pay-build-accept` | Server-built accept for partner APIs (`resourceKind: external`) |
+| `POST /api/token-pay-preview` | Validate proposed merchant JSON before deploy (onboarding wizard) |
 | `POST /api/token-pay-verify` | Verify + settle partner payments (PAYMENT-SIGNATURE) |
 
 All routes go through **existing** Edge router `api/[...path]` — no new Vercel serverless function.
@@ -208,6 +209,7 @@ Pay modal lists every registered merchant — live tokens are payable; pre-launc
 | **3** ✅ | npm SDK `@conc-exe/token-x402` + partner build/verify APIs | Hobby (Edge router) |
 | **4** ✅ | Hosted verify on `conc-exe.xyz` / `pay.conc-exe.xyz` | Hobby — same deploy |
 | **5** | Optional gasless (Kora / Turnkey) | Dedicated wallet ops |
+| **6** ✅ | Onboarding wizard + preview API + npm SDK publish prep | Hobby |
 
 ---
 
@@ -248,6 +250,7 @@ Public APIs never expose partner `payTo` addresses (only `payToReady` / ATA stat
 
 ## Integrator checklist
 
+0. **Self-service wizard:** [`/agent/token-pay/onboard`](https://conc-exe.xyz/agent/token-pay/onboard) — generate JSON, validate via `POST /api/token-pay-preview`, copy env line.
 1. Add your row to `TOKEN_PAY_MERCHANTS_JSON` in env (local or Vercel) and redeploy.
 2. Set `payTo` + create token ATA on merchant wallet (one tiny transfer).
 3. List liquidity on DexScreener (or set `priceSource=env` + `fallbackUsd`).

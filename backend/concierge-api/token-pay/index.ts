@@ -12,16 +12,21 @@ export type {
 
 export { normalizeSolanaMint, isValidSolanaMint } from "./mint";
 export {
+  buildMerchantEnvSnippet,
   clearTokenPayRegistryCache,
   getDefaultTokenPayMerchant,
   getDefaultTokenPayMerchantId,
   getTokenPayMerchant,
   getTokenPayPlatformMeta,
+  isReservedMerchantId,
   isTokenPayMerchantLive,
+  isValidMerchantId,
   listTokenPayMerchants,
   merchantSupportsResource,
+  parseMerchantJsonRow,
   toPublicMerchant,
 } from "./registry";
+export type { JsonMerchantRow } from "./registry";
 export { resolveTokenUsdPrice, clearTokenPriceCache } from "./price";
 export {
   formatTokenUiFromAtomic,

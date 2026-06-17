@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Token Pay Onboarding — Concierge Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Self-service Token Pay merchant onboarding — generate TOKEN_PAY_MERCHANTS_JSON, validate readiness, deploy to Vercel." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent/token-pay/onboard" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-playground.css" />
+<link rel="stylesheet" href="/css/agent-resources.css" />
+<link rel="stylesheet" href="/css/agent-token-pay.css" />
+</head>
+<body class="res-page tp-dash-page tp-onboard-page" data-agent-page="token-pay-onboard">
+<div class="pg-shell res-shell">
+  <header class="pg-topnav" id="agent-topnav"></header>
+  <main class="res-main tp-main">
+    <div class="res-term-line" aria-hidden="true">
+      <span class="res-prompt">$</span><span class="res-cmd">concierge token-pay --onboard</span><span class="res-cursor">▌</span>
+    </div>
+
+    <header class="res-hero tp-hero">
+      <h1>Token Pay Onboarding</h1>
+      <p class="res-lead">Register your native SPL token for x402 self-settle — generate <code>TOKEN_PAY_MERCHANTS_JSON</code>, validate readiness, then deploy via Vercel env. No facilitator wallet required.</p>
+      <p class="tp-onboard-links">
+        <a href="/agent/token-pay">Dashboard</a> ·
+        <a href="/docs/payment/token-pay">Integration docs</a> ·
+        <a href="https://www.npmjs.com/package/@conc-exe/token-x402" target="_blank" rel="noopener">npm SDK</a>
+      </p>
+    </header>
+
+    <nav class="tp-steps" aria-label="Onboarding steps">
+      <button type="button" class="tp-step active" data-step="1">1 · Basics</button>
+      <button type="button" class="tp-step" data-step="2">2 · Token</button>
+      <button type="button" class="tp-step" data-step="3">3 · Routes</button>
+      <button type="button" class="tp-step" data-step="4">4 · Deploy</button>
+    </nav>
+
+    <form id="tp-onboard-form" class="tp-onboard-form" novalidate>
+      <section class="tp-panel" data-panel="1">
+        <h2>Merchant identity</h2>
+        <p class="tp-panel-lead">Stable slug used in <code>extra.merchantId</code> and analytics. Reserved: <code>soon</code>.</p>
+        <div class="tp-form-grid">
+          <label class="tp-field tp-field--grow">
+            <span>Merchant id *</span>
+            <input type="text" name="id" required pattern="[a-z][a-z0-9_-]{1,31}" placeholder="acme" autocomplete="off" spellcheck="false" />
+            <small>Lowercase, 2–32 chars · [a-z][a-z0-9_-]</small>
+          </label>
+          <label class="tp-field">
+            <span>Symbol *</span>
+            <input type="text" name="symbol" required maxlength="12" placeholder="ACME" />
+          </label>
+          <label class="tp-field tp-field--grow">
+            <span>Display name</span>
+            <input type="text" name="name" placeholder="Acme Token" />
+          </label>
+        </div>
+      </section>
+
+      <section class="tp-panel" data-panel="2" hidden>
+        <h2>Solana token &amp; wallet</h2>
+        <p class="tp-panel-lead">Revenue goes to <code>payTo</code>. Create the token ATA once with a tiny transfer.</p>
+        <div class="tp-form-grid">
+          <label class="tp-field tp-field--grow">
+            <span>SPL mint *</span>
+            <input type="text" name="mint" required placeholder="MintBase58…" autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="tp-field">
+            <span>Decimals</span>
+            <input type="number" name="decimals" value="6" min="0" max="12" step="1" />
+          </label>
+          <label class="tp-field tp-field--grow">
+            <span>payTo wallet *</span>
+            <input type="text" name="payTo" required placeholder="Your Solana receive address" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+        <h3 class="tp-subhead">Pricing</h3>
+        <div class="tp-form-grid">
+          <label class="tp-field">
+            <span>Price source</span>
+            <select name="priceSource">
+              <option value="dexscreener" selected>DexScreener (live pair)</option>
+              <option value="env">env (fixed fallbackUsd)</option>
+            </select>
+          </label>
+          <label class="tp-field">
+            <span>fallbackUsd</span>
+            <input type="number" name="fallbackUsd" step="any" min="0" placeholder="0.001" />
+            <small>Required for env · recommended backup for DexScreener</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="tp-panel" data-panel="3" hidden>
+        <h2>Integration routes</h2>
+        <p class="tp-panel-lead">Choose where your token may appear in x402 <code>accepts[]</code>.</p>
+        <fieldset class="tp-check-group">
+          <legend>resourceKinds</legend>
+          <label><input type="checkbox" name="rk_concierge" value="concierge" /> concierge — Concierge paid APIs on conc-exe.xyz</label>
+          <label><input type="checkbox" name="rk_external" value="external" checked /> external — your API via build-accept / verify</label>
+        </fieldset>
+        <label class="tp-field tp-field--grow">
+          <span>allowedOrigins (comma-separated)</span>
+          <input type="text" name="allowedOrigins" placeholder="https://api.acme.xyz, https://app.acme.xyz" spellcheck="false" />
+          <small>Optional CORS allowlist for partner build/verify APIs</small>
+        </label>
+        <label class="tp-field tp-field--grow">
+          <span>Your API URL (for readiness probe)</span>
+          <input type="url" name="apiUrl" placeholder="https://api.acme.xyz/v1/intel" spellcheck="false" />
+        </label>
+      </section>
+
+      <section class="tp-panel" data-panel="4" hidden>
+        <h2>Validate &amp; deploy</h2>
+        <p class="tp-panel-lead">Preview checks mint, payTo, price, and ATA via RPC — without saving to the registry.</p>
+        <div class="tp-onboard-actions">
+          <button type="button" class="tp-refresh" id="tp-validate">Validate config</button>
+          <button type="button" class="tp-refresh tp-refresh--ghost" id="tp-copy-json">Copy JSON row</button>
+          <button type="button" class="tp-refresh tp-refresh--ghost" id="tp-copy-env">Copy env line</button>
+        </div>
+        <div id="tp-preview-status" class="tp-status" hidden></div>
+        <div id="tp-preview-readiness" class="tp-card tp-card--readiness" hidden></div>
+        <label class="tp-field tp-field--grow">
+          <span>TOKEN_PAY_MERCHANTS_JSON (single merchant)</span>
+          <textarea id="tp-json-out" rows="10" readonly spellcheck="false"></textarea>
+        </label>
+        <label class="tp-field tp-field--grow">
+          <span>Vercel env (one-liner)</span>
+          <textarea id="tp-env-out" rows="3" readonly spellcheck="false"></textarea>
+        </label>
+        <ol class="tp-deploy-steps" id="tp-deploy-steps"></ol>
+        <p class="tp-hint">After deploy: <a href="/agent/token-pay" id="tp-dash-link">open dashboard</a> · install <code>npm install @conc-exe/token-x402</code></p>
+      </section>
+
+      <div class="tp-onboard-nav">
+        <button type="button" class="tp-refresh tp-refresh--ghost" id="tp-prev" disabled>Back</button>
+        <button type="button" class="tp-refresh" id="tp-next">Next</button>
+      </div>
+    </form>
+  </main>
+</div>
+<script type="module" src="/js/agent-token-pay-onboard.mjs"></script>
+</body>
+</html>

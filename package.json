@@ -15,8 +15,12 @@
     "format": "prettier --write .",
     "discovery:validate": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz",
     "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
+    "paysh:sync-token-pay-openapi": "npx tsx scripts/generate-paysh-token-pay-openapi.ts",
     "paysh:validate": "npx -y @solana/pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md",
-    "paysh:prepare-pr": "node scripts/prepare-paysh-pr.mjs"
+    "paysh:validate:token-pay": "npx -y @solana/pay catalog check pay-skills/conc-exe/token-pay/PAY.md",
+    "paysh:prepare-pr": "node scripts/prepare-paysh-pr.mjs",
+    "token-x402:build": "npm run build --prefix packages/token-x402",
+    "token-pay:test-preview": "node scripts/test-token-pay-preview.mjs"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

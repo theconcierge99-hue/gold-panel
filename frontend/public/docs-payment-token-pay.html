@@ -76,6 +76,7 @@
         </p>
 
         <h3 class="docs-h3">Step 1 — Configure your merchant</h3>
+        <p><strong>Self-service:</strong> <a href="/agent/token-pay/onboard">Onboarding wizard</a> — fill the form, validate via <code>POST /api/token-pay-preview</code>, copy the env line. Or edit JSON manually:</p>
         <p>Add your row to <code>TOKEN_PAY_MERCHANTS_JSON</code> in environment variables, then redeploy:</p>
         <ul>
           <li><strong>Local test</strong> — copy <code>.env.example</code>, set <code>TOKEN_PAY_MERCHANTS_JSON</code>, run <code>npm run dev</code></li>
