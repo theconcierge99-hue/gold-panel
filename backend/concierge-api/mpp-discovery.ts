@@ -43,7 +43,7 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
   `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (${facilitatorLabel()}).`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
-  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m).",
+  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-macro (empty body ok), intel-wire (category/message/limit), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m).",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
   "OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery",
@@ -198,6 +198,18 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
         type: "array",
         items: { type: "string", enum: ["5m", "15m"] },
       },
+    },
+    [],
+  ),
+  "intel-macro": jsonSchemaBody(
+    { message: { type: "string", description: "Optional context for logging" } },
+    [],
+  ),
+  "intel-wire": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Relevance filter for Lounge wire memory" },
+      category: { type: "string", description: "Category filter (Macro, Geopolitics, Crypto, …)" },
+      limit: { type: "number", description: "Max headlines 1–20 (default 10)" },
     },
     [],
   ),
@@ -402,6 +414,50 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "assets"],
   ),
+  "intel-macro": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      marks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            symbol: { type: "string" },
+            price: { type: "string" },
+            change24h: { type: "string" },
+          },
+        },
+      },
+      sentiment: {
+        type: "object",
+        properties: {
+          index: { type: "number" },
+          label: { type: "string" },
+        },
+      },
+      macro: { type: "object" },
+    },
+    ["ok"],
+  ),
+  "intel-wire": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      headlines: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            source: { type: "string" },
+            category: { type: "string" },
+            url: { type: "string" },
+            origin: { type: "string", enum: ["live", "lounge"] },
+          },
+        },
+      },
+    },
+    ["ok", "headlines"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -433,6 +489,8 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-listing": { message: "Potential Binance listings", limit: 5 },
   "intel-momentum": { message: "BTC altcoin volatility catalysts", limit: 5, includeInsider: true },
   "intel-scalp": { message: "scalp BTC 15m", symbols: ["BTC"], intervals: ["5m", "15m"] },
+  "intel-macro": {},
+  "intel-wire": { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -484,6 +542,23 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
         symbol: "BTC",
         pair: "BTCUSDT",
         intervals: [{ interval: "15m", ta: { rsi14: 52, trend: "neutral", lastClose: 60781 } }],
+      },
+    ],
+  },
+  "intel-macro": {
+    ok: true,
+    marks: [{ symbol: "SPX", price: "5,240.10", change24h: "+0.42%" }],
+    sentiment: { index: 62, label: "Greed" },
+    macro: { upcomingEvents: [{ label: "FOMC decision", when: "2026-03-18" }] },
+  },
+  "intel-wire": {
+    ok: true,
+    headlines: [
+      {
+        title: "Oil supply risk rises on shipping disruption",
+        source: "Reuters",
+        category: "Geopolitics",
+        origin: "lounge",
       },
     ],
   },

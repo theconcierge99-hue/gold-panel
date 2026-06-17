@@ -17,6 +17,8 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-listing": "JSON with summary and candidates[] (listing catalyst desk)",
   "intel-momentum": "JSON with summary and candidates[] (large-move up/down desk)",
   "intel-scalp": "JSON with 5m/15m TA for BTC/ETH/BNB/SOL USDT (RSI, EMA, levels, perp overlay)",
+  "intel-macro": "JSON with marks[], sentiment, macro yields/events/headlines",
+  "intel-wire": "JSON with headlines[] from live RSS and Lounge wire memory",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

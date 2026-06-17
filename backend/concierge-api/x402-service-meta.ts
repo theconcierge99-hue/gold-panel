@@ -3,7 +3,16 @@
  * @see https://docs.x402.org/extensions/bazaar (serviceName, tags, iconUrl on resource)
  */
 /** Listing pills on x402scan / AGENTCASH (exact casing). */
-export const X402_SERVICE_TAGS = ["AI", "Trading", "Search", "Crypto", "RWA"] as const;
+export const X402_SERVICE_TAGS = [
+  "AI",
+  "Research",
+  "News",
+  "Trading",
+  "Search",
+  "Crypto",
+  "RWA",
+  "Utility",
+] as const;
 
 /** Per-route OpenAPI operation tags — explorers union these for the server Tags row. */
 export const X402_OPERATION_TAGS: Record<
@@ -19,11 +28,13 @@ export const X402_OPERATION_TAGS: Record<
   | "intel-airdrop"
   | "intel-listing"
   | "intel-momentum"
-  | "intel-scalp",
+  | "intel-scalp"
+  | "intel-macro"
+  | "intel-wire",
   readonly string[]
 > = {
-  news: ["Search", "Trading", "RWA"],
-  concierge: ["AI", "Trading", "RWA"],
+  news: ["Search", "News", "Research", "RWA"],
+  concierge: ["AI", "Research", "Trading", "RWA"],
   "signal-publish": ["Crypto", "RWA"],
   "signal-open": ["Crypto", "RWA"],
   "intel-tvl": ["AI", "Crypto", "Trading"],
@@ -35,12 +46,14 @@ export const X402_OPERATION_TAGS: Record<
   "intel-listing": ["AI", "Crypto", "Trading", "RWA"],
   "intel-momentum": ["AI", "Crypto", "Trading", "RWA"],
   "intel-scalp": ["AI", "Crypto", "Trading"],
+  "intel-macro": ["Research", "News", "Utility"],
+  "intel-wire": ["News", "Research", "Search"],
 };
 
 export const X402_SERVICE_NAME = "Concierge Agent";
 
 export const X402_SERVICE_TAGLINE =
-  "Market intelligence as a service — pay-per-call Concierge AI, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).";
+  "Market intelligence as a service — pay-per-call Concierge AI, macro & wire research, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).";
 
 export function x402ServiceListingMeta(origin: string): {
   serviceName: string;

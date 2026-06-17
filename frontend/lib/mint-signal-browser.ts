@@ -11,7 +11,10 @@ import {
   publicKey,
   some,
 } from "@metaplex-foundation/umi";
-import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
+import {
+  walletAdapterIdentity,
+  type WalletAdapter,
+} from "@metaplex-foundation/umi-signer-wallet-adapters";
 import bs58 from "bs58";
 import { truncateOnChainMetaName } from "./on-chain-meta";
 
@@ -68,7 +71,7 @@ async function mintOnce(
   useCollection: boolean,
 ): Promise<{ mintAddress: string; tx: string }> {
   const rpcUrl = serverRpcProxy();
-  const umi = createUmi(rpcUrl).use(mplTokenMetadata()).use(walletAdapterIdentity(phantom));
+  const umi = createUmi(rpcUrl).use(mplTokenMetadata()).use(walletAdapterIdentity(phantom as WalletAdapter));
   const mint = generateSigner(umi);
   const creatorPk = publicKey(params.creatorAddress.trim());
   const collectionMint = useCollection ? params.collectionMint?.trim() : undefined;

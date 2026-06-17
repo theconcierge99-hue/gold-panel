@@ -168,6 +168,24 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["intel-scalp"]],
   },
+  {
+    kind: "intel-macro",
+    method: "POST",
+    path: "/api/concierge-intel-macro",
+    name: "Concierge Intel — Macro",
+    description: "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH marks, Fear & Greed, Treasury yields, and central-bank calendar.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-macro"]],
+  },
+  {
+    kind: "intel-wire",
+    method: "POST",
+    path: "/api/concierge-intel-wire",
+    name: "Concierge Intel — Wire",
+    description: "Wire headline digest — live RSS plus persisted Lounge feed; optional category or message filter.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-wire"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */
@@ -223,7 +241,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — twelve pay-per-call routes (Concierge AI, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; USDC settlement via PayAI (primary) with Dexter fallback on Solana/Base. OpenDexter auto-discovery on Dexter settlements; also on MPPscan, pay.sh CLI, x402scan.",
+      "Concierge Agent — fifteen pay-per-call routes (Concierge AI, macro & wire research, DeFi intel, Alpha desks, Lounge). x402 + MPP discovery; USDC settlement via PayAI (primary) with Dexter fallback on Solana/Base. OpenDexter auto-discovery on Dexter settlements; also on MPPscan, pay.sh CLI, x402scan.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -337,7 +355,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.0.0",
       description:
-        "Market intelligence as a service — twelve pay-per-call endpoints. Concierge AI, DeFi intel, Alpha desks (airdrop, listing, momentum), and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
+        "Market intelligence as a service — fifteen pay-per-call endpoints. Concierge AI, macro & wire research, DeFi intel, Alpha desks, and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {
@@ -370,6 +388,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       { name: "news", description: "Wire article unlock" },
       { name: "concierge", description: "Concierge AI" },
       { name: "intel", description: "Concierge DeFi intelligence APIs" },
+      { name: "research", description: "Macro snapshot and wire headline digest" },
       { name: "creator", description: "Creator signals & RWA" },
       { name: "rwa", description: "Real World Asset intelligence certificates" },
     ],

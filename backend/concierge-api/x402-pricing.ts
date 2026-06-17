@@ -11,7 +11,9 @@ export type X402IntelKind =
   | "intel-airdrop"
   | "intel-listing"
   | "intel-momentum"
-  | "intel-scalp";
+  | "intel-scalp"
+  | "intel-macro"
+  | "intel-wire";
 
 export type X402ResourceKind = X402CoreKind | X402IntelKind;
 

@@ -810,9 +810,12 @@ export async function isChainPaymentReady(
   session: WalletSession,
   networkMode: "mainnet" | "testnet" = "mainnet",
   serverConfig: X402ServerPayConfig = {},
-  chain: PayChain,
+  chain?: PayChain,
 ): Promise<boolean> {
   const opts = await getPaymentChainOptions(session, networkMode, serverConfig);
+  if (!chain) {
+    return opts.some((o) => o.available && (o.sufficient || o.balanceUnknown));
+  }
   const pick = opts.find((o) => o.chain === chain);
   return !!(pick?.available && (pick.sufficient || pick.balanceUnknown));
 }

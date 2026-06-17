@@ -209,6 +209,12 @@ export async function listRecentCreatorSignals(limit = 12): Promise<LoungeMemory
   return items.filter((i) => i.kind === "creator_signal").slice(0, limit);
 }
 
+/** Recent wire headlines persisted from the Lounge feed. */
+export async function listRecentWireHeadlines(limit = 12): Promise<LoungeMemoryItem[]> {
+  const items = await listRecentMemoryItems(Math.min(MAX_LIST_FOR_RETRIEVAL, limit * 3));
+  return items.filter((i) => i.kind === "wire_headline").slice(0, limit);
+}
+
 function scoreItem(item: LoungeMemoryItem, tokens: string[]): number {
   if (!tokens.length) return 0;
   const blob = `${item.title} ${item.summary} ${item.source} ${item.category}`.toLowerCase();

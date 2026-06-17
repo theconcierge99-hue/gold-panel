@@ -115,6 +115,18 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "trading"],
   },
+  "intel-macro": {
+    name: "Concierge Intel — Macro",
+    description: "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH marks, Fear & Greed, Treasury yields, central-bank calendar",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "research", "macro", "news"],
+  },
+  "intel-wire": {
+    name: "Concierge Intel — Wire",
+    description: "Wire headline digest — live RSS plus persisted Lounge feed with optional category filter",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "research", "news", "wire"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -196,6 +208,10 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-momentum";
     case "intel-scalp":
       return "/api/concierge-intel-scalp";
+    case "intel-macro":
+      return "/api/concierge-intel-macro";
+    case "intel-wire":
+      return "/api/concierge-intel-wire";
     default:
       return `/api/${kind}`;
   }

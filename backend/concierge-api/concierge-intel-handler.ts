@@ -2,6 +2,7 @@
  * Shared x402 handlers for Concierge DeFi intelligence endpoints (integrators).
  */
 import { runAlphaIntel } from "./concierge-alpha-intel";
+import { runMacroIntel, runWireIntel } from "./concierge-research-intel";
 import { runScalpIntel } from "./concierge-scalp-intel";
 import {
   buildVerdict,
@@ -42,6 +43,8 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-listing": "/api/concierge-intel-listing",
   "intel-momentum": "/api/concierge-intel-momentum",
   "intel-scalp": "/api/concierge-intel-scalp",
+  "intel-macro": "/api/concierge-intel-macro",
+  "intel-wire": "/api/concierge-intel-wire",
 };
 
 const INTEL_KINDS = Object.keys(INTEL_ROUTE_PATH) as X402IntelKind[];
@@ -73,6 +76,8 @@ export type IntelRequestBody = {
   includeInsider?: boolean;
   /** Alpha desks: max candidates (1–8, default 5) */
   limit?: number;
+  /** Wire desk: category filter (Macro, Geopolitics, Crypto, …) */
+  category?: string;
   /** Scalp desk: 5m | 15m (default both) */
   intervals?: ("5m" | "15m")[];
 };
@@ -229,6 +234,14 @@ async function runIntel(
 
   if (kind === "intel-scalp") {
     return runScalpIntel(body);
+  }
+
+  if (kind === "intel-macro") {
+    return runMacroIntel();
+  }
+
+  if (kind === "intel-wire") {
+    return runWireIntel(body);
   }
 
   throw new Error("Unknown intel kind");
