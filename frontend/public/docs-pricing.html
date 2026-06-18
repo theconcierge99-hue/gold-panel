@@ -18,29 +18,60 @@
       <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
       <div class="docs-eyebrow">Payment</div>
       <h1 class="docs-title">Pricing</h1>
-      <p class="docs-lead">Pay per query. No subscriptions. No API keys.</p>
+      <p class="docs-lead">Tiered pay-per-query. No subscriptions. No API keys.</p>
 
       <div class="card">
-        <p>All Concierge and Intel routes use <strong>USDC micropayments</strong> via x402 on <strong>Base</strong> and optionally <strong>Solana</strong>. Amounts are fixed per route (not dynamic quotes).</p>
+        <p><strong>17 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
+        <table>
+          <thead><tr><th>Tier</th><th>USDC</th><th>Routes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Raw</strong></td><td>0.02</td><td>TVL, macro, wire, whales</td></tr>
+            <tr><td><strong>Signal</strong></td><td>0.10</td><td>Concierge, yields, Meteora, wallet, verdict, alpha desks, scalp, news, signal unlock</td></tr>
+            <tr><td><strong>Bundle</strong></td><td>0.25</td><td>Desk brief (macro + Meteora + verdict)</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Post-launch: pay with <strong>SOON</strong> at a holder discount, or use <code>X-Soon-Holder-Wallet</code> for free raw-tier calls (see <a href="/docs/launch" class="gold-link">Launch playbook</a>).</p>
       </div>
 
-      <h2 class="docs-h2">Concierge &amp; Intel</h2>
+      <h2 class="docs-h2">Raw tier — $0.02</h2>
       <div class="card">
         <table>
-          <thead><tr><th>Route</th><th>USDC</th><th>Atomic (6 dp)</th></tr></thead>
+          <thead><tr><th>Route</th><th>USDC</th><th>Atomic</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>0.02</td><td><code>20000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-macro</code></td><td>0.02</td><td><code>20000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-wire</code></td><td>0.02</td><td><code>20000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-whales</code></td><td>0.02</td><td><code>20000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Signal tier — $0.10</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Atomic</th></tr></thead>
           <tbody>
             <tr><td><code>POST /api/concierge</code></td><td>0.10</td><td><code>100000</code></td></tr>
-            <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-yields</code></td><td>0.10</td><td><code>100000</code></td></tr>
-            <tr><td><code>POST /api/concierge-intel-whales</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-meteora</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-listing</code></td><td>0.10</td><td><code>100000</code></td></tr>
-            <tr><td><code>POST /api/concierge-intel-macro</code></td><td>0.10</td><td><code>100000</code></td></tr>
-            <tr><td><code>POST /api/concierge-intel-wire</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/news-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/lounge-signal-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Bundle tier — $0.25</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Atomic</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>0.25</td><td><code>250000</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -54,36 +85,28 @@
             <tr><td><code>POST /api/lounge-signal-publish</code></td><td>1.00</td><td>Anti-spam publish fee (100% merchant)</td></tr>
           </tbody>
         </table>
-        <p class="note">Signal unlock fees split 50% creator / 50% merchant when payout treasuries are configured. Solana NFT mint after publish requires ~0.03 SOL in Phantom for gas.</p>
+      </div>
+
+      <h2 class="docs-h2">Free discovery &amp; tools</h2>
+      <div class="card">
+        <ul>
+          <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
+          <li><code>GET /api/concierge-intel-accuracy</code> — verdict accuracy leaderboard</li>
+          <li><code>GET /api/mcp</code> · <code>POST /api/mcp</code> — MCP tools/list, tools/call</li>
+          <li><code>POST /api/agent-identity</code> · <code>GET /api/agent-identity</code></li>
+        </ul>
       </div>
 
       <h2 class="docs-h2">Token Pay (native SPL)</h2>
       <div class="card">
-        <p>List prices are pegged to <strong>0.1 USDC</strong> (or route-specific USDC amounts). Registered merchants convert that to token atomic units via DexScreener + fallback rate.</p>
-        <p>Example: <code>GET /api/token-pay?merchant=acme</code> returns <code>conciergeAtomic</code> and <code>conciergeLabel</code> for display. Users pay SOL gas for self-settle transfers.</p>
-        <p><a href="/docs/payment/token-pay" class="gold-link">Token Pay beta guide</a> — onboarding for other projects.</p>
-      </div>
-
-      <h2 class="docs-h2">MPP listing (AgentCash)</h2>
-      <div class="card">
-        <p>Same prices appear on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a> as USD per call. Install all routes:</p>
-<pre><code>npx agentcash add https://conc-exe.xyz</code></pre>
-        <p>See <a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a> for the full fifteen-route structure · <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/builders" class="gold-link">For Builders</a>.</p>
-      </div>
-
-      <h2 class="docs-h2">Free discovery</h2>
-      <div class="card">
-        <ul>
-          <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
-          <li><code>POST /api/agent-identity</code> · <code>GET /api/agent-identity</code></li>
-          <li><code>GET /api/zauth-directory</code> · <code>GET /api/zauth-status</code></li>
-        </ul>
+        <p>List prices peg to each route’s USDC amount. SOON holders get a configurable discount post-launch (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>).</p>
+        <p><a href="/docs/payment/token-pay" class="gold-link">Token Pay beta guide</a> · <a href="/docs/launch" class="gold-link">SOON launch playbook</a></p>
       </div>
 
       <div class="cta-row">
-        <a class="btn gold" href="/docs/payment/x402">x402 Protocol</a>
-        <a class="btn" href="/docs/payment/token-pay">Token Pay beta</a>
-        <a class="btn" href="/docs/payment/mpp">MPP &amp; AgentCash</a>
+        <a class="btn gold" href="/agent/endpoints">Endpoint catalog</a>
+        <a class="btn" href="/docs/api/intel">Intel APIs</a>
+        <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
         <a class="btn" href="/docs/quickstart">Quickstart</a>
       </div>
       <p class="docs-foot">Concierge · Executive Lounge</p>

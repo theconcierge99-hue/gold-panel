@@ -1,4 +1,4 @@
-/** Concierge Agent — paid x402 + MPP endpoint catalog (mirrors api/lib/x402-discovery.ts). */
+/** Concierge Agent — paid x402 + MPP endpoint catalog (mirrors backend x402-discovery). */
 export const CONCIERGE_AGENT_ORIGIN =
   typeof location !== "undefined" && location.origin ? location.origin : "https://conc-exe.xyz";
 
@@ -11,7 +11,7 @@ export const CONCIERGE_AGENT_SEGMENTS = [
   { id: "lounge", label: "Lounge" },
 ];
 
-/** @type {readonly { id: string; segment: string; method: string; path: string; name: string; description: string; priceUsd: string; sampleBody?: object }[]} */
+/** @type {readonly { id: string; segment: string; method: string; path: string; name: string; description: string; priceUsd: string; tier?: string; sampleBody?: object }[]} */
 export const CONCIERGE_AGENT_ENDPOINTS = [
   {
     id: "concierge",
@@ -21,6 +21,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Concierge chat",
     description: "Concierge chat — Gemini (default) or GLM-4.7 Flash; macro, DeFi desk, trading plans (HTML reply).",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: {
       mode: "chat",
       message: "Hottest Meteora DLMM pools — IL risks?",
@@ -36,7 +37,8 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     path: "/api/concierge-intel-tvl",
     name: "Intel — TVL",
     description: "Chain TVL snapshot and top DeFi protocols (DeFi Llama).",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
+    tier: "raw",
     sampleBody: {},
   },
   {
@@ -47,7 +49,19 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Yields",
     description: "Screened pools — Meteora DLMM API, Jupiter, Raydium, major venues.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { chain: "solana", project: "meteora" },
+  },
+  {
+    id: "intel-meteora",
+    segment: "intel",
+    method: "POST",
+    path: "/api/concierge-intel-meteora",
+    name: "Intel — Meteora DLMM",
+    description: "Meteora DLMM deep-dive — TVL, APY, bin step, volume, IL risk flags (Solana moat).",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: { sortByApy: true, limit: 8, poolHint: "SOL" },
   },
   {
     id: "intel-whales",
@@ -56,7 +70,8 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     path: "/api/concierge-intel-whales",
     name: "Intel — Whales",
     description: "BTC/ETH/SOL top-trader long/short ratios (Binance derivatives proxy).",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
+    tier: "raw",
     sampleBody: { symbols: ["BTC", "ETH", "SOL"] },
   },
   {
@@ -67,6 +82,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Wallet",
     description: "Solana wallet snapshot (Helius) or EVM address acknowledgment.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "Paste a Solana or EVM address in solAddress / evmAddress" },
   },
   {
@@ -77,6 +93,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Verdict",
     description: "Desk verdict: snipe/watch/follow/avoid/rebalance + insider creator signals.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "DeFi outlook on Solana", includeInsider: true },
   },
   {
@@ -87,6 +104,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Airdrop",
     description: "Potential airdrop candidates — Lounge insider first, then institutional/onchain/narrative/KOL.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "Solana ecosystem points farming", limit: 5, includeInsider: true },
   },
   {
@@ -97,6 +115,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Listing",
     description: "Potential exchange listing candidates — insider-first alpha desk synthesis.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "Binance listing rumors", limit: 5 },
   },
   {
@@ -107,6 +126,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Momentum",
     description: "Large-move candidates (up or down) — insider + positioning + narrative.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "Altcoins volatility catalysts", limit: 5, includeInsider: true },
   },
   {
@@ -117,6 +137,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Intel — Scalp",
     description: "BTC/ETH/BNB/SOL USDT scalping — 5m & 15m klines, RSI/EMA, perp funding & positioning.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { message: "scalp BTC 15m entry stop", symbols: ["BTC"], intervals: ["5m", "15m"] },
   },
   {
@@ -126,7 +147,8 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     path: "/api/concierge-intel-macro",
     name: "Intel — Macro",
     description: "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH, Fear & Greed, Treasury yields, central-bank calendar.",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
+    tier: "raw",
     sampleBody: {},
   },
   {
@@ -136,8 +158,20 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     path: "/api/concierge-intel-wire",
     name: "Intel — Wire",
     description: "Wire headline digest — live RSS plus Lounge feed; optional category or message filter.",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
+    tier: "raw",
     sampleBody: { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
+  },
+  {
+    id: "intel-desk-brief",
+    segment: "research",
+    method: "POST",
+    path: "/api/concierge-intel-desk-brief",
+    name: "Intel — Desk brief",
+    description: "Composite brief — macro + Meteora yields + desk verdict + optional Lounge insider overlay.",
+    priceUsd: "0.25",
+    tier: "bundle",
+    sampleBody: { message: "morning Solana desk brief", includeInsider: true },
   },
   {
     id: "news-open",
@@ -147,6 +181,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Open wire article",
     description: "Unlock one headline and receive the canonical article URL.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: {
       url: "https://example.com/article",
       title: "Headline title",
@@ -171,7 +206,26 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     name: "Unlock creator signal",
     description: "Unlock full summary for one Lounge RWA creator signal.",
     priceUsd: "0.10",
+    tier: "signal",
     sampleBody: { signalId: "sig_…" },
+  },
+];
+
+/** Free companion routes (not in x402 paid catalog). */
+export const CONCIERGE_FREE_ROUTES = [
+  {
+    id: "intel-accuracy",
+    method: "GET",
+    path: "/api/concierge-intel-accuracy",
+    name: "Verdict accuracy leaderboard",
+    description: "Public 24h verdict track record — social proof for intel-verdict.",
+  },
+  {
+    id: "mcp",
+    method: "GET",
+    path: "/api/mcp",
+    name: "MCP discovery",
+    description: "JSON-RPC tools/list and tools/call for agent integrations.",
   },
 ];
 

@@ -110,6 +110,10 @@
       "destination": "/docs-pricing.html"
     },
     {
+      "source": "/docs/launch",
+      "destination": "/docs-launch.html"
+    },
+    {
       "source": "/docs/payment/x402",
       "destination": "/docs-payment-x402.html"
     },

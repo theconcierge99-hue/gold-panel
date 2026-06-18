@@ -35,6 +35,10 @@
       <li><a href="#whales">Whales</a></li>
       <li><a href="#wallet">Wallet</a></li>
       <li><a href="#verdict">Verdict</a></li>
+      <li><a href="#meteora">Meteora DLMM</a></li>
+      <li><a href="#desk-brief">Desk brief</a></li>
+      <li><a href="#accuracy">Accuracy</a></li>
+      <li><a href="#mcp">MCP</a></li>
       <li><a href="#concierge">Full Concierge chat</a></li>
     </ul>
   </nav>
@@ -42,22 +46,26 @@
   <section id="overview">
     <h2>Overview</h2>
     <div class="card">
-      <p>Each endpoint returns <strong>JSON</strong> from DeFi Llama, <strong>Meteora DLMM API</strong>, Binance futures, Fear &amp; Greed, optional Helius, and Lounge creator signals (verdict). <strong>0.1 USDC</strong> per call.</p>
+      <p>Each endpoint returns <strong>JSON</strong> from DeFi Llama, <strong>Meteora DLMM API</strong>, Binance futures, Fear &amp; Greed, optional Helius, and Lounge creator signals (verdict). <strong>Tiered pricing:</strong> raw <strong>$0.02</strong> · signal <strong>$0.10</strong> · bundle <strong>$0.25</strong> (desk brief).</p>
       <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code></p>
       <table>
-        <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
+        <thead><tr><th>Endpoint</th><th>Price</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td><code>POST /api/concierge-intel-macro</code></td><td>Macro snapshot — SPX, VIX, DXY, yields, calendar</td></tr>
-          <tr><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest (RSS + Lounge memory)</td></tr>
-          <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>Chain + protocol TVL</td></tr>
-          <tr><td><code>POST /api/concierge-intel-yields</code></td><td>Jupiter, Meteora, DLMM, lending pools</td></tr>
-          <tr><td><code>POST /api/concierge-intel-whales</code></td><td>Top-trader positioning (BTC/ETH/SOL)</td></tr>
-          <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>Wallet snapshot / PnL note</td></tr>
-          <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>Desk verdict + insider overlay</td></tr>
-          <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops (insider-first alpha)</td></tr>
-          <tr><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
-          <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move up/down candidates</td></tr>
-          <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-macro</code></td><td>$0.02</td><td>Macro snapshot — SPX, VIX, DXY, yields, calendar</td></tr>
+          <tr><td><code>POST /api/concierge-intel-wire</code></td><td>$0.02</td><td>Wire headline digest (RSS + Lounge memory)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-tvl</code></td><td>$0.02</td><td>Chain + protocol TVL</td></tr>
+          <tr><td><code>POST /api/concierge-intel-whales</code></td><td>$0.02</td><td>Top-trader positioning (BTC/ETH/SOL)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-yields</code></td><td>$0.10</td><td>Jupiter, Meteora, DLMM, lending pools</td></tr>
+          <tr><td><code>POST /api/concierge-intel-meteora</code></td><td>$0.10</td><td>Meteora DLMM deep-dive + risk flags</td></tr>
+          <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>$0.10</td><td>Wallet snapshot / PnL note</td></tr>
+          <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td><td>Desk verdict + insider overlay</td></tr>
+          <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>$0.25</td><td>Macro + Meteora + verdict bundle</td></tr>
+          <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>$0.10</td><td>Potential airdrops (insider-first alpha)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-listing</code></td><td>$0.10</td><td>Potential exchange listings</td></tr>
+          <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>$0.10</td><td>Large-move up/down candidates</td></tr>
+          <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>$0.10</td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
+          <tr><td><code>GET /api/concierge-intel-accuracy</code></td><td>Free</td><td>Verdict accuracy leaderboard</td></tr>
+          <tr><td><code>GET/POST /api/mcp</code></td><td>Free</td><td>MCP tools/list · tools/call</td></tr>
         </tbody>
       </table>
       <p class="note">Discovery: <a class="ext" href="/openapi.json">openapi.json</a> · <a class="ext" href="/.well-known/x402">/.well-known/x402</a> · <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/payment/mpp">MPPscan / AgentCash</a> · <a href="/docs/builders" class="gold-link">For Builders</a></p>
@@ -205,6 +213,43 @@
   "insider": [{ "line": "[INSIDER · Crypto] …" }],
   "supporting": { … }
 }</code></pre>
+    </div>
+  </section>
+
+  <section id="meteora">
+    <h2>Meteora DLMM</h2>
+    <div class="card">
+      <p><code>POST /api/concierge-intel-meteora</code> — <strong>$0.10</strong>. Solana moat: pool TVL, APY, bin step, volume, IL risk flags from <code>dlmm.datapi.meteora.ag</code>.</p>
+<pre><code>{
+  "sortByApy": true,
+  "limit": 8,
+  "poolHint": "SOL-USDC"
+}</code></pre>
+    </div>
+  </section>
+
+  <section id="desk-brief">
+    <h2>Desk brief (bundle)</h2>
+    <div class="card">
+      <p><code>POST /api/concierge-intel-desk-brief</code> — <strong>$0.25</strong>. One call: macro snapshot + Meteora top pools + desk verdict + optional insider overlay.</p>
+<pre><code>{
+  "message": "morning Solana desk brief",
+  "includeInsider": true
+}</code></pre>
+    </div>
+  </section>
+
+  <section id="accuracy">
+    <h2>Verdict accuracy</h2>
+    <div class="card">
+      <p><code>GET /api/concierge-intel-accuracy</code> — <strong>free</strong>. Public leaderboard scoring paid <code>intel-verdict</code> calls vs 24h BTC move. Track record builds as verdicts are paid.</p>
+    </div>
+  </section>
+
+  <section id="mcp">
+    <h2>MCP</h2>
+    <div class="card">
+      <p><code>GET /api/mcp</code> — discovery. <code>POST /api/mcp</code> — JSON-RPC <code>tools/list</code> and <code>tools/call</code> with optional <code>paymentSignature</code> after x402 pay.</p>
     </div>
   </section>
 

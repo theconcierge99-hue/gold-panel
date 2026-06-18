@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>SOON Launch Playbook — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/launch" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="launch">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a></div>
+      <div class="docs-eyebrow">Product</div>
+      <h1 class="docs-title">SOON Launch Playbook</h1>
+      <p class="docs-lead">Pre-launch and launch-day env snapshots — paste to Vercel, redeploy, no code changes.</p>
+
+      <div class="card">
+        <p><strong>Now:</strong> USDC only · SOON shows “Coming soon” in pay modal.</p>
+        <p><strong>Launch day:</strong> set <code>SOON_TOKEN_MINT</code> from pump.fun → all routes accept SOON with holder discount.</p>
+        <p>Verify: <code>npm run launch:verify -- --phase=pre</code> or <code>--phase=post --live</code></p>
+      </div>
+
+      <h2 class="docs-h2">Env snapshots (repo)</h2>
+      <div class="card">
+        <ul>
+          <li><code>config/launch/pre-launch.env.snapshot</code> — use now</li>
+          <li><code>config/launch/post-launch.env.snapshot</code> — use on token launch day</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Post-launch keys</h2>
+      <div class="card">
+<pre><code>SOON_TOKEN_MINT=&lt;mint_from_pump_fun&gt;
+SOON_RESOURCE_KINDS=all
+SOON_TOKEN_DISCOUNT_PERCENT=30
+SOON_USDC_RATE=0.00008
+TOKEN_PAY_DEFAULT_MERCHANT=soon
+SOON_HOLDER_FREE_TIER_ENABLED=true
+SOON_HOLDER_FREE_RAW_PER_DAY=5</code></pre>
+        <p class="note">Raw-tier free calls: send <code>X-Soon-Holder-Wallet</code> on intel-tvl, macro, wire, or whales when wallet holds ≥50k SOON.</p>
+      </div>
+
+      <h2 class="docs-h2">Pricing tiers (live)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Tier</th><th>USDC</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td>Raw</td><td>0.02</td><td>tvl, macro, wire, whales</td></tr>
+            <tr><td>Signal</td><td>0.10</td><td>verdict, meteora, yields, concierge</td></tr>
+            <tr><td>Bundle</td><td>0.25</td><td>desk-brief</td></tr>
+          </tbody>
+        </table>
+        <p><a href="/docs/pricing" class="gold-link">Full pricing table</a></p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/payment/token-pay">Token Pay guide</a>
+        <a class="btn" href="/token">SOON tokenomics</a>
+        <a class="btn" href="/docs/pricing">Pricing</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

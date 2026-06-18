@@ -11,6 +11,7 @@
       { id: "builders", href: "/docs/builders", title: "For Builders" },
       { id: "quickstart", href: "/docs/quickstart", title: "Quickstart" },
       { id: "pricing", href: "/docs/pricing", title: "Pricing" },
+      { id: "launch", href: "/docs/launch", title: "SOON Launch" },
     ]},
     { label: "Payment", items: [
       { id: "payment-x402", href: "/docs/payment/x402", title: "x402 Protocol" },

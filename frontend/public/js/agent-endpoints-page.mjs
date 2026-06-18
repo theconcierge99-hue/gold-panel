@@ -23,7 +23,7 @@ if (chipsEl) {
   chipsEl.innerHTML = [
     `<span><strong>${c.total}</strong> Endpoints</span>`,
     `<span class="dot">·</span><span>x402</span>`,
-    `<span class="dot">·</span><span>Pay per call</span>`,
+    `<span class="dot">·</span><span>from $0.02</span>`,
     `<span class="dot">·</span><span>Solana · Base</span>`,
     `<span class="dot">·</span><span>AI-enhanced</span>`,
   ].join("");

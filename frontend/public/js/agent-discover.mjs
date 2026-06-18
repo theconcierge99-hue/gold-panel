@@ -94,7 +94,17 @@ async function load() {
 
     cards.push(
       discCard(
-        "OpenAPI",
+        "MCP & accuracy",
+        `<p>Free agent tools — MCP JSON-RPC and public verdict track record.</p>
+        <div class="res-disc-links">
+          ${discLink("/api/mcp", `${origin}/api/mcp`)}
+          ${discLink("/api/concierge-intel-accuracy", `${origin}/api/concierge-intel-accuracy`)}
+        </div>
+        ${config?.pricingTiers ? `<p class="res-disc-hint">Tiers: raw $${config.pricingTiers.rawUsdc} · signal $${config.pricingTiers.signalUsdc} · bundle $${config.pricingTiers.bundleUsdc}</p>` : ""}`,
+      ),
+    );
+
+    cards.push(
         `<p>Machine-readable spec with x-payment-info for integrators.</p>
         ${discLink("/openapi.json", `${origin}/openapi.json`)}`,
       ),
