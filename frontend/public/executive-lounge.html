@@ -3175,10 +3175,7 @@
       removeTyping();
       if(err?.message === 'Payment cancelled' || err?.message === 'Payments not configured on server') return;
       addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
-      const fallback=respond(v);
-      addAi(fallback);
       window._chatHistory.push({ role:'user', text:v });
-      window._chatHistory.push({ role:'model', text:stripTags(fallback) });
     }
     persistCurrentSession();
   }
@@ -3220,7 +3217,7 @@
         removeTyping();
         if(err?.message === 'Payment cancelled' || err?.message === 'Payments not configured on server') return;
         addAi('<p><strong>Concierge unavailable.</strong> '+escapeHtml(err.message)+'</p>');
-        addAi(respond(q));
+        window._chatHistory.push({ role:'user', text:q });
       }
       persistCurrentSession();
     },120);

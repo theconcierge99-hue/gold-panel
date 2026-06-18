@@ -127,20 +127,20 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   return { text: text.trim(), images };
 }
 
-const GEMINI_CALL_MS = 24_000;
-const GEMINI_TRADING_MS = 17_000;
+const GEMINI_CALL_MS = 18_000;
+const GEMINI_TRADING_MS = 15_000;
 /** Wall-clock budget for Gemini on trading-plan path (fits Vercel Edge ~30s incl. x402 + intel). */
-const GEMINI_TRADING_BUDGET_MS = 18_000;
+const GEMINI_TRADING_BUDGET_MS = 16_000;
 
-const TRADING_PLAN_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash-lite"];
+const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
   if (mode === "trading_plan") {
-    return { temperature: 0.55, maxOutputTokens: 6144 };
+    return { temperature: 0.55, maxOutputTokens: 4096 };
   }
   if (mode === "scalping_plan") {
-    return { temperature: 0.5, maxOutputTokens: 6144 };
+    return { temperature: 0.5, maxOutputTokens: 4096 };
   }
   if (mode === "trade_ideas") {
     return { temperature: 0.55, maxOutputTokens: 4096 };
@@ -265,6 +265,7 @@ async function resolveIntelligenceContext(
   userMessage: string,
   liveSnapshot?: LiveMarketSnapshot | null,
   responseMode: ConciergeResponseMode = "standard",
+  deFiYieldQuestion = false,
 ): Promise<{
   intelBlock: string;
   ticks: MarketTick[];
@@ -279,23 +280,43 @@ async function resolveIntelligenceContext(
   };
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
-  const marketTimeout = tradingPlan ? 5_500 : 7_000;
-  const generalTimeout = tradingPlan ? 3_000 : 4_000;
+  const marketTimeout = tradingPlan ? 4_500 : deFiYieldQuestion ? 5_000 : 6_500;
+  const generalTimeout = deFiYieldQuestion ? 2_000 : 4_000;
+  const skipGeneral = tradingPlan || deFiYieldQuestion;
 
   const queryMessage = normalizeConciergeDeFiMessage(userMessage);
   const topicsForIntel = detectTopics(queryMessage);
-  const needDeFiIntel = tradingPlan
-    ? wantsDeFiIntel(queryMessage) || topicsForIntel.includes("defi")
-    : wantsDeFiIntel(queryMessage) ||
-      topicsForIntel.includes("defi") ||
-      topicsForIntel.includes("crypto");
+  const liqClusterQuery = /\b(liquidation|liq cluster|cascade|perps?\s+liquidation)\b/i.test(
+    queryMessage,
+  );
+  const needDeFiIntel = liqClusterQuery
+    ? false
+    : tradingPlan
+      ? wantsDeFiIntel(queryMessage) || topicsForIntel.includes("defi")
+      : wantsDeFiIntel(queryMessage) ||
+        topicsForIntel.includes("defi") ||
+        topicsForIntel.includes("crypto");
 
   const deFiQueryNote =
     /\bdllm\b/i.test(userMessage) && !/\bdlmm\b/i.test(userMessage)
       ? "USER QUERY NOTE: User typed \"DLLM\" — interpret as DLMM (Dynamic Liquidity Market Maker, e.g. Meteora on Solana), not an unknown acronym.\n\n"
       : "";
 
-  const [snapshot, general, memoryItems] = await Promise.all([
+  const emptySnapshot: LiveMarketSnapshot = {
+    fetchedAt: new Date().toISOString(),
+    ticks: market,
+    derivatives: [],
+    positioning: [],
+    headlines: [],
+    sources: [],
+  };
+  const wantsBtcAnchor =
+    tradingPlan ||
+    scalpDesk ||
+    topicsForIntel.includes("crypto") ||
+    /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage);
+
+  const [snapshot, general, memoryItems, freshBtc] = await Promise.all([
     liveSnapshot
       ? Promise.resolve(liveSnapshot)
       : withTimeout(
@@ -305,74 +326,61 @@ async function resolveIntelligenceContext(
             message: queryMessage,
           }),
           marketTimeout,
-          {
-            fetchedAt: new Date().toISOString(),
-            ticks: market,
-            derivatives: [],
-            positioning: [],
-            headlines: [],
-            sources: [],
-          },
+          emptySnapshot,
         ),
-    withTimeout(
-      fetchGeneralKnowledgeSnapshot(
-        queryMessage,
-        tradingPlan ? { mode: "trading" } : { mode: "lite" },
-      ),
-      generalTimeout,
-      emptyGeneral,
-    ),
+    skipGeneral
+      ? Promise.resolve(emptyGeneral)
+      : withTimeout(
+          fetchGeneralKnowledgeSnapshot(queryMessage, { mode: "lite" }),
+          generalTimeout,
+          emptyGeneral,
+        ),
     tradingPlan
       ? Promise.resolve([])
-      : withTimeout(selectRelevantLoungeMemory(queryMessage), 3_000, []),
+      : withTimeout(selectRelevantLoungeMemory(queryMessage), 2_500, []),
+    wantsBtcAnchor ? withTimeout(fetchBtcSpotTickFast(2_000), 2_000, null) : Promise.resolve(null),
   ]);
 
   const loungeMemoryBlock = formatLoungeMemoryForPrompt(memoryItems);
 
   let enrichedSnapshot = snapshot;
-  const wantsBtcAnchor =
-    tradingPlan ||
-    scalpDesk ||
-    topicsForIntel.includes("crypto") ||
-    /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage);
-  if (wantsBtcAnchor) {
-    const freshBtc = await withTimeout(fetchBtcSpotTickFast(), 2_500, null);
-    if (freshBtc) {
-      enrichedSnapshot = {
-        ...enrichedSnapshot,
-        fetchedAt: new Date().toISOString(),
-        ticks: mergeMarketTicks([freshBtc], enrichedSnapshot.ticks),
-      };
-    }
+  if (freshBtc) {
+    enrichedSnapshot = {
+      ...enrichedSnapshot,
+      fetchedAt: new Date().toISOString(),
+      ticks: mergeMarketTicks([freshBtc], enrichedSnapshot.ticks),
+    };
   }
+
+  const btcTick = enrichedSnapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
+  const defiTimeout = tradingPlan ? 2_500 : deFiYieldQuestion ? 5_000 : 5_500;
+  const scalpTimeout = tradingPlan ? 4_500 : 4_000;
+
+  const [defiIntel, scalp] = await Promise.all([
+    needDeFiIntel
+      ? withTimeout(
+          fetchConciergeDeFiIntel({
+            message: queryMessage,
+            positioning: enrichedSnapshot.positioning,
+            sentiment: enrichedSnapshot.sentiment ?? null,
+            btcChange: btcTick?.change,
+            insiderItems: memoryItems,
+            lite: tradingPlan || deFiYieldQuestion,
+          }),
+          defiTimeout,
+          null,
+        )
+      : Promise.resolve(null),
+    scalpDesk
+      ? withTimeout(fetchScalpDeskIntel({ message: userMessage }), scalpTimeout, null)
+      : Promise.resolve(null),
+  ]);
 
   let defiIntelBlock = "";
-  if (needDeFiIntel) {
-    const btcTick = enrichedSnapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
-    const defiIntel = await withTimeout(
-      fetchConciergeDeFiIntel({
-        message: queryMessage,
-        positioning: snapshot.positioning,
-        sentiment: snapshot.sentiment ?? null,
-        btcChange: btcTick?.change,
-        insiderItems: memoryItems,
-        lite: tradingPlan,
-      }),
-      tradingPlan ? 2_500 : 6_000,
-      null,
-    );
-    if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
-  }
+  if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
 
   let scalpBlock = "";
-  if (scalpDesk) {
-    const scalp = await withTimeout(
-      fetchScalpDeskIntel({ message: userMessage }),
-      tradingPlan ? 5_500 : 4_500,
-      null,
-    );
-    if (scalp) scalpBlock = formatScalpIntelForPrompt(scalp);
-  }
+  if (scalp) scalpBlock = formatScalpIntelForPrompt(scalp);
 
   ingestWireHeadlinesAsync(snapshot.headlines);
 
@@ -421,6 +429,7 @@ export async function runConciergeGemini(options: {
     queryMessage,
     options.liveSnapshot,
     responseMode,
+    deFiYieldQuestion,
   );
   const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
