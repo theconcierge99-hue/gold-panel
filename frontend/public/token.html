@@ -106,45 +106,119 @@
       <span class="tok-flow-arrow">·</span>
       <span>20% treasury</span>
     </div>
-    <p><strong>8% discount</strong> vs USDC when checkout uses SOON (e.g. $0.10 call → $0.092 equivalent in SOON).</p>
+    <p><strong>~30% discount</strong> vs USDC list price when checkout uses SOON (<code>SOON_TOKEN_DISCOUNT_PERCENT</code> — e.g. $0.10 signal route → ~$0.07 equivalent in SOON).</p>
   </section>
 
   <section class="tok-section" aria-labelledby="utility-h">
     <h2 id="utility-h">Holder <em>utility</em></h2>
-    <p>Snapshot + 7-day minimum hold. Benefits ship in phases after T0.</p>
-    <div class="tok-grid">
+    <p>
+      Three balance tiers at snapshot + <strong>7-day minimum hold</strong> for phased perks.
+      <span class="tok-status live">Live</span> = ships with post-launch env snapshot.
+      <span class="tok-status phased">Phased</span> = quarterly rollout on the roadmap below.
+    </p>
+    <div class="tok-grid tok-tier-cards">
       <div class="tok-card">
-        <h3>Concierge credits</h3>
-        <p>Monthly free or discounted Concierge messages in the Lounge (tiered).</p>
+        <h3>Deluxe <span class="tok-tier-min">≥ 50,000 SOON</span></h3>
+        <p class="tok-tier-head">Entry holder — raw intel allowance, SOON checkout, Lounge credits.</p>
       </div>
       <div class="tok-card">
-        <h3>Intel discount</h3>
-        <p>Agents pay <strong>$0.08</strong> per Intel call (vs $0.10) on TVL, yields, whales, wallet, verdict.</p>
+        <h3>Executive <span class="tok-tier-min">≥ 250,000 SOON</span></h3>
+        <p class="tok-tier-head">Builder holder — Discover badge, signal credits, higher raw allowance.</p>
       </div>
-      <div class="tok-card">
-        <h3>Agent badge</h3>
-        <p><code>agt_…</code> identities with minimum hold → verified desk badge on Discover.</p>
-      </div>
-      <div class="tok-card">
-        <h3>Publish rebate</h3>
-        <p>Signal publish ($1) → partial SOON rebate from treasury (not inflation).</p>
+      <div class="tok-card tok-card--gold">
+        <h3>President <span class="tok-tier-min">≥ 1,000,000 SOON</span></h3>
+        <p class="tok-tier-head">Top holder — integration headroom, bundle pricing, <strong>governance vote</strong>.</p>
       </div>
     </div>
   </section>
 
   <section class="tok-section" aria-labelledby="tiers-h">
-    <h2 id="tiers-h">Holder <em>tiers</em></h2>
+    <h2 id="tiers-h">Benefit <em>matrix</em></h2>
+    <p>What each tier unlocks against live Concierge routes. Updates as features ship — see <code>GET /api/x402-config</code> → <code>soonHolderTiers</code>.</p>
     <div class="tok-table-wrap">
-      <table class="tok-table">
+      <table class="tok-table tok-table--matrix">
         <thead>
-          <tr><th>Tier</th><th>Minimum hold</th><th>Utility</th></tr>
+          <tr>
+            <th>Benefit</th>
+            <th>Deluxe</th>
+            <th>Executive</th>
+            <th>President</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><td><strong>Desk</strong></td><td>50,000 SOON</td><td>3 Concierge credits / month · profile badge</td></tr>
-          <tr><td><strong>Agent</strong></td><td>250,000 SOON</td><td>Intel $0.08 · Discover priority</td></tr>
-          <tr><td><strong>Institutional</strong></td><td>1,000,000+ SOON</td><td>Higher rate limits · macro webhook beta</td></tr>
+          <tr class="tok-matrix-group"><td colspan="4">Payment &amp; intel (x402)</td></tr>
+          <tr>
+            <td>SOON checkout — all 17 paid routes <span class="tok-status live">Live</span></td>
+            <td class="tok-yes">✓</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr>
+            <td>~30% SOON vs USDC list (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>) <span class="tok-status live">Live</span></td>
+            <td class="tok-yes">✓</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Free raw intel — tvl, macro, wire, whales (<code>X-Soon-Holder-Wallet</code>) <span class="tok-status live">Live</span></td>
+            <td>5 / day</td><td>5 / day <span class="tok-status phased">→ 10 · Q1</span></td><td>5 / day <span class="tok-status phased">→ 15 · Q2+</span></td>
+          </tr>
+          <tr>
+            <td>intel-desk-brief bundle ($0.25) SOON pricing <span class="tok-status phased">Q2+</span></td>
+            <td class="tok-no">—</td><td class="tok-no">—</td><td>~20% lower effective</td>
+          </tr>
+          <tr>
+            <td>Free accuracy + MCP (<code>/api/concierge-intel-accuracy</code>, <code>/api/mcp</code>) <span class="tok-status live">Live</span></td>
+            <td class="tok-yes">Public</td><td class="tok-yes">Public</td><td class="tok-yes">Public</td>
+          </tr>
+          <tr class="tok-matrix-group"><td colspan="4">Executive Lounge</td></tr>
+          <tr>
+            <td>Concierge chat credits ($0.10) <span class="tok-status phased">2026 · Q4</span></td>
+            <td>3 / mo</td><td>3 / mo</td><td>3 / mo</td>
+          </tr>
+          <tr>
+            <td>Lounge profile holder badge <span class="tok-status phased">2026 · Q4</span></td>
+            <td class="tok-yes">✓</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Signal unlock credits ($0.10) <span class="tok-status phased">2027 · Q1</span></td>
+            <td class="tok-no">—</td><td>2 / mo</td><td>2 / mo</td>
+          </tr>
+          <tr>
+            <td>Signal publish rebate ($1 treasury) <span class="tok-status phased">2027 · Q1</span></td>
+            <td class="tok-no">—</td><td>Partial</td><td>Partial</td>
+          </tr>
+          <tr>
+            <td>Transparency report early access (24h) <span class="tok-status phased">2027 · Q1</span></td>
+            <td class="tok-no">—</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr class="tok-matrix-group"><td colspan="4">Agent identity &amp; integrations</td></tr>
+          <tr>
+            <td>Discover verified badge on <code>agt_…</code> <span class="tok-status phased">2027 · Q1</span></td>
+            <td class="tok-no">—</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Macro webhook beta (intel-macro callback) <span class="tok-status phased">2027 · Q2+</span></td>
+            <td class="tok-no">—</td><td class="tok-no">—</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr>
+            <td>Integration rate-limit headroom <span class="tok-status phased">2027 · Q2+</span></td>
+            <td class="tok-no">—</td><td class="tok-no">—</td><td class="tok-yes">✓</td>
+          </tr>
+          <tr class="tok-matrix-group"><td colspan="4">Governance</td></tr>
+          <tr>
+            <td>Quarterly advisory governance vote <span class="tok-status phased">2027 · Q2+</span></td>
+            <td class="tok-no">—</td><td class="tok-no">—</td><td class="tok-yes">✓</td>
+          </tr>
         </tbody>
       </table>
+    </div>
+    <div class="tok-card tok-governance" style="margin-top:14px">
+      <h3>President governance (planned)</h3>
+      <p>
+        Snapshot-weighted <strong>advisory</strong> polls — not on-chain binding DAO control.
+        Each quarter, wallets at President tier vote on 2–3 priorities within published policy, for example:
+        next intel desk to build, treasury grant shortlist, or buyback vs LP emphasis inside the existing 15% bucket.
+        One wallet per voter; weight = snapshot balance capped to limit single-wallet dominance.
+        Results publish on <a href="/token/transparency" class="tok-inline-link">/token/transparency</a>;
+        the ops team retains final execution — realistic for a young utility token without over-promising decentralization.
+      </p>
     </div>
   </section>
 
@@ -172,12 +246,14 @@
           <tr><th>Route</th><th>Price</th><th>Token hook</th></tr>
         </thead>
         <tbody>
-          <tr><td>Concierge chat</td><td>$0.10</td><td>Credits · SOON pay −8%</td></tr>
-          <tr><td>News / wire unlock</td><td>$0.10</td><td>Credits</td></tr>
-          <tr><td>Signal open</td><td>$0.10</td><td>Discount · 50% to creator</td></tr>
-          <tr><td>intel-macro · intel-wire</td><td>$0.10 each</td><td>Research — Poncho / agent JSON</td></tr>
-          <tr><td>intel-tvl · yields · whales · wallet · verdict</td><td>$0.10 each</td><td>Holder Intel discount</td></tr>
-          <tr><td>Signal publish</td><td>$1.00</td><td>Publisher rebate</td></tr>
+          <tr><td>Raw intel — tvl, macro, wire, whales</td><td>$0.02</td><td>Deluxe+ free allowance · SOON pay</td></tr>
+          <tr><td>Signal intel — verdict, meteora, yields, wallet, …</td><td>$0.10</td><td>SOON pay ~−30%</td></tr>
+          <tr><td>intel-desk-brief</td><td>$0.25</td><td>President SOON pricing · Q2+</td></tr>
+          <tr><td>Concierge chat</td><td>$0.10</td><td>Deluxe credits · Q4 · SOON pay</td></tr>
+          <tr><td>News / wire unlock</td><td>$0.10</td><td>SOON pay · credits roadmap</td></tr>
+          <tr><td>Signal open</td><td>$0.10</td><td>Executive credits · 50% to creator</td></tr>
+          <tr><td>Signal publish</td><td>$1.00</td><td>Executive publish rebate · treasury</td></tr>
+          <tr><td>Accuracy + MCP</td><td>Free</td><td>Public — no hold</td></tr>
         </tbody>
       </table>
     </div>
@@ -202,11 +278,12 @@
 
   <section class="tok-section" aria-labelledby="roadmap-h">
     <h2 id="roadmap-h">Launch <em>roadmap</em></h2>
+    <p>Phased rollout — quarterly targets, not week-by-week promises. Dates may shift with market and ops.</p>
     <div class="tok-grid">
-      <div class="tok-card"><h3>T0 · Launch</h3><p>Pump.fun → migrate → Raydium LP. Publish CA, utility live, transparency page active.</p></div>
-      <div class="tok-card"><h3>Week 1</h3><p>Holder snapshot, Concierge credits, first buyback window (if threshold met).</p></div>
-      <div class="tok-card"><h3>Week 2–4</h3><p>Intel discount, agent badge on Discover, weekly transparency report.</p></div>
-      <div class="tok-card"><h3>Month 2+</h3><p>SOON checkout on Concierge routes · milestone burns as revenue scales.</p></div>
+      <div class="tok-card"><h3>2026 · Q3 · Launch</h3><p>Pump.fun → migrate → Raydium LP. Publish CA, enable SOON on Concierge pay rail, transparency page live.</p></div>
+      <div class="tok-card"><h3>2026 · Q4</h3><p>Holder snapshot, Concierge credits for Deluxe tier, first buyback window if net revenue threshold is met.</p></div>
+      <div class="tok-card"><h3>2027 · Q1</h3><p>Executive tier perks — Discover badge, signal credits, weekly transparency report cadence.</p></div>
+      <div class="tok-card"><h3>2027 · Q2+</h3><p>President governance polls · macro webhook beta · higher raw allowances · milestone burns as revenue scales.</p></div>
     </div>
   </section>
 

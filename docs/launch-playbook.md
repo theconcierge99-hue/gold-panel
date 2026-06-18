@@ -172,6 +172,17 @@ curl.exe -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl `
 | MCP server | `GET/POST /api/mcp` (JSON-RPC: `tools/list`, `tools/call`) |
 | Accuracy leaderboard | `GET /api/concierge-intel-accuracy` (free) |
 | SOON holder free tier | Raw routes + `X-Soon-Holder-Wallet` header — `SOON_HOLDER_*` env |
+| Holder tier matrix | Deluxe 50k · Executive 250k · President 1M+ — `soon-token.ts` + `/token` + `x402-config.soonHolderTiers` |
+
+### Holder tiers (summary)
+
+| Tier | Min hold | Live now (post env) | Phased |
+|------|----------|---------------------|--------|
+| **Deluxe** | 50,000 | SOON checkout ~−30% · 5 free raw/day · public accuracy + MCP | Concierge credits · profile badge (2026 · Q4) |
+| **Executive** | 250,000 | Inherits Deluxe | Discover badge · signal credits · transparency early access (2027 · Q1) |
+| **President** | 1,000,000 | — | Webhook beta · rate headroom · **advisory governance vote** (2027 · Q2+) |
+
+Governance is snapshot-weighted and **non-binding** — quarterly signal on treasury grants, intel roadmap priority, and buyback/LP emphasis within published policy.
 
 ---
 
