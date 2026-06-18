@@ -6,6 +6,7 @@ Competitive and operational playbook for **pre-launch (now)** and **launch day (
 |----------|------|
 | Pre-launch env | [`config/launch/pre-launch.env.snapshot`](../config/launch/pre-launch.env.snapshot) |
 | Post-launch env | [`config/launch/post-launch.env.snapshot`](../config/launch/post-launch.env.snapshot) |
+| TCX rebrand (SOON → TCX) | [`config/launch/tcx-rebrand-checklist.md`](../config/launch/tcx-rebrand-checklist.md) |
 | Verify | `npm run launch:verify -- --phase=pre` or `--phase=post` |
 
 ---
