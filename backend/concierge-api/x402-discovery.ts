@@ -74,7 +74,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     method: "POST",
     path: "/api/lounge-signal-publish",
     name: "Publish creator signal",
-    description: "Publish one RWA intelligence signal to the Executive Lounge feed (anti-spam fee).",
+    description: "Publish one RWA intelligence signal to the Executive Lounge feed (minimum settlement fee).",
     priceUsd: String(X402_SIGNAL_PUBLISH_USDC.toFixed(2)),
     tags: [...X402_OPERATION_TAGS["signal-publish"]],
   },

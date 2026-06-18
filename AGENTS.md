@@ -6,7 +6,7 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 
 - **Frontend** (`frontend/`) — static Lounge UI (`public/`), TanStack app (`src/`), browser bundles (`lib/`)
 - **Backend** (`backend/`) — Concierge API handlers (`concierge-api/`), Vercel entries (`api/`), dev middleware (`concierge-dev-plugin.ts`)
-- **API entry (Vercel):** root `api/*.ts` shims → `backend/api/` · Edge router `[...path].ts` · Node: `lounge-creator-payout`, `lounge-rwa-mint-sol`
+- **API entry (Vercel):** root `api/*.ts` shims → `backend/api/` · Edge router `[...path].ts` · Node: `lounge-rwa-mint-sol`
 - **Handlers:** `backend/concierge-api/` — keep new handlers **outside** root `/api/` (Vercel Hobby ≤12 serverless functions)
 - **x402 / Token Pay:** `backend/concierge-api/token-pay/` · partner APIs `/api/token-pay-build-accept`, `/api/token-pay-verify` · SDK `packages/token-x402`
 - **x402 / OpenAPI:** `backend/concierge-api/x402-server.ts`, `x402-discovery.ts`

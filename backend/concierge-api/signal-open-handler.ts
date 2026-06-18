@@ -12,39 +12,12 @@ import {
   SIGNAL_MERCHANT_SHARE_BPS,
   splitReaderUnlockAtomic,
 } from "./signal-revenue";
-import { internalAuthHeaders, loungeApiOrigin } from "./lounge-internal-auth";
+import { awardCreatorPoints } from "./creator-points";
 import { parseSignalOpenBody } from "./signal-validation";
-import type { CreatorPayoutResult } from "./creator-payout-types";
 import { awardReaderBadge } from "./rwa-badge";
 import { getSignalRwaToken } from "./rwa-store";
 import { appendUnlockLedger, getSignalById } from "./signal-store";
 import { reportPaidRouteToZauth } from "./zauth-paid-response";
-
-async function requestCreatorInstantPayout(opts: {
-  creatorWallet: string;
-  creatorChain: "sol" | "evm";
-  shareAtomic: string;
-}): Promise<CreatorPayoutResult> {
-  try {
-    const res = await fetch(`${loungeApiOrigin()}/api/lounge-creator-payout`, {
-      method: "POST",
-      headers: internalAuthHeaders(),
-      body: JSON.stringify(opts),
-    });
-    const data = (await res.json().catch(() => ({}))) as {
-      payout?: CreatorPayoutResult;
-      error?: string;
-    };
-    if (!res.ok || !data.payout) {
-      return { status: "failed", reason: data.error || `Payout HTTP ${res.status}` };
-    }
-    return data.payout;
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[signal-open] creator payout fetch", msg);
-    return { status: "failed", reason: "Creator payout unavailable" };
-  }
-}
 
 export async function runSignalOpenAfterPayment(
   request: Request,
@@ -68,8 +41,13 @@ export async function runSignalOpenAfterPayment(
       });
     }
 
-    let creatorPayoutTx: string | undefined;
-    let creatorPayoutStatus: "sent" | "skipped" | "failed" | undefined;
+    let creatorPoints:
+      | {
+          awarded: number;
+          totalPoints: number;
+          totalUnlocks: number;
+        }
+      | undefined;
     let readerBadge:
       | {
           badgeId: string;
@@ -83,29 +61,48 @@ export async function runSignalOpenAfterPayment(
 
     if (gate.payer && gate.payer !== "dev-bypass" && gate.transaction) {
       const split = splitReaderUnlockAtomic(X402_READ_PRICE_ATOMIC);
-      const payout = await requestCreatorInstantPayout({
-        creatorWallet: signal.creatorWallet,
-        creatorChain: signal.creatorChain,
-        shareAtomic: split.creatorAtomic,
-      });
-      creatorPayoutTx = payout.tx;
-      creatorPayoutStatus = payout.status;
 
-      await appendUnlockLedger({
-        type: "signal_unlock",
-        signalId: signal.id,
-        creatorWallet: signal.creatorWallet,
-        payer: gate.payer,
-        amountAtomic: X402_READ_PRICE_ATOMIC,
-        creatorShareAtomic: split.creatorAtomic,
-        merchantShareAtomic: split.merchantAtomic,
-        creatorShareBps: SIGNAL_CREATOR_SHARE_BPS,
-        merchantShareBps: SIGNAL_MERCHANT_SHARE_BPS,
-        transaction: gate.transaction,
-        creatorPayoutTx,
-        creatorPayoutStatus,
-        at: new Date().toISOString(),
-      });
+      try {
+        const award = await awardCreatorPoints({
+          wallet: signal.creatorWallet,
+          reason: "unlock",
+        });
+        creatorPoints = {
+          awarded: award.points,
+          totalPoints: award.profile.totalPoints,
+          totalUnlocks: award.profile.totalUnlocks,
+        };
+
+        await appendUnlockLedger({
+          type: "signal_unlock",
+          signalId: signal.id,
+          creatorWallet: signal.creatorWallet,
+          payer: gate.payer,
+          amountAtomic: X402_READ_PRICE_ATOMIC,
+          creatorShareAtomic: split.creatorAtomic,
+          merchantShareAtomic: split.merchantAtomic,
+          creatorShareBps: SIGNAL_CREATOR_SHARE_BPS,
+          merchantShareBps: SIGNAL_MERCHANT_SHARE_BPS,
+          creatorPointsAwarded: award.points,
+          transaction: gate.transaction,
+          at: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error("[signal-open] creator points", e instanceof Error ? e.message : e);
+        await appendUnlockLedger({
+          type: "signal_unlock",
+          signalId: signal.id,
+          creatorWallet: signal.creatorWallet,
+          payer: gate.payer,
+          amountAtomic: X402_READ_PRICE_ATOMIC,
+          creatorShareAtomic: split.creatorAtomic,
+          merchantShareAtomic: split.merchantAtomic,
+          creatorShareBps: SIGNAL_CREATOR_SHARE_BPS,
+          merchantShareBps: SIGNAL_MERCHANT_SHARE_BPS,
+          transaction: gate.transaction,
+          at: new Date().toISOString(),
+        });
+      }
 
       try {
         const award = await awardReaderBadge({
@@ -147,14 +144,7 @@ export async function runSignalOpenAfterPayment(
         creatorChain: signal.creatorChain,
         publishedAt: signal.publishedAt,
       },
-      revenueShare: {
-        creatorPercent: 50,
-        merchantPercent: 50,
-        creatorShareUsdc: 0.05,
-      },
-      creatorPayout: creatorPayoutStatus
-        ? { status: creatorPayoutStatus, transaction: creatorPayoutTx }
-        : undefined,
+      creatorPoints,
       rwa: rwaToken
         ? {
             tokenId: rwaToken.tokenId,

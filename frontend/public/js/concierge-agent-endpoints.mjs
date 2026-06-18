@@ -194,8 +194,8 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     method: "POST",
     path: "/api/lounge-signal-publish",
     name: "Publish creator signal",
-    description: "Publish RWA intelligence signal to the Lounge feed (anti-spam fee).",
-    priceUsd: "1.00",
+    description: "Publish RWA intelligence signal to the Lounge feed (minimum settlement fee).",
+    priceUsd: "0.02",
     sampleBody: { title: "Signal title", summary: "Full intelligence summary…", category: "Crypto" },
   },
   {

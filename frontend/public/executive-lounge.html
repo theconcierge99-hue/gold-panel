@@ -455,6 +455,16 @@
   .reader-badge-card .btier{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
   .reader-badge-card .btitle{font-size:12px;margin-top:6px;color:var(--text-primary);line-height:1.35}
   .reader-badge-card .bmeta{font-size:10px;color:var(--text-muted);margin-top:6px}
+  .creator-standing-card{border:1px solid var(--border);padding:16px 18px;background:var(--gcard-bg)}
+  .creator-standing-card .cs-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .creator-standing-card .cs-tier{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+  .creator-standing-card .cs-label{font-size:15px;color:var(--text-primary);margin-top:4px;line-height:1.3}
+  .creator-standing-card .cs-points{font-family:'DM Mono',monospace;font-size:24px;color:var(--gold);line-height:1;text-align:right}
+  .creator-standing-card .cs-points span{font-size:10px;letter-spacing:.12em;color:var(--text-muted);display:block;margin-top:4px;text-transform:uppercase;font-family:'Outfit',sans-serif}
+  .creator-standing-card .cs-stats{display:flex;flex-wrap:wrap;gap:14px 22px;font-size:11px;color:var(--text-secondary);margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+  .creator-standing-card .cs-progress{margin-top:14px;font-size:10px;color:var(--text-muted)}
+  .creator-standing-card .cs-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px}
+  .creator-standing-card .cs-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:2px;transition:width .35s ease}
   .signal-cats{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
   .signal-cats span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--border);color:var(--gold)}
   .fcard.creator-signal .chain{color:var(--gold)}
@@ -791,10 +801,13 @@
         <div>
           <div class="pname" id="walletTitle">Not connected</div>
           <div class="ptier" id="walletSubtitle">Connect to access Executive Lounge onchain</div>
+          <div class="ptier" id="walletPointsLine" style="display:none;margin-top:6px;color:var(--gold);font-family:'DM Mono',monospace;font-size:11px"></div>
         </div>
         <button class="btn gold" style="margin-left:auto" onclick="openWalletModal()">Connect wallet</button>
       </div>
       <div id="walletAccountList"></div>
+      <div class="section-h" style="margin-top:28px"><h2>Creator standing</h2><div class="meta">Lounge points · signal author</div></div>
+      <div id="creatorStandingPanel"><div class="intel-empty" style="border:none">Connect wallet to view creator points</div></div>
       <div class="section-h" style="margin-top:28px"><h2>Reader badges</h2><div class="meta">Proof-of-read · RWA lounge</div></div>
       <div id="readerBadgePanel"><div class="intel-empty" style="border:none">Connect wallet to view your badges</div></div>
     </section>
@@ -1049,8 +1062,9 @@
     <div class="field">
       <label>Pricing</label>
       <div class="imp" style="margin-top:0">
-        <strong>Publish fee:</strong> 1 USDC (anti-spam, one-time per signal).<br />
-        <strong>Reader unlock:</strong> 0.1 USDC per open · <strong>50/50</strong> revenue share (creator paid on-chain).<br />
+        <strong>Publish fee:</strong> $0.02 (minimum settlement — same as raw intel tier).<br />
+        <strong>Reader unlock:</strong> 0.1 USDC per open · creators earn <strong>Lounge points</strong> (no USDC revenue share).<br />
+        <strong>Reader badges</strong> still awarded on unlock (Intel Scout → Sovereign Intel).
         <strong>RWA:</strong> Each signal is tokenized as an intelligence certificate; each unlock earns a <strong>reader badge</strong> on your wallet.
       </div>
     </div>
@@ -1213,6 +1227,8 @@
       title.textContent = 'Not connected';
       sub.textContent = 'Connect to access Executive Lounge onchain';
       av.textContent = '◇';
+      const ptsLine = document.getElementById('walletPointsLine');
+      if(ptsLine){ ptsLine.style.display = 'none'; ptsLine.textContent = ''; }
     }
 
     const rowHtml = (key, data)=>{
@@ -1229,6 +1245,7 @@
     document.getElementById('walletAccountList').innerHTML = list;
     document.getElementById('walletModalList').innerHTML = list;
     fetchReaderBadges();
+    fetchCreatorStanding();
 
     const form = document.getElementById('walletConnectForm');
     const panel = document.getElementById('walletConnectedPanel');
@@ -1801,6 +1818,10 @@
       syncConciergeLayout();
       setTimeout(()=>document.getElementById('chatInput')?.focus(), 80);
     }
+    if(v==='profile'){
+      fetchCreatorStanding();
+      fetchReaderBadges();
+    }
   }
 
   // MODAL
@@ -1851,13 +1872,13 @@
       if(publishBtn){ publishBtn.disabled=true; publishBtn.textContent='Publishing…'; }
       let chain;
       if(x402PaymentsLive(cfg)){
-        toast('Choose payment chain (1 USDC)…');
+        toast('Choose payment chain ($0.02 publish fee)…');
         chain=await showPaymentConfirm({
           title:'Publish signal',
-          subtitle:'One-time anti-spam fee · USDC or SOON (coming soon)',
+          subtitle:'Minimum settlement fee · USDC or SOON (coming soon)',
           story:title,
-          confirmLabel:'Pay 1 USDC & publish',
-          amountUsdc:cfg.signalPublishUsdc||1,
+          confirmLabel:'Pay & publish',
+          amountUsdc:cfg.signalPublishUsdc||0.02,
         });
       }
       const res=await paidApiFetch('/api/lounge-signal-publish',{
@@ -1932,7 +1953,11 @@
           msg = 'Signal published ✓ (off-chain RWA only — Solana NFT mint not configured)';
         }
       }
+      if(data.creatorPoints?.awarded){
+        msg += ' · +'+data.creatorPoints.awarded+' Lounge points';
+      }
       toast(msg);
+      fetchCreatorStanding();
       await refreshMarket();
     }catch(e){
       if(e?.message==='Payment cancelled'||e?.message==='Payments not configured on server') return;
@@ -2530,7 +2555,7 @@
     if(agentId) headers['X-Agent-Id'] = agentId;
     const fetchOpts = Object.assign({}, baseOpts, { headers });
     if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
-    else if(u.includes('/api/lounge-signal-publish')) toast('Approve 1 USDC publish fee on '+chainHint+'…');
+    else if(u.includes('/api/lounge-signal-publish')) toast('Approve $0.02 publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve payment on '+chainHint+' in your wallet…');
     try{
       return await paidFetch(url, fetchOpts);
@@ -2596,6 +2621,73 @@
     }
     document.getElementById('signalReaderOverlay')?.classList.add('show');
   }
+
+  async function fetchCreatorStanding(){
+    const panel = document.getElementById('creatorStandingPanel');
+    const ptsLine = document.getElementById('walletPointsLine');
+    if(!panel) return;
+    const session = getWalletSession();
+    const wallet = session.sol?.address || session.evm?.address;
+    if(!wallet){
+      panel.innerHTML = '<div class="intel-empty" style="border:none">Connect wallet to view creator points</div>';
+      if(ptsLine){ ptsLine.style.display = 'none'; ptsLine.textContent = ''; }
+      return;
+    }
+    panel.innerHTML = '<div class="intel-loading" style="border:none;padding:14px 0">Loading creator standing…</div>';
+    try{
+      const res = await fetch('/api/creator-points?wallet='+encodeURIComponent(wallet));
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
+      const p = data.profile || {};
+      const total = p.totalPoints || 0;
+      const published = p.signalsPublished || 0;
+      const unlocks = p.totalUnlocks || 0;
+      const tier = data.tier;
+      const nextTier = data.nextTier;
+      const toNext = data.pointsToNextTier;
+      const tierLabel = tier?.label || 'Unranked';
+      const tierSlug = tier?.slug || 'none';
+
+      if(ptsLine){
+        if(total > 0){
+          ptsLine.style.display = 'block';
+          ptsLine.textContent = total.toLocaleString()+' Lounge pts · '+tierLabel;
+        } else {
+          ptsLine.style.display = 'none';
+          ptsLine.textContent = '';
+        }
+      }
+
+      let progressHtml = '';
+      if(nextTier && toNext != null){
+        const floor = tier?.minPoints || 0;
+        const span = nextTier.minPoints - floor;
+        const done = Math.max(0, total - floor);
+        const pct = span > 0 ? Math.min(100, Math.round((done / span) * 100)) : 100;
+        progressHtml = '<div class="cs-progress">Next · <strong style="color:var(--text-primary)">'+escapeHtml(nextTier.label)+'</strong> at '+nextTier.minPoints.toLocaleString()+' pts · '+toNext.toLocaleString()+' to go<div class="cs-bar"><i style="width:'+pct+'%"></i></div></div>';
+      } else if(tier && tier.slug === 'sovereign'){
+        progressHtml = '<div class="cs-progress">Top creator tier reached</div>';
+      } else if(!tier){
+        progressHtml = '<div class="cs-progress">Publish your first signal (+25 pts) to reach Desk Contributor</div>';
+      }
+
+      panel.innerHTML = '<div class="creator-standing-card">'
+        +'<div class="cs-head"><div><div class="cs-tier">Creator tier · '+escapeHtml(tierSlug)+'</div><div class="cs-label">'+escapeHtml(tierLabel)+'</div></div>'
+        +'<div class="cs-points">'+total.toLocaleString()+'<span>Lounge points</span></div></div>'
+        +'<div class="cs-stats">'
+        +'<div><strong style="color:var(--text-primary)">'+published+'</strong> published</div>'
+        +'<div><strong style="color:var(--text-primary)">'+unlocks+'</strong> reader unlocks</div>'
+        +'<div>+25 publish · +10 per unlock</div>'
+        +'</div>'
+        +progressHtml
+        +'</div>';
+    }catch(e){
+      console.warn('creator-points', e);
+      panel.innerHTML = '<div class="intel-empty" style="border:none">Could not load creator standing</div>';
+      if(ptsLine){ ptsLine.style.display = 'none'; }
+    }
+  }
+  window.fetchCreatorStanding = fetchCreatorStanding;
 
   async function fetchReaderBadges(){
     const panel = document.getElementById('readerBadgePanel');
@@ -3035,7 +3127,7 @@
     if(t.includes('defi')||t.includes('tvl')||t.includes('uniswap')||t.includes('narrative'))
       return `<p><strong>DeFi narrative scan.</strong> Three threads are gathering weight: (1) Uniswap v4 hooks are restructuring MEV economics — searcher revenue is migrating to LPs, which changes the marginal yield calculation for stablecoin LPs; (2) Restaking is past its hype peak but EigenLayer's actively-validated services are now generating real cashflow; (3) Stablecoin float continues to outpace TVL growth — a regime where velocity, not deposits, is the cleaner lead.</p><p>The single most under-priced thesis on the desk: yield-bearing collateral becoming the dominant DeFi primitive within 12 months. That changes everything downstream — borrow markets, LSTs, and onchain credit.</p>`;
     if(t.includes('signal')||t.includes('create')||t.includes('btc dominance'))
-      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> Open <strong>Create Signal</strong> to publish (1 USDC anti-spam fee; readers unlock at 0.1 USDC).</p>`;
+      return `<p><strong>Signal generation.</strong> I can draft a publishable signal from your current view. Based on recent positioning telemetry, the highest-conviction angle is a <strong>BTC dominance roll-down</strong> thesis — dominance has stalled at 58.2% for three weeks while ETH/BTC and SOL/BTC both print higher lows. That is the textbook setup for a regime handoff.</p><p>Suggested title: <em>"BTC Dominance Distribution: The Quiet Handoff to Risk Curve Assets."</em> Open <strong>Create Signal</strong> to publish ($0.02 settlement fee; readers unlock at 0.1 USDC; you earn Lounge points per unlock).</p>`;
     if(t.includes('ai')||t.includes('agent')||t.includes('artificial'))
       return `<p><strong>AI × crypto convergence.</strong> The interesting datapoint is no longer adoption — it is reflexivity. Autonomous agent wallets now drive ~8% of DEX volume on Base and Arbitrum, with repeating, rule-driven signatures that the market is beginning to front-run. The marginal buyer is increasingly non-human, which compresses the timeline between thesis and price.</p><p>Two derivatives worth tracking: (1) compute-bound L2s capturing agent inference workloads, and (2) yield-bearing stablecoins becoming the default agent settlement asset. Both are early. Neither is priced in.</p>`;
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;

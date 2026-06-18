@@ -32,7 +32,8 @@ import {
 } from "./x402-pricing";
 import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
 import { isZauthProviderEnabled } from "./zauth";
-import { creatorPayoutWalletsConfigured, solanaRwaMintConfigured } from "./creator-payout-env";
+import { publicCreatorPointsMeta } from "./creator-points";
+import { solanaRwaMintConfigured } from "./rwa-mint-env";
 import { isPrivyEnabled } from "./privy-env";
 import {
   SIGNAL_CREATOR_SHARE_PERCENT,
@@ -240,11 +241,11 @@ export function getPublicX402Config() {
     signalReaderRevenueShare: {
       creatorPercent: SIGNAL_CREATOR_SHARE_PERCENT,
       merchantPercent: SIGNAL_MERCHANT_SHARE_PERCENT,
-      instantCreatorPayout: true,
+      instantCreatorPayout: false,
       settledMonthly: false,
-      note: "Publish fee (1 USDC) is 100% merchant; reader unlock (0.1 USDC) splits 50/50 — creator half sent on-chain to their wallet after each unlock when payout wallets are configured.",
+      note: "No USDC revenue share — creators earn Lounge points on publish and each reader unlock. Reader unlock (0.1 USDC) is 100% protocol.",
     },
-    creatorInstantPayoutReady: creatorPayoutWalletsConfigured(),
+    creatorPoints: publicCreatorPointsMeta(),
     rwaSignalsEnabled: true,
     readerBadgesEnabled: true,
     solanaRwaMintReady: solanaRwaMintConfigured(),

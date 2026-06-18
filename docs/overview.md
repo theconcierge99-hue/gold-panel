@@ -84,5 +84,5 @@ See [rwa.md](rwa.md) and [creator-signals.md](creator-signals.md) for full flows
 
 - **Base / EVM on-chain** RWA mint (ERC-1155) — certificates and UI only on EVM creators for now.
 - On-chain **reader badges** (SBT/cNFT) — badges are off-chain in Redis.
-- Treasury float monitoring / alerts for `CREATOR_PAYOUT_*` wallets.
+- On-chain **creator points** redemption (SOON / perks) — points are off-chain in KV for now.
 - Per-creator custom unlock pricing (flat 0.1 USDC platform standard).

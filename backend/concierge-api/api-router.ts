@@ -14,6 +14,7 @@ import handleMppscanRedirect from "./routes/mppscan-redirect";
 import handleNewsOpen from "./routes/news-open";
 import handleOpenapi from "./routes/openapi";
 import handlePrivyConfig from "./routes/privy-config";
+import handleCreatorPoints from "./routes/creator-points";
 import handleRwaBadges from "./routes/rwa-badges";
 import handleRwaMetadata from "./routes/rwa-metadata";
 import handleRwaToken from "./routes/rwa-token";
@@ -47,6 +48,7 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/news-open": handleNewsOpen,
   "/api/openapi": handleOpenapi,
   "/api/privy-config": handlePrivyConfig,
+  "/api/creator-points": handleCreatorPoints,
   "/api/rwa-badges": handleRwaBadges,
   "/api/rwa-metadata": handleRwaMetadata,
   "/api/rwa-token": handleRwaToken,

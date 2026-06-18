@@ -4,7 +4,7 @@
     "title": "Concierge Agent API",
     "version": "4.0.0",
     "description": "Market intelligence as a service — fifteen pay-per-call endpoints. Concierge AI, macro & wire research, DeFi intel, Alpha desks, and Lounge RWA signals. No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
-    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI (primary) · Dexter (fallback)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-macro (empty body ok), intel-wire (category/message/limit), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m). Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
+    "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (PayAI (primary) · Dexter (fallback)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). SOON holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch. Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($0.02), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
     "x-marketplace-tags": [
       "AI",
       "Research",
@@ -442,12 +442,12 @@
       "post": {
         "operationId": "signal_publish",
         "summary": "Publish creator signal",
-        "description": "Publish one RWA intelligence signal to the Executive Lounge feed (anti-spam fee).",
+        "description": "Publish one RWA intelligence signal to the Executive Lounge feed (minimum settlement fee).",
         "x-payment-info": {
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "1.000000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -489,17 +489,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "1000000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$1.00 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "1000000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$1.00 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -785,7 +785,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -827,17 +827,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -969,7 +969,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -1011,17 +1011,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -1512,7 +1512,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -1554,17 +1554,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -1689,7 +1689,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -1731,17 +1731,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -4167,7 +4167,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -4209,17 +4209,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -4363,7 +4363,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -4405,17 +4405,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -4553,7 +4553,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -4595,17 +4595,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -4743,7 +4743,7 @@
           "price": {
             "mode": "fixed",
             "currency": "USD",
-            "amount": "0.100000"
+            "amount": "0.020000"
           },
           "protocols": [
             {
@@ -4785,17 +4785,17 @@
           "offers": [
             {
               "protocol": "x402",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+              "description": "$0.02 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
             },
             {
               "protocol": "mpp",
-              "amount": "100000",
+              "amount": "20000",
               "currency": "USDC",
               "intent": "charge",
-              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+              "description": "$0.02 USDC — x402 settlement compatible with MPP clients"
             }
           ]
         },
@@ -4921,6 +4921,722 @@
             "required": false,
             "schema": {
               "type": "number"
+            }
+          }
+        ]
+      }
+    },
+    "/api/concierge-intel-meteora": {
+      "post": {
+        "operationId": "intel_meteora",
+        "summary": "Concierge Intel — Meteora DLMM",
+        "description": "Meteora DLMM pool deep-dive — TVL, APY, bin step, volume, IL risk flags (Solana-native moat).",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Crypto",
+          "Trading",
+          "Utility"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "pools": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "apy": {
+                            "type": "string"
+                          },
+                          "tvlUsd": {
+                            "type": "string"
+                          },
+                          "riskFlags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "pools"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "pools": [
+                    {
+                      "name": "SOL-USDC",
+                      "apy": "24.50%",
+                      "tvlUsd": "$12.4M",
+                      "riskFlags": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-meteora"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "sortByApy": {
+                    "type": "boolean",
+                    "description": "Sort by APY instead of TVL"
+                  },
+                  "limit": {
+                    "type": "number",
+                    "description": "Max pools 1–20"
+                  },
+                  "poolHint": {
+                    "type": "string",
+                    "description": "Substring filter on pool name"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "intel_meteora_get",
+        "summary": "Concierge Intel — Meteora DLMM (GET probe)",
+        "description": "Meteora DLMM pool deep-dive — TVL, APY, bin step, volume, IL risk flags (Solana-native moat). Probes return 402 without payment; use POST with JSON body after settlement.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.100000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "100000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.10 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Crypto",
+          "Trading",
+          "Utility"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "pools": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "apy": {
+                            "type": "string"
+                          },
+                          "tvlUsd": {
+                            "type": "string"
+                          },
+                          "riskFlags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "pools"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "pools": [
+                    {
+                      "name": "SOL-USDC",
+                      "apy": "24.50%",
+                      "tvlUsd": "$12.4M",
+                      "riskFlags": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-meteora"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sortByApy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "poolHint",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/concierge-intel-desk-brief": {
+      "post": {
+        "operationId": "intel_desk_brief",
+        "summary": "Concierge Intel — Desk brief",
+        "description": "Composite brief — macro + Meteora yields + desk verdict + optional Lounge insider overlay.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.250000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "250000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.25 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "250000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.25 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Research",
+          "Trading",
+          "RWA"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "brief": {
+                      "type": "object",
+                      "properties": {
+                        "headline": {
+                          "type": "string"
+                        },
+                        "signal": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "brief"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "brief": {
+                    "headline": "Constructive risk-on with Solana yield rotation",
+                    "signal": "watch",
+                    "confidence": "medium"
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-desk-brief"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "Desk brief context"
+                  },
+                  "includeInsider": {
+                    "type": "boolean",
+                    "description": "Include Lounge creator signals"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "intel_desk_brief_get",
+        "summary": "Concierge Intel — Desk brief (GET probe)",
+        "description": "Composite brief — macro + Meteora yields + desk verdict + optional Lounge insider overlay. Probes return 402 without payment; use POST with JSON body after settlement.",
+        "x-payment-info": {
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.250000"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://facilitator.payai.network",
+                "role": "primary"
+              }
+            },
+            {
+              "x402": {
+                "network": "solana",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "x402": {
+                "network": "base",
+                "facilitator": "https://x402.dexter.cash",
+                "role": "fallback"
+              }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge",
+                "currency": "USDC"
+              }
+            }
+          ],
+          "offers": [
+            {
+              "protocol": "x402",
+              "amount": "250000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.25 USDC via PayAI (primary; Dexter fallback on Solana/Base)"
+            },
+            {
+              "protocol": "mpp",
+              "amount": "250000",
+              "currency": "USDC",
+              "intent": "charge",
+              "description": "$0.25 USDC — x402 settlement compatible with MPP clients"
+            }
+          ]
+        },
+        "tags": [
+          "AI",
+          "Research",
+          "Trading",
+          "RWA"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success after payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "brief": {
+                      "type": "object",
+                      "properties": {
+                        "headline": {
+                          "type": "string"
+                        },
+                        "signal": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "brief"
+                  ]
+                },
+                "example": {
+                  "ok": true,
+                  "brief": {
+                    "headline": "Constructive risk-on with Solana yield rotation",
+                    "signal": "watch",
+                    "confidence": "medium"
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 JSON x402 payment requirements (MPP-compatible)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "priceUsdc": {
+                      "type": "number"
+                    },
+                    "resource": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://conc-exe.xyz/api/concierge-intel-desk-brief"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeInsider",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ]

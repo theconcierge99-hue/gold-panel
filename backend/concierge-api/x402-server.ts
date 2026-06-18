@@ -51,7 +51,7 @@ const RESOURCE_META: Record<
   },
   "signal-publish": {
     name: "Concierge Agent — Publish signal",
-    description: "Publish one RWA intelligence signal to the Lounge (anti-spam fee; Solana NFT mint in Phantom)",
+    description: "Publish one RWA intelligence signal to the Lounge (minimum settlement fee; Solana NFT mint in Phantom)",
     mimeType: "application/json",
     tags: ["executive-lounge", "creator", "signals", "rwa"],
   },

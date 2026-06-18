@@ -19,15 +19,13 @@ export type SignalLedgerEntry = {
   payer: string;
   /** Gross reader unlock (0.1 USDC) */
   amountAtomic: string;
-  /** Creator 50% of reader unlock */
+  /** Legacy split fields — creator share is 0; creators earn Lounge points instead */
   creatorShareAtomic: string;
-  /** Merchant 50% of reader unlock */
   merchantShareAtomic: string;
-  /** On-chain USDC transfer to creator wallet (when payout wallet configured) */
-  creatorPayoutTx?: string;
-  creatorPayoutStatus?: "sent" | "skipped" | "failed";
   creatorShareBps: number;
   merchantShareBps: number;
+  /** Points awarded to creator on this unlock (when credited) */
+  creatorPointsAwarded?: number;
   transaction: string;
   at: string;
 };

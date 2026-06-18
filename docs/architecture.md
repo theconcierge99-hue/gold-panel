@@ -27,7 +27,7 @@ api/
   solana-rpc-send.ts           # HTTP Solana JSON-RPC proxy (browser mint)
   rwa-token.ts, rwa-badges.ts, rwa-metadata.ts
   lounge-rwa-mint-sol.ts       # Optional server mint (Node)
-  lounge-creator-payout.ts     # Creator USDC payout (Node)
+  lounge-rwa-mint-sol.ts     # Solana NFT mint proxy (Node)
   x402-config.ts, well-known-x402.ts, openapi.ts
   zauth-directory.ts, zauth-status.ts
   lib/

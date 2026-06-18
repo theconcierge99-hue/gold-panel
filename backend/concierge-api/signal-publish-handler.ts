@@ -7,6 +7,7 @@ import {
 import type { PaidX402RouteContinue } from "./x402-server";
 import { guardPaidX402Api } from "./x402-server";
 import { X402_SIGNAL_PUBLISH_USDC } from "./x402-pricing";
+import { awardCreatorPoints } from "./creator-points";
 import { ingestCreatorSignalMemory } from "./lounge-memory";
 import { parseSignalPublishBody } from "./signal-validation";
 import { rwaMetadataUri } from "./rwa-metadata-json";
@@ -100,6 +101,23 @@ export async function runSignalPublishAfterPayment(
       console.error("[signal-publish] post-save", e instanceof Error ? e.message : e);
     }
 
+    let creatorPoints:
+      | { awarded: number; totalPoints: number; signalsPublished: number }
+      | undefined;
+    try {
+      const award = await awardCreatorPoints({
+        wallet: signal.creatorWallet,
+        reason: "publish",
+      });
+      creatorPoints = {
+        awarded: award.points,
+        totalPoints: award.profile.totalPoints,
+        signalsPublished: award.profile.signalsPublished,
+      };
+    } catch (e) {
+      console.error("[signal-publish] creator points", e instanceof Error ? e.message : e);
+    }
+
     const headers: Record<string, string> = {
       ...cors,
       "Content-Type": "application/json",
@@ -117,6 +135,7 @@ export async function runSignalPublishAfterPayment(
       },
       publishFeeUsdc: X402_SIGNAL_PUBLISH_USDC,
       readerUnlockUsdc: 0.1,
+      creatorPoints,
       rwa: rwaToken
         ? {
             tokenId: rwaToken.tokenId,

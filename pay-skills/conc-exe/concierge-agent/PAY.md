@@ -24,7 +24,7 @@ Concierge Agent is **market intelligence as a service** for autonomous agents an
 
 Flow: `POST` + JSON → **402** + `PAYMENT-REQUIRED` → sign USDC → retry with `PAYMENT-SIGNATURE` → **200** JSON (or HTML `reply` for chat).
 
-x402 USDC payment accepted on Solana mainnet ($0.10 per call; $1.00 signal publish).
+x402 USDC payment accepted on Solana mainnet ($0.02–$0.25 per call; $0.02 signal publish).
 
 ## Spend-aware usage
 

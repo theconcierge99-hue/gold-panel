@@ -198,7 +198,7 @@ Publish a creator signal and register an **RWA certificate**. For `creatorChain:
 {
   "ok": true,
   "signal": { "id": "sig_...", "title": "...", "publishedAt": "..." },
-  "publishFeeUsdc": 1,
+  "publishFeeUsdc": 0.02,
   "readerUnlockUsdc": 0.1,
   "rwa": {
     "tokenId": "rwa_...",
@@ -222,13 +222,15 @@ Publish a creator signal and register an **RWA certificate**. For `creatorChain:
 
 After Phantom mint, client calls `POST /api/lounge-rwa-record-mint`.
 
-**Price:** 1 USDC. Requires KV. **100% merchant** revenue.
+**Price:** $0.02 USDC (minimum settlement). Requires KV. Creator earns **25 Lounge points**.
 
 ---
 
 ### `POST /api/lounge-signal-open`
 
-Unlock full signal summary; awards **reader badge**.
+Unlock full signal summary; awards **reader badge** and **10 Lounge points** to the signal author.
+
+**Price:** 0.1 USDC. **100% protocol** — no USDC creator split.
 
 **Body:**
 
@@ -238,9 +240,7 @@ Unlock full signal summary; awards **reader badge**.
 }
 ```
 
-**Success (200):** Signal object with full `summary`, categories, RWA/badge fields when applicable.
-
-**Price:** 0.1 USDC. **50/50** reader split; creator half paid on-chain when payout wallets are configured.
+**Success (200):** Signal object with full `summary`, categories, RWA/badge fields, and `creatorPoints` when applicable.
 
 ---
 

@@ -61,17 +61,9 @@ Executive Lounge registers each published signal as an **RWA intelligence certif
 
 **Client mint path (default):** no `RWA_MINT_SOL_SECRET` needed — creator pays SOL in Phantom; platform only proxies RPC.
 
-### Instant creator payout (50% of unlock)
+### Creator points (replaces USDC revenue share)
 
-| Variable | Description |
-|----------|-------------|
-| `CREATOR_PAYOUT_EVM_PRIVATE_KEY` | Treasury wallet on Base — sends 0.05 USDC to EVM creators after each unlock. `0x` + 64 hex. **Secret — Vercel only.** |
-| `CREATOR_PAYOUT_SOL_SECRET` | Treasury keypair on Solana — sends 0.05 USDC to Solana creators. Base58 secret or JSON byte array (64 bytes). **Secret — Vercel only.** |
-| `BASE_RPC_URL` | Optional RPC for EVM payouts (defaults to public Base RPC). |
-
-Fund treasury wallets with USDC. Reader payment (0.1 USDC) still settles to merchant via x402; the platform wallet forwards the creator half on the creator’s registered chain.
-
-Check readiness: `GET /api/x402-config` → `creatorInstantPayoutReady`.
+Creators earn **Lounge points** on publish and each reader unlock — no on-chain payout env vars. See `GET /api/creator-points?wallet=…` and `GET /api/x402-config` → `creatorPoints`.
 
 ## SOON token & Token Pay
 
@@ -176,7 +168,7 @@ Check: `GET /api/x402-config` → `zauthTelemetryEnabled: true` after deploy.
 After deploy (check flags only—avoid sharing full JSON publicly):
 
 ```bash
-curl -s https://your-production-domain.com/api/x402-config | jq '{ enabled, evmPayToReady, solPayToReady, creatorInstantPayoutReady, discovery: .discovery.wellKnownUrl }'
+curl -s https://your-production-domain.com/api/x402-config | jq '{ enabled, evmPayToReady, solPayToReady, creatorPoints, discovery: .discovery.wellKnownUrl }'
 curl -s https://your-production-domain.com/deploy-version.txt
 ```
 

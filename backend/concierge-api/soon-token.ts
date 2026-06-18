@@ -111,8 +111,8 @@ export const SOON_TIERS: SoonTier[] = [
       },
       {
         id: "publish-rebate",
-        label: "Signal publish rebate",
-        detail: "Partial SOON rebate from treasury on $1 signal publish (not new mint).",
+        label: "Signal publish bonus",
+        detail: "Extra Lounge points on signal publish (replaces legacy $1 publish rebate).",
         status: "phased",
         phase: "2027 · Q1",
       },

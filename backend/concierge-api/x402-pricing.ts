@@ -34,9 +34,9 @@ export const X402_SIGNAL_PRICE_ATOMIC = "100000";
 export const X402_BUNDLE_PRICE_USDC = 0.25;
 export const X402_BUNDLE_PRICE_ATOMIC = "250000";
 
-/** Creator anti-spam: one-time publish fee */
-export const X402_SIGNAL_PUBLISH_USDC = 1;
-export const X402_SIGNAL_PUBLISH_ATOMIC = "1000000";
+/** Minimum settlement fee — same as raw intel tier (covers x402 network cost). */
+export const X402_SIGNAL_PUBLISH_USDC = X402_RAW_PRICE_USDC;
+export const X402_SIGNAL_PUBLISH_ATOMIC = X402_RAW_PRICE_ATOMIC;
 
 /** Raw-tier intel — $0.02/call (SOON holder free tier eligible post-launch) */
 export const X402_RAW_INTEL_KINDS: readonly X402IntelKind[] = [
