@@ -86,6 +86,13 @@ SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_
 | `SOON_PRICE_MAX_AGE_SEC` | In-memory DexScreener cache TTL per Edge isolate (default `60`, max `300`). |
 | `SOON_USDC_RATE` | Fallback USD price per 1 SOON when DexScreener fails or `SOON_PRICE_SOURCE=env`. |
 | `SOON_X402_ENABLED` | Set `false` to disable token pay even when mint is set. |
+| `SOON_RESOURCE_KINDS` | Comma-separated x402 resource kinds, or `all` for every route. Pre-launch default: `concierge`. Post-launch snapshot: `all`. |
+| `SOON_TOKEN_DISCOUNT_PERCENT` | Holder discount when paying in SOON (0–90). Post-launch snapshot: `30` (= pay 70% of USDC equivalent in token). |
+| `SOON_HOLDER_FREE_TIER_ENABLED` | `false` to disable SOON holder free raw-tier calls (default enabled when mint live). |
+| `SOON_HOLDER_FREE_RAW_PER_DAY` | Free raw-tier calls per wallet per UTC day (default `5`). |
+| `SOON_HOLDER_MIN_TOKENS` | Min SOON balance (UI units) for free tier (default `50000` = Desk tier). |
+
+**Launch snapshots:** [launch-playbook.md](launch-playbook.md) · `config/launch/pre-launch.env.snapshot` · `config/launch/post-launch.env.snapshot` · `npm run launch:verify -- --phase=pre|post`
 
 ### Partner merchants (Token Pay)
 

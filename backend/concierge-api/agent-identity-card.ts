@@ -1,4 +1,5 @@
 import { resolveX402SiteOrigin, resourceUrlForOrigin } from "./x402-discovery";
+import { priceUsdcForResource } from "./x402-pricing";
 import type { AgentCardJson, LoungeAgentServiceCard } from "./agent-identity-types";
 import type { AgentIdentityRecord } from "./agent-identity-types";
 
@@ -44,35 +45,49 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
         endpoint: `${base}/api/concierge-intel-tvl`,
         method: "POST",
         payment: "x402",
-        priceUsdc: 0.1,
+        priceUsdc: priceUsdcForResource("intel-tvl"),
+      },
+      {
+        name: "intel-meteora",
+        endpoint: `${base}/api/concierge-intel-meteora`,
+        method: "POST",
+        payment: "x402",
+        priceUsdc: priceUsdcForResource("intel-meteora"),
+      },
+      {
+        name: "intel-desk-brief",
+        endpoint: `${base}/api/concierge-intel-desk-brief`,
+        method: "POST",
+        payment: "x402",
+        priceUsdc: priceUsdcForResource("intel-desk-brief"),
       },
       {
         name: "intel-yields",
         endpoint: `${base}/api/concierge-intel-yields`,
         method: "POST",
         payment: "x402",
-        priceUsdc: 0.1,
+        priceUsdc: priceUsdcForResource("intel-yields"),
       },
       {
         name: "intel-whales",
         endpoint: `${base}/api/concierge-intel-whales`,
         method: "POST",
         payment: "x402",
-        priceUsdc: 0.1,
+        priceUsdc: priceUsdcForResource("intel-whales"),
       },
       {
         name: "intel-wallet",
         endpoint: `${base}/api/concierge-intel-wallet`,
         method: "POST",
         payment: "x402",
-        priceUsdc: 0.1,
+        priceUsdc: priceUsdcForResource("intel-wallet"),
       },
       {
         name: "intel-verdict",
         endpoint: `${base}/api/concierge-intel-verdict`,
         method: "POST",
         payment: "x402",
-        priceUsdc: 0.1,
+        priceUsdc: priceUsdcForResource("intel-verdict"),
       },
       {
         name: "news-open",
@@ -85,6 +100,8 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
     discovery: {
       x402: `${base}/.well-known/x402`,
       openapi: `${base}/openapi.json`,
+      mcp: `${base}/api/mcp`,
+      intelAccuracy: `${base}/api/concierge-intel-accuracy`,
       docs: `${base}/docs/agents`,
       paysh: "https://pay.sh/",
       payshGuide: `${base}/docs/payment/paysh`,

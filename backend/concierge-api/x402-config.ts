@@ -21,10 +21,14 @@ import {
 } from "./token-pay";
 
 import {
+  X402_RAW_INTEL_KINDS,
+  X402_RAW_PRICE_USDC,
+  X402_BUNDLE_PRICE_USDC,
   X402_READ_PRICE_ATOMIC,
   X402_READ_PRICE_USDC,
   X402_SIGNAL_PUBLISH_ATOMIC,
   X402_SIGNAL_PUBLISH_USDC,
+  X402_SIGNAL_PRICE_USDC,
 } from "./x402-pricing";
 import { discoveryMetaForConfig, resolveX402SiteOrigin } from "./x402-discovery";
 import { isZauthProviderEnabled } from "./zauth";
@@ -36,10 +40,11 @@ import {
 } from "./signal-revenue";
 import { getSolanaFeePayer, getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { dexterDiscoveryLinks } from "./dexter-links";
+import { isSoonLaunched } from "./soon-token";
 
 export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
-export const X402_PRICE_LABEL = "$0.10";
-export const X402_PRICE_MONEY = "$0.10";
+export const X402_PRICE_LABEL = "$0.02–$0.25";
+export const X402_PRICE_MONEY = "$0.02–$0.25";
 
 /** USDC atomic units (6 decimals): 0.1 USDC = 100_000 */
 export const X402_PRICE_ATOMIC = X402_READ_PRICE_ATOMIC;
@@ -215,6 +220,21 @@ export function getPublicX402Config() {
     conciergePerChat: true,
     signalPublishUsdc: X402_SIGNAL_PUBLISH_USDC,
     signalOpenUsdc: X402_READ_PRICE_USDC,
+    pricingTiers: {
+      rawUsdc: X402_RAW_PRICE_USDC,
+      signalUsdc: X402_SIGNAL_PRICE_USDC,
+      bundleUsdc: X402_BUNDLE_PRICE_USDC,
+      rawIntelKinds: [...X402_RAW_INTEL_KINDS],
+    },
+    soonHolderFreeTier: {
+      enabled: process.env.SOON_HOLDER_FREE_TIER_ENABLED !== "false" && isSoonLaunched(),
+      walletHeader: "X-Soon-Holder-Wallet",
+      freeRawPerDay: Number(process.env.SOON_HOLDER_FREE_RAW_PER_DAY ?? "5") || 5,
+      minHoldUi: Number(process.env.SOON_HOLDER_MIN_TOKENS ?? "50000") || 50000,
+      note: "POST raw-tier intel with X-Soon-Holder-Wallet when SOON mint is live — no x402 if desk tier+ balance.",
+    },
+    mcpEndpoint: "/api/mcp",
+    intelAccuracyEndpoint: "/api/concierge-intel-accuracy",
     creatorSignalsEnabled: true,
     signalReaderRevenueShare: {
       creatorPercent: SIGNAL_CREATOR_SHARE_PERCENT,

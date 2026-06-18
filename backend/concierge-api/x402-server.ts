@@ -7,7 +7,6 @@ import {
   getX402NetworkProfile,
   getUsdcAssetForNetwork,
   isX402Enabled,
-  X402_PRICE_LABEL,
 } from "./x402-config";
 import {
   getX402FacilitatorProfile,
@@ -19,7 +18,7 @@ import {
 } from "./x402-facilitator";
 import { corsHeadersFor } from "./concierge-security";
 import { buildBazaarExtension } from "./x402-discovery";
-import { priceUsdcForResource, atomicAmountForResource, type X402ResourceKind } from "./x402-pricing";
+import { priceUsdcForResource, atomicAmountForResource, priceLabelForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
 import {
   buildTokenPayAcceptsForResourceAsync,
@@ -30,6 +29,7 @@ import {
   verifyAndSettleTokenPaySelf,
   type TokenPayPaymentPayload,
 } from "./token-pay";
+import { trySoonHolderFreeTier } from "./soon-holder-free-tier";
 
 export type { X402ResourceKind };
 
@@ -127,6 +127,18 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "research", "news", "wire"],
   },
+  "intel-meteora": {
+    name: "Concierge Intel — Meteora DLMM",
+    description: "Meteora DLMM pool deep-dive — TVL, APY, bin step, volume, and IL risk flags (Solana moat)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "solana", "meteora"],
+  },
+  "intel-desk-brief": {
+    name: "Concierge Intel — Desk brief",
+    description: "Composite morning brief — macro snapshot + Meteora yields + desk verdict + insider overlay",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "research", "bundle"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -212,6 +224,10 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-macro";
     case "intel-wire":
       return "/api/concierge-intel-wire";
+    case "intel-meteora":
+      return "/api/concierge-intel-meteora";
+    case "intel-desk-brief":
+      return "/api/concierge-intel-desk-brief";
     default:
       return `/api/${kind}`;
   }
@@ -494,7 +510,7 @@ export async function buildPaymentRequiredResponse(
       priceLabel:
         kind === "signal-publish"
           ? "$1.00"
-          : `${X402_PRICE_LABEL}${tokenLabel}`,
+          : `${priceLabelForResource(kind)}${tokenLabel}`,
       resource: kind,
     }),
     {
@@ -535,6 +551,15 @@ export async function requireX402Payment(
   try {
     const sigHeader = getPaymentSignatureHeader(request);
     if (!sigHeader) {
+      const freeTier = await trySoonHolderFreeTier(request, kind);
+      if (freeTier.ok) {
+        return {
+          ok: true,
+          payer: freeTier.wallet,
+          transaction: "soon-holder-free-tier",
+          paymentResponseHeader: null,
+        };
+      }
       return { ok: false, response: await buildPaymentRequiredResponse(request, kind, cors) };
     }
 

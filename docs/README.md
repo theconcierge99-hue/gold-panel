@@ -26,3 +26,4 @@ Built as static HTML under `public/` with shared layout (`public/css/docs-site.c
 | [api-reference.md](api-reference.md) | Full route list |
 | [architecture.md](architecture.md) | System design |
 | [deployment.md](deployment.md) | Vercel deploy |
+| [launch-playbook.md](launch-playbook.md) | Pre/post SOON launch snapshots + competitive strategy |

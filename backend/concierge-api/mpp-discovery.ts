@@ -43,7 +43,7 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
   `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana or Base (${facilitatorLabel()}).`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
-  "Intel routes: /api/concierge-intel-tvl (empty body ok), intel-yields (chain/project), intel-whales (symbols), intel-wallet (solAddress/evmAddress), intel-verdict (message, includeInsider), intel-macro (empty body ok), intel-wire (category/message/limit), intel-airdrop|intel-listing|intel-momentum (message, chain, limit, includeInsider), intel-scalp (symbols BTC|ETH|BNB|SOL, intervals 5m|15m).",
+  "Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). SOON holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch.",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($1), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
   "OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery",
@@ -210,6 +210,21 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
       message: { type: "string", description: "Relevance filter for Lounge wire memory" },
       category: { type: "string", description: "Category filter (Macro, Geopolitics, Crypto, …)" },
       limit: { type: "number", description: "Max headlines 1–20 (default 10)" },
+    },
+    [],
+  ),
+  "intel-meteora": jsonSchemaBody(
+    {
+      sortByApy: { type: "boolean", description: "Sort by APY instead of TVL" },
+      limit: { type: "number", description: "Max pools 1–20" },
+      poolHint: { type: "string", description: "Substring filter on pool name" },
+    },
+    [],
+  ),
+  "intel-desk-brief": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Desk brief context" },
+      includeInsider: { type: "boolean", description: "Include Lounge creator signals" },
     },
     [],
   ),
@@ -458,6 +473,38 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "headlines"],
   ),
+  "intel-meteora": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      pools: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            apy: { type: "string" },
+            tvlUsd: { type: "string" },
+            riskFlags: { type: "array", items: { type: "string" } },
+          },
+        },
+      },
+    },
+    ["ok", "pools"],
+  ),
+  "intel-desk-brief": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      brief: {
+        type: "object",
+        properties: {
+          headline: { type: "string" },
+          signal: { type: "string" },
+          confidence: { type: "string" },
+        },
+      },
+    },
+    ["ok", "brief"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -491,6 +538,8 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-scalp": { message: "scalp BTC 15m", symbols: ["BTC"], intervals: ["5m", "15m"] },
   "intel-macro": {},
   "intel-wire": { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
+  "intel-meteora": { sortByApy: true, limit: 8, poolHint: "SOL" },
+  "intel-desk-brief": { message: "morning Solana desk brief", includeInsider: true },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -561,6 +610,14 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
         origin: "lounge",
       },
     ],
+  },
+  "intel-meteora": {
+    ok: true,
+    pools: [{ name: "SOL-USDC", apy: "24.50%", tvlUsd: "$12.4M", riskFlags: [] }],
+  },
+  "intel-desk-brief": {
+    ok: true,
+    brief: { headline: "Constructive risk-on with Solana yield rotation", signal: "watch", confidence: "medium" },
   },
 };
 

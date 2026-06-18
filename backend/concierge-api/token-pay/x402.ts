@@ -8,6 +8,10 @@ import {
   tokenAtomicForUsdcSync,
 } from "./amount";
 import {
+  getSoonTokenDiscountPercent,
+  SOON_MERCHANT_ID,
+} from "./merchants/soon";
+import {
   getDefaultTokenPayMerchant,
   getDefaultTokenPayMerchantId,
   isTokenPayMerchantLive,
@@ -39,6 +43,17 @@ export function tokenPaySupportsResource(
   return merchant.x402Enabled && merchantSupportsResource(merchant, resourceKind);
 }
 
+/** USDC list price after SOON holder discount (SOON merchant only). */
+export function effectiveUsdcForTokenPay(
+  usdcAmount: number,
+  merchant: TokenPayMerchant = getDefaultTokenPayMerchant(),
+): number {
+  if (merchant.id !== SOON_MERCHANT_ID) return usdcAmount;
+  const discount = getSoonTokenDiscountPercent();
+  if (discount <= 0) return usdcAmount;
+  return usdcAmount * (1 - discount / 100);
+}
+
 export function buildTokenPayAcceptExtra(merchant: TokenPayMerchant): TokenPayAcceptExtra {
   return {
     settlement: "self",
@@ -53,7 +68,7 @@ export async function tokenPayAtomicForResourceAsync(
   merchant: TokenPayMerchant = getDefaultTokenPayMerchant(),
 ): Promise<string | null> {
   if (!isTokenPayMerchantLive(merchant)) return null;
-  return tokenAtomicForUsdcAsync(merchant, usdcAmount);
+  return tokenAtomicForUsdcAsync(merchant, effectiveUsdcForTokenPay(usdcAmount, merchant));
 }
 
 export function tokenPayAtomicForResourceSync(
@@ -61,7 +76,7 @@ export function tokenPayAtomicForResourceSync(
   merchant: TokenPayMerchant = getDefaultTokenPayMerchant(),
 ): string | null {
   if (!merchant.mint) return null;
-  return tokenAtomicForUsdcSync(merchant, usdcAmount);
+  return tokenAtomicForUsdcSync(merchant, effectiveUsdcForTokenPay(usdcAmount, merchant));
 }
 
 export async function getTokenPayUsdRateAsync(

@@ -93,7 +93,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     path: "/api/concierge-intel-tvl",
     name: "Concierge Intel — TVL",
     description: "Chain TVL snapshot and top DeFi protocols (DeFi Llama). JSON for agents.",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
     tags: [...X402_OPERATION_TAGS["intel-tvl"]],
   },
   {
@@ -111,7 +111,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     path: "/api/concierge-intel-whales",
     name: "Concierge Intel — Whales",
     description: "Binance top-trader long/short ratios (BTC/ETH/SOL derivatives proxy).",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
     tags: [...X402_OPERATION_TAGS["intel-whales"]],
   },
   {
@@ -174,7 +174,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     path: "/api/concierge-intel-macro",
     name: "Concierge Intel — Macro",
     description: "Macro snapshot — SPX, VIX, DXY, gold, BTC/ETH marks, Fear & Greed, Treasury yields, and central-bank calendar.",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
     tags: [...X402_OPERATION_TAGS["intel-macro"]],
   },
   {
@@ -183,8 +183,26 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     path: "/api/concierge-intel-wire",
     name: "Concierge Intel — Wire",
     description: "Wire headline digest — live RSS plus persisted Lounge feed; optional category or message filter.",
-    priceUsd: "0.10",
+    priceUsd: "0.02",
     tags: [...X402_OPERATION_TAGS["intel-wire"]],
+  },
+  {
+    kind: "intel-meteora",
+    method: "POST",
+    path: "/api/concierge-intel-meteora",
+    name: "Concierge Intel — Meteora DLMM",
+    description: "Meteora DLMM pool deep-dive — TVL, APY, bin step, volume, IL risk flags (Solana-native moat).",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-meteora"]],
+  },
+  {
+    kind: "intel-desk-brief",
+    method: "POST",
+    path: "/api/concierge-intel-desk-brief",
+    name: "Concierge Intel — Desk brief",
+    description: "Composite brief — macro + Meteora yields + desk verdict + optional Lounge insider overlay.",
+    priceUsd: "0.25",
+    tags: [...X402_OPERATION_TAGS["intel-desk-brief"]],
   },
 ];
 

@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "discovery:validate": "npx -y @agentcash/discovery@latest discover https://conc-exe.xyz",
+    "launch:verify": "node scripts/verify-launch-readiness.mjs",
     "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
     "paysh:sync-token-pay-openapi": "npx tsx scripts/generate-paysh-token-pay-openapi.ts",
     "paysh:validate": "npx -y @solana/pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md",

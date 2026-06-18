@@ -1,136 +1,78 @@
 # Concierge Intel API (integrators)
 
-Structured desk data as **separate x402 endpoints** — **0.1 USDC** each, same payment flow as Concierge chat. Includes **research** routes (`intel-macro`, `intel-wire`) for agent marketplaces like [Poncho](https://conc-exe.xyz/docs/integration/poncho).
+Structured desk data as **separate x402 endpoints** with **tiered pricing**. Same payment flow as Concierge chat. Research routes (`intel-macro`, `intel-wire`) for agent marketplaces like [Poncho](https://conc-exe.xyz/docs/integration/poncho).
 
 **Web:** `https://conc-exe.xyz/docs/intel`  
-**OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402`
+**OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402` · **MCP:** `POST /api/mcp` · **Accuracy:** `GET /api/concierge-intel-accuracy` (free)
+
+## Pricing tiers
+
+| Tier | USDC | Routes |
+|------|------|--------|
+| **Raw** | $0.02 | `intel-tvl`, `intel-macro`, `intel-wire`, `intel-whales` |
+| **Signal** | $0.10 | yields, wallet, verdict, alpha desks, scalp, `intel-meteora`, concierge, news |
+| **Bundle** | $0.25 | `intel-desk-brief` |
+
+SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Holder-Wallet` when balance ≥ Desk tier (50k SOON). See [launch-playbook.md](launch-playbook.md).
 
 ## Endpoints
 
-| Method | Path | Returns |
-|--------|------|---------|
-| POST | `/api/concierge-intel-macro` | SPX, VIX, DXY, Fear & Greed, Treasury yields, calendar |
-| POST | `/api/concierge-intel-wire` | Wire headline digest (RSS + Lounge memory) |
-| POST | `/api/concierge-intel-tvl` | Chain TVL + top protocols (DeFi Llama) |
-| POST | `/api/concierge-intel-yields` | Screened yield pools (Jupiter, Meteora, DLMM, …) |
-| POST | `/api/concierge-intel-whales` | Binance top-trader ratios (BTC/ETH/SOL) |
-| POST | `/api/concierge-intel-wallet` | Solana snapshot (Helius) or EVM ack |
-| POST | `/api/concierge-intel-verdict` | Desk verdict + optional Lounge insider signals |
-| POST | `/api/concierge-intel-airdrop` | Potential airdrops — insider-first alpha desk |
-| POST | `/api/concierge-intel-listing` | Potential exchange listings — insider-first |
-| POST | `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
-| POST | `/api/concierge-intel-scalp` | BTC/ETH/BNB/SOL scalp desk (5m/15m) |
+| Method | Path | Price | Returns |
+|--------|------|-------|---------|
+| POST | `/api/concierge-intel-macro` | $0.02 | SPX, VIX, DXY, Fear & Greed, Treasury yields |
+| POST | `/api/concierge-intel-wire` | $0.02 | Wire headline digest (RSS + Lounge) |
+| POST | `/api/concierge-intel-tvl` | $0.02 | Chain TVL + top protocols |
+| POST | `/api/concierge-intel-whales` | $0.02 | Binance top-trader ratios |
+| POST | `/api/concierge-intel-yields` | $0.10 | Screened yield pools |
+| POST | `/api/concierge-intel-meteora` | $0.10 | Meteora DLMM deep-dive + risk flags |
+| POST | `/api/concierge-intel-wallet` | $0.10 | Solana snapshot (Helius) or EVM ack |
+| POST | `/api/concierge-intel-verdict` | $0.10 | Desk verdict + insider signals |
+| POST | `/api/concierge-intel-desk-brief` | $0.25 | Macro + Meteora + verdict bundle |
+| POST | `/api/concierge-intel-airdrop` | $0.10 | Airdrop candidates |
+| POST | `/api/concierge-intel-listing` | $0.10 | Listing candidates |
+| POST | `/api/concierge-intel-momentum` | $0.10 | Large-move candidates |
+| POST | `/api/concierge-intel-scalp` | $0.10 | BTC/ETH/BNB/SOL scalp desk |
+| GET | `/api/concierge-intel-accuracy` | free | Verdict accuracy leaderboard |
 
-### Research (macro / wire)
+### Meteora (`intel-meteora`)
 
-- **`intel-macro`** — body `{}` ok; returns `marks[]`, `sentiment`, `macro` (yields, events, headlines).
-- **`intel-wire`** — optional `category`, `message`, `limit` (1–20); returns `headlines[]` with `origin`: `live` | `lounge`.
+```json
+{
+  "sortByApy": true,
+  "limit": 8,
+  "poolHint": "SOL-USDC"
+}
+```
 
-## Alpha desk methodology
+### Desk brief (`intel-desk-brief`)
 
-All three alpha endpoints synthesize evidence in this order:
+```json
+{
+  "message": "morning Solana desk brief",
+  "includeInsider": true
+}
+```
 
-1. **Insider** — Lounge creator signals (highest weight)
-2. **Institutional** — Binance positioning, Fear & Greed
-3. **Onchain** — DeFi yields / TVL proxies
-4. **Narrative** — wire headlines, general news
-5. **KOL** — creator publisher context from insider block
+### MCP (`POST /api/mcp`)
 
-Gemini synthesis when `GEMINI_API_KEY` is set; rule-based fallback otherwise.
+JSON-RPC: `initialize`, `tools/list`, `tools/call`. Pass `arguments.paymentSignature` after x402 pay, or receive pay instructions in the tool result.
 
 ## Payment
 
 1. POST without payment → **402** + `PAYMENT-REQUIRED`
-2. Sign USDC (Solana or Base)
+2. Sign USDC (Solana or Base) or SOON (post-launch)
 3. POST with `PAYMENT-SIGNATURE`
+
+Raw-tier free (SOON holders): `X-Soon-Holder-Wallet: <solana>` without payment when eligible.
 
 See [agents.md](agents.md) for client examples.
 
-## Request bodies
+## Verdict accuracy
 
-### TVL
-
-```json
-{}
-```
-
-### Yields
-
-```json
-{
-  "chain": "solana",
-  "project": "meteora"
-}
-```
-
-### Whales
-
-```json
-{
-  "symbols": ["BTC", "ETH", "SOL"]
-}
-```
-
-### Wallet
-
-```json
-{
-  "solAddress": "…",
-  "evmAddress": "0x…",
-  "message": "optional context"
-}
-```
-
-At least one address required (or address in `message`).
-
-### Verdict
-
-```json
-{
-  "message": "DeFi on Solana — risk?",
-  "includeInsider": true
-}
-```
-
-`includeInsider` (default `true`) pulls relevant **creator signals** from Lounge memory as insider overlay.
-
-### Alpha desks (airdrop, listing, momentum)
-
-```json
-{
-  "message": "Solana airdrop farming themes",
-  "chain": "solana",
-  "limit": 5,
-  "includeInsider": true
-}
-```
-
-- `limit` — max candidates (1–8, default 5)
-- `chain` — optional filter for yield/onchain context
-- Response: `summary`, `candidates[]` with `insiderSignals`, `institutional`, `onchain`, `narrative`, `kol`, `riskFlags`, `actionable`
-
-## Verdict signals
-
-| Signal | Meaning |
-|--------|---------|
-| `snipe` | Tactical — insider + tape align; small size |
-| `watch` | Mixed; wait for edge |
-| `follow` | Constructive risk-on read |
-| `avoid` | Defensive |
-| `rebalance` | Rotate yields/positioning |
-
-## vs full Concierge
-
-| | Intel APIs | `POST /api/concierge` |
-|--|------------|----------------------|
-| Output | Structured JSON | HTML + Gemini narrative |
-| Use case | Agents, pipelines | Human chat, trading plans |
-| Price | 0.1 USDC / call | 0.1 USDC / call |
-
-Implementation: `api/lib/concierge-defi-intel.ts`, `api/lib/concierge-intel-handler.ts`, `api/lib/concierge-alpha-intel.ts`.
+Each paid `intel-verdict` records BTC mark + signal. After 24h, public leaderboard scores alignment. `GET /api/concierge-intel-accuracy` — no payment.
 
 ## Related
 
-- [concierge-ai.md](concierge-ai.md) — Full Concierge + bundled DeFi block in chat
+- [launch-playbook.md](launch-playbook.md) — pre/post SOON launch snapshots
 - [agent-identity.md](agent-identity.md) — `agt_…` + `X-Agent-Id`
 - [agents.md](agents.md) — x402 integrator guide

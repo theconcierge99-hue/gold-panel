@@ -39,6 +39,8 @@ export type AgentCardJson = {
     x402: string;
     openapi: string;
     docs: string;
+    mcp?: string;
+    intelAccuracy?: string;
     paysh?: string;
     payshGuide?: string;
     grokBuild?: string;

@@ -2,6 +2,8 @@
  * Shared x402 handlers for Concierge DeFi intelligence endpoints (integrators).
  */
 import { runAlphaIntel } from "./concierge-alpha-intel";
+import { runDeskBriefIntel } from "./concierge-desk-brief";
+import { runMeteoraIntel } from "./concierge-meteora-intel";
 import { runMacroIntel, runWireIntel } from "./concierge-research-intel";
 import { runScalpIntel } from "./concierge-scalp-intel";
 import {
@@ -30,6 +32,7 @@ import { selectRelevantLoungeMemory } from "./lounge-memory";
 import { reportPaidRouteToZauth } from "./zauth-paid-response";
 import { guardPaidX402Api } from "./x402-server";
 import type { X402IntelKind } from "./x402-pricing";
+import { recordVerdictSnapshot } from "./verdict-accuracy";
 
 export type { X402IntelKind };
 
@@ -45,6 +48,8 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-scalp": "/api/concierge-intel-scalp",
   "intel-macro": "/api/concierge-intel-macro",
   "intel-wire": "/api/concierge-intel-wire",
+  "intel-meteora": "/api/concierge-intel-meteora",
+  "intel-desk-brief": "/api/concierge-intel-desk-brief",
 };
 
 const INTEL_KINDS = Object.keys(INTEL_ROUTE_PATH) as X402IntelKind[];
@@ -56,7 +61,7 @@ export function resolveIntelKindFromRequest(request: Request): X402IntelKind | n
   if (fromQuery && INTEL_KINDS.includes(fromQuery as X402IntelKind)) {
     return fromQuery as X402IntelKind;
   }
-  const match = url.pathname.match(/^\/api\/concierge-intel-([a-z]+)$/);
+  const match = url.pathname.match(/^\/api\/concierge-intel-([a-z][a-z0-9-]*)$/);
   if (!match) return null;
   const kind = `intel-${match[1]}` as X402IntelKind;
   return INTEL_KINDS.includes(kind) ? kind : null;
@@ -80,6 +85,9 @@ export type IntelRequestBody = {
   category?: string;
   /** Scalp desk: 5m | 15m (default both) */
   intervals?: ("5m" | "15m")[];
+  /** Meteora: sortByApy, poolHint */
+  sortByApy?: boolean;
+  poolHint?: string;
 };
 
 function jsonResponse(
@@ -206,6 +214,8 @@ async function runIntel(
       yields,
       insiderLines,
     });
+    const btcUsd = btcTick?.price ? Number(String(btcTick.price).replace(/[^0-9.]/g, "")) : null;
+    void recordVerdictSnapshot({ verdict, btcUsd: Number.isFinite(btcUsd) ? btcUsd : null });
     return {
       ok: true,
       kind,
@@ -242,6 +252,18 @@ async function runIntel(
 
   if (kind === "intel-wire") {
     return runWireIntel(body);
+  }
+
+  if (kind === "intel-meteora") {
+    return runMeteoraIntel({
+      sortByApy: body.sortByApy,
+      limit: body.limit,
+      poolHint: body.poolHint,
+    });
+  }
+
+  if (kind === "intel-desk-brief") {
+    return runDeskBriefIntel(body);
   }
 
   throw new Error("Unknown intel kind");

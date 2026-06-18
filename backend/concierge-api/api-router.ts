@@ -25,6 +25,8 @@ import handleTokenPayPreview from "./routes/token-pay-preview";
 import handleTokenPayVerify from "./routes/token-pay-verify";
 import handleSolanaRpc from "./routes/solana-rpc";
 import handleSolanaRpcSend from "./routes/solana-rpc-send";
+import handleIntelAccuracy from "./routes/intel-accuracy";
+import handleMcp from "./routes/mcp";
 import handleWellKnownAgentCard from "./routes/well-known-agent-card";
 import handleWellKnownX402 from "./routes/well-known-x402";
 import handleX402Config from "./routes/x402-config";
@@ -56,6 +58,8 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/token-pay-verify": handleTokenPayVerify,
   "/api/solana-rpc": handleSolanaRpc,
   "/api/solana-rpc-send": handleSolanaRpcSend,
+  "/api/concierge-intel-accuracy": handleIntelAccuracy,
+  "/api/mcp": handleMcp,
   "/api/well-known-agent-card": handleWellKnownAgentCard,
   "/api/well-known-x402": handleWellKnownX402,
   "/api/x402-config": handleX402Config,
