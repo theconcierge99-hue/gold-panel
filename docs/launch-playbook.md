@@ -1,147 +1,141 @@
 # Launch Playbook — conc-exe.xyz
 
-Playbook kompetitif + operasional untuk **fase sekarang (pre-launch)** dan **hari H (post-launch token)**. Setelah token live, cukup **paste env snapshot** → redeploy — tanpa ubah kode.
+Competitive and operational playbook for **pre-launch (now)** and **launch day (post-token)**. After the token is live, **paste the env snapshot** → redeploy — no code changes.
 
-| Artefak | Path |
-|---------|------|
-| Env pre-launch | [`config/launch/pre-launch.env.snapshot`](../config/launch/pre-launch.env.snapshot) |
-| Env post-launch | [`config/launch/post-launch.env.snapshot`](../config/launch/post-launch.env.snapshot) |
-| Verifikasi | `npm run launch:verify -- --phase=pre` atau `--phase=post` |
-
----
-
-## Positioning (jangan diubah saat launch)
-
-> **Bukan data API murah — Intelligence OS untuk agent Solana.**
-
-| Kalian menang | Kalian kalah jika |
-|---------------|-------------------|
-| Verdict + synthesis (snipe/watch/avoid) | Race harga vs x402-api ($0.001) |
-| Meteora DLMM + Solana-native | Race breadth vs httpay (307 endpoint) |
-| AI concierge + insider Lounge signals | Jual raw JSON tanpa interpretasi |
-| A2A agent identity (`agt_`) | Jadi "CoinGecko dengan x402" |
+| Artifact | Path |
+|----------|------|
+| Pre-launch env | [`config/launch/pre-launch.env.snapshot`](../config/launch/pre-launch.env.snapshot) |
+| Post-launch env | [`config/launch/post-launch.env.snapshot`](../config/launch/post-launch.env.snapshot) |
+| Verify | `npm run launch:verify -- --phase=pre` or `--phase=post` |
 
 ---
 
-## Fase 1 — Sekarang (pre-launch)
+## Positioning (do not change at launch)
 
-### Yang sudah jalan
+> **Not a cheap data API — an Intelligence OS for Solana agents.**
+
+| You win on | You lose if |
+|------------|-------------|
+| Verdict + synthesis (snipe/watch/avoid) | Racing price vs x402-api ($0.001) |
+| Meteora DLMM + Solana-native depth | Racing breadth vs httpay (307 endpoints) |
+| AI concierge + insider Lounge signals | Selling raw JSON without interpretation |
+| A2A agent identity (`agt_`) | Becoming "CoinGecko with x402" |
+
+---
+
+## Phase 1 — Now (pre-launch)
+
+### What is live
 
 | Area | Status |
 |------|--------|
-| 15 route x402 @ $0.10 USDC | Live |
+| Tiered x402 (raw $0.02 · signal $0.10 · bundle $0.25) | Live |
 | USDC pay (Solana + Base) | Live |
-| Token Pay infra (SOON merchant) | Built — **mint belum di-set** |
+| Token Pay infra (SOON merchant) | Built — **mint not set** |
 | Agent identity + discovery | Live |
 | Poncho / pay.sh / x402scan / Grok skill | Live |
 | Creator signals (Lounge) | Live |
+| MCP `/api/mcp` + accuracy leaderboard | Live |
 
 ### Env snapshot (pre-launch)
 
-Copy [`config/launch/pre-launch.env.snapshot`](../config/launch/pre-launch.env.snapshot) ke Vercel.
+Copy [`config/launch/pre-launch.env.snapshot`](../config/launch/pre-launch.env.snapshot) into Vercel.
 
-**Kunci pre-launch:**
+**Pre-launch keys:**
 
 ```env
-# JANGAN set sebelum launch
+# Do NOT set before launch
 # SOON_TOKEN_MINT=
 
 SOON_RESOURCE_KINDS=concierge
 SOON_TOKEN_DISCOUNT_PERCENT=0
+TOKEN_PAY_DEFAULT_MERCHANT=soon
 ```
 
-- Pembayaran API: **USDC only**
-- Pay modal: SOON tampil **"Coming soon"**
-- SOON hanya di-wire ke `concierge` (chat) — intel tetap USDC
+- API payment: **USDC only**
+- Pay modal: SOON shows **"Coming soon"**
+- SOON wired to `concierge` (chat) only until post-launch snapshot
 
-### Strategi go-to-market (pre-launch)
+### Go-to-market (pre-launch)
 
-1. **Discovery** — daftar/maintain di x402scan, Poncho, MPPscan, pay.sh catalog
-2. **Sandbox onboarding** — promosikan `pay --sandbox curl` untuk developer probing (jawab objection "mahal untuk testing")
-3. **Solana-first messaging** — semua copy: Meteora, verdict, `agt_` discovery
-4. **Case study** — 1 agent flow: register `agt_` → fund → `intel-verdict` → action
-5. **Jangan** tambah puluhan endpoint generik — fokus depth
+1. **Discovery** — maintain listings on x402scan, Poncho, MPPscan, pay.sh catalog
+2. **Sandbox onboarding** — promote `pay --sandbox curl` for developer probing
+3. **Solana-first messaging** — Meteora, verdict, `agt_` discovery in all copy
+4. **Case study** — one agent flow: register `agt_` → fund → `intel-verdict` → action
+5. **Do not** add dozens of generic endpoints — focus on depth
 
-### Endpoint roadmap (pre-launch, opsional)
-
-Tambah hanya jika ada bandwidth — semua tetap $0.10 USDC:
-
-| Endpoint | Mengapa |
-|----------|---------|
-| `intel-meteora` | Moat unik — DLMM deep-dive |
-| `intel-desk-brief` | Bundle macro+yields+verdict ($0.25–0.50) |
-
-### Checklist pre-launch
+### Pre-launch checklist
 
 ```bash
 npm run launch:verify -- --phase=pre
-# Opsional live:
+# Optional live check:
 API_ORIGIN=https://conc-exe.xyz npm run launch:verify -- --phase=pre --live
 ```
 
-- [ ] `GEMINI_API_KEY` + x402 wallets configured
-- [ ] `SOON_TOKEN_MINT` **kosong**
+- [ ] `GEMINI_API_KEY` + x402 wallets configured on Vercel
+- [ ] `SOON_TOKEN_MINT` **unset**
+- [ ] `TOKEN_PAY_DEFAULT_MERCHANT=soon` (no comments in the value)
 - [ ] Discovery valid: `npm run discovery:validate`
-- [ ] Docs positioning konsisten di `/docs`, `/openapi.json`
+- [ ] Docs consistent at `/docs`, `/openapi.json`
 
 ---
 
-## Fase 2 — Hari H (post-launch token)
+## Phase 2 — Launch day (post-token)
 
-### Snapshot flow (5 menit)
+### Snapshot flow (~5 minutes)
 
 ```
-1. Token live di pump.fun → copy mint address
-2. Buka config/launch/post-launch.env.snapshot
-3. Paste SOON_TOKEN_MINT=<mint>
-4. Copy seluruh block ke Vercel Environment Variables (Production)
+1. Token live on pump.fun → copy mint address
+2. Open config/launch/post-launch.env.snapshot
+3. Set SOON_TOKEN_MINT=<mint>
+4. Copy the full block to Vercel Environment Variables (Production)
 5. Redeploy
 6. npm run launch:verify -- --phase=post --live
 ```
 
-**Tidak perlu:** deploy kode baru, branch khusus, atau migration DB.
+**Not required:** new code deploy, special branch, or DB migration.
 
 ### Env snapshot (post-launch)
 
-Copy [`config/launch/post-launch.env.snapshot`](../config/launch/post-launch.env.snapshot), isi `SOON_TOKEN_MINT`.
+Copy [`config/launch/post-launch.env.snapshot`](../config/launch/post-launch.env.snapshot) and set `SOON_TOKEN_MINT`.
 
-**Kunci post-launch:**
+**Post-launch keys:**
 
 ```env
-SOON_TOKEN_MINT=<base58_mint_dari_pump_fun>
+SOON_TOKEN_MINT=<base58_mint_from_pump_fun>
 SOON_RESOURCE_KINDS=all
 SOON_TOKEN_DISCOUNT_PERCENT=30
 SOON_USDC_RATE=0.00008
 TOKEN_PAY_SOON_COMING_SOON=
 ```
 
-| Variable | Efek |
-|----------|------|
-| `SOON_TOKEN_MINT` | SOON muncul di pay modal, self-settle aktif |
-| `SOON_RESOURCE_KINDS=all` | Semua 15 route terima SOON |
-| `SOON_TOKEN_DISCOUNT_PERCENT=30` | Holder bayar ~30% lebih murah vs USDC setara |
-| `SOON_USDC_RATE` | Fallback harga jika DexScreener down |
+| Variable | Effect |
+|----------|--------|
+| `SOON_TOKEN_MINT` | SOON appears in pay modal; self-settle active |
+| `SOON_RESOURCE_KINDS=all` | All x402 routes accept SOON |
+| `SOON_TOKEN_DISCOUNT_PERCENT=30` | Holders pay ~30% less vs equivalent USDC |
+| `SOON_USDC_RATE` | Fallback price when DexScreener is down |
 
-### Dual-rail pricing (otomatis setelah snapshot)
+### Dual-rail pricing (automatic after snapshot)
 
-| Rail | Harga | Untuk siapa |
-|------|-------|-------------|
-| USDC | $0.10/call (flat) | Agent institusional, integrator |
-| SOON | $0.10 × (1 − diskon) dalam token | Holder, retail, creator ecosystem |
+| Rail | Price | For |
+|------|-------|-----|
+| USDC | Tiered ($0.02 / $0.10 / $0.25) | Institutional agents, integrators |
+| SOON | USDC equivalent × (1 − discount) in tokens | Holders, retail, creator ecosystem |
 
-Contoh: `intel-verdict` $0.10 USDC → dengan diskon 30% = efektif $0.07 dalam SOON (jumlah token dihitung dari DexScreener).
+Example: `intel-verdict` $0.10 USDC → with 30% discount = effective $0.07 in SOON (token amount from DexScreener).
 
-### Token flywheel (post-launch, non-code)
+### Token flywheel (post-launch)
 
-| Mekanisme | Status | Catatan |
-|-----------|--------|---------|
-| Bayar API pakai SOON (diskon) | **Env snapshot** | `SOON_TOKEN_DISCOUNT_PERCENT` |
-| Creator signal unlock → split USDC | **Sudah ada** | 50/50 creator/merchant |
-| Creator payout dalam SOON | Roadmap | Butuh treasury + policy |
-| Stake SOON → free tier | **Live** | `SOON_HOLDER_FREE_TIER_*` env + wallet header |
-| Holder badge di agent card | Roadmap Fase 3 | |
+| Mechanism | Status | Notes |
+|-----------|--------|-------|
+| Pay API with SOON (discount) | **Env snapshot** | `SOON_TOKEN_DISCOUNT_PERCENT` |
+| Creator signal unlock → USDC split | **Live** | 50/50 creator/merchant |
+| Creator payout in SOON | Roadmap | Treasury + policy |
+| SOON holder free raw-tier calls | **Live** | `SOON_HOLDER_FREE_TIER_*` + `X-Soon-Holder-Wallet` |
+| Holder badge on agent card | Roadmap | |
 
-### Checklist post-launch (H+0)
+### Post-launch checklist (H+0)
 
 ```bash
 npm run launch:verify -- --phase=post
@@ -149,26 +143,26 @@ API_ORIGIN=https://conc-exe.xyz npm run launch:verify -- --phase=post --live
 ```
 
 - [ ] `GET /api/x402-config` → `tokenPay.default.live: true`
-- [ ] Pay modal Lounge: SOON selectable, bukan "Coming soon"
-- [ ] Test 1 call USDC + 1 call SOON (`intel-tvl` body `{}`)
-- [ ] DexScreener pair exists untuk SOON/SOL atau SOON/USDC
-- [ ] Merchant wallet punya SOL untuk gas (self-settle user pays gas, merchant receives token)
-- [ ] Announce: holder discount %, USDC tetap available
+- [ ] Lounge pay modal: SOON selectable, not "Coming soon"
+- [ ] Test one USDC call + one SOON call (`intel-tvl` body `{}`)
+- [ ] DexScreener pair exists for SOON/SOL or SOON/USDC
+- [ ] Merchant wallet has SOL for ops (user pays gas on self-settle; merchant receives tokens)
+- [ ] Announce holder discount %; USDC remains available
 
-### Verifikasi manual (curl)
+### Manual verification (Windows: use `curl.exe`)
 
-```bash
-# Harus return tokenPay.default.live true
-curl -s https://conc-exe.xyz/api/x402-config | jq '.tokenPay.default'
+```powershell
+# Must show tokenPay.default.live true
+curl.exe -s https://conc-exe.xyz/api/x402-config
 
-# 402 harus list SOON accept di accepts[]
-curl -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl \
-  -H 'Content-Type: application/json' -d '{}' -D - | head
+# Must return 402 without payment
+curl.exe -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl `
+  -H "Content-Type: application/json" -d "{}"
 ```
 
 ---
 
-## Fase 3 — Implemented (live in codebase)
+## Phase 3 — Implemented (in codebase)
 
 | Item | Endpoint / config |
 |------|-------------------|
@@ -177,19 +171,19 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl \
 | `intel-desk-brief` | `POST /api/concierge-intel-desk-brief` — $0.25 |
 | MCP server | `GET/POST /api/mcp` (JSON-RPC: `tools/list`, `tools/call`) |
 | Accuracy leaderboard | `GET /api/concierge-intel-accuracy` (free) |
-| SOON holder free tier | Raw routes + `X-Soon-Holder-Wallet` header — env `SOON_HOLDER_*` |
+| SOON holder free tier | Raw routes + `X-Soon-Holder-Wallet` header — `SOON_HOLDER_*` env |
 
 ---
 
 ## Competitive battle card → action map
 
-| Objection (dari Poncho intel) | Jawaban + aksi |
-|-------------------------------|----------------|
-| "10–100× lebih mahal" | Jual synthesis bukan raw JSON; post-launch SOON diskon 30% |
-| "Mycelia 176 endpoint + attestation" | Ed25519 sudah ada — market lebih keras; jangan race count |
-| "Meridian free tier" | Fase 3: stake SOON / sandbox `pay --sandbox` |
-| "Neurobro juga $0.10 AI" | Solana depth + Lounge insider + A2A |
-| "CoinGecko brand $0.01" | Price check mereka; intelligence kalian |
+| Objection (Poncho intel) | Response + action |
+|--------------------------|-------------------|
+| "10–100× more expensive" | Sell synthesis not raw JSON; post-launch SOON 30% discount |
+| "Mycelia 176 endpoints + attestation" | Market Ed25519 harder; do not race on endpoint count |
+| "Meridian free tier" | SOON holder free raw-tier + `pay --sandbox` |
+| "Neurobro also $0.10 AI" | Solana depth + Lounge insider + A2A |
+| "CoinGecko brand $0.01" | They are price checks; you are intelligence |
 
 ---
 
@@ -203,7 +197,8 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl \
 | `SOON_X402_ENABLED` | `true` | `true` |
 | `SOON_PRICE_SOURCE` | `dexscreener` | `dexscreener` |
 | `SOON_USDC_RATE` | optional | **set fallback** |
-| `TOKEN_PAY_SOON_COMING_SOON` | pesan coming soon | kosong |
+| `TOKEN_PAY_SOON_COMING_SOON` | coming-soon message | empty |
+| `TOKEN_PAY_DEFAULT_MERCHANT` | `soon` | `soon` |
 
 Full list: [configuration.md](configuration.md#soon-token--token-pay).
 
@@ -211,23 +206,23 @@ Full list: [configuration.md](configuration.md#soon-token--token-pay).
 
 ## Rollback
 
-Jika launch bermasalah:
+If launch has issues:
 
 ```env
-# Emergency: matikan SOON pay, USDC tetap jalan
+# Emergency: disable SOON pay; USDC keeps working
 SOON_X402_ENABLED=false
-# atau unset SOON_TOKEN_MINT
+# or unset SOON_TOKEN_MINT
 ```
 
-Redeploy → SOON hilang dari accepts, USDC tidak terpengaruh.
+Redeploy → SOON removed from accepts; USDC unaffected.
 
 ---
 
-## Ringkasan
+## Summary
 
-| Pertanyaan | Jawaban |
-|------------|---------|
-| Perlu deploy kode baru saat launch? | **Tidak** — paste post-launch env snapshot |
-| Perlu banyak endpoint baru? | **Tidak sekarang** — 3–5 moat endpoint di Fase 3 |
-| Apa yang paling penting hari H? | `SOON_TOKEN_MINT` + `SOON_RESOURCE_KINDS=all` + diskon 30% |
-| USDC masih bisa? | **Ya** — selalu dual-rail |
+| Question | Answer |
+|----------|--------|
+| New code deploy on launch day? | **No** — paste post-launch env snapshot |
+| Need many new endpoints? | **No** — moat endpoints already shipped |
+| Most important on launch day? | `SOON_TOKEN_MINT` + `SOON_RESOURCE_KINDS=all` + 30% discount |
+| USDC still supported? | **Yes** — always dual-rail |
