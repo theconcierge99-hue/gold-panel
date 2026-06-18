@@ -174,6 +174,69 @@ async function binanceSpot(timeoutMs = FETCH_MS): Promise<MarketTick[]> {
     });
 }
 
+/** Server-fetched ticks win; client/ticker ticks are fallback only. */
+export function mergeMarketTicks(...groups: MarketTick[][]): MarketTick[] {
+  const out: MarketTick[] = [];
+  const seen = new Set<string>();
+  for (const group of groups) {
+    for (const t of group) {
+      if (!t?.symbol) continue;
+      const sym = t.symbol.toUpperCase();
+      if (seen.has(sym)) continue;
+      seen.add(sym);
+      out.push(t);
+    }
+  }
+  return out;
+}
+
+/** Fast single-symbol fetch — anchors Concierge BTC before LLM call. */
+export async function fetchBtcSpotTickFast(timeoutMs = 2_500): Promise<MarketTick | null> {
+  const data = await fetchJson<{ lastPrice: string; priceChangePercent: string }>(
+    "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
+    undefined,
+    timeoutMs,
+  );
+  if (!data) return null;
+  const price = Number(data.lastPrice);
+  const chg = Number(data.priceChangePercent);
+  if (!Number.isFinite(price)) return null;
+  return {
+    symbol: "BTC",
+    price: fmtUsd(price, 0),
+    change: fmtPct(chg),
+  };
+}
+
+export function formatMandatoryPriceAnchor(snapshot: LiveMarketSnapshot): string {
+  const lines: string[] = [
+    `[MANDATORY LIVE PRICES — ${snapshot.fetchedAt}]`,
+    "Use ONLY these figures for spot/perp references. NEVER substitute memorized or outdated prices.",
+  ];
+
+  const priority = ["BTC", "ETH", "SOL", "BNB", "SPX", "DXY", "VIX", "GOLD", "NVDA", "AAPL"];
+  for (const sym of priority) {
+    const t = snapshot.ticks.find((x) => x.symbol.toUpperCase() === sym);
+    if (t) lines.push(`→ ${t.symbol}: ${t.price} (${t.change} 24h)`);
+  }
+  for (const t of snapshot.ticks) {
+    if (priority.includes(t.symbol.toUpperCase())) continue;
+    lines.push(`→ ${t.symbol}: ${t.price} (${t.change} 24h)`);
+  }
+
+  for (const d of snapshot.derivatives) {
+    lines.push(`→ ${d.symbol} perp mark: ${d.markPrice} · funding ${d.fundingRate} · OI ${d.openInterest}`);
+  }
+
+  if (!snapshot.ticks.some((t) => t.symbol.toUpperCase() === "BTC")) {
+    lines.push("→ BTC: unavailable in feed — do NOT invent a BTC price.");
+  } else {
+    lines.push("→ For BTC plans: cite the BTC line above exactly in the Executive summary.");
+  }
+
+  return lines.join("\n");
+}
+
 async function binanceFutures(timeoutMs = FETCH_MS): Promise<DerivativeSnap[]> {
   const symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
   const labels: Record<string, string> = {
@@ -370,15 +433,11 @@ export async function fetchConciergeMarketSnapshot(options?: {
       ...yahooTasks,
     ]);
 
-    const ticks: MarketTick[] = [];
-    const seen = new Set<string>();
-    for (const t of [...client, ...spot, ...yahooExtra]) {
-      if (!t?.symbol) continue;
-      const sym = t.symbol.toUpperCase();
-      if (seen.has(sym)) continue;
-      seen.add(sym);
-      ticks.push(t);
-    }
+    const ticks = mergeMarketTicks(
+      spot,
+      yahooExtra.filter((t): t is MarketTick => t != null),
+      client,
+    );
 
     const sources: string[] = [];
     if (spot.length || client.length) sources.push("Binance / terminal tape");
@@ -419,10 +478,11 @@ export async function fetchConciergeMarketSnapshot(options?: {
       fetchMacroIntelligence({ timeoutMs: ms }),
     ]);
 
-  const ticks: MarketTick[] = [...spot];
-  for (const t of [spx, dxy, vix]) {
-    if (t) ticks.push(t);
-  }
+  const ticks = mergeMarketTicks(
+    spot,
+    [spx, dxy, vix].filter((t): t is MarketTick => t != null),
+    client,
+  );
 
   const sources: string[] = [];
   if (spot.length) sources.push("Binance");
@@ -531,7 +591,7 @@ export function formatLiveMarketForPrompt(snapshot: LiveMarketSnapshot): string 
   const lines: string[] = [
     `MULTI-SOURCE MARKET INTELLIGENCE (fetched ${snapshot.fetchedAt}):`,
     `Sources: ${snapshot.sources.join(" · ")}`,
-    "Rules: Quote numbers from this block. Attribute headlines by publisher (CoinDesk, Bloomberg, Reuters, etc.). Bloomberg/Reuters here = public RSS headlines, not Bloomberg Terminal. Cross-check crypto spot with Binance; macro with Yahoo.",
+    "Rules: Quote numbers from this block only. Attribute headlines by publisher (CoinDesk, Bloomberg, Reuters, etc.). Bloomberg/Reuters here = public RSS headlines, not Bloomberg Terminal. Cross-check crypto spot with Binance; macro with Yahoo. If MANDATORY LIVE PRICES appears above, those figures override everything else.",
   ];
 
   lines.push("\n[PRICES & INDICES]");

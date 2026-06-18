@@ -465,7 +465,7 @@
   .creator-standing-card .cs-progress{margin-top:14px;font-size:10px;color:var(--text-muted)}
   .creator-standing-card .cs-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px}
   .creator-standing-card .cs-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:2px;transition:width .35s ease}
-  .signal-cats{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .conc-tape-foot{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);letter-spacing:.04em}
   .signal-cats span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--border);color:var(--gold)}
   .fcard.creator-signal .chain{color:var(--gold)}
   .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
@@ -3085,6 +3085,16 @@
     html = html.replace(/(<\/strong>)\s+(<strong>([A-Za-z0-9][^<]{0,48}:)<\/strong>)/g,'$1<br class="conc-gap"/>$2');
     return html;
   }
+  function conciergeMetaFromResponse(data){
+    const btc=(data.marketLive||[]).find(m=>String(m.symbol||'').toUpperCase()==='BTC');
+    return {
+      images:data.images,
+      dataAsOf:data.dataAsOf,
+      btcPrice:btc?.price,
+      btcChange:btc?.change,
+    };
+  }
+
   function addAi(html, extra, trackSession){
     const c=document.getElementById('chat');
     const wrap=document.createElement('div');wrap.className='msg ai';
@@ -3094,6 +3104,15 @@
       imgs.forEach(src=>{
         inner+=`<img class="conc-img" src="${src}" alt="Concierge visual" />`;
       });
+    }
+    if(extra?.dataAsOf || extra?.btcPrice){
+      let foot='Binance tape';
+      if(extra.dataAsOf){
+        const t=new Date(extra.dataAsOf);
+        if(!isNaN(t.getTime())) foot+=' · '+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      }
+      if(extra.btcPrice) foot+=' · BTC '+String(extra.btcPrice)+(extra.btcChange?' ('+extra.btcChange+')':'');
+      inner+=`<div class="conc-tape-foot">${escapeHtml(foot)}</div>`;
     }
     wrap.innerHTML=`<div class="bubble">${inner}</div>`;
     c.appendChild(wrap);c.scrollTop=c.scrollHeight;
@@ -3149,7 +3168,7 @@
     try{
       const data=await callConcierge(conciergePayload(v, forceMode));
       removeTyping();
-      addAi(data.reply, { images:data.images });
+      addAi(data.reply, conciergeMetaFromResponse(data));
       window._chatHistory.push({ role:'user', text:v });
       window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
     }catch(err){
@@ -3194,7 +3213,7 @@
       try{
         const data=await callConcierge(conciergePayload(q, imageMode?'image':'chat'));
         removeTyping();
-        addAi(data.reply, { images:data.images });
+        addAi(data.reply, conciergeMetaFromResponse(data));
         window._chatHistory.push({ role:'user', text:q });
         window._chatHistory.push({ role:'model', text:stripTags(data.reply) });
       }catch(err){

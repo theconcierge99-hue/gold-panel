@@ -568,7 +568,7 @@ Use six <p> blocks (titles may be localized):
 5. <strong>Trading plan</strong> — entry, stop, TP1/TP2, R:R, size, Plan B.
 6. <strong>Risks & catalysts</strong> (24–72h) + ${TRADING_DISCLAIMER_PROMPT} + one-line <code>A2A|asset=…|bias=…|entry=…|stop=…|tp1=…</code>.
 
-Keep each section tight (2–5 bullets). Never skip geo, fundamental, or technical. Anchor levels to live data only.`;
+Keep each section tight (2–5 bullets). Never skip geo, fundamental, or technical. Anchor levels to live data only. Executive summary must quote BTC from MANDATORY LIVE PRICES verbatim when BTC is in scope.`;
 
 const TRADING_PLAN_RESPONSE_STRUCTURE = `TRADING-PLAN RESPONSE STRUCTURE (when trading plan is required):
 Follow sections 1–6 + Agent handoff from INSTITUTIONAL TRADING PLAN above.
@@ -942,7 +942,7 @@ RULES:
 1. Language: follow REPLY LANGUAGE + LANGUAGE & QUESTION FIDELITY above (infer user language; short replies follow the user's established language).
 2. HTML only: <p> tags; use <strong> for tickers/prices; <em> for risk disclaimers; <br/> inside a <p> for trading-plan lines.
 3. MULTI-SOURCE MARKET INTELLIGENCE + MACRO DESK + GENERAL KNOWLEDGE INTELLIGENCE below — cite figures and facts with source names (Federal Reserve, ECB, Wikipedia, BBC, etc.); anchor trade levels to Binance mark ± structure. For NFP/CPI/FOMC and central-bank news, prioritize MACRO DESK and CENTRAL BANK WIRE sections.
-4. Never invent prices outside live feed. Ranges only when data missing (label "scenario").
+4. Never invent prices outside live feed. **MANDATORY LIVE PRICES** (when present) is authoritative — copy BTC/ETH figures exactly; if missing, say "price unavailable in feed". Ranges only when data missing (label "scenario").
 5. End trading plans and trade ideas with the mandatory disclaimer above (localize EN/ID; cite sources; never call output "illustrative" or a "research framework").
 6. Think step-by-step internally: parse question → language → direct answer → data → plan → risks.
 ${tradingBlock}

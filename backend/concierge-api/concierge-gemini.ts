@@ -33,6 +33,9 @@ import {
 import {
   fetchConciergeMarketSnapshot,
   formatLiveMarketForPrompt,
+  formatMandatoryPriceAnchor,
+  fetchBtcSpotTickFast,
+  mergeMarketTicks,
   type LiveMarketSnapshot,
 } from "./market-data";
 import { GLM_CHAT_MODEL_ID, glmApiKeyFromEnv, glmChatCompletion } from "./concierge-glm";
@@ -326,9 +329,26 @@ async function resolveIntelligenceContext(
 
   const loungeMemoryBlock = formatLoungeMemoryForPrompt(memoryItems);
 
+  let enrichedSnapshot = snapshot;
+  const wantsBtcAnchor =
+    tradingPlan ||
+    scalpDesk ||
+    topicsForIntel.includes("crypto") ||
+    /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage);
+  if (wantsBtcAnchor) {
+    const freshBtc = await withTimeout(fetchBtcSpotTickFast(), 2_500, null);
+    if (freshBtc) {
+      enrichedSnapshot = {
+        ...enrichedSnapshot,
+        fetchedAt: new Date().toISOString(),
+        ticks: mergeMarketTicks([freshBtc], enrichedSnapshot.ticks),
+      };
+    }
+  }
+
   let defiIntelBlock = "";
   if (needDeFiIntel) {
-    const btcTick = snapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
+    const btcTick = enrichedSnapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
     const defiIntel = await withTimeout(
       fetchConciergeDeFiIntel({
         message: queryMessage,
@@ -355,16 +375,18 @@ async function resolveIntelligenceContext(
   }
 
   ingestWireHeadlinesAsync(snapshot.headlines);
+
   const intelBlock = [
-    formatLiveMarketForPrompt(snapshot),
+    formatMandatoryPriceAnchor(enrichedSnapshot),
+    formatLiveMarketForPrompt(enrichedSnapshot),
     scalpBlock,
     formatGeneralKnowledgeForPrompt(general),
     defiIntelBlock,
   ]
     .filter(Boolean)
     .join("\n\n");
-  const ticks = snapshot.ticks.length ? snapshot.ticks : market;
-  return { intelBlock, ticks, snapshot, loungeMemoryBlock };
+  const ticks = enrichedSnapshot.ticks.length ? enrichedSnapshot.ticks : market;
+  return { intelBlock, ticks, snapshot: enrichedSnapshot, loungeMemoryBlock };
 }
 
 type ConciergeChatResult = {
