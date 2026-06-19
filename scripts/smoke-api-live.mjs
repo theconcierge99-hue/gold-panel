@@ -69,10 +69,9 @@ await check("GET /api/creator-points requires wallet", async () => {
   if (res.status !== 400) throw new Error(`expected 400, got ${res.status}`);
 });
 
-await check("GET /api/rwa-badges", async () => {
+await check("GET /api/rwa-badges requires wallet", async () => {
   const res = await fetch(`${origin}/api/rwa-badges`, { headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  if (res.status !== 400) throw new Error(`expected 400, got ${res.status}`);
 });
 
 const failed = checks.filter((c) => !c.ok);
