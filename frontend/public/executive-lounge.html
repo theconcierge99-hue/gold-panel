@@ -2189,6 +2189,7 @@
 
   let _x402Config = null;
   let _marketPollId = null;
+  let _loungeMarketSnapshot = null;
 
   async function loadX402Config(force){
     if(_x402Config && !force) return _x402Config;
@@ -3030,11 +3031,50 @@
     if(lbl) lbl.textContent='Offline';
   }
 
+  function trimMarketSnapshotForConcierge(data){
+    if(!data || !data.fetchedAt) return null;
+    return {
+      fetchedAt: data.fetchedAt,
+      ticks: (data.ticks||[]).slice(0,24).map(t=>({
+        symbol: String(t.symbol||'').slice(0,16),
+        price: String(t.price||'').slice(0,32),
+        change: String(t.change||'').slice(0,16),
+      })),
+      derivatives: (data.derivatives||[]).slice(0,4).map(d=>({
+        symbol: String(d.symbol||'').slice(0,12),
+        fundingRate: String(d.fundingRate||'').slice(0,24),
+        openInterest: String(d.openInterest||'').slice(0,32),
+        markPrice: String(d.markPrice||'').slice(0,32),
+      })),
+      positioning: (data.positioning||[]).slice(0,4).map(p=>({
+        symbol: String(p.symbol||'').slice(0,12),
+        topTraderLongPct: String(p.topTraderLongPct||'').slice(0,16),
+        topTraderShortPct: String(p.topTraderShortPct||'').slice(0,16),
+        longShortRatio: String(p.longShortRatio||'').slice(0,16),
+        takerBuySellRatio: String(p.takerBuySellRatio||'').slice(0,16),
+      })),
+      sentiment: data.sentiment ? {
+        index: Number(data.sentiment.index)||0,
+        label: String(data.sentiment.label||'').slice(0,40),
+      } : null,
+      headlines: (data.headlines||[]).slice(0,4).map(h=>({
+        source: String(h.source||'').slice(0,80),
+        title: String(h.title||'').slice(0,240),
+        published: String(h.published||'').slice(0,48),
+        summary: String(h.summary||'').slice(0,220),
+        category: String(h.category||'').slice(0,48),
+      })),
+      sources: (data.sources||[]).slice(0,8).map(s=>String(s||'').slice(0,80)),
+    };
+  }
+
   async function refreshMarket(){
     try{
       const res=await fetch('/api/market', { signal: AbortSignal.timeout(28000) });
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.error||('HTTP '+res.status));
+
+      _loungeMarketSnapshot = trimMarketSnapshotForConcierge(data);
 
       renderTickerTicks(data.ticks||[]);
 
@@ -3167,6 +3207,7 @@
       message,
       history: window._chatHistory,
       market: getMarketContext(),
+      liveSnapshot: _loungeMarketSnapshot,
       agentModel: getConciergeAgentModel(),
     };
   }

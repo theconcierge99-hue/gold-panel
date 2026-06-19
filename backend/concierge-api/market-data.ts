@@ -74,6 +74,118 @@ export type LiveMarketSnapshot = {
   sources: string[];
 };
 
+export const CLIENT_SNAPSHOT_MAX_AGE_MS = 120_000;
+
+export function clientSnapshotIsFresh(snapshot: LiveMarketSnapshot | null | undefined): boolean {
+  if (!snapshot?.fetchedAt || !snapshot.ticks?.length) return false;
+  const t = Date.parse(snapshot.fetchedAt);
+  return Number.isFinite(t) && Date.now() - t <= CLIENT_SNAPSHOT_MAX_AGE_MS;
+}
+
+function clampSnapshotText(value: unknown, max: number): string {
+  return String(value ?? "")
+    .slice(0, max)
+    .replace(/\0/g, "");
+}
+
+/** Lounge browser sends trimmed /api/market payload to skip redundant server fetches on Edge. */
+export function parseClientLiveSnapshot(raw: unknown): LiveMarketSnapshot | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const body = raw as Record<string, unknown>;
+  const fetchedAt = clampSnapshotText(body.fetchedAt, 40).trim();
+  if (!fetchedAt || !Number.isFinite(Date.parse(fetchedAt))) return null;
+
+  const ticks: MarketTick[] = [];
+  if (Array.isArray(body.ticks)) {
+    for (const row of body.ticks.slice(0, 24)) {
+      if (!row || typeof row !== "object") continue;
+      const m = row as Record<string, unknown>;
+      const symbol = clampSnapshotText(m.symbol, 16).trim();
+      if (!symbol) continue;
+      ticks.push({
+        symbol,
+        price: clampSnapshotText(m.price, 32),
+        change: clampSnapshotText(m.change, 16),
+      });
+    }
+  }
+  if (!ticks.length) return null;
+
+  const derivatives: DerivativeSnap[] = [];
+  if (Array.isArray(body.derivatives)) {
+    for (const row of body.derivatives.slice(0, 6)) {
+      if (!row || typeof row !== "object") continue;
+      const d = row as Record<string, unknown>;
+      derivatives.push({
+        symbol: clampSnapshotText(d.symbol, 12),
+        fundingRate: clampSnapshotText(d.fundingRate, 24),
+        openInterest: clampSnapshotText(d.openInterest, 32),
+        markPrice: clampSnapshotText(d.markPrice, 32),
+      });
+    }
+  }
+
+  const positioning: PositioningSnap[] = [];
+  if (Array.isArray(body.positioning)) {
+    for (const row of body.positioning.slice(0, 6)) {
+      if (!row || typeof row !== "object") continue;
+      const p = row as Record<string, unknown>;
+      positioning.push({
+        symbol: clampSnapshotText(p.symbol, 12),
+        topTraderLongPct: clampSnapshotText(p.topTraderLongPct, 16),
+        topTraderShortPct: clampSnapshotText(p.topTraderShortPct, 16),
+        longShortRatio: clampSnapshotText(p.longShortRatio, 16),
+        takerBuySellRatio: clampSnapshotText(p.takerBuySellRatio, 16),
+      });
+    }
+  }
+
+  const headlines: NewsHeadline[] = [];
+  if (Array.isArray(body.headlines)) {
+    for (const row of body.headlines.slice(0, 6)) {
+      if (!row || typeof row !== "object") continue;
+      const h = row as Record<string, unknown>;
+      const title = clampSnapshotText(h.title, 240).trim();
+      if (!title) continue;
+      headlines.push({
+        source: clampSnapshotText(h.source, 80),
+        title,
+        published: clampSnapshotText(h.published, 48),
+        summary: clampSnapshotText(h.summary, 220),
+        category: clampSnapshotText(h.category, 48),
+      });
+    }
+  }
+
+  const sources: string[] = [];
+  if (Array.isArray(body.sources)) {
+    for (const s of body.sources.slice(0, 8)) {
+      const v = clampSnapshotText(s, 80).trim();
+      if (v) sources.push(v);
+    }
+  }
+
+  let sentiment: SentimentContext | null = null;
+  if (body.sentiment && typeof body.sentiment === "object") {
+    const s = body.sentiment as Record<string, unknown>;
+    sentiment = {
+      index: Number(s.index) || 0,
+      label: clampSnapshotText(s.label, 40),
+    };
+  }
+
+  const snapshot: LiveMarketSnapshot = {
+    fetchedAt,
+    ticks,
+    derivatives,
+    positioning,
+    headlines,
+    sources,
+    sentiment,
+  };
+  return clientSnapshotIsFresh(snapshot) ? snapshot : null;
+}
+
 function enrichMacroWithHeadlines(
   macro: MacroContext | null | undefined,
   headlines: NewsHeadline[],

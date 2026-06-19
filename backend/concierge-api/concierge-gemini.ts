@@ -36,6 +36,7 @@ import {
   formatMandatoryPriceAnchor,
   fetchBtcSpotTickFast,
   mergeMarketTicks,
+  clientSnapshotIsFresh,
   type LiveMarketSnapshot,
 } from "./market-data";
 import { GLM_CHAT_MODEL_ID, glmApiKeyFromEnv, glmChatCompletion } from "./concierge-glm";
@@ -137,10 +138,10 @@ const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-fla
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
   if (mode === "trading_plan") {
-    return { temperature: 0.55, maxOutputTokens: 4096 };
+    return { temperature: 0.55, maxOutputTokens: 3072 };
   }
   if (mode === "scalping_plan") {
-    return { temperature: 0.5, maxOutputTokens: 4096 };
+    return { temperature: 0.5, maxOutputTokens: 3072 };
   }
   if (mode === "trade_ideas") {
     return { temperature: 0.55, maxOutputTokens: 4096 };
@@ -280,9 +281,10 @@ async function resolveIntelligenceContext(
   };
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
-  const marketTimeout = tradingPlan ? 3_500 : deFiYieldQuestion ? 5_000 : 6_500;
+  const clientSnapshot = clientSnapshotIsFresh(liveSnapshot) ? liveSnapshot! : null;
+  const marketTimeout = clientSnapshot ? 0 : tradingPlan ? 3_500 : deFiYieldQuestion ? 5_000 : 6_500;
   const generalTimeout = deFiYieldQuestion ? 2_000 : 4_000;
-  const skipGeneral = tradingPlan || deFiYieldQuestion;
+  const skipGeneral = tradingPlan || deFiYieldQuestion || !!clientSnapshot;
 
   const queryMessage = normalizeConciergeDeFiMessage(userMessage);
   const topicsForIntel = detectTopics(queryMessage);
@@ -310,24 +312,30 @@ async function resolveIntelligenceContext(
     headlines: [],
     sources: [],
   };
+  const hasBtcInSnapshot = (clientSnapshot?.ticks ?? []).some(
+    (t) => t.symbol.toUpperCase() === "BTC",
+  );
   const wantsBtcAnchor =
     !tradingPlan &&
+    !hasBtcInSnapshot &&
     (scalpDesk ||
       topicsForIntel.includes("crypto") ||
       /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage));
 
   const [snapshot, general, memoryItems, freshBtc] = await Promise.all([
-    liveSnapshot
-      ? Promise.resolve(liveSnapshot)
-      : withTimeout(
-          fetchConciergeMarketSnapshot({
-            mode: tradingPlan ? "trading" : "standard",
-            clientTicks: market,
-            message: queryMessage,
-          }),
-          marketTimeout,
-          emptySnapshot,
-        ),
+    clientSnapshot
+      ? Promise.resolve(clientSnapshot)
+      : liveSnapshot
+        ? Promise.resolve(liveSnapshot)
+        : withTimeout(
+            fetchConciergeMarketSnapshot({
+              mode: tradingPlan ? "trading" : "standard",
+              clientTicks: market,
+              message: queryMessage,
+            }),
+            marketTimeout || 3_500,
+            emptySnapshot,
+          ),
     skipGeneral
       ? Promise.resolve(emptyGeneral)
       : withTimeout(
@@ -353,11 +361,13 @@ async function resolveIntelligenceContext(
   }
 
   const btcTick = enrichedSnapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
-  const defiTimeout = tradingPlan ? 2_500 : deFiYieldQuestion ? 5_000 : 5_500;
-  const scalpTimeout = tradingPlan ? 4_500 : 4_000;
+  const defiTimeout = clientSnapshot ? 2_000 : tradingPlan ? 2_500 : deFiYieldQuestion ? 5_000 : 5_500;
+  const scalpTimeout = clientSnapshot ? 3_500 : tradingPlan ? 4_500 : 4_000;
+  const skipDefiForTradingSnapshot = !!clientSnapshot && tradingPlan && !needDeFiIntel;
+  const skipScalpForSnapshot = !!clientSnapshot && tradingPlan && !scalpDesk;
 
   const [defiIntel, scalp] = await Promise.all([
-    needDeFiIntel
+    needDeFiIntel && !skipDefiForTradingSnapshot
       ? withTimeout(
           fetchConciergeDeFiIntel({
             message: queryMessage,
@@ -371,7 +381,7 @@ async function resolveIntelligenceContext(
           null,
         )
       : Promise.resolve(null),
-    scalpDesk
+    scalpDesk && !skipScalpForSnapshot
       ? withTimeout(fetchScalpDeskIntel({ message: userMessage }), scalpTimeout, null)
       : Promise.resolve(null),
   ]);

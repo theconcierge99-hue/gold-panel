@@ -507,10 +507,7 @@ export async function buildPaymentRequiredResponse(
       error: clientMessage,
       detail: error,
       priceUsdc: usdcPrice,
-      priceLabel:
-        kind === "signal-publish"
-          ? "$1.00"
-          : `${priceLabelForResource(kind)}${tokenLabel}`,
+      priceLabel: `${priceLabelForResource(kind)}${tokenLabel}`,
       resource: kind,
     }),
     {

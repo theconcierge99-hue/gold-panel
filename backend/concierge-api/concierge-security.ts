@@ -2,6 +2,7 @@ import type { ChatTurn, ConciergeMode } from "./concierge-gemini";
 import type { MarketTick } from "./concierge-brain";
 import type { ConciergeAgentModelId } from "./concierge-llm-models";
 import { parseConciergeAgentModel } from "./concierge-llm-models";
+import { parseClientLiveSnapshot, type LiveMarketSnapshot } from "./market-data";
 
 /** Vercel Hobby–safe limits (cost + abuse protection) */
 export const LIMITS = {
@@ -19,6 +20,7 @@ export type ConciergeRequest = {
   history: ChatTurn[];
   signal?: { title?: string; summary?: string };
   market: MarketTick[];
+  liveSnapshot?: LiveMarketSnapshot | null;
   agentModel: ConciergeAgentModelId;
 };
 
@@ -157,7 +159,17 @@ export function validateConciergeRequest(raw: unknown): ConciergeRequest {
     }
   }
 
-  return { mode, message, history, signal, market, agentModel: parseConciergeAgentModel(body.agentModel) };
+  const liveSnapshot = parseClientLiveSnapshot(body.liveSnapshot);
+
+  return {
+    mode,
+    message,
+    history,
+    signal,
+    market,
+    liveSnapshot,
+    agentModel: parseConciergeAgentModel(body.agentModel),
+  };
 }
 
 export async function readBodyWithLimit(request: Request): Promise<unknown> {
