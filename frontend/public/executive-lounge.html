@@ -135,7 +135,8 @@
   .section-h .meta{font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
 
   /* Featured cards */
-  .featured{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:34px}
+  .featured{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+  .creator-signals-lane{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:34px}
   .fcard{position:relative;display:flex;flex-direction:column;min-height:168px;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;cursor:pointer;overflow:hidden}
   .fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.7;z-index:1}
   .fcard:hover{border-color:var(--gold-dim)}
@@ -516,6 +517,7 @@
     .app.concierge-mode aside.right{grid-row:unset;display:none}
     .app.concierge-mode main{grid-row:2;min-height:0;padding:0;overflow:hidden}
     .featured{grid-template-columns:1fr}
+    .creator-signals-lane{grid-template-columns:1fr}
     .grid{grid-template-columns:1fr}
     .header-menu-btn,.nav-backdrop,.mobile-nav,.conc-drawer-btn{display:flex}
     .nav-backdrop{
@@ -718,15 +720,19 @@
     <!-- LOUNGE -->
     <section class="view show" id="view-lounge">
       <div class="section-h">
-        <h2>Featured Signals</h2>
+        <h2>Creator Signals</h2>
+        <div class="meta" id="creatorMeta">Lounge desk</div>
       </div>
-      <div class="featured" id="featuredSignals">
-        <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
+      <div class="creator-signals-lane" id="creatorSignalsGrid">
+        <div class="intel-loading">Loading creator signals…</div>
       </div>
 
       <div class="section-h">
         <h2>Market Intelligence</h2>
         <div class="meta" id="intelMeta">Live wire</div>
+      </div>
+      <div class="featured" id="featuredWire">
+        <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
       </div>
       <div class="grid" id="marketIntelGrid">
         <div class="intel-loading">Fetching market intelligence…</div>
@@ -2930,25 +2936,57 @@
     return isCreator?'Unlock full thesis':'Read full story';
   }
 
-  function renderFeaturedHeadlines(items){
-    const el=document.getElementById('featuredSignals');
+  function isCreatorHeadline(h){
+    return !!(h && (h.signalId || h.kind === 'creator'));
+  }
+
+  function splitMarketHeadlines(data){
+    if(Array.isArray(data.creatorHeadlines) && Array.isArray(data.wireHeadlines)){
+      return { creators: data.creatorHeadlines, wire: data.wireHeadlines };
+    }
+    const all=data.headlines||[];
+    return {
+      creators: all.filter(isCreatorHeadline),
+      wire: all.filter(h=>!isCreatorHeadline(h)),
+    };
+  }
+
+  function renderCreatorSignals(items){
+    const el=document.getElementById('creatorSignalsGrid');
     if(!el) return;
     if(!items.length){
-      el.innerHTML='<div class="intel-empty">No headlines available — retry shortly.</div>';
+      el.innerHTML='<div class="intel-empty">No creator signals yet — publish yours with <strong>+ Create Signal</strong>.</div>';
+      return;
+    }
+    el.innerHTML=items.slice(0,4).map((h)=>{
+      const signalAttr=h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
+      const noUrl=!h.signalId?' data-no-url="1"':'';
+      return `<article class="fcard is-live news-card creator-signal" role="button" tabindex="0"${noUrl}${signalAttr}
+        data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
+        onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
+        <h3>${escapeHtml(h.title)}</h3>
+        <p class="news-teaser">${escapeHtml(newsTeaser(h,300))}</p>
+        <div class="card-read-hint">Unlock full thesis →</div>
+      </article>`;
+    }).join('');
+  }
+
+  function renderFeaturedWire(items){
+    const el=document.getElementById('featuredWire');
+    if(!el) return;
+    if(!items.length){
+      el.innerHTML='<div class="intel-empty">No wire headlines — retry shortly.</div>';
       return;
     }
     el.innerHTML=items.slice(0,2).map((h)=>{
-      const isCreator=h.signalId||h.kind==='creator';
       const urlAttr=h.url?escapeHtml(h.url):'';
-      const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
-      const noUrl=!h.url&&!h.signalId?' data-no-url="1"':'';
-      const cardClass='fcard is-live news-card'+(isCreator?' creator-signal':'');
-      return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
+      const noUrl=!h.url?' data-no-url="1"':'';
+      return `<article class="fcard is-live news-card" role="button" tabindex="0"${noUrl}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
         <h3>${escapeHtml(h.title)}</h3>
         <p class="news-teaser">${escapeHtml(newsTeaser(h,300))}</p>
-        <div class="card-read-hint">${readHint(h)} →</div>
+        <div class="card-read-hint">Read full story →</div>
       </article>`;
     }).join('');
   }
@@ -2962,17 +3000,14 @@
       return;
     }
     el.innerHTML=grid.map((h)=>{
-      const isCreator=h.signalId||h.kind==='creator';
       const urlAttr=h.url?escapeHtml(h.url):'';
-      const signalAttr=isCreator&&h.signalId?' data-signal-id="'+escapeHtml(h.signalId)+'"':'';
-      const noUrl=!h.url&&!h.signalId?' data-no-url="1"':'';
-      const cardClass='gcard is-live news-card'+(isCreator?' creator-signal':'');
-      return `<article class="${cardClass}" role="button" tabindex="0"${noUrl}${signalAttr}
+      const noUrl=!h.url?' data-no-url="1"':'';
+      return `<article class="gcard is-live news-card" role="button" tabindex="0"${noUrl}
         data-url="${urlAttr}" data-title="${escapeHtml(h.title)}" data-source="${escapeHtml(h.source)}"
         onclick="openNewsArticleFromEl(this)" onkeydown="newsCardKey(event,this)">
         <h4>${escapeHtml(h.title)}</h4>
         <p class="news-teaser">${escapeHtml(newsTeaser(h,200))}</p>
-        <div class="card-read-hint">${readHint(h)} →</div>
+        <div class="card-read-hint">Read full story →</div>
       </article>`;
     }).join('');
   }
@@ -3012,17 +3047,27 @@
   }
 
   function updateLoungeMeta(data){
-    const headlines=data.headlines||[];
+    const { creators, wire } = splitMarketHeadlines(data);
+    const creatorMeta=document.getElementById('creatorMeta');
     const intel=document.getElementById('intelMeta');
-    if(intel) intel.textContent='Live · '+headlines.length+' headlines';
+    if(creatorMeta){
+      creatorMeta.textContent=creators.length
+        ? 'Live · '+creators.length+' signal'+(creators.length===1?'':'s')
+        : 'Publish with + Create Signal';
+    }
+    if(intel){
+      intel.textContent='Live · '+wire.length+' headline'+(wire.length===1?'':'s');
+    }
   }
 
   function showMarketLoadError(msg){
     const text=escapeHtml(msg||'Feed unavailable');
-    const feat=document.getElementById('featuredSignals');
+    const creator=document.getElementById('creatorSignalsGrid');
+    const feat=document.getElementById('featuredWire');
     const grid=document.getElementById('marketIntelGrid');
     const narr=document.getElementById('trendingNarratives');
     const feed=document.getElementById('feedActivity');
+    if(creator) creator.innerHTML='<div class="intel-empty">'+text+'</div>';
     if(feat) feat.innerHTML='<div class="intel-empty">'+text+'</div>';
     if(grid) grid.innerHTML='<div class="intel-empty">'+text+'</div>';
     if(narr) narr.innerHTML='<div class="intel-empty" style="border:none">'+text+'</div>';
@@ -3078,11 +3123,12 @@
 
       renderTickerTicks(data.ticks||[]);
 
-      const headlines=data.headlines||[];
-      renderFeaturedHeadlines(headlines);
-      renderIntelGrid(headlines);
+      const { creators, wire } = splitMarketHeadlines(data);
+      renderCreatorSignals(creators);
+      renderFeaturedWire(wire);
+      renderIntelGrid(wire);
       renderNarratives(data.narratives||[]);
-      renderFeedActivity(headlines);
+      renderFeedActivity(data.headlines||[]);
       updateLoungeMeta(data);
 
       const lbl=document.getElementById('liveLabel');

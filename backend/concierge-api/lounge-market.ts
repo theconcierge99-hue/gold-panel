@@ -1,4 +1,5 @@
 import { buildTrendingNarratives, enrichHeadlinesForUi } from "./headline-ui";
+import { fetchDevCreatorHeadlines } from "./dev-creator-sync";
 import { ingestWireHeadlinesAsync } from "./lounge-memory";
 import { fetchLiveMarketSnapshot, ticksForUi } from "./market-data";
 import { listCreatorHeadlinesForUi } from "./signal-ui";
@@ -10,6 +11,9 @@ export async function buildLoungeMarketPayload() {
   let creator: Awaited<ReturnType<typeof listCreatorHeadlinesForUi>> = [];
   try {
     creator = await listCreatorHeadlinesForUi();
+    if (creator.length === 0) {
+      creator = await fetchDevCreatorHeadlines();
+    }
   } catch (e) {
     console.error("[market] creator signals", e instanceof Error ? e.message : e);
   }
@@ -23,9 +27,12 @@ export async function buildLoungeMarketPayload() {
     sentiment: snapshot.sentiment,
     defi: snapshot.defi,
     btcNetwork: snapshot.btcNetwork,
+    creatorHeadlines: creator,
+    wireHeadlines: wire,
     headlines,
     narratives: buildTrendingNarratives(headlines),
     sources: snapshot.sources,
     creatorSignalCount: creator.length,
+    wireHeadlineCount: wire.length,
   };
 }
