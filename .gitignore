@@ -53,6 +53,8 @@ frontend/public/.well-known/
 
 # MCP Registry signing keys (local — do not commit)
 .secrets/
+**/mcp-registry-key.pem
+**/mcp-registry-key.hex
 
 # Official mcp-publisher CLI binary (download locally — see mcp-registry/PUBLISH.md)
 tools/
