@@ -15,6 +15,7 @@
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
 - [Agent Skill (SKILL.md)](https://github.com/theconcierge99-hue/gold-panel/blob/main/skills/concierge-intel/SKILL.md): Agent Skills pattern for Claude/Cursor/Grok sessions
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Listed as xyz.conc-exe/concierge-intel v1.0.0 — streamable HTTP at /api/mcp
 - [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Audit posture, distribution phase 2, verify commands
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default) or GLM-4.7 Flash chat, enhance, image.

@@ -189,6 +189,13 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
         title: "Concierge Intel MCP",
         description: "HTTP JSON-RPC MCP — tools/list and tools/call for all intel routes",
         "service-desc": [{ href: `${base}/openapi.json`, type: "application/json" }],
+        describedby: [
+          {
+            href: "https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel",
+            type: "text/html",
+            title: "Official MCP Registry listing (xyz.conc-exe/concierge-intel v1.0.0)",
+          },
+        ],
       },
       {
         anchor: `${base}/.well-known/x402`,
