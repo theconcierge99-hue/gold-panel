@@ -8,7 +8,7 @@ Publish `xyz.conc-exe/concierge-intel` to the [official MCP Registry](https://re
 ## Prerequisites
 
 - Domain control of **conc-exe.xyz** (HTTP namespace `xyz.conc-exe/*`)
-- [mcp-publisher](https://www.npmjs.com/package/mcp-publisher) CLI
+- **Official** MCP Registry publisher CLI (see step 3 — **not** `npm install -g mcp-publisher`)
 - Ed25519 private key in Vercel env `MCP_REGISTRY_PRIVATE_KEY_HEX` (64 hex chars)
 
 ## Validate locally
@@ -40,31 +40,55 @@ In Vercel → **Settings → Environment Variables**:
 
 Redeploy. Build runs `scripts/generate-mcp-registry-auth.mjs` and emits `/.well-known/mcp-registry-auth`.
 
-Verify:
+Verify (Windows PowerShell — use `curl.exe`, not `curl`):
 
-```bash
-curl -s https://conc-exe.xyz/.well-known/mcp-registry-auth
+```powershell
+curl.exe -s https://conc-exe.xyz/.well-known/mcp-registry-auth
 # v=MCPv1; k=ed25519; p=...
 ```
 
 ### 3. Install publisher CLI
 
-```bash
-npm install -g mcp-publisher
+**Do not use** `npm install -g mcp-publisher` — that npm package is unrelated and starts an MCP server on stdio.
+
+Download the official binary from [modelcontextprotocol/registry releases](https://github.com/modelcontextprotocol/registry/releases) (`mcp-publisher_windows_amd64.tar.gz`), extract `mcp-publisher.exe`, and run it from repo root or add to PATH.
+
+PowerShell example:
+
+```powershell
+# from repo root
+New-Item -ItemType Directory -Force tools | Out-Null
+curl.exe -L -o tools/mcp-publisher.tar.gz `
+  https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_windows_amd64.tar.gz
+tar -xzf tools/mcp-publisher.tar.gz -C tools
+.\tools\mcp-publisher.exe --help
 ```
+
+If you already installed the wrong npm package: `npm uninstall -g mcp-publisher`
 
 ### 4. Login (HTTP domain verification)
 
+Paste the **actual** 64-char hex from `.secrets/mcp-registry-key.hex` — not the placeholder text `<hex>`.
+
+PowerShell:
+
+```powershell
+$key = (Get-Content .secrets/mcp-registry-key.hex -Raw).Trim()
+.\tools\mcp-publisher.exe login http --domain=conc-exe.xyz --private-key=$key
+```
+
+Unix:
+
 ```bash
-mcp-publisher login http --domain=conc-exe.xyz --private-key=YOUR_64_CHAR_HEX_PRIVATE_KEY
+mcp-publisher login http --domain=conc-exe.xyz --private-key="$(cat .secrets/mcp-registry-key.hex | tr -d '\n')"
 ```
 
 ### 5. Publish
 
 From repo root:
 
-```bash
-mcp-publisher publish mcp-registry/server.json
+```powershell
+.\tools\mcp-publisher.exe publish mcp-registry/server.json
 ```
 
 Bump `version` in `server.json` when tools or URLs change.

@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "xyz.conc-exe/concierge-intel",
   "title": "Concierge Intel",
-  "description": "Pay-per-call DeFi and macro market intelligence for AI agents. Thirteen x402 USDC tools — TVL, macro, wire, yields, whales, wallet, verdict, Meteora DLMM, desk brief, alpha desks, scalp. JSON-RPC at /api/mcp; settlement on Solana and Base; no API keys.",
+  "description": "Pay-per-call DeFi and macro intel for AI agents. x402 USDC tools via streamable HTTP /api/mcp.",
   "version": "1.0.0",
   "repository": {
     "url": "https://github.com/theconcierge99-hue/gold-panel",
