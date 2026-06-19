@@ -171,6 +171,10 @@
       "destination": "/docs-integration-x402scan.html"
     },
     {
+      "source": "/docs/integration/mcp-registry",
+      "destination": "/docs-integration-mcp-registry.html"
+    },
+    {
       "source": "/docs/integration/poncho",
       "destination": "/docs-integration-poncho.html"
     },

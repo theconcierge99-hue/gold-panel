@@ -36,6 +36,7 @@
         <a class="doc-card" href="/docs/payment/mpp"><h4>③ AgentCash</h4><p><code>npx agentcash add</code> — install all skills into MPP-compatible agents.</p></a>
         <a class="doc-card" href="/docs/payment/paysh"><h4>④ pay.sh</h4><p><code>pay curl</code> — sandbox wallet, Claude/Codex MCP, no API keys.</p></a>
         <a class="doc-card" href="/docs/api/agent-readiness"><h4>⑤ Agent readiness</h4><p>Audit rubric, api-catalog, idempotency, rate-limit headers — for agent integrators.</p></a>
+        <a class="doc-card" href="/docs/integration/mcp-registry"><h4>⑥ MCP Registry</h4><p>Published <code>xyz.conc-exe/concierge-intel</code> — Cursor/Claude connect at <code>/api/mcp</code>.</p></a>
       </div>
 
       <h2 class="docs-h2">x402 flow (all paid routes)</h2>
@@ -137,6 +138,10 @@ r = httpx.post(f"{ORIGIN}/api/concierge-intel-airdrop", json=payload)
           <thead><tr><th>URL</th><th>Use</th></tr></thead>
           <tbody>
             <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402/MPP payment metadata per route</td></tr>
+            <tr><td><code>GET /api/mcp</code></td><td>JSON-RPC MCP — <code>tools/list</code>, <code>tools/call</code></td></tr>
+            <tr><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener">MCP Registry</a></td><td>Official listing <code>xyz.conc-exe/concierge-intel</code> v1.0.1 — <a href="/docs/integration/mcp-registry" class="gold-link">guide</a></td></tr>
+            <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Agent Skills file for Claude/Cursor/Grok sessions</td></tr>
+            <tr><td><code>GET /.well-known/api-catalog</code></td><td>RFC 9727 linkset — OpenAPI, MCP, x402, agent card</td></tr>
             <tr><td><code>GET /.well-known/x402</code></td><td>Resource fan-out for x402scan / registries</td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Networks, pricing flags (no secrets)</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Concierge registry + <code>agt_</code> cards</td></tr>
@@ -157,7 +162,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-verdict \
           <li><strong>Server-side proxy</strong> — Browsers on foreign origins may hit CORS; agents should call Concierge from a backend.</li>
           <li><strong>Idempotency</strong> — Each paid call is independent; cache Intel JSON by <code>dataAsOf</code> if you poll.</li>
           <li><strong>Insider layer</strong> — Alpha + verdict routes weight Lounge creator signals; publish signals to improve alpha quality.</li>
-          <li><strong>Distribution</strong> — Optional proxy via <a href="/docs/corbits" class="gold-link">Corbits Marketplace</a>, list on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>, or <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> pay-skills catalog.</li>
+          <li><strong>Distribution</strong> — Optional proxy via <a href="/docs/corbits" class="gold-link">Corbits Marketplace</a>, list on <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">MPPscan</a>, <a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a>, or <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> pay-skills catalog.</li>
         </ul>
       </div>
 

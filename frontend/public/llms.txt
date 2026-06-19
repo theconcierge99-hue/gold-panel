@@ -15,7 +15,7 @@
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
 - [Agent Skill (SKILL.md)](https://conc-exe.xyz/skills/concierge-intel/SKILL.md): Agent Skills pattern for Claude/Cursor/Grok sessions
-- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Listed as xyz.conc-exe/concierge-intel v1.0.0 — streamable HTTP at /api/mcp
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Published xyz.conc-exe/concierge-intel v1.0.1 — guide at /docs/integration/mcp-registry
 - [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Audit posture, distribution phase 2, verify commands
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default) or GLM-4.7 Flash chat, enhance, image.
@@ -25,7 +25,7 @@
 - [Executive Lounge](https://conc-exe.xyz/docs/playground): Browser terminal and wallet UX.
 - [Concierge Agent home](https://conc-exe.xyz/agent): Hero hub — market intelligence as a service.
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
-- [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, agent cards. List on [MPPscan](https://www.mppscan.com/register).
+- [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, MCP Registry, agent cards. List on [MPPscan](https://www.mppscan.com/register).
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
 - [SOON Token](https://conc-exe.xyz/token): Tokenomics — 55/20/15/10 split, SOON pay burns, holder tiers.
 - [SOON Transparency](https://conc-exe.xyz/token/transparency): Weekly buyback and burn reports (post-T0).

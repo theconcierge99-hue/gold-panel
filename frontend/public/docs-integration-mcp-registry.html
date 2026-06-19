@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>MCP Registry — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Intel listed on the Official MCP Registry — xyz.conc-exe/concierge-intel v1.0.1, streamable HTTP at /api/mcp." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/mcp-registry" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-mcp-registry">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <h1 class="docs-title">Official MCP Registry</h1>
+      <p class="docs-lead">
+        <a class="ext" href="https://registry.modelcontextprotocol.io/" target="_blank" rel="noopener">MCP Registry</a> indexes streamable HTTP MCP servers for Claude, Cursor, and other agent runtimes.
+        Concierge Intel is published as <code>xyz.conc-exe/concierge-intel</code> — discovery and paid intel tools at <code>/api/mcp</code>, x402 USDC settlement, no API keys.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> <span class="gold-link">Published</span> — v1.0.1</p>
+        <p><strong>Listing:</strong> <a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> ↗</a></p>
+        <p><strong>Remote URL:</strong> <code>https://conc-exe.xyz/api/mcp</code></p>
+        <p><strong>Agent skill:</strong> <a href="/skills/concierge-intel/SKILL.md"><code>/skills/concierge-intel/SKILL.md</code></a></p>
+        <p><strong>Source repo:</strong> Not advertised — integrators use conc-exe.xyz discovery only.</p>
+      </div>
+
+      <h2 class="docs-h2">Connect (Cursor / Claude Desktop)</h2>
+      <div class="card">
+<pre><code>{
+  "mcpServers": {
+    "concierge-intel": {
+      "url": "https://conc-exe.xyz/api/mcp"
+    }
+  }
+}</code></pre>
+        <p class="note">Paid <code>tools/call</code> require x402 settlement — pass <code>paymentSignature</code> after <code>pay curl</code>, or use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> MCP.</p>
+      </div>
+
+      <h2 class="docs-h2">Discovery on conc-exe.xyz</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>URL</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /api/mcp</code></td><td>MCP discovery · JSON-RPC <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code></td></tr>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402 payment metadata</td></tr>
+            <tr><td><code>GET /.well-known/api-catalog</code></td><td>RFC 9727 linkset — links to registry listing</td></tr>
+            <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Agent Skills pattern for sessions</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Verify</h2>
+      <div class="card">
+<pre><code>curl.exe -s https://conc-exe.xyz/api/mcp
+curl.exe -s https://conc-exe.xyz/skills/concierge-intel/SKILL.md
+
+npm run mcp-registry:validate
+npm run agent-readiness:audit</code></pre>
+        <p>Live probes: <a href="/agent/discover" class="gold-link">Discover UI</a> · <a href="/docs/api/agent-readiness" class="gold-link">Agent readiness</a></p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> — structured JSON routes behind MCP tools</li>
+          <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — x402 resource fan-out</li>
+          <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — CLI + MCP for paid calls</li>
+          <li><a href="/docs/api/agent-readiness" class="gold-link">Agent readiness</a> — audit posture + distribution</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener">Registry listing ↗</a>
+        <a class="btn" href="/api/mcp" target="_blank" rel="noopener">Live /api/mcp</a>
+        <a class="btn" href="/skills/concierge-intel/SKILL.md" target="_blank" rel="noopener">SKILL.md</a>
+        <a class="btn" href="/agent/discover">Discover UI</a>
+      </div>
+      <p class="docs-foot">Concierge Intel · MCP Registry · <a href="https://registry.modelcontextprotocol.io/" class="ext" target="_blank" rel="noopener">registry.modelcontextprotocol.io</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

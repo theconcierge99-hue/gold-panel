@@ -32,6 +32,7 @@
         <a class="doc-card" href="/docs/api/intel"><h4>Intel APIs</h4><p>macro, wire, DeFi desks, alpha — structured JSON</p></a>
         <a class="doc-card" href="/docs/builders"><h4>For Builders</h4><p>Integrate x402, OpenAPI, AgentCash — fifteen routes</p></a>
         <a class="doc-card" href="/docs/api/agent-identity"><h4>Agent Identity</h4><p>agt_ registry, agent cards, well-known</p></a>
+        <a class="doc-card" href="/docs/integration/mcp-registry"><h4>MCP Registry</h4><p>Published listing, Cursor connect, SKILL.md</p></a>
         <a class="doc-card" href="/docs/api/agent-readiness"><h4>Agent Readiness</h4><p>Audit dimensions, api-catalog, MCP, verify commands</p></a>
         <a class="doc-card" href="/docs/api/lounge"><h4>Lounge</h4><p>Market feed, signals, RWA, news unlock</p></a>
       </div>
@@ -51,7 +52,8 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></
             <tr><td><code>GET /.well-known/x402</code></td><td>Paid route fan-out · MPPscan / x402scan links</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry (<code>agt_…</code>) and Concierge services</td></tr>
             <tr><td><code>GET /asyncapi.json</code></td><td>AsyncAPI stub — event contract placeholder</td></tr>
-            <tr><td><code>GET /api/mcp</code></td><td>MCP HTTP transport — <code>tools/list</code>, <code>tools/call</code> · <a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener">official registry</a> (<code>xyz.conc-exe/concierge-intel</code>)</td></tr>
+            <tr><td><code>GET /api/mcp</code></td><td>MCP HTTP transport — <code>tools/list</code>, <code>tools/call</code> · <a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener">registry</a> (<code>xyz.conc-exe/concierge-intel</code> v1.0.1)</td></tr>
+            <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Agent Skills file — <a href="/docs/integration/mcp-registry" class="gold-link">MCP guide</a></td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Networks, <code>discovery.protocols</code>, pricing (no secrets)</td></tr>
             <tr><td><code>GET /api/token-pay</code></td><td>Token Pay merchant registry — beta partner onboarding</td></tr>
             <tr><td><code>402</code> + Bazaar</td><td>Runtime input/output schemas for AgentCash probes</td></tr>

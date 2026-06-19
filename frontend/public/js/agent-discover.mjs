@@ -95,10 +95,11 @@ async function load() {
     cards.push(
       discCard(
         "MCP & accuracy",
-        `<p>Free agent tools — MCP JSON-RPC and public verdict track record. Listed on the <strong>Official MCP Registry</strong> as <code>xyz.conc-exe/concierge-intel</code> v1.0.0.</p>
+        `<p>Free agent tools — MCP JSON-RPC and public verdict track record. Listed on the <strong>Official MCP Registry</strong> as <code>xyz.conc-exe/concierge-intel</code> v1.0.1.</p>
         <div class="res-disc-links">
           ${discLink("/api/mcp", `${origin}/api/mcp`)}
           ${discLink("https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel", "registry.modelcontextprotocol.io — Concierge Intel")}
+          ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
           ${discLink("/api/concierge-intel-accuracy", `${origin}/api/concierge-intel-accuracy`)}
         </div>
         ${config?.pricingTiers ? `<p class="res-disc-hint">Tiers: raw $${config.pricingTiers.rawUsdc} · signal $${config.pricingTiers.signalUsdc} · bundle $${config.pricingTiers.bundleUsdc}</p>` : ""}`,
@@ -130,9 +131,11 @@ async function load() {
     cards.push(
       discCard(
         "MCP Registry",
-        `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.0. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
+        `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.1. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
         <div class="res-disc-links">
           ${discLink("https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel", "Official listing ↗")}
+          ${discLink("/docs/integration/mcp-registry", `${origin}/docs/integration/mcp-registry`)}
+          ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
           ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
         </div>
         <p class="res-disc-hint"><code>npm run mcp-registry:validate</code> · republish: <code>mcp-registry/PUBLISH.md</code></p>`,
