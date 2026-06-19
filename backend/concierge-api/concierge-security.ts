@@ -224,6 +224,9 @@ export function sanitizePublicError(error: unknown): string {
   if (/\bGemini\b/.test(msg) && !msg.includes("GEMINI_API_KEY")) {
     return "Concierge is temporarily unavailable. Please try again shortly.";
   }
+  if (msg.includes("Concierge timed out")) {
+    return msg;
+  }
   if (msg.includes("Payment") || msg.includes("x402") || msg.includes("Facilitator")) {
     return msg;
   }

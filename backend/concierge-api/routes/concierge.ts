@@ -16,7 +16,7 @@ function parseAgentIdHeader(request: Request): string | null {
   return id;
 }
 
-/** Edge — Gemini + x402 (via api/[...path].ts). Trading-plan path tuned for ~30s wall clock. */
+/** Node runtime (api/concierge.ts) — Gemini + intel can exceed Edge ~30s. */
 function jsonResponse(
   request: Request,
   body: unknown,

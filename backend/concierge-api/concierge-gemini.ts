@@ -127,12 +127,12 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   return { text: text.trim(), images };
 }
 
-const GEMINI_CALL_MS = 18_000;
-const GEMINI_TRADING_MS = 15_000;
-/** Wall-clock budget for Gemini on trading-plan path (fits Vercel Edge ~30s incl. x402 + intel). */
-const GEMINI_TRADING_BUDGET_MS = 16_000;
+const GEMINI_CALL_MS = 24_000;
+const GEMINI_TRADING_MS = 22_000;
+/** Wall-clock budget for Gemini on trading-plan path (Node handler allows up to 60s). */
+const GEMINI_TRADING_BUDGET_MS = 28_000;
 
-const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
@@ -601,7 +601,11 @@ export async function runConciergeGemini(options: {
     }
   }
   if (!reply) {
-    throw new Error(errors[0] || "Concierge timed out — try again in a moment");
+    throw new Error(
+      errors.find((e) => /\bGemini\b/.test(e)) ||
+        errors[0] ||
+        "Concierge timed out — try again shortly.",
+    );
   }
 
   return {
