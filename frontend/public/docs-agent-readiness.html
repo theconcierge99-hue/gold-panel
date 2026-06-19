@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Agent Readiness — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent agent-readiness posture — OpenAPI, MCP, RFC 9727 api-catalog, idempotency, rate-limit headers, and audit commands for integrators." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/api/agent-readiness" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="api-agent-readiness">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/api/overview">API Overview</a></div>
+      <div class="docs-eyebrow">API Reference</div>
+      <h1 class="docs-title">Agent readiness</h1>
+      <p class="docs-lead">
+        How safely an autonomous agent can discover, authenticate (via x402), call, and recover from errors on this API —
+        scored against the <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">agent-readiness</a> dimension model.
+      </p>
+
+      <div class="card">
+        <p><strong>Audience:</strong> Agent developers, marketplace integrators (Poncho, pay.sh, MPPscan), and procurement teams evaluating x402 APIs.</p>
+        <p><strong>Not marketing fluff:</strong> Each signal is observable from public URLs — OpenAPI, well-known discovery, response headers, and npm audit scripts in this repo.</p>
+      </div>
+
+      <h2 class="docs-h2">What Concierge exposes</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Signal</th><th>URL / header</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>OpenAPI 3.1</td><td><code>GET /openapi.json</code></td><td>Canonical contract — <code>info.x-guidance</code>, <code>x-payment-info</code>, <code>components.securitySchemes</code>, examples on every operation</td></tr>
+            <tr><td>RFC 9727 catalog</td><td><code>GET /.well-known/api-catalog</code></td><td>Linkset index — OpenAPI, MCP, x402, agent card, AsyncAPI stub</td></tr>
+            <tr><td>x402 fan-out</td><td><code>GET /.well-known/x402</code></td><td>Paid route list + ownership proofs for x402scan / Bazaar</td></tr>
+            <tr><td>Agent card</td><td><code>GET /.well-known/agent-card.json</code></td><td>ERC-8004-style A2A discovery</td></tr>
+            <tr><td>MCP HTTP</td><td><code>GET /api/mcp</code></td><td>JSON-RPC <code>tools/list</code> · <code>tools/call</code> for intel routes</td></tr>
+            <tr><td>AsyncAPI stub</td><td><code>GET /asyncapi.json</code></td><td>Event contract placeholder (HTTP-only today; webhooks reserved)</td></tr>
+            <tr><td>LLM index</td><td><code>GET /llms.txt</code></td><td>Human + agent doc map</td></tr>
+            <tr><td>Rate-limit policy</td><td><code>X-RateLimit-Limit</code>, <code>RateLimit-Limit</code></td><td>120 req/min soft limit on <code>/api/*</code> — documented in OpenAPI 429 responses</td></tr>
+            <tr><td>Idempotency</td><td><code>Idempotency-Key</code> header</td><td>Optional on POST; reuse <code>PAYMENT-SIGNATURE</code> after settlement to avoid double-pay</td></tr>
+            <tr><td>Agent attribution</td><td><code>X-Agent-Id: agt_…</code></td><td>Registered agent identity — see <a href="/docs/api/agent-identity" class="gold-link">Agent Identity</a></td></tr>
+            <tr><td>Consent</td><td><code>GET /robots.txt</code></td><td>Content-signal: search=yes, ai-input=yes, ai-train=no</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Twelve audit dimensions</h2>
+      <div class="card">
+        <p>Repo script <code>npm run agent-readiness:audit</code> scores 0–3 per dimension (mean across core + forward-looking):</p>
+        <table>
+          <thead><tr><th>Dimension</th><th>Concierge posture</th></tr></thead>
+          <tbody>
+            <tr><td>Spec presence</td><td>OpenAPI 3.1 at predictable URL, static + live</td></tr>
+            <tr><td>Auth model clarity</td><td><code>x402Payment</code> security scheme + <code>x-payment-info</code> per route</td></tr>
+            <tr><td>Idempotency</td><td><code>Idempotency-Key</code> documented; payment signature dedup guidance in <code>info.x-guidance</code></td></tr>
+            <tr><td>Error semantics</td><td><code>components.schemas.ApiError</code> — stable <code>code</code> enum; 400/402/429/500 on all paid ops</td></tr>
+            <tr><td>Rate-limit headers</td><td><code>X-RateLimit-*</code> on API responses; <code>Retry-After</code> on 429 in spec</td></tr>
+            <tr><td>Dry-run / simulate</td><td>GET intel probes → 402; <code>POST /api/token-pay-preview</code>; <a href="/agent/playground" class="gold-link">playground</a></td></tr>
+            <tr><td>OpenAPI examples</td><td><code>operationId</code>, request + response examples on every operation</td></tr>
+            <tr><td>MCP server</td><td>First-party HTTP MCP at <code>/api/mcp</code></td></tr>
+            <tr><td>AsyncAPI / events</td><td>Stub at <code>/asyncapi.json</code> (no live webhooks yet)</td></tr>
+            <tr><td>RFC 9727 api-catalog</td><td><code>/.well-known/api-catalog</code> linkset+json</td></tr>
+            <tr><td>Consent signals</td><td><code>Content-signal</code> in <code>robots.txt</code></td></tr>
+            <tr><td>Web Bot Auth</td><td><code>Signature-Agent</code> header → agent identity docs</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Verify (integrators &amp; CI)</h2>
+      <div class="card">
+<pre><code># Live production audit (all dimensions incl. headers + MCP)
+npm run agent-readiness:audit
+
+# JSON output for CI
+node scripts/audit-agent-readiness.mjs --json
+
+# Local — OpenAPI + static discovery files (no live probes)
+npm run agent-readiness:local
+
+# Related discovery checks
+npm run discovery:validate
+curl -s https://conc-exe.xyz/.well-known/api-catalog | jq '.linkset | length'
+curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | findstr /i ratelimit</code></pre>
+        <p class="note">Clone <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">api-evangelist/agent-readiness</a> for the rubric. Concierge audit script: <code>scripts/audit-agent-readiness.mjs</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Related pages</h2>
+      <div class="card-grid cols-2" style="margin-bottom:20px">
+        <a class="doc-card" href="/docs/api/overview"><h4>API Overview</h4><p>Base URL, discovery table, CORS</p></a>
+        <a class="doc-card" href="/docs/builders"><h4>For Builders</h4><p>Integration paths — OpenAPI, AgentCash, pay.sh</p></a>
+        <a class="doc-card" href="/agent/discover"><h4>Discover UI</h4><p>Live x402 fan-out, MCP, agent card probes</p></a>
+        <a class="doc-card" href="/docs/integration/agent-card"><h4>Agent Card</h4><p>A2A registry and <code>agt_</code> identities</p></a>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/openapi.json" target="_blank" rel="noopener">OpenAPI JSON</a>
+        <a class="btn" href="/.well-known/api-catalog" target="_blank" rel="noopener">api-catalog</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

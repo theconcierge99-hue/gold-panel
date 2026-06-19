@@ -1,0 +1,21 @@
+{
+  "asyncapi": "2.6.0",
+  "info": {
+    "title": "Concierge Agent Events",
+    "version": "1.0.0",
+    "description": "Concierge is HTTP request/response today. This contract reserves channel names for future webhook subscriptions (signal published, verdict updates). Subscribe via OpenAPI + MCP until events ship.",
+    "x-guidance": "No webhook endpoints are live yet. Poll https://conc-exe.xyz/api/concierge-intel-accuracy or use MCP tools."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "production": {
+      "url": "https://conc-exe.xyz",
+      "protocol": "https",
+      "description": "HTTP API (active)"
+    }
+  },
+  "channels": {},
+  "components": {
+    "messages": {}
+  }
+}

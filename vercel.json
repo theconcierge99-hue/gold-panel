@@ -19,6 +19,20 @@
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
+    },
+    {
+      "source": "/.well-known/api-catalog",
+      "headers": [
+        { "key": "Content-Type", "value": "application/linkset+json" },
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
+    },
+    {
+      "source": "/asyncapi.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=600" }
+      ]
     }
   ],
   "redirects": [
@@ -188,6 +202,10 @@
     {
       "source": "/docs/api/agent-identity",
       "destination": "/docs-agent-identity.html"
+    },
+    {
+      "source": "/docs/api/agent-readiness",
+      "destination": "/docs-agent-readiness.html"
     },
     {
       "source": "/docs/api/lounge",

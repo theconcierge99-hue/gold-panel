@@ -14,6 +14,7 @@
 - [pay.sh](https://conc-exe.xyz/docs/payment/paysh): pay CLI catalog — sandbox curl, Claude/Codex MCP, pay-skills listing.
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
+- [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Twelve-dimension audit posture, verify commands, discovery index.
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default) or GLM-4.7 Flash chat, enhance, image.
 - [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields, macro, wire, whales, wallet, verdict, alpha desks.
@@ -31,4 +32,6 @@
 
 - [openapi.json](https://conc-exe.xyz/openapi.json)
 - [/.well-known/x402](https://conc-exe.xyz/.well-known/x402)
+- [/.well-known/api-catalog](https://conc-exe.xyz/.well-known/api-catalog): RFC 9727 linkset — OpenAPI, MCP, x402, agent card
+- [asyncapi.json](https://conc-exe.xyz/asyncapi.json): Event contract stub (HTTP-only today)
 - [/.well-known/agent-card.json](https://conc-exe.xyz/.well-known/agent-card.json)

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Machine-readable AI usage preferences (Cloudflare Content Signals pattern)
+Content-signal: search=yes,ai-input=yes,ai-train=no
+
+Sitemap: https://conc-exe.xyz/sitemap.xml

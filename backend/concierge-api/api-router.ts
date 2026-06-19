@@ -2,6 +2,7 @@
  * Dispatched from api/[...path].ts (root shim → backend/api). Handlers live in
  * backend/concierge-api/ so Vercel does not register each file as its own function.
  */
+import { mergeAgentReadinessHeaders, siteOriginFromRequest } from "./agent-readiness";
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
@@ -35,6 +36,25 @@ import handleZauthDirectory from "./routes/zauth-directory";
 import handleZauthStatus from "./routes/zauth-status";
 
 type RouteHandler = (request: Request) => Promise<Response>;
+
+function withAgentReadinessHeaders(response: Response, request: Request): Response {
+  const origin = siteOriginFromRequest(request);
+  const merged = mergeAgentReadinessHeaders({}, origin);
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(merged)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+async function dispatchHandler(request: Request, handler: RouteHandler): Promise<Response> {
+  const response = await handler(request);
+  return withAgentReadinessHeaders(response, request);
+}
 
 const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/agent-identity": handleAgentIdentity,
@@ -74,16 +94,17 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
 
   const intelKind = resolveIntelKindFromRequest(request);
   if (intelKind) {
-    return handleConciergeIntelRoute(request, intelKind);
+    return dispatchHandler(request, (req) => handleConciergeIntelRoute(req, intelKind));
   }
 
   const handler = EXACT_ROUTES[pathname];
-  if (handler) return handler(request);
+  if (handler) return dispatchHandler(request, handler);
 
-  return Promise.resolve(
-    new Response(JSON.stringify({ error: "Not found" }), {
+  return withAgentReadinessHeaders(
+    new Response(JSON.stringify({ error: "Not found", code: "not_found" }), {
       status: 404,
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     }),
+    request,
   );
 }

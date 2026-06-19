@@ -25,15 +25,24 @@ import {
   MPPSCAN_REGISTER_URL,
   openApiQueryParameters,
   openApiRequestSchema,
+  openApiRequestExample,
   openApiResponseExample,
   openApiResponseSchema,
 } from "./mpp-discovery";
 
-export { buildBazaarExtension };
+export { buildBazaarExtension, buildApiCatalogLinkset, buildAsyncApiDocument };
 import { corbitsDiscoveryLinks } from "./corbits-links";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { grokDiscoveryLinks } from "./grok-links";
 import { payshDiscoveryLinks } from "./paysh-links";
+import {
+  openApiAgentHeadersParameter,
+  openApiComponents,
+  openApiIdempotencyParameter,
+  openApiStandardErrorResponses,
+  buildApiCatalogLinkset,
+  buildAsyncApiDocument,
+} from "./agent-readiness";
 import { getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { zauthMetaLinks } from "./zauth";
 
@@ -283,6 +292,7 @@ function openApiOperation(
   const url = `${origin.replace(/\/$/, "")}${resource.path}`;
   const kind = resource.kind;
   const opSuffix = method === "get" ? "_get" : "";
+  const standardErrors = openApiStandardErrorResponses();
   const op: Record<string, unknown> = {
     operationId: `${resource.kind.replace(/-/g, "_")}${opSuffix}`,
     summary:
@@ -295,7 +305,10 @@ function openApiOperation(
         : resource.description,
     "x-payment-info": buildXPaymentInfo(resource.priceUsd, kind),
     tags: resource.tags,
+    parameters: [openApiAgentHeadersParameter()],
+    security: [{ x402Payment: [] }],
     responses: {
+      ...standardErrors,
       "200": {
         description: "Success after payment",
         content: {
@@ -312,16 +325,19 @@ function openApiOperation(
             description: "Base64 JSON x402 payment requirements (MPP-compatible)",
             schema: { type: "string" },
           },
+          "X-RateLimit-Limit": {
+            description: "Soft rate limit per IP per minute",
+            schema: { type: "integer", example: 120 },
+          },
         },
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                error: { type: "string" },
-                priceUsdc: { type: "number" },
-                resource: { type: "string" },
-              },
+            schema: { $ref: "#/components/schemas/ApiError" },
+            example: {
+              error: "Payment required",
+              code: "payment_required",
+              priceUsdc: Number(resource.priceUsd),
+              resource: kind,
             },
           },
         },
@@ -331,16 +347,18 @@ function openApiOperation(
   };
 
   if (method === "post") {
+    op.parameters = [...(op.parameters as Record<string, unknown>[]), openApiIdempotencyParameter()];
     op.requestBody = {
       required: kind !== "intel-tvl",
       content: {
         "application/json": {
           schema: openApiRequestSchema(kind),
+          example: openApiRequestExample(kind),
         },
       },
     };
   } else if (isIntelKindWithGetProbe(kind)) {
-    op.parameters = openApiQueryParameters(kind);
+    op.parameters = [...(op.parameters as Record<string, unknown>[]), ...openApiQueryParameters(kind)];
   }
 
   return op;
@@ -410,6 +428,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       { name: "creator", description: "Creator signals & RWA" },
       { name: "rwa", description: "Real World Asset intelligence certificates" },
     ],
+    components: openApiComponents(),
   };
 }
 

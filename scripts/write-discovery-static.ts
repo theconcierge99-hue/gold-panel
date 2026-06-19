@@ -7,6 +7,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildLoungeServiceCard } from "../backend/concierge-api/agent-identity-card.ts";
 import {
+  buildApiCatalogLinkset,
+  buildAsyncApiDocument,
   buildOpenApiDocument,
   buildWellKnownX402Document,
 } from "../backend/concierge-api/x402-discovery.ts";
@@ -37,7 +39,32 @@ writeFileSync(
   "utf8",
 );
 
+const apiCatalog = buildApiCatalogLinkset(origin);
+writeFileSync(
+  join(wellKnownDir, "api-catalog"),
+  `${JSON.stringify(apiCatalog, null, 2)}\n`,
+  "utf8",
+);
+
+const asyncApi = buildAsyncApiDocument(origin);
+writeFileSync(join(publicDir, "asyncapi.json"), `${JSON.stringify(asyncApi, null, 2)}\n`, "utf8");
+
+writeFileSync(
+  join(publicDir, "robots.txt"),
+  [
+    "User-agent: *",
+    "Allow: /",
+    "",
+    "# Machine-readable AI usage preferences (Cloudflare Content Signals pattern)",
+    "Content-signal: search=yes,ai-input=yes,ai-train=no",
+    "",
+    `Sitemap: ${origin}/sitemap.xml`,
+    "",
+  ].join("\n"),
+  "utf8",
+);
+
 const pathCount = Object.keys(openapi.paths as object).length;
 console.log(
-  `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources)`,
+  `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources, api-catalog + asyncapi + robots.txt)`,
 );

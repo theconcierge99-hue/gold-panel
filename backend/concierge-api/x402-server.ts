@@ -505,6 +505,7 @@ export async function buildPaymentRequiredResponse(
   return new Response(
     JSON.stringify({
       error: clientMessage,
+      code: "payment_required",
       detail: error,
       priceUsdc: usdcPrice,
       priceLabel: `${priceLabelForResource(kind)}${tokenLabel}`,

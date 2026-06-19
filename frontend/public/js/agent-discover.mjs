@@ -105,8 +105,24 @@ async function load() {
     );
 
     cards.push(
-        `<p>Machine-readable spec with x-payment-info for integrators.</p>
-        ${discLink("/openapi.json", `${origin}/openapi.json`)}`,
+      discCard(
+        "OpenAPI",
+        `<p>Machine-readable spec with x-payment-info, ApiError schema, and request examples.</p>
+        ${discLink("/openapi.json", `${origin}/openapi.json`)}
+        ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness — audit guide`)}`,
+      ),
+    );
+
+    cards.push(
+      discCard(
+        "Agent readiness",
+        `<p>RFC 9727 catalog, rate-limit headers, idempotency — observable signals for autonomous agents.</p>
+        <div class="res-disc-links">
+          ${discLink("/.well-known/api-catalog", `${origin}/.well-known/api-catalog`)}
+          ${discLink("/asyncapi.json", `${origin}/asyncapi.json`)}
+          ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness`)}
+        </div>
+        <p class="res-disc-hint"><code>npm run agent-readiness:audit</code> (repo)</p>`,
       ),
     );
 

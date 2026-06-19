@@ -12,7 +12,6 @@ import { handleSignalPublish } from "./concierge-api/signal-publish-handler";
 import handleAgentIdentity from "./concierge-api/routes/agent-identity";
 import handleAgentIdentityCard from "./concierge-api/routes/agent-identity-card";
 import handleWellKnownAgentCard from "./concierge-api/routes/well-known-agent-card";
-import { handleConciergeIntelRoute } from "./concierge-api/concierge-intel-handler";
 import { dispatchApiRoute } from "./concierge-api/api-router";
 
 const jsonHeaders = {
@@ -117,19 +116,6 @@ export function conciergeDevPlugin(): Plugin {
           "/api/signal-open": handleSignalOpen,
           "/api/agent-identity": handleAgentIdentity,
           "/api/agent-identity-card": handleAgentIdentityCard,
-          "/api/concierge-intel-tvl": (r) => handleConciergeIntelRoute(r, "intel-tvl"),
-          "/api/concierge-intel-yields": (r) => handleConciergeIntelRoute(r, "intel-yields"),
-          "/api/concierge-intel-whales": (r) => handleConciergeIntelRoute(r, "intel-whales"),
-          "/api/concierge-intel-wallet": (r) => handleConciergeIntelRoute(r, "intel-wallet"),
-          "/api/concierge-intel-verdict": (r) => handleConciergeIntelRoute(r, "intel-verdict"),
-          "/api/concierge-intel-airdrop": (r) => handleConciergeIntelRoute(r, "intel-airdrop"),
-          "/api/concierge-intel-listing": (r) => handleConciergeIntelRoute(r, "intel-listing"),
-          "/api/concierge-intel-momentum": (r) => handleConciergeIntelRoute(r, "intel-momentum"),
-          "/api/concierge-intel-scalp": (r) => handleConciergeIntelRoute(r, "intel-scalp"),
-          "/api/concierge-intel-macro": (r) => handleConciergeIntelRoute(r, "intel-macro"),
-          "/api/concierge-intel-wire": (r) => handleConciergeIntelRoute(r, "intel-wire"),
-          "/api/concierge-intel-meteora": (r) => handleConciergeIntelRoute(r, "intel-meteora"),
-          "/api/concierge-intel-desk-brief": (r) => handleConciergeIntelRoute(r, "intel-desk-brief"),
         };
         if (url && signalRoutes[url]) {
           const chunks: Buffer[] = [];

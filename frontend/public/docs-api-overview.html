@@ -32,6 +32,7 @@
         <a class="doc-card" href="/docs/api/intel"><h4>Intel APIs</h4><p>macro, wire, DeFi desks, alpha — structured JSON</p></a>
         <a class="doc-card" href="/docs/builders"><h4>For Builders</h4><p>Integrate x402, OpenAPI, AgentCash — fifteen routes</p></a>
         <a class="doc-card" href="/docs/api/agent-identity"><h4>Agent Identity</h4><p>agt_ registry, agent cards, well-known</p></a>
+        <a class="doc-card" href="/docs/api/agent-readiness"><h4>Agent Readiness</h4><p>Audit dimensions, api-catalog, MCP, verify commands</p></a>
         <a class="doc-card" href="/docs/api/lounge"><h4>Lounge</h4><p>Market feed, signals, RWA, news unlock</p></a>
       </div>
 
@@ -45,9 +46,12 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'</code></
         <table>
           <thead><tr><th>Resource</th><th>Description</th></tr></thead>
           <tbody>
-            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 — <code>x-payment-info</code> (x402 + mpp), input/output schemas, <code>info.x-guidance</code></td></tr>
+            <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 — <code>x-payment-info</code> (x402 + mpp), input/output schemas, <code>info.x-guidance</code>, <code>components.schemas.ApiError</code></td></tr>
+            <tr><td><code>GET /.well-known/api-catalog</code></td><td>RFC 9727 linkset — canonical agent index (<a href="/docs/api/agent-readiness" class="gold-link">agent readiness</a>)</td></tr>
             <tr><td><code>GET /.well-known/x402</code></td><td>Paid route fan-out · MPPscan / x402scan links</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Agent registry (<code>agt_…</code>) and Concierge services</td></tr>
+            <tr><td><code>GET /asyncapi.json</code></td><td>AsyncAPI stub — event contract placeholder</td></tr>
+            <tr><td><code>GET /api/mcp</code></td><td>MCP HTTP transport — <code>tools/list</code>, <code>tools/call</code></td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Networks, <code>discovery.protocols</code>, pricing (no secrets)</td></tr>
             <tr><td><code>GET /api/token-pay</code></td><td>Token Pay merchant registry — beta partner onboarding</td></tr>
             <tr><td><code>402</code> + Bazaar</td><td>Runtime input/output schemas for AgentCash probes</td></tr>

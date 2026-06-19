@@ -48,6 +48,9 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
   "OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery",
   "pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence",
+  "Idempotency: optional Idempotency-Key header on POST mutating routes. Reuse the same PAYMENT-SIGNATURE after a successful x402 settlement — facilitators will not double-charge the same on-chain payment.",
+  "Rate limits: soft limit 120 requests/minute per IP on /api/* — responses include X-RateLimit-Limit; 429 returns Retry-After.",
+  "Discovery index: GET /.well-known/api-catalog (RFC 9727 linkset) · GET /llms.txt · GET /.well-known/agent-card.json",
 ].join(" ");
 
 function jsonSchemaBody(
@@ -623,6 +626,10 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
 
 export function openApiRequestSchema(kind: X402ResourceKind): Record<string, unknown> {
   return REQUEST_SCHEMAS[kind];
+}
+
+export function openApiRequestExample(kind: X402ResourceKind): Record<string, unknown> {
+  return REQUEST_BODY_EXAMPLES[kind];
 }
 
 export function openApiResponseSchema(kind: X402ResourceKind): Record<string, unknown> {

@@ -38,6 +38,7 @@
       { id: "api-concierge", href: "/docs/api/concierge", title: "Concierge Chat" },
       { id: "api-intel", href: "/docs/api/intel", title: "Intel APIs" },
       { id: "api-agent-identity", href: "/docs/api/agent-identity", title: "Agent Identity" },
+      { id: "api-agent-readiness", href: "/docs/api/agent-readiness", title: "Agent Readiness" },
       { id: "api-lounge", href: "/docs/api/lounge", title: "Lounge & Signals" },
     ]},
     { label: "Concierge Agent", items: [
