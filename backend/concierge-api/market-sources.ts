@@ -8,6 +8,7 @@ export type NewsHeadline = {
   published?: string;
   url?: string;
   summary?: string;
+  category?: string;
 };
 
 export type GlobalCryptoContext = {
