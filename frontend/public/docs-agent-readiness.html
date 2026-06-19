@@ -85,7 +85,7 @@ npm run agent-readiness:local
 # Related discovery checks
 npm run discovery:validate
 curl -s https://conc-exe.xyz/.well-known/api-catalog | jq '.linkset | length'
-curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | findstr /i ratelimit</code></pre>
+curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | grep -i ratelimit</code></pre>
         <p class="note">Clone <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">api-evangelist/agent-readiness</a> for the rubric. Concierge audit script: <code>scripts/audit-agent-readiness.mjs</code>.</p>
       </div>
 
@@ -95,9 +95,9 @@ curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | findstr /i ratel
         <table>
           <thead><tr><th>Channel</th><th>Status</th><th>Command / path</th></tr></thead>
           <tbody>
-            <tr><td>MCP Registry</td><td>Ready to publish</td><td><code>npm run mcp-registry:validate</code> · see <code>mcp-registry/PUBLISH.md</code></td></tr>
-            <tr><td>thebuyside <code>pay.discover</code></td><td>PR bundle ready</td><td><code>npm run distribution:thebuyside-pr</code></td></tr>
-            <tr><td>pay.sh / pay-skills</td><td>Bundle in repo</td><td><code>npm run distribution:paysh-pr</code></td></tr>
+            <tr><td>MCP Registry</td><td>Ready to publish</td><td><code>npm run mcp-registry:validate</code> — validate <code>server.json</code> · see <code>mcp-registry/PUBLISH.md</code></td></tr>
+            <tr><td>thebuyside <code>pay.discover</code></td><td>PR bundle ready</td><td><code>npm run distribution:thebuyside-pr</code> — prepare thebuyside seed PR</td></tr>
+            <tr><td>pay.sh / pay-skills</td><td>Bundle in repo</td><td><code>npm run distribution:paysh-pr</code> — prepare pay-skills provider PR</td></tr>
             <tr><td>Agent Skill (SKILL.md)</td><td>Published</td><td><code>skills/concierge-intel/SKILL.md</code> on GitHub</td></tr>
             <tr><td>CI quality gate</td><td>GitHub Actions</td><td><code>.github/workflows/discovery-quality.yml</code></td></tr>
           </tbody>
