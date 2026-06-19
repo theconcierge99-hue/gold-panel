@@ -24,8 +24,11 @@ function solPayToFromEnv(): string | null {
   return normalizeSolPayTo(cleanEnvAddress(raw) || undefined);
 }
 
-function defaultMerchantId(): string {
-  return (process.env.TOKEN_PAY_DEFAULT_MERCHANT ?? SOON_MERCHANT_ID).trim() || SOON_MERCHANT_ID;
+function resolveDefaultMerchantId(merchants: Map<string, TokenPayMerchant>): string {
+  const raw = (process.env.TOKEN_PAY_DEFAULT_MERCHANT ?? SOON_MERCHANT_ID).trim();
+  const withoutComment = raw.split("#")[0]?.trim() ?? "";
+  const id = withoutComment || SOON_MERCHANT_ID;
+  return merchants.has(id) ? id : SOON_MERCHANT_ID;
 }
 
 export type JsonMerchantRow = {
@@ -192,7 +195,7 @@ function loadRegistry(): { merchants: Map<string, TokenPayMerchant>; defaultId: 
     map.set(m.id, m);
   }
 
-  const defaultId = defaultMerchantId();
+  const defaultId = resolveDefaultMerchantId(map);
   return { merchants: map, defaultId };
 }
 
