@@ -9,6 +9,8 @@ export function renderAgentSiteFooter(containerId = "agent-site-footer") {
         <nav class="agent-foot-links" aria-label="Site links">
           <a class="agent-foot-link" href="/integrations">Integrations</a>
           <span class="agent-foot-dot" aria-hidden="true">·</span>
+          <a class="agent-foot-link" href="/agent/skills">Skills</a>
+          <span class="agent-foot-dot" aria-hidden="true">·</span>
           <a class="agent-foot-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
         </nav>
         <span class="agent-foot-divider" aria-hidden="true"></span>
@@ -56,6 +58,7 @@ export function renderAgentTopNav(activeId) {
     { id: "endpoints", href: "/agent/endpoints", label: "Endpoints" },
     { id: "playground", href: "/agent/playground", label: "Playground" },
     { id: "discover", href: "/agent/discover", label: "Discover" },
+    { id: "skills", href: "/agent/skills", label: "Skills" },
     { id: "token-pay", href: "/agent/token-pay", label: "Token Pay (Beta)" },
     { id: "identity", href: "/agent/identity", label: "Identity" },
     { id: "lounge", href: "/lounge", label: "Lounge" },

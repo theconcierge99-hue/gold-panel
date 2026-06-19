@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>Agent Skills — Concierge Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent Skills for Claude, Cursor, Grok, and MCP — pay-per-call intel via x402 without API keys." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/agent/skills" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/agent-playground.css" />
+<link rel="stylesheet" href="/css/agent-resources.css" />
+</head>
+<body class="res-page" data-agent-page="skills">
+<div class="pg-shell res-shell">
+  <header class="pg-topnav" id="agent-topnav"></header>
+  <main class="res-main">
+    <div class="res-term-line" aria-hidden="true">
+      <span class="res-prompt">$</span><span class="res-cmd">concierge --skills</span><span class="res-cursor">▌</span>
+    </div>
+    <div class="res-chips" id="skill-chips">
+      <span><strong>Agent Skills</strong></span>
+      <span class="dot">·</span><span>Cursor / Claude</span>
+      <span class="dot">·</span><span>MCP Registry</span>
+      <span class="dot">·</span><span>x402 probes</span>
+    </div>
+
+    <header class="res-hero">
+      <h1>Agent Skills</h1>
+      <p class="res-lead">Portable skill files for agent runtimes — discovery, pricing, and pay.sh probes for Concierge intel routes. Raw markdown for tools at <code>/skills/concierge-intel/SKILL.md</code>.</p>
+    </header>
+
+    <div class="res-disc-grid" id="skills-catalog"></div>
+
+    <article class="res-skill-view" id="skill-view" hidden>
+      <div class="res-skill-view-head">
+        <h2 id="skill-view-title">concierge-intel</h2>
+        <div class="res-skill-view-actions">
+          <a class="res-skill-raw" id="skill-raw-link" href="/skills/concierge-intel/SKILL.md" target="_blank" rel="noopener">Raw SKILL.md ↗</a>
+          <button type="button" class="res-skill-back" id="skill-back">← All skills</button>
+        </div>
+      </div>
+      <div class="skill-md" id="skill-md"></div>
+    </article>
+
+    <aside class="res-integrate">
+      <div class="res-integrate-eyebrow">Connect</div>
+      <h3>MCP Registry + pay.sh</h3>
+      <p>Listed as <code>xyz.conc-exe/concierge-intel</code> v1.0.1 on the official MCP Registry. Use <code>pay --sandbox curl</code> for x402 probes.</p>
+      <div class="res-integrate-actions">
+        <a class="primary" href="/docs/integration/mcp-registry">MCP guide →</a>
+        <a href="/agent/discover">Discover</a>
+        <a href="/docs/payment/paysh">pay.sh</a>
+        <a href="/agent/playground">Playground</a>
+      </div>
+    </aside>
+  </main>
+</div>
+<script type="module" src="/js/agent-skills.mjs"></script>
+</body>
+</html>

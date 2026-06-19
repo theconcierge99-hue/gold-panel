@@ -162,6 +162,50 @@ body.res-page{
 .res-disc-skeleton .bar.wide{max-width:100%;opacity:.6}
 @keyframes res-pulse{50%{opacity:.45}}
 
+.res-skill-card .res-skill-open{
+  margin-top:12px;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;
+  color:var(--pg-bg);background:var(--pg-accent);border:none;border-radius:4px;cursor:pointer;
+}
+.res-skill-card .res-skill-open:hover{filter:brightness(1.08)}
+.res-skill-tag{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:10px;color:var(--pg-muted);
+  border:1px solid var(--pg-panel-border);padding:2px 8px;border-radius:999px;margin-right:6px;
+}
+.res-skill-view{
+  margin-bottom:28px;padding:20px 22px;border:1px solid var(--pg-panel-border);
+  background:var(--pg-panel);border-radius:8px;
+}
+.res-skill-view-head{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--pg-panel-border);
+}
+.res-skill-view-head h2{font-size:20px;font-weight:600;margin:0}
+.res-skill-view-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.res-skill-raw{font-family:'DM Mono',monospace;font-size:11px;color:var(--pg-accent);text-decoration:none}
+.res-skill-back{
+  font-family:'Outfit',sans-serif;font-size:12px;color:var(--pg-muted);background:transparent;
+  border:1px solid var(--pg-panel-border);padding:6px 12px;border-radius:4px;cursor:pointer;
+}
+.skill-md{font-size:14px;line-height:1.65;color:var(--pg-text-secondary)}
+.skill-md h1,.skill-md h2,.skill-md h3{margin:1.2em 0 .5em;font-weight:600;color:var(--pg-text)}
+.skill-md h1{font-size:1.35em}.skill-md h2{font-size:1.15em}.skill-md h3{font-size:1.05em}
+.skill-md p{margin:.65em 0;color:var(--pg-muted)}
+.skill-md ul{margin:.5em 0 .75em 1.2em;color:var(--pg-muted)}
+.skill-md li{margin:.25em 0}
+.skill-md code{
+  font-family:'DM Mono',monospace;font-size:.9em;color:var(--pg-accent);
+  background:var(--pg-term-bg);padding:1px 6px;border-radius:3px;
+}
+.skill-md a{color:var(--pg-accent)}
+.skill-md table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.skill-md th,.skill-md td{border:1px solid var(--pg-panel-border);padding:8px 10px;text-align:left}
+.skill-md th{background:var(--pg-term-bg);color:var(--pg-text);font-weight:500}
+.skill-code{
+  font-family:'DM Mono',monospace;font-size:11px;background:var(--pg-term-bg);
+  border:1px solid var(--pg-panel-border);padding:14px;margin:12px 0;overflow:auto;
+  border-radius:4px;color:var(--pg-muted);white-space:pre-wrap;
+}
+
 @media(max-width:640px){
   .res-main{padding:20px 16px 48px}
   .res-ep-head{flex-direction:column;gap:4px}

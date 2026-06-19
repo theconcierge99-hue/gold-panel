@@ -130,6 +130,17 @@ async function load() {
 
     cards.push(
       discCard(
+        "Agent Skills",
+        `<p>Portable <code>SKILL.md</code> for Cursor, Claude, and Grok — x402 probes, pricing tiers, MCP connect.</p>
+        <div class="res-disc-links">
+          ${discLink("/agent/skills", `${origin}/agent/skills`)}
+          ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
+        </div>`,
+      ),
+    );
+
+    cards.push(
+      discCard(
         "MCP Registry",
         `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.1. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
         <div class="res-disc-links">

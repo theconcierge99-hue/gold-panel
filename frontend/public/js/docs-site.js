@@ -46,6 +46,7 @@
       { id: "agent-endpoints", href: "/agent/endpoints", title: "Endpoints" },
       { id: "agent-playground", href: "/agent/playground", title: "Playground" },
       { id: "agent-discover", href: "/agent/discover", title: "Discover" },
+      { id: "agent-skills", href: "/agent/skills", title: "Agent Skills" },
     ]},
     { label: "Product", items: [
       { id: "playground", href: "/docs/playground", title: "Executive Lounge" },
