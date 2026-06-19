@@ -1,0 +1,54 @@
+name: Discovery quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  agent-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate static discovery artifacts
+        run: npx tsx scripts/write-discovery-static.ts
+        env:
+          X402_SITE_ORIGIN: https://conc-exe.xyz
+
+      - name: Agent-readiness audit (local OpenAPI + static)
+        run: node scripts/audit-agent-readiness.mjs --local
+
+      - name: Validate MCP Registry server.json
+        run: npm run mcp-registry:validate
+
+  discovery-live:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: AgentCash discovery validate (production)
+        run: npm run discovery:validate
+
+      - name: Agent-readiness audit (live probes)
+        run: npm run agent-readiness:audit
+        env:
+          API_ORIGIN: https://conc-exe.xyz

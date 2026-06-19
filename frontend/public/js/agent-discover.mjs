@@ -128,6 +128,27 @@ async function load() {
 
     cards.push(
       discCard(
+        "MCP Registry",
+        `<p>Official registry manifest in-repo — publish with <code>mcp-publisher</code> (domain auth required).</p>
+        <div class="res-disc-links">
+          ${discLink("https://github.com/theconcierge99-hue/gold-panel/blob/main/mcp-registry/server.json", "server.json")}
+          ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
+        </div>
+        <p class="res-disc-hint"><code>npm run mcp-registry:validate</code></p>`,
+      ),
+    );
+
+    cards.push(
+      discCard(
+        "thebuyside seed",
+        `<p>Federated <code>pay.discover</code> — PR bundle for six verified intel routes.</p>
+        ${discLink("https://github.com/theconcierge99-hue/gold-panel/tree/main/distribution/thebuyside", "distribution/thebuyside")}
+        <p class="res-disc-hint"><code>npm run distribution:thebuyside-pr</code></p>`,
+      ),
+    );
+
+    cards.push(
+      discCard(
         "Trust directory",
         `<p>Query verified x402 endpoints before paying third-party APIs.</p>
         <div class="res-disc-links">

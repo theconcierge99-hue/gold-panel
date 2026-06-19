@@ -89,6 +89,21 @@ curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | findstr /i ratel
         <p class="note">Clone <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">api-evangelist/agent-readiness</a> for the rubric. Concierge audit script: <code>scripts/audit-agent-readiness.mjs</code>.</p>
       </div>
 
+      <h2 class="docs-h2">Distribution (phase 2)</h2>
+      <div class="card">
+        <p>Ship metadata in-repo; publish to external registries with the commands below.</p>
+        <table>
+          <thead><tr><th>Channel</th><th>Status</th><th>Command / path</th></tr></thead>
+          <tbody>
+            <tr><td>MCP Registry</td><td>Ready to publish</td><td><code>npm run mcp-registry:validate</code> · see <code>mcp-registry/PUBLISH.md</code></td></tr>
+            <tr><td>thebuyside <code>pay.discover</code></td><td>PR bundle ready</td><td><code>npm run distribution:thebuyside-pr</code></td></tr>
+            <tr><td>pay.sh / pay-skills</td><td>Bundle in repo</td><td><code>npm run distribution:paysh-pr</code></td></tr>
+            <tr><td>Agent Skill (SKILL.md)</td><td>Published</td><td><code>skills/concierge-intel/SKILL.md</code> on GitHub</td></tr>
+            <tr><td>CI quality gate</td><td>GitHub Actions</td><td><code>.github/workflows/discovery-quality.yml</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <h2 class="docs-h2">Related pages</h2>
       <div class="card-grid cols-2" style="margin-bottom:20px">
         <a class="doc-card" href="/docs/api/overview"><h4>API Overview</h4><p>Base URL, discovery table, CORS</p></a>
