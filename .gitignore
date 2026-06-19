@@ -51,5 +51,8 @@ service-account*.json
 frontend/public/openapi.json
 frontend/public/.well-known/
 
-# MCP Registry signing keys (local/ro commit)
+# MCP Registry signing keys (local — do not commit)
 .secrets/
+
+# Official mcp-publisher CLI binary (download locally — see mcp-registry/PUBLISH.md)
+tools/
