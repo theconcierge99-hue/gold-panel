@@ -50,3 +50,6 @@ service-account*.json
 # Generated at build (scripts/write-discovery-static.ts) — do not commit
 frontend/public/openapi.json
 frontend/public/.well-known/
+
+# MCP Registry signing keys (local/ro commit)
+.secrets/

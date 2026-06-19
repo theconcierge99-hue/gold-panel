@@ -2,12 +2,14 @@
 
 Publish `xyz.conc-exe/concierge-intel` to the [official MCP Registry](https://registry.modelcontextprotocol.io/).
 
-**Live endpoint:** `https://conc-exe.xyz/api/mcp` (GET discovery · POST JSON-RPC `initialize` | `tools/list` | `tools/call`)
+**Live endpoint:** `https://conc-exe.xyz/api/mcp`  
+**Domain auth file:** `https://conc-exe.xyz/.well-known/mcp-registry-auth`
 
 ## Prerequisites
 
 - Domain control of **conc-exe.xyz** (HTTP namespace `xyz.conc-exe/*`)
 - [mcp-publisher](https://www.npmjs.com/package/mcp-publisher) CLI
+- Ed25519 private key in Vercel env `MCP_REGISTRY_PRIVATE_KEY_HEX` (64 hex chars)
 
 ## Validate locally
 
@@ -15,26 +17,49 @@ Publish `xyz.conc-exe/concierge-intel` to the [official MCP Registry](https://re
 npm run mcp-registry:validate
 ```
 
-## Publish (one-time setup + each release)
+## One-time domain setup (~15 min)
 
-### 1. Install CLI
+### 1. Generate keypair (local only — never commit `.secrets/`)
+
+```bash
+npm run mcp-registry:generate-key
+```
+
+This writes:
+
+- `.secrets/mcp-registry-key.pem` — local backup
+- `.secrets/mcp-registry-key.hex` — copy value into Vercel
+
+### 2. Deploy with env var
+
+In Vercel → **Settings → Environment Variables**:
+
+| Name | Value |
+|------|--------|
+| `MCP_REGISTRY_PRIVATE_KEY_HEX` | 64-char hex from `.secrets/mcp-registry-key.hex` |
+
+Redeploy. Build runs `scripts/generate-mcp-registry-auth.mjs` and emits `/.well-known/mcp-registry-auth`.
+
+Verify:
+
+```bash
+curl -s https://conc-exe.xyz/.well-known/mcp-registry-auth
+# v=MCPv1; k=ed25519; p=...
+```
+
+### 3. Install publisher CLI
 
 ```bash
 npm install -g mcp-publisher
 ```
 
-### 2. Authenticate domain
-
-Generate an Ed25519 keypair (save the hex private key securely):
+### 4. Login (HTTP domain verification)
 
 ```bash
-# Example — use openssl or mcp-publisher docs for keygen
 mcp-publisher login http --domain=conc-exe.xyz --private-key=YOUR_64_CHAR_HEX_PRIVATE_KEY
 ```
 
-Follow CLI instructions to serve the verification token at the URL it specifies on `conc-exe.xyz`.
-
-### 3. Publish
+### 5. Publish
 
 From repo root:
 

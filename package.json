@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node scripts/write-deploy-version.mjs && npx tsx scripts/write-discovery-static.ts && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
+    "build": "node scripts/write-deploy-version.mjs && npx tsx scripts/write-discovery-static.ts && node scripts/generate-mcp-registry-auth.mjs && vite build && node scripts/build-x402-client.mjs && node scripts/build-privy-bridge.mjs && node scripts/build-agent-identity.mjs && node scripts/build-mint-signal.mjs",
     "build:privy": "node scripts/build-privy-bridge.mjs",
     "build:x402": "node scripts/build-x402-client.mjs",
     "build:agent-identity": "node scripts/build-agent-identity.mjs",
@@ -17,6 +17,7 @@
     "agent-readiness:audit": "node scripts/audit-agent-readiness.mjs",
     "agent-readiness:local": "npx tsx scripts/write-discovery-static.ts && node scripts/audit-agent-readiness.mjs --local",
     "mcp-registry:validate": "node scripts/validate-mcp-registry.mjs",
+    "mcp-registry:generate-key": "node scripts/generate-mcp-registry-auth.mjs --generate",
     "distribution:thebuyside-pr": "node scripts/prepare-thebuyside-pr.mjs",
     "distribution:paysh-pr": "node scripts/prepare-paysh-pr.mjs",
     "launch:verify": "node scripts/verify-launch-readiness.mjs",
