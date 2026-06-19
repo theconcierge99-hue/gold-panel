@@ -127,12 +127,12 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   return { text: text.trim(), images };
 }
 
-const GEMINI_CALL_MS = 24_000;
-const GEMINI_TRADING_MS = 22_000;
-/** Wall-clock budget for Gemini on trading-plan path (Node handler allows up to 60s). */
-const GEMINI_TRADING_BUDGET_MS = 28_000;
+const GEMINI_CALL_MS = 18_000;
+const GEMINI_TRADING_MS = 18_000;
+/** Wall-clock budget for Gemini on trading-plan path (fits Vercel Edge ~30s incl. x402 + intel). */
+const GEMINI_TRADING_BUDGET_MS = 20_000;
 
-const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
@@ -280,7 +280,7 @@ async function resolveIntelligenceContext(
   };
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
-  const marketTimeout = tradingPlan ? 4_500 : deFiYieldQuestion ? 5_000 : 6_500;
+  const marketTimeout = tradingPlan ? 3_500 : deFiYieldQuestion ? 5_000 : 6_500;
   const generalTimeout = deFiYieldQuestion ? 2_000 : 4_000;
   const skipGeneral = tradingPlan || deFiYieldQuestion;
 
@@ -311,10 +311,10 @@ async function resolveIntelligenceContext(
     sources: [],
   };
   const wantsBtcAnchor =
-    tradingPlan ||
-    scalpDesk ||
-    topicsForIntel.includes("crypto") ||
-    /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage);
+    !tradingPlan &&
+    (scalpDesk ||
+      topicsForIntel.includes("crypto") ||
+      /\b(btc|bitcoin|eth|sol|crypto|trading plan|scalp)\b/i.test(queryMessage));
 
   const [snapshot, general, memoryItems, freshBtc] = await Promise.all([
     liveSnapshot

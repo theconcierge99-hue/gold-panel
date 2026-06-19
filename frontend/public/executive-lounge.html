@@ -2827,7 +2827,12 @@
       const text = await res.text();
       let data = {};
       try { data = JSON.parse(text); } catch { /* non-JSON */ }
-      if(!res.ok) throw new Error(data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status));
+      if(!res.ok){
+        const raw = data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status);
+        if(/FUNCTION_INVOCATION_FAILED/i.test(raw)||/FUNCTION_INVOCATION_FAILED/i.test(text))
+          throw new Error('Concierge is temporarily unavailable. Please try again shortly.');
+        throw new Error(raw);
+      }
       return data;
     }
     if(x402PaymentsLive(cfg)){
@@ -2848,7 +2853,12 @@
     const text = await res.text();
     let data = {};
     try { data = JSON.parse(text); } catch { /* non-JSON */ }
-    if (!res.ok) throw new Error(data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status));
+    if (!res.ok) {
+      const raw = data.detail||data.error||text.slice(0, 200)||('HTTP '+res.status);
+      if(/FUNCTION_INVOCATION_FAILED/i.test(raw)||/FUNCTION_INVOCATION_FAILED/i.test(text))
+        throw new Error('Concierge is temporarily unavailable. Please try again shortly.');
+      throw new Error(raw);
+    }
     return data;
   }
 
