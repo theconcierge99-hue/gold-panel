@@ -3,11 +3,7 @@
   "name": "xyz.conc-exe/concierge-intel",
   "title": "Concierge Intel",
   "description": "Pay-per-call DeFi and macro intel for AI agents. x402 USDC tools via streamable HTTP /api/mcp.",
-  "version": "1.0.0",
-  "repository": {
-    "url": "https://github.com/theconcierge99-hue/gold-panel",
-    "source": "github"
-  },
+  "version": "1.0.1",
   "websiteUrl": "https://conc-exe.xyz/docs/api/agent-readiness",
   "remotes": [
     {
@@ -23,7 +19,7 @@
         "apiCatalog": "https://conc-exe.xyz/.well-known/api-catalog",
         "payment": "x402-v2",
         "docs": "https://conc-exe.xyz/docs/api/agent-readiness",
-        "skill": "https://github.com/theconcierge99-hue/gold-panel/blob/main/skills/concierge-intel/SKILL.md"
+        "skill": "https://conc-exe.xyz/skills/concierge-intel/SKILL.md"
       }
     }
   }

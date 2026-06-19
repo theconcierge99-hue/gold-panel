@@ -14,7 +14,7 @@
 - [pay.sh](https://conc-exe.xyz/docs/payment/paysh): pay CLI catalog — sandbox curl, Claude/Codex MCP, pay-skills listing.
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
-- [Agent Skill (SKILL.md)](https://github.com/theconcierge99-hue/gold-panel/blob/main/skills/concierge-intel/SKILL.md): Agent Skills pattern for Claude/Cursor/Grok sessions
+- [Agent Skill (SKILL.md)](https://conc-exe.xyz/skills/concierge-intel/SKILL.md): Agent Skills pattern for Claude/Cursor/Grok sessions
 - [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Listed as xyz.conc-exe/concierge-intel v1.0.0 — streamable HTTP at /api/mcp
 - [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Audit posture, distribution phase 2, verify commands
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.

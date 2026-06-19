@@ -2,7 +2,7 @@
  * Emit openapi.json and /.well-known/x402* as static files for Vercel.
  * Rewrites to Edge handlers 404 for dotted / .well-known paths; x402scan needs these URLs.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildLoungeServiceCard } from "../backend/concierge-api/agent-identity-card.ts";
@@ -64,7 +64,12 @@ writeFileSync(
   "utf8",
 );
 
+const skillSrc = join(__dirname, "..", "skills", "concierge-intel", "SKILL.md");
+const skillOutDir = join(publicDir, "skills", "concierge-intel");
+mkdirSync(skillOutDir, { recursive: true });
+copyFileSync(skillSrc, join(skillOutDir, "SKILL.md"));
+
 const pathCount = Object.keys(openapi.paths as object).length;
 console.log(
-  `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources, api-catalog + asyncapi + robots.txt)`,
+  `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources, api-catalog + asyncapi + robots.txt + skill)`,
 );

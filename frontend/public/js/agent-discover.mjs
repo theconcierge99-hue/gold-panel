@@ -133,7 +133,6 @@ async function load() {
         `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.0. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
         <div class="res-disc-links">
           ${discLink("https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel", "Official listing ↗")}
-          ${discLink("https://github.com/theconcierge99-hue/gold-panel/blob/main/mcp-registry/server.json", "server.json manifest")}
           ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
         </div>
         <p class="res-disc-hint"><code>npm run mcp-registry:validate</code> · republish: <code>mcp-registry/PUBLISH.md</code></p>`,
@@ -144,7 +143,7 @@ async function load() {
       discCard(
         "thebuyside seed",
         `<p>Federated <code>pay.discover</code> — PR bundle for six verified intel routes.</p>
-        ${discLink("https://github.com/theconcierge99-hue/gold-panel/tree/main/distribution/thebuyside", "distribution/thebuyside")}
+        ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
         <p class="res-disc-hint"><code>npm run distribution:thebuyside-pr</code></p>`,
       ),
     );

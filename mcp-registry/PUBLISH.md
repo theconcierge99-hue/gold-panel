@@ -93,6 +93,8 @@ From repo root:
 
 Bump `version` in `server.json` when tools or URLs change.
 
+**Private source repo:** omit `repository` from `server.json` — discovery links use `conc-exe.xyz` only (OpenAPI, skill, docs). Republish after manifest changes.
+
 ## Cursor / Claude Desktop (manual until indexed)
 
 ```json
