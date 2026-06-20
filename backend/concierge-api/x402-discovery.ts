@@ -39,6 +39,8 @@ import {
   openApiAgentHeadersParameter,
   openApiComponents,
   openApiIdempotencyParameter,
+  openApiIntelAccuracyPathItem,
+  openApiIntelAccuracySchemas,
   openApiStandardErrorResponses,
   buildApiCatalogLinkset,
   buildAsyncApiDocument,
@@ -380,10 +382,16 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
   for (const r of X402_DISCOVERY_RESOURCES) {
     paths[r.path] = openApiPathItem(r, base);
   }
+  paths["/api/concierge-intel-accuracy"] = openApiIntelAccuracyPathItem(base);
 
   const proofs = ownershipProofs();
   const listing = x402ServiceListingMeta(base);
   const facilitator = getX402FacilitatorProfile();
+  const components = openApiComponents();
+  const schemas = {
+    ...(components.schemas as Record<string, unknown>),
+    ...openApiIntelAccuracySchemas(),
+  };
 
   return {
     openapi: "3.1.0",
@@ -428,7 +436,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       { name: "creator", description: "Creator signals & RWA" },
       { name: "rwa", description: "Real World Asset intelligence certificates" },
     ],
-    components: openApiComponents(),
+    components: { ...components, schemas },
   };
 }
 

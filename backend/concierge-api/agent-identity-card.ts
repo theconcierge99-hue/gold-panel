@@ -15,6 +15,19 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     payment: "x402-v2",
     protocols: ["x402", "mpp"],
     networks: ["solana", "eip155:8453"],
+    discovery: {
+      x402: `${base}/.well-known/x402`,
+      openapi: `${base}/openapi.json`,
+      mcp: `${base}/api/mcp`,
+      intelAccuracy: `${base}/api/concierge-intel-accuracy`,
+      apiCatalog: `${base}/.well-known/api-catalog`,
+      caseStudy: `${base}/docs/builders/case-study`,
+    },
+    trust: {
+      intelAccuracyEndpoint: `${base}/api/concierge-intel-accuracy`,
+      description:
+        "Free public leaderboard scoring paid intel-verdict signals vs 24h BTC alignment — observable trust signal for procurement and agent routing.",
+    },
   };
 }
 

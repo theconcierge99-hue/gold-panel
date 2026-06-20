@@ -193,9 +193,16 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
           {
             href: "https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel",
             type: "text/html",
-            title: "Official MCP Registry listing (xyz.conc-exe/concierge-intel v1.0.0)",
+            title: "Official MCP Registry listing (xyz.conc-exe/concierge-intel v1.0.1)",
           },
         ],
+      },
+      {
+        anchor: `${base}/api/concierge-intel-accuracy`,
+        title: "Verdict accuracy leaderboard",
+        description: "Free trust signal — scored intel-verdict track record vs 24h BTC move",
+        "service-desc": [{ href: `${base}/openapi.json`, type: "application/json" }],
+        "service-doc": [{ href: `${base}/docs/builders/case-study`, type: "text/html" }],
       },
       {
         anchor: `${base}/.well-known/x402`,
@@ -237,6 +244,75 @@ export function buildAsyncApiDocument(origin: string): Record<string, unknown> {
     channels: {},
     components: {
       messages: {},
+    },
+  };
+}
+
+/** Free GET — documented in OpenAPI for agent trust / procurement probes. */
+export function openApiIntelAccuracyPathItem(origin: string): Record<string, unknown> {
+  const base = origin.replace(/\/$/, "");
+  return {
+    get: {
+      operationId: "getConciergeIntelAccuracy",
+      summary: "Verdict accuracy leaderboard (free)",
+      description:
+        "Public trust signal scoring paid intel-verdict snapshots against 24h BTC price move. " +
+        "No x402 payment required. Poll before routing agents to intel-verdict or for procurement due diligence.",
+      tags: ["intel"],
+      externalDocs: {
+        description: "B2B integration case study",
+        url: `${base}/docs/builders/case-study`,
+      },
+      responses: {
+        "200": {
+          description: "Accuracy leaderboard — evaluated counts, hit rate, recent snapshots",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IntelAccuracyResponse" },
+              example: {
+                ok: true,
+                dataAsOf: "2026-06-20T12:00:00.000Z",
+                methodology:
+                  "Each paid intel-verdict records BTC mark + signal. After 24h, hit if snipe/follow + BTC ≥+1%, avoid + BTC ≤−1%, watch/rebalance if |move| <2%.",
+                evaluated: { total: 12, hits: 8, misses: 4, inconclusive: 0, hitRatePct: 66.7 },
+                bySignal: {
+                  snipe: { total: 4, hits: 3, hitRatePct: 75 },
+                  watch: { total: 3, hits: 2, hitRatePct: 66.7 },
+                },
+                recent: [],
+              },
+            },
+          },
+        },
+        ...openApiStandardErrorResponses(),
+      },
+    },
+  };
+}
+
+export function openApiIntelAccuracySchemas(): Record<string, unknown> {
+  return {
+    IntelAccuracyResponse: {
+      type: "object",
+      additionalProperties: false,
+      required: ["ok", "dataAsOf", "methodology", "evaluated", "bySignal", "recent"],
+      properties: {
+        ok: { type: "boolean", const: true },
+        dataAsOf: { type: "string", format: "date-time" },
+        methodology: { type: "string" },
+        evaluated: {
+          type: "object",
+          properties: {
+            total: { type: "integer" },
+            hits: { type: "integer" },
+            misses: { type: "integer" },
+            inconclusive: { type: "integer" },
+            hitRatePct: { type: ["number", "null"] },
+          },
+        },
+        bySignal: { type: "object", additionalProperties: true },
+        recent: { type: "array", items: { type: "object", additionalProperties: true } },
+      },
     },
   };
 }

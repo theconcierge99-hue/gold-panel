@@ -9,6 +9,7 @@
     { label: "Start", items: [
       { id: "introduction", href: "/docs", title: "Welcome to Concierge" },
       { id: "builders", href: "/docs/builders", title: "For Builders" },
+      { id: "builders-case-study", href: "/docs/builders/case-study", title: "B2B Case Study" },
       { id: "quickstart", href: "/docs/quickstart", title: "Quickstart" },
       { id: "pricing", href: "/docs/pricing", title: "Pricing" },
       { id: "launch", href: "/docs/launch", title: "SOON Launch" },

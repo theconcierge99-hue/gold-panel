@@ -21,12 +21,12 @@
       <h1 class="docs-title">Agent readiness</h1>
       <p class="docs-lead">
         How safely an autonomous agent can discover, authenticate (via x402), call, and recover from errors on this API —
-        scored against the <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">agent-readiness</a> dimension model.
+        scored against the public agent-readiness dimension model (spec presence, auth clarity, idempotency, error semantics, and more).
       </p>
 
       <div class="card">
         <p><strong>Audience:</strong> Agent developers, marketplace integrators (Poncho, pay.sh, MPPscan), and procurement teams evaluating x402 APIs.</p>
-        <p><strong>Not marketing fluff:</strong> Each signal is observable from public URLs — OpenAPI, well-known discovery, response headers, and npm audit scripts in this repo.</p>
+        <p><strong>Not marketing fluff:</strong> Each signal is observable from public URLs — OpenAPI, well-known discovery, response headers, and live probes on <code>conc-exe.xyz</code>.</p>
       </div>
 
       <h2 class="docs-h2">What Concierge exposes</h2>
@@ -39,6 +39,7 @@
             <tr><td>x402 fan-out</td><td><code>GET /.well-known/x402</code></td><td>Paid route list + ownership proofs for x402scan / Bazaar</td></tr>
             <tr><td>Agent card</td><td><code>GET /.well-known/agent-card.json</code></td><td>ERC-8004-style A2A discovery</td></tr>
             <tr><td>MCP HTTP</td><td><code>GET /api/mcp</code></td><td>JSON-RPC <code>tools/list</code> · <code>tools/call</code> for intel routes</td></tr>
+            <tr><td>Verdict accuracy</td><td><code>GET /api/concierge-intel-accuracy</code></td><td>Free trust signal — 24h BTC alignment leaderboard · <a href="/docs/builders/case-study" class="gold-link">B2B case study</a></td></tr>
             <tr><td>Official MCP Registry</td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code></a></td><td>Published v1.0.1 — <a href="/docs/integration/mcp-registry" class="gold-link">integration guide</a></td></tr>
             <tr><td>AsyncAPI stub</td><td><code>GET /asyncapi.json</code></td><td>Event contract placeholder (HTTP-only today; webhooks reserved)</td></tr>
             <tr><td>LLM index</td><td><code>GET /llms.txt</code></td><td>Human + agent doc map</td></tr>
@@ -52,7 +53,7 @@
 
       <h2 class="docs-h2">Twelve audit dimensions</h2>
       <div class="card">
-        <p>Repo script <code>npm run agent-readiness:audit</code> scores 0–3 per dimension (mean across core + forward-looking):</p>
+        <p>Live audit via public probes — see <a href="#verify" class="gold-link">Verify</a> below. Dimensions scored 0–3 (spec presence, auth clarity, idempotency, and more):</p>
         <table>
           <thead><tr><th>Dimension</th><th>Concierge posture</th></tr></thead>
           <tbody>
@@ -68,39 +69,33 @@
             <tr><td>RFC 9727 api-catalog</td><td><code>/.well-known/api-catalog</code> linkset+json</td></tr>
             <tr><td>Consent signals</td><td><code>Content-signal</code> in <code>robots.txt</code></td></tr>
             <tr><td>Web Bot Auth</td><td><code>Signature-Agent</code> header → agent identity docs</td></tr>
+            <tr><td>Trust / accuracy</td><td><code>GET /api/concierge-intel-accuracy</code> in OpenAPI + agent card <code>trust</code> block</td></tr>
           </tbody>
         </table>
       </div>
 
-      <h2 class="docs-h2">Verify (integrators &amp; CI)</h2>
+      <h2 class="docs-h2" id="verify">Verify (integrators &amp; CI)</h2>
       <div class="card">
-<pre><code># Live production audit (all dimensions incl. headers + MCP)
-npm run agent-readiness:audit
-
-# JSON output for CI
-node scripts/audit-agent-readiness.mjs --json
-
-# Local — OpenAPI + static discovery files (no live probes)
-npm run agent-readiness:local
-
-# Related discovery checks
-npm run discovery:validate
+<pre><code># Live production probes (no API keys)
 curl -s https://conc-exe.xyz/.well-known/api-catalog | jq '.linkset | length'
-curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | grep -i ratelimit</code></pre>
-        <p class="note">Clone <a class="ext" href="https://github.com/api-evangelist/agent-readiness" target="_blank" rel="noopener">api-evangelist/agent-readiness</a> for the rubric. Concierge audit script: <code>scripts/audit-agent-readiness.mjs</code>.</p>
+curl -s https://conc-exe.xyz/api/concierge-intel-accuracy | jq '.evaluated'
+curl -s https://conc-exe.xyz/.well-known/agent-card.json | jq '.trust'
+curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | grep -i ratelimit
+curl -s https://conc-exe.xyz/openapi.json | jq '.paths["/api/concierge-intel-accuracy"]'</code></pre>
+        <p class="note">Use the <a href="/agent/discover" class="gold-link">Discover UI</a> for a live dashboard of x402, MCP, accuracy, and OpenAPI probes.</p>
       </div>
 
-      <h2 class="docs-h2">Distribution (phase 2)</h2>
+      <h2 class="docs-h2">Distribution</h2>
       <div class="card">
-        <p>Ship metadata in-repo; publish to external registries with the commands below.</p>
+        <p>Metadata ships from <code>conc-exe.xyz</code> — registries and catalogs link here, not to source repositories.</p>
         <table>
-          <thead><tr><th>Channel</th><th>Status</th><th>Command / path</th></tr></thead>
+          <thead><tr><th>Channel</th><th>Status</th><th>Public URL</th></tr></thead>
           <tbody>
             <tr><td>MCP Registry</td><td><span class="gold-link">Published</span></td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> v1.0.1</a> · <a href="/docs/integration/mcp-registry" class="gold-link">guide</a></td></tr>
-            <tr><td>thebuyside <code>pay.discover</code></td><td>PR open</td><td><a class="ext" href="https://github.com/jaysperspective/thebuyside-x402-agent/pull/2" target="_blank" rel="noopener">PR #2</a> · <code>npm run distribution:thebuyside-pr</code></td></tr>
-            <tr><td>pay.sh / pay-skills</td><td>Bundle in repo</td><td><code>npm run distribution:paysh-pr</code> — prepare pay-skills provider PR</td></tr>
-            <tr><td>Agent Skill (SKILL.md)</td><td>Published</td><td><a class="ext" href="/skills/concierge-intel/SKILL.md"><code>/skills/concierge-intel/SKILL.md</code></a></td></tr>
-            <tr><td>CI quality gate</td><td>GitHub Actions</td><td><code>.github/workflows/discovery-quality.yml</code></td></tr>
+            <tr><td>thebuyside <code>pay.discover</code></td><td>Pending merge</td><td>Six verified intel routes — see <a href="/docs/api/agent-readiness" class="gold-link">distribution notes</a></td></tr>
+            <tr><td>pay.sh catalog</td><td>Bundle live</td><td><a href="/docs/payment/paysh" class="gold-link">pay.sh guide</a> · FQN <code>conc-exe/concierge-agent</code></td></tr>
+            <tr><td>Agent Skill (SKILL.md)</td><td>Published</td><td><a href="/skills/concierge-intel/SKILL.md"><code>/skills/concierge-intel/SKILL.md</code></a></td></tr>
+            <tr><td>B2B case study</td><td>Published</td><td><a href="/docs/builders/case-study" class="gold-link">Procurement checklist + accuracy methodology</a></td></tr>
           </tbody>
         </table>
       </div>
@@ -109,6 +104,7 @@ curl -sI https://conc-exe.xyz/api/concierge-intel-tvl -X POST | grep -i ratelimi
       <div class="card-grid cols-2" style="margin-bottom:20px">
         <a class="doc-card" href="/docs/api/overview"><h4>API Overview</h4><p>Base URL, discovery table, CORS</p></a>
         <a class="doc-card" href="/docs/builders"><h4>For Builders</h4><p>Integration paths — OpenAPI, AgentCash, pay.sh</p></a>
+        <a class="doc-card" href="/docs/builders/case-study"><h4>B2B Case Study</h4><p>Procurement checklist, desk workflow, accuracy trust</p></a>
         <a class="doc-card" href="/agent/discover"><h4>Discover UI</h4><p>Live x402 fan-out, MCP, agent card probes</p></a>
         <a class="doc-card" href="/docs/integration/mcp-registry"><h4>MCP Registry</h4><p>Official listing — streamable HTTP at /api/mcp</p></a>
         <a class="doc-card" href="/docs/integration/agent-card"><h4>Agent Card</h4><p>A2A registry and <code>agt_</code> identities</p></a>

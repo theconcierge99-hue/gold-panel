@@ -45,11 +45,12 @@ async function load() {
   const c = countBySegment();
 
   try {
-    const [x402, config, agentCard, tokenPay] = await Promise.all([
+    const [x402, config, agentCard, tokenPay, accuracy] = await Promise.all([
       fetchJson("/.well-known/x402").catch(() => null),
       fetchJson("/api/x402-config").catch(() => null),
       fetchJson("/.well-known/agent-card.json").catch(() => null),
       fetchJson("/api/token-pay").catch(() => null),
+      fetchJson("/api/concierge-intel-accuracy").catch(() => null),
     ]);
 
     const cards = [];
@@ -88,19 +89,38 @@ async function load() {
         "Agent card",
         `<p>Register <code>agt_…</code> identities and discover how to call Concierge from other agents.</p>
         ${discLink("/.well-known/agent-card.json", `${origin}/.well-known/agent-card.json`)}
+        ${agentCard?.trust ? `<p class="res-disc-hint">Trust: <code>${escapeHtml(agentCard.trust.intelAccuracyEndpoint || "")}</code></p>` : ""}
         ${agentCard ? preHtml(JSON.stringify(agentCard, null, 2).slice(0, 2500)) : ""}`,
+      ),
+    );
+
+    const accuracyHint =
+      accuracy?.evaluated?.hitRatePct != null
+        ? `<p class="res-disc-hint">Evaluated: <strong>${accuracy.evaluated.total}</strong> · hit rate: <strong>${accuracy.evaluated.hitRatePct}%</strong> · as of ${escapeHtml(String(accuracy.dataAsOf || "").slice(0, 19))}</p>`
+        : `<p class="res-disc-hint">Track record builds as paid <code>intel-verdict</code> calls settle.</p>`;
+
+    cards.push(
+      discCard(
+        "Verdict accuracy",
+        `<p>Free trust signal — public leaderboard scoring desk verdicts vs 24h BTC alignment. Documented in OpenAPI and agent card <code>trust</code> block.</p>
+        <div class="res-disc-links">
+          ${discLink("/api/concierge-intel-accuracy", `${origin}/api/concierge-intel-accuracy`)}
+          ${discLink("/docs/builders/case-study", `${origin}/docs/builders/case-study — B2B case study`)}
+        </div>
+        ${accuracyHint}
+        ${accuracy ? preHtml(JSON.stringify(accuracy, null, 2).slice(0, 2500)) : ""}`,
       ),
     );
 
     cards.push(
       discCard(
-        "MCP & accuracy",
-        `<p>Free agent tools — MCP JSON-RPC and public verdict track record. Listed on the <strong>Official MCP Registry</strong> as <code>xyz.conc-exe/concierge-intel</code> v1.0.1.</p>
+        "MCP Registry",
+        `<p>Official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.1. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
         <div class="res-disc-links">
           ${discLink("/api/mcp", `${origin}/api/mcp`)}
           ${discLink("https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel", "registry.modelcontextprotocol.io — Concierge Intel")}
           ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
-          ${discLink("/api/concierge-intel-accuracy", `${origin}/api/concierge-intel-accuracy`)}
+          ${discLink("/docs/integration/mcp-registry", `${origin}/docs/integration/mcp-registry`)}
         </div>
         ${config?.pricingTiers ? `<p class="res-disc-hint">Tiers: raw $${config.pricingTiers.rawUsdc} · signal $${config.pricingTiers.signalUsdc} · bundle $${config.pricingTiers.bundleUsdc}</p>` : ""}`,
       ),
@@ -124,7 +144,7 @@ async function load() {
           ${discLink("/asyncapi.json", `${origin}/asyncapi.json`)}
           ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness`)}
         </div>
-        <p class="res-disc-hint"><code>npm run agent-readiness:audit</code> (repo)</p>`,
+        <p class="res-disc-hint">Live verify: <code>curl -s ${origin}/api/concierge-intel-accuracy | jq '.evaluated'</code></p>`,
       ),
     );
 
@@ -141,24 +161,21 @@ async function load() {
 
     cards.push(
       discCard(
-        "MCP Registry",
-        `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.1. Remote: streamable HTTP at <code>/api/mcp</code>.</p>
+        "MCP listing",
+        `<p><strong>Published</strong> on the official MCP Registry — <code>xyz.conc-exe/concierge-intel</code> v1.0.1.</p>
         <div class="res-disc-links">
           ${discLink("https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel", "Official listing ↗")}
           ${discLink("/docs/integration/mcp-registry", `${origin}/docs/integration/mcp-registry`)}
-          ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
-          ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
-        </div>
-        <p class="res-disc-hint"><code>npm run mcp-registry:validate</code> · republish: <code>mcp-registry/PUBLISH.md</code></p>`,
+        </div>`,
       ),
     );
 
     cards.push(
       discCard(
-        "thebuyside seed",
-        `<p>Federated <code>pay.discover</code> — PR bundle for six verified intel routes.</p>
-        ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness#distribution`)}
-        <p class="res-disc-hint"><code>npm run distribution:thebuyside-pr</code></p>`,
+        "Distribution",
+        `<p>External catalogs link to <code>conc-exe.xyz</code> — pay.sh, MPPscan, thebuyside <code>pay.discover</code>.</p>
+        ${discLink("/docs/api/agent-readiness", `${origin}/docs/api/agent-readiness — distribution status`)}
+        ${discLink("/docs/builders/case-study", `${origin}/docs/builders/case-study — B2B case study`)}`,
       ),
     );
 

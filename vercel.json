@@ -131,6 +131,10 @@
       "destination": "/docs-builders.html"
     },
     {
+      "source": "/docs/builders/case-study",
+      "destination": "/docs-builders-case-study.html"
+    },
+    {
       "source": "/docs/pricing",
       "destination": "/docs-pricing.html"
     },

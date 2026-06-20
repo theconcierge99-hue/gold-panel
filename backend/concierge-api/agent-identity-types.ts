@@ -57,4 +57,16 @@ export type LoungeAgentServiceCard = {
   payment: string;
   protocols: string[];
   networks: string[];
+  discovery: {
+    x402: string;
+    openapi: string;
+    mcp: string;
+    intelAccuracy: string;
+    apiCatalog: string;
+    caseStudy: string;
+  };
+  trust: {
+    intelAccuracyEndpoint: string;
+    description: string;
+  };
 };

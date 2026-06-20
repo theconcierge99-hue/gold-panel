@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>B2B Case Study — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="How teams integrate Concierge Agent market intelligence — x402 pay-per-call, observable trust via verdict accuracy, OpenAPI and MCP discovery, no API keys." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/builders/case-study" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="builders-case-study">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs/builders">← For Builders</a> · <a href="/agent/discover">Discover UI</a></div>
+      <div class="docs-eyebrow">Integrate</div>
+      <h1 class="docs-title">B2B integration case study</h1>
+      <p class="docs-lead">
+        How agent platforms, research desks, and fintech backends add market intelligence without API keys, monthly seats, or opaque vendor lock-in —
+        using <strong>x402 USDC</strong> settlement and a <strong>free accuracy leaderboard</strong> for procurement due diligence.
+      </p>
+
+      <div class="card">
+        <p><strong>Audience:</strong> Engineering leads, agent operators, and procurement evaluating pay-per-call intel APIs.</p>
+        <p><strong>Base URL:</strong> <code>https://conc-exe.xyz</code> · <strong>Contract:</strong> <a href="/openapi.json" class="gold-link">OpenAPI 3.1</a> · <strong>Trust signal:</strong> <a href="/api/concierge-intel-accuracy" class="gold-link"><code>GET /api/concierge-intel-accuracy</code></a></p>
+      </div>
+
+      <h2 class="docs-h2">Problem</h2>
+      <div class="card">
+        <ul style="margin:0 0 0 18px;font-size:14px;line-height:1.75;color:var(--text-secondary)">
+          <li>Traditional market-data APIs require API keys, monthly minimums, and opaque usage billing.</li>
+          <li>Autonomous agents need machine-readable discovery (OpenAPI, MCP) and predictable per-call pricing.</li>
+          <li>Procurement teams lack observable trust signals — no public track record for desk-style verdicts.</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Solution</h2>
+      <div class="card">
+        <p>Concierge ships <strong>seventeen HTTP routes</strong> — fifteen paid intel endpoints plus free discovery surfaces. Agents pay only for calls they make via x402 (Solana or Base USDC). No signup required for consumers.</p>
+        <table>
+          <thead><tr><th>Layer</th><th>What you get</th></tr></thead>
+          <tbody>
+            <tr><td>Structured intel</td><td>Macro, wire, DeFi desks, alpha signals — JSON per function (<a href="/docs/api/intel" class="gold-link">Intel APIs</a>)</td></tr>
+            <tr><td>Pay-per-call</td><td>Raw $0.02 · signal $0.10 · bundle $0.25 — see <a href="/docs/pricing" class="gold-link">Pricing</a></td></tr>
+            <tr><td>Discovery</td><td><code>GET /openapi.json</code>, <code>GET /.well-known/api-catalog</code>, <code>GET /api/mcp</code></td></tr>
+            <tr><td>Trust</td><td><code>GET /api/concierge-intel-accuracy</code> — free verdict track record vs 24h BTC</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Example workflow</h2>
+      <div class="card">
+        <p>A trading agent runs a morning desk brief before routing capital:</p>
+        <ol style="margin:0 0 0 18px;font-size:14px;line-height:1.75;color:var(--text-secondary)">
+          <li><strong>Macro context</strong> — <code>POST /api/concierge-intel-macro</code> ($0.02 raw tier)</li>
+          <li><strong>Wire headlines</strong> — <code>POST /api/concierge-intel-wire</code> ($0.02)</li>
+          <li><strong>Desk verdict</strong> — <code>POST /api/concierge-intel-verdict</code> ($0.10 signal tier)</li>
+          <li><strong>Trust check</strong> — <code>GET /api/concierge-intel-accuracy</code> (free) before escalating to human review</li>
+        </ol>
+<pre><code># Free trust probe (no payment)
+curl -s https://conc-exe.xyz/api/concierge-intel-accuracy | jq '.evaluated'
+
+# Paid intel via x402 client (402 → sign → retry)
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'</code></pre>
+        <p class="note">Use the <a href="/agent/playground" class="gold-link">Playground</a> to inspect 402 challenges before wiring production agents.</p>
+      </div>
+
+      <h2 class="docs-h2">Verdict accuracy methodology</h2>
+      <div class="card">
+        <p>Each settled <code>intel-verdict</code> call records the desk signal and BTC mark. After 24 hours, the system scores alignment:</p>
+        <table>
+          <thead><tr><th>Signal</th><th>Hit condition (24h BTC move)</th></tr></thead>
+          <tbody>
+            <tr><td><code>snipe</code> / <code>follow</code></td><td>BTC ≥ +1%</td></tr>
+            <tr><td><code>avoid</code></td><td>BTC ≤ −1%</td></tr>
+            <tr><td><code>watch</code> / <code>rebalance</code></td><td>|move| &lt; 2%</td></tr>
+          </tbody>
+        </table>
+        <p>The leaderboard exposes <code>evaluated.hitRatePct</code>, per-signal breakdowns, and recent snapshots. This is <strong>social proof for routing decisions</strong> — not financial advice or a performance guarantee.</p>
+        <p><a href="/api/concierge-intel-accuracy" class="gold-link">Live accuracy JSON →</a> · documented in <a href="/openapi.json" class="gold-link">OpenAPI</a> as <code>getConciergeIntelAccuracy</code></p>
+      </div>
+
+      <h2 class="docs-h2">Integration paths</h2>
+      <div class="card-grid cols-2" style="margin-bottom:20px">
+        <a class="doc-card" href="/openapi.json" target="_blank" rel="noopener"><h4>OpenAPI</h4><p>Build any HTTP client — x-payment-info, ApiError schema, examples on every operation.</p></a>
+        <a class="doc-card" href="/docs/integration/mcp-registry"><h4>MCP Registry</h4><p><code>xyz.conc-exe/concierge-intel</code> v1.0.1 — Cursor/Claude at <code>/api/mcp</code>.</p></a>
+        <a class="doc-card" href="/docs/payment/mpp"><h4>AgentCash</h4><p><code>npx agentcash add https://conc-exe.xyz</code> — install all skills into MPP agents.</p></a>
+        <a class="doc-card" href="/docs/payment/paysh"><h4>pay.sh</h4><p><code>pay curl</code> — sandbox wallet, handles 402 automatically.</p></a>
+      </div>
+
+      <h2 class="docs-h2">Procurement checklist</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Question</th><th>Verify at</th></tr></thead>
+          <tbody>
+            <tr><td>Is the API contract public?</td><td><code>GET /openapi.json</code></td></tr>
+            <tr><td>Are paid routes listed with prices?</td><td><code>GET /.well-known/x402</code></td></tr>
+            <tr><td>Is there a machine index?</td><td><code>GET /.well-known/api-catalog</code></td></tr>
+            <tr><td>Can we audit verdict track record?</td><td><code>GET /api/concierge-intel-accuracy</code></td></tr>
+            <tr><td>Rate limits documented?</td><td><code>X-RateLimit-Limit</code> headers · <a href="/docs/api/agent-readiness" class="gold-link">Agent readiness</a></td></tr>
+            <tr><td>MCP listed on official registry?</td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener">registry.modelcontextprotocol.io</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Agent card &amp; discovery</h2>
+      <div class="card">
+        <p>The platform agent card at <code>GET /.well-known/agent-card.json</code> now includes <code>discovery.intelAccuracy</code> and <code>trust</code> fields for A2A routing. Per-agent cards (<code>agt_…</code>) expose the same accuracy URL under <code>discovery.intelAccuracy</code>.</p>
+<pre><code>curl -s https://conc-exe.xyz/.well-known/agent-card.json | jq '.trust, .discovery'</code></pre>
+        <p><a href="/agent/discover" class="gold-link">Discover UI</a> loads live accuracy stats alongside x402, MCP, and OpenAPI probes.</p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/agent/playground">Try Playground</a>
+        <a class="btn" href="/docs/builders">For Builders</a>
+        <a class="btn" href="/api/concierge-intel-accuracy" target="_blank" rel="noopener">Accuracy JSON</a>
+        <a class="btn" href="/docs/api/agent-readiness">Agent Readiness</a>
+      </div>
+      <p class="docs-foot">Concierge · Executive Lounge · Not financial advice</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

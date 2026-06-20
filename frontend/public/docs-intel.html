@@ -243,6 +243,9 @@
     <h2>Verdict accuracy</h2>
     <div class="card">
       <p><code>GET /api/concierge-intel-accuracy</code> — <strong>free</strong>. Public leaderboard scoring paid <code>intel-verdict</code> calls vs 24h BTC move. Track record builds as verdicts are paid.</p>
+      <p>Documented in OpenAPI as <code>getConciergeIntelAccuracy</code>. Platform agent card exposes <code>trust.intelAccuracyEndpoint</code> and <code>discovery.intelAccuracy</code>.</p>
+      <p><a href="/docs/builders/case-study" class="gold-link">B2B case study — methodology &amp; procurement checklist →</a></p>
+<pre><code>curl -s https://conc-exe.xyz/api/concierge-intel-accuracy | jq '.evaluated, .bySignal'</code></pre>
     </div>
   </section>
 

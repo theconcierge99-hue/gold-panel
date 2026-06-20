@@ -33,17 +33,18 @@
       <h2 class="docs-h2">What the card includes</h2>
       <div class="card">
         <ul>
-          <li>Service name, description, and icon for Concierge Agent</li>
-          <li>Links to <code>/openapi.json</code> and paid endpoint catalog</li>
-          <li>x402 payment capability — USDC on Base and Solana</li>
-          <li>Fifteen pay-per-call intelligence routes</li>
+          <li>Platform registry schema <code>concierge-agent-registry-v1</code> — register endpoint, docs, payment protocol</li>
+          <li><code>discovery</code> — links to x402, OpenAPI, MCP, accuracy leaderboard, api-catalog, and <a href="/docs/builders/case-study" class="gold-link">B2B case study</a></li>
+          <li><code>trust</code> — <code>intelAccuracyEndpoint</code> and description for procurement / agent routing</li>
+          <li>Per-agent cards (<code>agt_…</code>) add paid service endpoints and <code>discovery.intelAccuracy</code></li>
         </ul>
-        <p>Handler: <code>lib/concierge-api/routes/well-known-agent-card.ts</code></p>
       </div>
 
       <h2 class="docs-h2">Verify integration</h2>
       <div class="card">
-<pre><code>curl -s https://conc-exe.xyz/.well-known/agent-card.json | jq .
+<pre><code>curl -s https://conc-exe.xyz/.well-known/agent-card.json | jq '.discovery, .trust'
+
+curl -s https://conc-exe.xyz/api/concierge-intel-accuracy | jq '.evaluated'
 
 curl -s https://conc-exe.xyz/api/agent-identity-card?id=agt_demo | jq .</code></pre>
       </div>
