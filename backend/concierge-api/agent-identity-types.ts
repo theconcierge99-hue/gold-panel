@@ -41,6 +41,7 @@ export type AgentCardJson = {
     docs: string;
     mcp?: string;
     intelAccuracy?: string;
+    a2aMesh?: string;
     paysh?: string;
     payshGuide?: string;
     grokBuild?: string;
@@ -63,6 +64,7 @@ export type LoungeAgentServiceCard = {
     mcp: string;
     intelAccuracy: string;
     apiCatalog: string;
+    a2aMesh: string;
     caseStudy: string;
   };
   trust: {
