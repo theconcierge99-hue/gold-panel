@@ -174,6 +174,18 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { message: "morning Solana desk brief", includeInsider: true },
   },
   {
+    id: "intel-a2a-pipeline",
+    segment: "research",
+    method: "POST",
+    path: "/api/concierge-intel-a2a-pipeline",
+    name: "Intel — A2A pipeline",
+    description:
+      "Agent-to-agent orchestration — desk brief + machine-readable A2A handoff + delegate routing for downstream agents.",
+    priceUsd: "0.25",
+    tier: "bundle",
+    sampleBody: { message: "Solana desk orchestration", includeInsider: true },
+  },
+  {
     id: "news-open",
     segment: "lounge",
     method: "POST",
@@ -226,6 +238,13 @@ export const CONCIERGE_FREE_ROUTES = [
     path: "/api/mcp",
     name: "MCP discovery",
     description: "JSON-RPC tools/list and tools/call for agent integrations.",
+  },
+  {
+    id: "agent-a2a-mesh",
+    method: "GET",
+    path: "/api/agent-a2a-mesh",
+    name: "A2A mesh discovery",
+    description: "Free peer agents, pipeline templates, and orchestration guidance.",
   },
 ];
 

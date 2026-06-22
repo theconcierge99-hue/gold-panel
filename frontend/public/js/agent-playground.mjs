@@ -24,7 +24,9 @@ const footOrigin = document.getElementById("pg-foot-origin");
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",
+  research: "Research",
   intel: "DeFi Intel",
+  alpha: "Alpha Intel",
   lounge: "Lounge",
 };
 
@@ -73,10 +75,12 @@ function selectEndpoint(ep) {
 }
 
 function renderPickList() {
-  const bySeg = { concierge: [], intel: [], lounge: [] };
-  for (const ep of CONCIERGE_AGENT_ENDPOINTS) bySeg[ep.segment].push(ep);
+  const bySeg = { concierge: [], research: [], intel: [], alpha: [], lounge: [] };
+  for (const ep of CONCIERGE_AGENT_ENDPOINTS) {
+    if (bySeg[ep.segment]) bySeg[ep.segment].push(ep);
+  }
 
-  pickList.innerHTML = ["concierge", "intel", "lounge"]
+  pickList.innerHTML = ["concierge", "research", "intel", "alpha", "lounge"]
     .filter((seg) => bySeg[seg].length)
     .map(
       (seg) => `
