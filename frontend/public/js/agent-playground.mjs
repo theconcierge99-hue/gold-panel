@@ -19,6 +19,7 @@ const placeholderEl = document.getElementById("pg-placeholder");
 const termTitleEl = document.getElementById("pg-term-title");
 const entryCountEl = document.getElementById("pg-entry-count");
 const execBtn = document.getElementById("play-exec");
+const copyCurlBtn = document.getElementById("play-copy-curl");
 const clearBtn = document.getElementById("play-clear");
 const footOrigin = document.getElementById("pg-foot-origin");
 
@@ -114,18 +115,69 @@ function renderPickList() {
   selectEndpoint(fromQ || CONCIERGE_AGENT_ENDPOINTS[0]);
 }
 
-async function execute() {
-  let body;
+function parseBodyJson() {
   try {
-    body = bodyEl.value.trim() ? JSON.parse(bodyEl.value) : {};
+    return bodyEl.value.trim() ? JSON.parse(bodyEl.value) : {};
   } catch {
+    return null;
+  }
+}
+
+/** PowerShell-safe one-liner — curl.exe with single-quoted JSON (-d). */
+function buildCurlCommand(ep, body) {
+  const url = endpointUrl(ep.path);
+  const json = JSON.stringify(body);
+  return `curl.exe -X ${ep.method} "${url}" -H "Content-Type: application/json" -d '${json}'`;
+}
+
+function buildPayCurlCommand(ep, body) {
+  const url = endpointUrl(ep.path);
+  const json = JSON.stringify(body);
+  return `pay curl ${url} -d '${json}'`;
+}
+
+async function copyCurlCommand() {
+  const body = parseBodyJson();
+  if (body === null) {
+    log("✗ Invalid JSON body — fix before copying curl", "err");
+    return;
+  }
+
+  const cmd = buildCurlCommand(selected, body);
+  const payCmd = buildPayCurlCommand(selected, body);
+  const text = `${cmd}\r\n\r\n# With pay.sh (WSL / macOS / Linux):\r\n${payCmd}`;
+
+  try {
+    await navigator.clipboard.writeText(cmd);
+    if (copyCurlBtn) {
+      const prev = copyCurlBtn.textContent;
+      copyCurlBtn.textContent = "Copied!";
+      copyCurlBtn.classList.add("is-copied");
+      setTimeout(() => {
+        copyCurlBtn.textContent = prev;
+        copyCurlBtn.classList.remove("is-copied");
+      }, 1800);
+    }
+    log("Copied PowerShell curl.exe one-liner to clipboard.", "ok");
+    log(cmd, "dim");
+    log("");
+    log("pay.sh (WSL):", "dim");
+    log(payCmd, "dim");
+  } catch {
+    log("Clipboard blocked — copy manually:", "warn");
+    log(cmd, "dim");
+  }
+}
+
+async function execute() {
+  const body = parseBodyJson();
+  if (body === null) {
     log("✗ Invalid JSON body", "err");
     return;
   }
 
-  log(`$ curl -X ${selected.method} '${endpointUrl(selected.path)}' \\`, "dim");
-  log(`    -H 'Content-Type: application/json' \\`, "dim");
-  log(`    -d '${JSON.stringify(body).slice(0, 120)}${JSON.stringify(body).length > 120 ? "…" : ""}'`, "dim");
+  const curlPreview = buildCurlCommand(selected, body);
+  log(`$ ${curlPreview}`, "dim");
   log("");
   log("→ Probing without PAYMENT-SIGNATURE…", "warn");
 
@@ -176,6 +228,7 @@ function clearLog() {
 }
 
 execBtn.addEventListener("click", execute);
+copyCurlBtn?.addEventListener("click", copyCurlCommand);
 clearBtn.addEventListener("click", clearLog);
 updateEntryCount();
 renderPickList();

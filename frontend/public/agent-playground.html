@@ -44,9 +44,14 @@
           <span class="pg-detail-label">Resolved URL</span>
           <span class="pg-detail-val pg-mono pg-url" id="play-url"></span>
         </div>
-        <button type="button" class="pg-exec-btn" id="play-exec">
-          Execute <span id="play-method">POST</span> request
-        </button>
+        <div class="pg-action-row">
+          <button type="button" class="pg-exec-btn" id="play-exec">
+            Execute <span id="play-method">POST</span> request
+          </button>
+          <button type="button" class="pg-copy-btn" id="play-copy-curl" title="Copy PowerShell-safe curl.exe one-liner">
+            Copy curl
+          </button>
+        </div>
       </section>
     </aside>
 
