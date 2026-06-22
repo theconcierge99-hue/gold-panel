@@ -21,6 +21,7 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
       mcp: `${base}/api/mcp`,
       intelAccuracy: `${base}/api/concierge-intel-accuracy`,
       apiCatalog: `${base}/.well-known/api-catalog`,
+      a2aMesh: `${base}/api/agent-a2a-mesh`,
       caseStudy: `${base}/docs/builders/case-study`,
     },
     trust: {
@@ -75,6 +76,13 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
         priceUsdc: priceUsdcForResource("intel-desk-brief"),
       },
       {
+        name: "intel-a2a-pipeline",
+        endpoint: `${base}/api/concierge-intel-a2a-pipeline`,
+        method: "POST",
+        payment: "x402",
+        priceUsdc: priceUsdcForResource("intel-a2a-pipeline"),
+      },
+      {
         name: "intel-yields",
         endpoint: `${base}/api/concierge-intel-yields`,
         method: "POST",
@@ -115,6 +123,7 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
       openapi: `${base}/openapi.json`,
       mcp: `${base}/api/mcp`,
       intelAccuracy: `${base}/api/concierge-intel-accuracy`,
+      a2aMesh: `${base}/api/agent-a2a-mesh`,
       docs: `${base}/docs/agents`,
       paysh: "https://pay.sh/",
       payshGuide: `${base}/docs/payment/paysh`,

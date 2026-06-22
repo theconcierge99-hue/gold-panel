@@ -31,6 +31,7 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
   "intel-verdict": { message: "Solana DeFi outlook", includeInsider: true },
   "intel-meteora": { sortByApy: true, limit: 8 },
   "intel-desk-brief": { message: "morning desk brief", includeInsider: true },
+  "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
   "intel-scalp": { symbols: ["BTC", "SOL"], intervals: ["5m", "15m"] },
 };
 

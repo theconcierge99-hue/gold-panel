@@ -2,6 +2,8 @@
  * Shared x402 handlers for Concierge DeFi intelligence endpoints (integrators).
  */
 import { runAlphaIntel } from "./concierge-alpha-intel";
+import { siteOriginFromRequest } from "./agent-readiness";
+import { runA2aPipelineIntel } from "./concierge-a2a-pipeline";
 import { runDeskBriefIntel } from "./concierge-desk-brief";
 import { runMeteoraIntel } from "./concierge-meteora-intel";
 import { runMacroIntel, runWireIntel } from "./concierge-research-intel";
@@ -50,6 +52,7 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-wire": "/api/concierge-intel-wire",
   "intel-meteora": "/api/concierge-intel-meteora",
   "intel-desk-brief": "/api/concierge-intel-desk-brief",
+  "intel-a2a-pipeline": "/api/concierge-intel-a2a-pipeline",
 };
 
 const INTEL_KINDS = Object.keys(INTEL_ROUTE_PATH) as X402IntelKind[];
@@ -284,7 +287,10 @@ export async function handleConciergeIntelRoute(
 
     const raw = await readBodyWithLimit(request);
     const body = validateIntelRequest(raw);
-    const payload = await runIntel(kind, body);
+    const payload =
+      kind === "intel-a2a-pipeline"
+        ? await runA2aPipelineIntel(body, siteOriginFromRequest(request))
+        : await runIntel(kind, body);
 
     const extraHeaders: Record<string, string> = {};
     if (payGate.paymentResponseHeader) {

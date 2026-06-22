@@ -231,6 +231,13 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     [],
   ),
+  "intel-a2a-pipeline": jsonSchemaBody(
+    {
+      message: { type: "string", description: "Desk / orchestration context for downstream agents" },
+      includeInsider: { type: "boolean", description: "Include Lounge creator signals in verdict" },
+    },
+    [],
+  ),
 };
 
 const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -508,6 +515,20 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "brief"],
   ),
+  "intel-a2a-pipeline": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      a2a: {
+        type: "object",
+        properties: {
+          handoff: { type: "string", description: "Machine-readable A2A| line" },
+          delegate: { type: "array", items: { type: "object" } },
+          mesh: { type: "string", format: "uri" },
+        },
+      },
+    },
+    ["ok", "a2a"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -543,6 +564,7 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-wire": { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
   "intel-meteora": { sortByApy: true, limit: 8, poolHint: "SOL" },
   "intel-desk-brief": { message: "morning Solana desk brief", includeInsider: true },
+  "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -621,6 +643,23 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
   "intel-desk-brief": {
     ok: true,
     brief: { headline: "Constructive risk-on with Solana yield rotation", signal: "watch", confidence: "medium" },
+  },
+  "intel-a2a-pipeline": {
+    ok: true,
+    a2a: {
+      schema: "concierge-a2a-v1",
+      handoff: "A2A|asset=BTC|class=crypto|tf=24h|bias=neutral|conviction=M|signal=watch|regime=mixed|src=concierge",
+      delegate: [
+        {
+          action: "call",
+          target: "concierge",
+          endpoint: "https://conc-exe.xyz/api/concierge-intel-wire",
+          priceUsdc: 0.02,
+          reason: "Neutral desk — scan wire headlines for near-term catalysts",
+        },
+      ],
+      mesh: "https://conc-exe.xyz/api/agent-a2a-mesh",
+    },
   },
 };
 

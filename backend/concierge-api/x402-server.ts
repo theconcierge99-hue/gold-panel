@@ -139,6 +139,13 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "research", "bundle"],
   },
+  "intel-a2a-pipeline": {
+    name: "Concierge Intel — A2A pipeline",
+    description:
+      "Agent-to-agent orchestration — desk brief + machine-readable A2A handoff + delegate routing to peer agents",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "research", "a2a", "bundle"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -228,6 +235,8 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-meteora";
     case "intel-desk-brief":
       return "/api/concierge-intel-desk-brief";
+    case "intel-a2a-pipeline":
+      return "/api/concierge-intel-a2a-pipeline";
     default:
       return `/api/${kind}`;
   }

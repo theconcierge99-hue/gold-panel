@@ -292,6 +292,12 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
         ],
       },
       {
+        anchor: `${base}/api/agent-a2a-mesh`,
+        title: "A2A agent mesh",
+        description: "Free discovery — registered peer agents, pipeline templates, and orchestration guidance",
+        "service-desc": [{ href: `${base}/openapi.json`, type: "application/json" }],
+      },
+      {
         anchor: `${base}/api/concierge-intel-accuracy`,
         title: "Verdict accuracy leaderboard",
         description: "Free trust signal — scored intel-verdict track record vs 24h BTC move",

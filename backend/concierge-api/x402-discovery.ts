@@ -215,6 +215,16 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.25",
     tags: [...X402_OPERATION_TAGS["intel-desk-brief"]],
   },
+  {
+    kind: "intel-a2a-pipeline",
+    method: "POST",
+    path: "/api/concierge-intel-a2a-pipeline",
+    name: "Concierge Intel — A2A pipeline",
+    description:
+      "Agent-to-agent orchestration — desk brief plus machine-readable A2A handoff and delegate routing to peer agents.",
+    priceUsd: "0.25",
+    tags: [...X402_OPERATION_TAGS["intel-a2a-pipeline"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */

@@ -10,6 +10,7 @@ import {
   type RateLimitState,
 } from "./agent-readiness";
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
+import handleAgentA2aMesh from "./routes/agent-a2a-mesh";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
 import handleConcierge from "./routes/concierge";
@@ -71,6 +72,7 @@ async function dispatchHandler(
 }
 
 const EXACT_ROUTES: Record<string, RouteHandler> = {
+  "/api/agent-a2a-mesh": handleAgentA2aMesh,
   "/api/agent-identity": handleAgentIdentity,
   "/api/agent-identity-card": handleAgentIdentityCard,
   "/api/concierge": handleConcierge,

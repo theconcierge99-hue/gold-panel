@@ -15,7 +15,8 @@ export type X402IntelKind =
   | "intel-macro"
   | "intel-wire"
   | "intel-meteora"
-  | "intel-desk-brief";
+  | "intel-desk-brief"
+  | "intel-a2a-pipeline";
 
 export type X402ResourceKind = X402CoreKind | X402IntelKind;
 
@@ -57,14 +58,14 @@ export function usdcToAtomic(usdc: number): string {
 
 export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
-  if (kind === "intel-desk-brief") return X402_BUNDLE_PRICE_ATOMIC;
+  if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
   if (isRawIntelKind(kind)) return X402_RAW_PRICE_ATOMIC;
   return X402_SIGNAL_PRICE_ATOMIC;
 }
 
 export function priceUsdcForResource(kind: X402ResourceKind): number {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
-  if (kind === "intel-desk-brief") return X402_BUNDLE_PRICE_USDC;
+  if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_USDC;
   if (isRawIntelKind(kind)) return X402_RAW_PRICE_USDC;
   return X402_SIGNAL_PRICE_USDC;
 }
@@ -96,4 +97,5 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "intel-wire",
   "intel-meteora",
   "intel-desk-brief",
+  "intel-a2a-pipeline",
 ] as const;
