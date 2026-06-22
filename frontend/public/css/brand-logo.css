@@ -4,18 +4,18 @@
 html,html[data-theme="dark"]{
   --el-logo-gold:#c9a84c;
   --el-logo-gold-bright:#e8c968;
-  --el-logo-ring:rgba(232,200,104,.85);
-  --el-logo-glow:rgba(201,168,76,.5);
-  --el-logo-glow-soft:rgba(201,168,76,.28);
-  --el-logo-bg:radial-gradient(circle at 38% 32%,#243048 0%,#121a2a 52%,#060810 100%);
+  --el-logo-ring:rgba(201,168,76,.55);
+  --el-logo-glow:rgba(201,168,76,.42);
+  --el-logo-glow-soft:rgba(201,168,76,.22);
+  --el-logo-bg:transparent;
 }
 html[data-theme="light"]{
   --el-logo-gold:#9a7b2e;
   --el-logo-gold-bright:#c9a84c;
-  --el-logo-ring:rgba(154,123,46,.75);
-  --el-logo-glow:rgba(201,168,76,.38);
-  --el-logo-glow-soft:rgba(154,123,46,.18);
-  --el-logo-bg:radial-gradient(circle at 38% 32%,#fff 0%,#f6f2ea 50%,#ebe6dc 100%);
+  --el-logo-ring:rgba(154,123,46,.5);
+  --el-logo-glow:rgba(201,168,76,.32);
+  --el-logo-glow-soft:rgba(154,123,46,.14);
+  --el-logo-bg:transparent;
 }
 
 .el-logo,
@@ -28,15 +28,15 @@ html[data-theme="light"]{
 .logo-row img{
   display:block;flex-shrink:0;
   border-radius:50%;
-  object-fit:contain;
+  object-fit:cover;
   background:var(--el-logo-bg);
-  border:2px solid var(--el-logo-ring);
+  border:1.5px solid var(--el-logo-ring);
   box-shadow:
-    0 0 0 1px rgba(201,168,76,.35),
-    0 0 24px var(--el-logo-glow),
-    0 0 44px var(--el-logo-glow-soft),
-    0 4px 16px rgba(0,0,0,.4);
-  filter:brightness(1.14) contrast(1.08) saturate(1.1);
+    0 0 0 1px rgba(201,168,76,.2),
+    0 0 20px var(--el-logo-glow),
+    0 0 36px var(--el-logo-glow-soft),
+    0 4px 14px rgba(0,0,0,.35);
+  filter:brightness(1.04) contrast(1.04) saturate(1.06);
 }
 
 /* Header — Executive Lounge */

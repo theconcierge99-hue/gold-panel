@@ -58,7 +58,10 @@ export function initConciergeLogoParticles(canvas) {
         const g = data[i + 1];
         const b = data[i + 2];
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        if (a < 50 || lum < 38) continue;
+        if (a < 50 || lum < 42) continue;
+        const neutralBg =
+          Math.abs(r - g) < 22 && Math.abs(g - b) < 22 && lum < 110;
+        if (neutralBg) continue;
         const goldish = r > 120 && g > 85 && b < 170;
         const tx = x - size / 2;
         const ty = y - size / 2;
