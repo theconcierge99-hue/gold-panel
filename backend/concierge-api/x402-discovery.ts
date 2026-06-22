@@ -331,6 +331,14 @@ function openApiOperation(
             description: "Soft rate limit per IP per minute",
             schema: { type: "integer", example: 120 },
           },
+          "X-RateLimit-Remaining": {
+            description: "Requests remaining in the current window",
+            schema: { type: "integer", example: 119 },
+          },
+          "Retry-After": {
+            description: "Seconds until the rate-limit window resets (also sent on 429)",
+            schema: { type: "integer", example: 60 },
+          },
         },
         content: {
           "application/json": {
@@ -361,6 +369,17 @@ function openApiOperation(
     };
   } else if (isIntelKindWithGetProbe(kind)) {
     op.parameters = [...(op.parameters as Record<string, unknown>[]), ...openApiQueryParameters(kind)];
+    op.requestBody = {
+      required: false,
+      description:
+        "GET probes omit a body and return 402. Example documents the POST JSON payload to send after x402 settlement.",
+      content: {
+        "application/json": {
+          schema: openApiRequestSchema(kind),
+          example: openApiRequestExample(kind),
+        },
+      },
+    };
   }
 
   return op;

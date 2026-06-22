@@ -274,7 +274,8 @@ function scoreOpenApiExamples(openapi) {
   let score = 0;
   if (withOpId === ops.length) score = 1;
   if (withResponseEx >= ops.length * 0.8) score = Math.max(score, 2);
-  if (withResponseEx === ops.length && withRequestEx >= ops.length * 0.5) score = 3;
+  if (withResponseEx === ops.length && withRequestEx >= ops.length * 0.8) score = 3;
+  else if (withResponseEx === ops.length && withRequestEx >= ops.length * 0.5) score = Math.max(score, 2);
   else if (withResponseEx === ops.length) score = Math.max(score, 2);
   return { score, evidence: `${origin}/openapi.json`, notes };
 }

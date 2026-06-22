@@ -767,10 +767,11 @@ export function isIntelKindWithGetProbe(kind: X402ResourceKind): boolean {
 /** Query parameters for GET probe / agent tools (intel routes only). */
 export function openApiQueryParameters(kind: X402ResourceKind): Record<string, unknown>[] {
   const schema = REQUEST_SCHEMAS[kind];
+  const exampleBody = REQUEST_BODY_EXAMPLES[kind];
   const props = (schema.properties ?? {}) as Record<string, { type?: string; enum?: string[] }>;
   const params: Record<string, unknown>[] = [];
   for (const [name, def] of Object.entries(props)) {
-    params.push({
+    const param: Record<string, unknown> = {
       name,
       in: "query",
       required: false,
@@ -778,7 +779,11 @@ export function openApiQueryParameters(kind: X402ResourceKind): Record<string, u
         type: def.type ?? "string",
         ...(def.enum ? { enum: def.enum } : {}),
       },
-    });
+    };
+    if (name in exampleBody) {
+      param.example = exampleBody[name as keyof typeof exampleBody];
+    }
+    params.push(param);
   }
   return params;
 }

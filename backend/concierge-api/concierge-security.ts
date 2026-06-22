@@ -205,7 +205,7 @@ export function corsHeadersFor(request: Request): Record<string, string> {
     "Access-Control-Allow-Headers":
       "Content-Type, X-Agent-Id, Idempotency-Key, payment-signature, PAYMENT-SIGNATURE, PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-Soon-Holder-Wallet",
     "Access-Control-Expose-Headers":
-      "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-RateLimit-Limit, X-RateLimit-Policy, RateLimit-Limit, Retry-After, Link, Signature-Agent",
+      "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Policy, RateLimit-Limit, RateLimit-Remaining, Retry-After, Link, Signature-Agent",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

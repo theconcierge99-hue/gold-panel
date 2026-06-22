@@ -2,7 +2,13 @@
  * Dispatched from api/[...path].ts (root shim → backend/api). Handlers live in
  * backend/concierge-api/ so Vercel does not register each file as its own function.
  */
-import { mergeAgentReadinessHeaders, siteOriginFromRequest } from "./agent-readiness";
+import {
+  checkApiRateLimit,
+  mergeAgentReadinessHeaders,
+  rateLimitedJsonResponse,
+  siteOriginFromRequest,
+  type RateLimitState,
+} from "./agent-readiness";
 import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
@@ -37,9 +43,13 @@ import handleZauthStatus from "./routes/zauth-status";
 
 type RouteHandler = (request: Request) => Promise<Response>;
 
-function withAgentReadinessHeaders(response: Response, request: Request): Response {
+function withAgentReadinessHeaders(
+  response: Response,
+  request: Request,
+  rateLimit: RateLimitState,
+): Response {
   const origin = siteOriginFromRequest(request);
-  const merged = mergeAgentReadinessHeaders({}, origin);
+  const merged = mergeAgentReadinessHeaders({}, origin, rateLimit);
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(merged)) {
     if (!headers.has(key)) headers.set(key, value);
@@ -51,9 +61,13 @@ function withAgentReadinessHeaders(response: Response, request: Request): Respon
   });
 }
 
-async function dispatchHandler(request: Request, handler: RouteHandler): Promise<Response> {
+async function dispatchHandler(
+  request: Request,
+  handler: RouteHandler,
+  rateLimit: RateLimitState,
+): Promise<Response> {
   const response = await handler(request);
-  return withAgentReadinessHeaders(response, request);
+  return withAgentReadinessHeaders(response, request, rateLimit);
 }
 
 const EXACT_ROUTES: Record<string, RouteHandler> = {
@@ -91,14 +105,18 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
 
 export async function dispatchApiRoute(request: Request): Promise<Response> {
   const pathname = new URL(request.url).pathname;
+  const rateLimit = checkApiRateLimit(request);
+  if (!rateLimit.allowed) {
+    return rateLimitedJsonResponse(request, rateLimit);
+  }
 
   const intelKind = resolveIntelKindFromRequest(request);
   if (intelKind) {
-    return dispatchHandler(request, (req) => handleConciergeIntelRoute(req, intelKind));
+    return dispatchHandler(request, (req) => handleConciergeIntelRoute(req, intelKind), rateLimit);
   }
 
   const handler = EXACT_ROUTES[pathname];
-  if (handler) return dispatchHandler(request, handler);
+  if (handler) return dispatchHandler(request, handler, rateLimit);
 
   return withAgentReadinessHeaders(
     new Response(JSON.stringify({ error: "Not found", code: "not_found" }), {
@@ -106,5 +124,6 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     }),
     request,
+    rateLimit,
   );
 }

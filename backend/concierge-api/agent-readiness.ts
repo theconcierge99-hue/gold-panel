@@ -9,11 +9,77 @@ export const AGENT_RATE_LIMIT = {
   windowSeconds: 60,
 } as const;
 
-export function agentRateLimitHeaders(): Record<string, string> {
+export type RateLimitState = {
+  allowed: boolean;
+  remaining: number;
+  retryAfter: number;
+};
+
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+const MAX_RATE_LIMIT_BUCKETS = 8_000;
+
+function clientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+  return "unknown";
+}
+
+function pruneRateLimitBuckets(): void {
+  const now = Date.now();
+  for (const [key, bucket] of rateLimitBuckets) {
+    if (now >= bucket.resetAt) rateLimitBuckets.delete(key);
+  }
+  if (rateLimitBuckets.size <= MAX_RATE_LIMIT_BUCKETS) return;
+  const overflow = rateLimitBuckets.size - MAX_RATE_LIMIT_BUCKETS;
+  const keys = [...rateLimitBuckets.keys()].slice(0, overflow);
+  for (const key of keys) rateLimitBuckets.delete(key);
+}
+
+/** Soft per-IP sliding window — Edge-safe in-memory (per isolate). */
+export function checkApiRateLimit(request: Request): RateLimitState {
+  if (request.method === "OPTIONS") {
+    return {
+      allowed: true,
+      remaining: AGENT_RATE_LIMIT.limitPerMinute,
+      retryAfter: AGENT_RATE_LIMIT.windowSeconds,
+    };
+  }
+
+  const ip = clientIp(request);
+  const now = Date.now();
+  const windowMs = AGENT_RATE_LIMIT.windowSeconds * 1000;
+  let bucket = rateLimitBuckets.get(ip);
+  if (!bucket || now >= bucket.resetAt) {
+    bucket = { count: 0, resetAt: now + windowMs };
+    rateLimitBuckets.set(ip, bucket);
+  }
+
+  bucket.count += 1;
+  pruneRateLimitBuckets();
+
+  const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+  const remaining = Math.max(0, AGENT_RATE_LIMIT.limitPerMinute - bucket.count);
+  if (bucket.count > AGENT_RATE_LIMIT.limitPerMinute) {
+    return { allowed: false, remaining: 0, retryAfter };
+  }
+  return { allowed: true, remaining, retryAfter };
+}
+
+export function agentRateLimitHeaders(state?: RateLimitState): Record<string, string> {
+  const remaining = state?.remaining ?? AGENT_RATE_LIMIT.limitPerMinute;
+  const retryAfter = state?.retryAfter ?? AGENT_RATE_LIMIT.windowSeconds;
   return {
     "X-RateLimit-Limit": String(AGENT_RATE_LIMIT.limitPerMinute),
+    "X-RateLimit-Remaining": String(remaining),
     "X-RateLimit-Policy": `${AGENT_RATE_LIMIT.limitPerMinute};w=${AGENT_RATE_LIMIT.windowSeconds}`,
     "RateLimit-Limit": String(AGENT_RATE_LIMIT.limitPerMinute),
+    "RateLimit-Remaining": String(remaining),
+    "Retry-After": String(retryAfter),
   };
 }
 
@@ -29,12 +95,32 @@ export function agentDiscoveryLinkHeader(origin: string): Record<string, string>
 export function mergeAgentReadinessHeaders(
   base: Record<string, string>,
   origin?: string,
+  rateLimit?: RateLimitState,
 ): Record<string, string> {
   return {
     ...base,
-    ...agentRateLimitHeaders(),
+    ...agentRateLimitHeaders(rateLimit),
     ...(origin ? agentDiscoveryLinkHeader(origin) : {}),
   };
+}
+
+export function rateLimitedJsonResponse(
+  request: Request,
+  rateLimit: RateLimitState,
+): Response {
+  const origin = siteOriginFromRequest(request);
+  const headers = mergeAgentReadinessHeaders(
+    { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    origin,
+    rateLimit,
+  );
+  return new Response(
+    JSON.stringify({
+      error: "Too many requests — retry after the Retry-After interval",
+      code: "rate_limited",
+    }),
+    { status: 429, headers },
+  );
 }
 
 export function siteOriginFromRequest(request: Request): string {
@@ -101,6 +187,14 @@ export function openApiStandardErrorResponses(): Record<string, unknown> {
         "X-RateLimit-Limit": {
           description: "Maximum requests per window",
           schema: { type: "integer", example: AGENT_RATE_LIMIT.limitPerMinute },
+        },
+        "X-RateLimit-Remaining": {
+          description: "Requests remaining (0 when rate limited)",
+          schema: { type: "integer", example: 0 },
+        },
+        "RateLimit-Remaining": {
+          description: "Requests remaining (0 when rate limited)",
+          schema: { type: "integer", example: 0 },
         },
       },
       content: {
@@ -259,6 +353,17 @@ export function openApiIntelAccuracyPathItem(origin: string): Record<string, unk
         "Public trust signal scoring paid intel-verdict snapshots against 24h BTC price move. " +
         "No x402 payment required. Poll before routing agents to intel-verdict or for procurement due diligence.",
       tags: ["intel"],
+      parameters: [openApiAgentHeadersParameter()],
+      requestBody: {
+        required: false,
+        description: "No body required — free GET endpoint.",
+        content: {
+          "application/json": {
+            schema: { type: "object", additionalProperties: false, maxProperties: 0 },
+            example: {},
+          },
+        },
+      },
       externalDocs: {
         description: "B2B integration case study",
         url: `${base}/docs/builders/case-study`,
