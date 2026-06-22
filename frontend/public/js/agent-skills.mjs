@@ -11,9 +11,9 @@ const SKILLS = [
     name: "concierge-intel",
     title: "Concierge Intel",
     summary:
-      "Pay-per-call macro, wire, DeFi TVL, yields, Meteora, whales, wallet, verdict, alpha desks, and chat — x402 USDC, no API keys.",
+      "Pay-per-call macro, wire, DeFi TVL, yields, Meteora, whales, wallet, verdict, alpha desks, A2A orchestration, and chat — x402 USDC, no API keys.",
     path: "/skills/concierge-intel/SKILL.md",
-    tags: ["x402", "MCP", "pay.sh", "intel"],
+    tags: ["x402", "MCP", "pay.sh", "intel", "A2A"],
   },
 ];
 

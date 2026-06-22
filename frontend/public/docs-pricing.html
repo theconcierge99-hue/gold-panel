@@ -21,13 +21,13 @@
       <p class="docs-lead">Tiered pay-per-query. No subscriptions. No API keys.</p>
 
       <div class="card">
-        <p><strong>17 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
+        <p><strong>18 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
         <table>
           <thead><tr><th>Tier</th><th>USDC</th><th>Routes</th></tr></thead>
           <tbody>
             <tr><td><strong>Raw</strong></td><td>0.02</td><td>TVL, macro, wire, whales</td></tr>
             <tr><td><strong>Signal</strong></td><td>0.10</td><td>Concierge, yields, Meteora, wallet, verdict, alpha desks, scalp, news, signal unlock</td></tr>
-            <tr><td><strong>Bundle</strong></td><td>0.25</td><td>Desk brief (macro + Meteora + verdict)</td></tr>
+            <tr><td><strong>Bundle</strong></td><td>0.25</td><td>Desk brief, A2A pipeline (macro + Meteora + verdict + handoff)</td></tr>
           </tbody>
         </table>
         <p class="note">Post-launch: pay with <strong>SOON</strong> at a holder discount, or use <code>X-Soon-Holder-Wallet</code> for free raw-tier calls (see <a href="/docs/launch" class="gold-link">Launch playbook</a>).</p>
@@ -72,6 +72,7 @@
           <thead><tr><th>Route</th><th>USDC</th><th>Atomic</th></tr></thead>
           <tbody>
             <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>0.25</td><td><code>250000</code></td></tr>
+            <tr><td><code>POST /api/concierge-intel-a2a-pipeline</code></td><td>0.25</td><td><code>250000</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -92,6 +93,7 @@
         <ul>
           <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
           <li><code>GET /api/concierge-intel-accuracy</code> — verdict accuracy leaderboard</li>
+          <li><code>GET /api/agent-a2a-mesh</code> — A2A pipelines and registered peer agents</li>
           <li><code>GET /api/mcp</code> · <code>POST /api/mcp</code> — MCP tools/list, tools/call</li>
           <li><code>POST /api/agent-identity</code> · <code>GET /api/agent-identity</code></li>
         </ul>

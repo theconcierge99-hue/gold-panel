@@ -1,71 +1,79 @@
 ---
 name: concierge-intel
-description: Call Concierge Agent paid market intelligence on conc-exe.xyz — macro, wire, DeFi TVL, yields, whales, wallet, verdict, alpha desks, scalp desk, and Gemini/GLM chat. Use when the user asks for live market intel, x402 micropayments, Poncho routing, or Concierge API integration. Requires pay CLI for automatic 402 settlement.
+description: Pay-per-call market intelligence on conc-exe.xyz — macro, wire, DeFi TVL, yields, Meteora DLMM, whales, wallet, desk verdict, alpha desks, A2A orchestration, and Concierge chat. Use when building agents that need x402-settled research JSON without API keys. MCP at /api/mcp.
 ---
 
-# Concierge Agent intel (x402)
+# Concierge Intel (x402)
 
 **Origin:** `https://conc-exe.xyz`  
-**Discovery:** `GET /openapi.json` · `GET /.well-known/x402`  
-**Payment:** HTTP 402 + USDC (PayAI). No API keys — use [pay.sh](https://pay.sh/) CLI or wallet retry.  
-**Marketplaces:** [x402scan](https://www.x402scan.com/) · [Poncho](https://tryponcho.com/) (no Concierge API key)
+**Discovery:** `GET /.well-known/api-catalog` · `GET /openapi.json` · `GET /api/mcp` · `GET /api/agent-a2a-mesh`  
+**Payment:** HTTP 402 + USDC on Solana or Base (PayAI primary, Dexter fallback). No API keys.
 
-## Install pay CLI (handles 402)
+## When to use
 
-```bash
-brew install pay
-# or: npm install -g @solana/pay
-```
+- Agent needs **structured JSON** (not HTML) for pipelines — prefer `/api/concierge-intel-*`
+- User asks for macro, DeFi TVL, Meteora pools, desk verdict, or alpha scans
+- **A2A orchestration** — paid pipeline with handoff line + `delegate[]` routing for downstream agents
+- Integrating via MCP, pay.sh, AgentCash, or Poncho — same routes, same settlement
 
-## Sandbox probes ($0.10 USDC, ephemeral wallet)
-
-```bash
-pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
-
-pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
-  -d '{"category":"Geopolitics","limit":5}'
-
-pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
-
-pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-yields \
-  -d '{"chain":"solana","project":"meteora"}'
-
-pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-scalp \
-  -d '{"symbols":["BTC","ETH"],"intervals":["5m","15m"]}'
-
-pay --sandbox curl https://conc-exe.xyz/api/concierge \
-  -d '{"mode":"chat","message":"BTC outlook on 15m"}'
-```
-
-## Fifteen paid routes
-
-| Path | Price |
-|------|-------|
-| `POST /api/concierge` | $0.10 |
-| `POST /api/concierge-intel-*` (11 intel desks incl. macro, wire) | $0.10 each |
-| `POST /api/news-open` | $0.10 |
-| `POST /api/lounge-signal-open` | $0.10 |
-| `POST /api/lounge-signal-publish` | $1.00 |
-
-Full catalog: `/agent/endpoints` · Docs: `/docs/grok-build` · Poncho: `/docs/integration/poncho`
-
-## This repo (gold-panel)
-
-| Area | Path |
-|------|------|
-| API router | `api/[...path].ts` |
-| Handlers | `lib/concierge-api/` |
-| Research intel | `lib/concierge-api/concierge-research-intel.ts` |
-| x402 | `lib/concierge-api/x402-server.ts` |
-| OpenAPI | `lib/concierge-api/x402-discovery.ts` |
-| Integrations UI | `public/integrations.html` |
-
-After changing API routes, keep Vercel Hobby ≤12 functions — handlers stay outside `/api/`.
-
-## Verify Grok loaded this skill
+## Quick probes (402 without wallet)
 
 ```bash
-grok inspect
+curl -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl \
+  -H "Content-Type: application/json" -d '{}'
+
+curl -s https://conc-exe.xyz/api/agent-a2a-mesh
 ```
 
-Invoke in session: `/concierge-intel`
+## Paid calls (mainnet USDC via pay.sh)
+
+Production uses **mainnet** — do not use `--sandbox` against `conc-exe.xyz`.
+
+```bash
+pay setup
+pay topup
+pay curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
+pay curl https://conc-exe.xyz/api/concierge-intel-a2a-pipeline \
+  -d '{"message":"Solana desk orchestration","includeInsider":true}'
+```
+
+## Pricing tiers
+
+| Tier | USDC | Examples |
+|------|------|----------|
+| Raw | $0.02 | macro, wire, tvl, whales |
+| Signal | $0.10 | verdict, meteora, yields, concierge chat |
+| Bundle | $0.25 | desk-brief, **a2a-pipeline** |
+
+## A2A orchestration
+
+| Route | Price | Purpose |
+|-------|-------|---------|
+| `GET /api/agent-a2a-mesh` | Free | Pipeline templates + registered peer agents |
+| `POST /api/concierge-intel-a2a-pipeline` | $0.25 | Desk brief + `a2a.handoff` + `delegate[]` for downstream agents |
+
+After payment, the pipeline response includes:
+
+- `a2a.handoff` — machine-readable line (`A2A|asset=…|bias=…|…`)
+- `a2a.delegate[]` — suggested next steps (Concierge routes or peer agent cards)
+- `a2a.mesh` — link back to free mesh discovery
+
+Playground: `/agent/playground?ep=intel-a2a-pipeline`
+
+## MCP
+
+- **URL:** `https://conc-exe.xyz/api/mcp`
+- **Methods:** `initialize`, `tools/list`, `tools/call`
+- Pass `arguments.paymentSignature` after x402 pay, or use `pay curl` first
+
+## Agent identity (optional)
+
+Register `agt_…` and send `X-Agent-Id` header — see `/docs/api/agent-identity`.
+
+## Docs
+
+- Intel APIs (A2A): `/docs/api/intel#a2a`
+- Agent card (A2A): `/docs/integration/agent-card`
+- Agent readiness audit: `/docs/api/agent-readiness`
+- Builders: `/docs/builders`
+- OpenAPI: `/openapi.json`

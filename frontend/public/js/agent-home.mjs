@@ -22,6 +22,8 @@ initTypewriter(document.getElementById("agent-typewriter"), [
   "concierge intel airdrop sol",
   "concierge intel tvl snapshot",
   "register agt_ agent identity",
+  "concierge intel a2a pipeline",
+  "agent a2a mesh discovery",
   "whale positioning eth sol",
 ]);
 

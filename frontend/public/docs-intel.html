@@ -37,6 +37,7 @@
       <li><a href="#verdict">Verdict</a></li>
       <li><a href="#meteora">Meteora DLMM</a></li>
       <li><a href="#desk-brief">Desk brief</a></li>
+      <li><a href="#a2a">A2A orchestration</a></li>
       <li><a href="#accuracy">Accuracy</a></li>
       <li><a href="#mcp">MCP</a></li>
       <li><a href="#concierge">Full Concierge chat</a></li>
@@ -60,11 +61,13 @@
           <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>$0.10</td><td>Wallet snapshot / PnL note</td></tr>
           <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td><td>Desk verdict + insider overlay</td></tr>
           <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>$0.25</td><td>Macro + Meteora + verdict bundle</td></tr>
+          <tr><td><code>POST /api/concierge-intel-a2a-pipeline</code></td><td>$0.25</td><td>Desk brief + A2A handoff + delegate routing</td></tr>
           <tr><td><code>POST /api/concierge-intel-airdrop</code></td><td>$0.10</td><td>Potential airdrops (insider-first alpha)</td></tr>
           <tr><td><code>POST /api/concierge-intel-listing</code></td><td>$0.10</td><td>Potential exchange listings</td></tr>
           <tr><td><code>POST /api/concierge-intel-momentum</code></td><td>$0.10</td><td>Large-move up/down candidates</td></tr>
           <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>$0.10</td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
           <tr><td><code>GET /api/concierge-intel-accuracy</code></td><td>Free</td><td>Verdict accuracy leaderboard</td></tr>
+          <tr><td><code>GET /api/agent-a2a-mesh</code></td><td>Free</td><td>A2A pipelines, peer agents, orchestration guidance</td></tr>
           <tr><td><code>GET/POST /api/mcp</code></td><td>Free</td><td>MCP tools/list · tools/call</td></tr>
         </tbody>
       </table>
@@ -236,6 +239,33 @@
   "message": "morning Solana desk brief",
   "includeInsider": true
 }</code></pre>
+    </div>
+  </section>
+
+  <section id="a2a">
+    <h2>A2A orchestration</h2>
+    <div class="card">
+      <p>Concierge acts as an <strong>intelligence seller</strong> in agent-to-agent workflows: one x402 payment returns desk intel plus machine-readable routing for downstream agents.</p>
+      <table>
+        <thead><tr><th>Route</th><th>Price</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /api/agent-a2a-mesh</code></td><td>Free</td><td>Pipeline templates, registered <code>agt_…</code> peers, orchestration guidance</td></tr>
+          <tr><td><code>POST /api/concierge-intel-a2a-pipeline</code></td><td>$0.25</td><td>Desk brief + <code>a2a.handoff</code> + <code>delegate[]</code> next steps</td></tr>
+        </tbody>
+      </table>
+      <p>After payment, the pipeline response includes:</p>
+      <ul>
+        <li><code>a2a.handoff</code> — compact line such as <code>A2A|asset=BTC|bias=long|conviction=M|…</code></li>
+        <li><code>a2a.delegate[]</code> — suggested Concierge routes or peer agent cards</li>
+        <li><code>a2a.mesh</code> — URL of the free mesh discovery endpoint</li>
+      </ul>
+      <p>Try a 402 probe in the <a href="/agent/playground?ep=intel-a2a-pipeline" class="gold-link">Playground</a> or fetch the mesh:</p>
+<pre><code>curl -s https://conc-exe.xyz/api/agent-a2a-mesh | jq '.pipelines, .agents | length'
+
+curl -s -X POST https://conc-exe.xyz/api/concierge-intel-a2a-pipeline \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Solana desk orchestration","includeInsider":true}'</code></pre>
+      <p>See also <a href="/docs/integration/agent-card" class="gold-link">Agent Card (A2A)</a> and platform card field <code>discovery.a2aMesh</code>.</p>
     </div>
   </section>
 

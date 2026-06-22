@@ -45,12 +45,13 @@ async function load() {
   const c = countBySegment();
 
   try {
-    const [x402, config, agentCard, tokenPay, accuracy] = await Promise.all([
+    const [x402, config, agentCard, tokenPay, accuracy, a2aMesh] = await Promise.all([
       fetchJson("/.well-known/x402").catch(() => null),
       fetchJson("/api/x402-config").catch(() => null),
       fetchJson("/.well-known/agent-card.json").catch(() => null),
       fetchJson("/api/token-pay").catch(() => null),
       fetchJson("/api/concierge-intel-accuracy").catch(() => null),
+      fetchJson("/api/agent-a2a-mesh").catch(() => null),
     ]);
 
     const cards = [];
@@ -89,8 +90,23 @@ async function load() {
         "Agent card",
         `<p>Register <code>agt_…</code> identities and discover how to call Concierge from other agents.</p>
         ${discLink("/.well-known/agent-card.json", `${origin}/.well-known/agent-card.json`)}
+        ${agentCard?.discovery?.a2aMesh ? `<p class="res-disc-hint">A2A mesh: <code>${escapeHtml(String(agentCard.discovery.a2aMesh))}</code></p>` : ""}
         ${agentCard?.trust ? `<p class="res-disc-hint">Trust: <code>${escapeHtml(agentCard.trust.intelAccuracyEndpoint || "")}</code></p>` : ""}
         ${agentCard ? preHtml(JSON.stringify(agentCard, null, 2).slice(0, 2500)) : ""}`,
+      ),
+    );
+
+    cards.push(
+      discCard(
+        "A2A mesh",
+        `<p>Free orchestration discovery — pipeline templates, registered peer agents, and handoff guidance for downstream agents.</p>
+        <div class="res-disc-links">
+          ${discLink("/api/agent-a2a-mesh", `${origin}/api/agent-a2a-mesh`)}
+          ${discLink("/agent/playground?ep=intel-a2a-pipeline", `${origin}/agent/playground?ep=intel-a2a-pipeline — probe`)}
+          ${discLink("/docs/api/intel#a2a", `${origin}/docs/api/intel#a2a — intel docs`)}
+        </div>
+        ${a2aMesh ? `<p class="res-disc-hint">Pipelines: <strong>${a2aMesh.pipelines?.length ?? 0}</strong> · Peers: <strong>${a2aMesh.agents?.length ?? 0}</strong></p>` : ""}
+        ${a2aMesh ? preHtml(JSON.stringify(a2aMesh, null, 2).slice(0, 2500)) : ""}`,
       ),
     );
 
@@ -193,9 +209,10 @@ async function load() {
     cards.push(
       discCard(
         "pay.sh",
-        `<p>Agent CLI catalog — <code>pay curl</code> handles 402 for Claude, Codex, and shell workflows. Validated: <code>pay catalog check</code> · 20/20 Solana-compatible endpoints.</p>
+        `<p>Agent CLI catalog — <code>pay curl</code> handles 402 for Claude, Codex, and shell workflows. Validated: <code>pay catalog check</code> · Solana-compatible endpoints.</p>
         ${discLink("https://pay.sh/", "pay.sh")}
-        <p class="res-disc-hint"><code>pay --sandbox curl ${origin}/api/concierge-intel-tvl -d '{}'</code></p>
+        <p class="res-disc-hint">Production (mainnet): <code>pay setup</code> · <code>pay topup</code> · <code>pay curl ${origin}/api/concierge-intel-tvl -d '{}'</code></p>
+        <p class="res-disc-hint">Sandbox demo: <code>pay --sandbox curl https://debugger.pay.sh/mpp/quote/AAPL</code></p>
         <p class="res-disc-hint"><a href="/docs/payment/paysh">pay.sh integration guide →</a> · FQN <code>conc-exe/concierge-agent</code></p>`,
       ),
     );

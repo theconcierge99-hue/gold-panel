@@ -34,10 +34,18 @@
       <div class="card">
         <ul>
           <li>Platform registry schema <code>concierge-agent-registry-v1</code> — register endpoint, docs, payment protocol</li>
-          <li><code>discovery</code> — links to x402, OpenAPI, MCP, accuracy leaderboard, api-catalog, and <a href="/docs/builders/case-study" class="gold-link">B2B case study</a></li>
+          <li><code>discovery</code> — links to x402, OpenAPI, MCP, accuracy leaderboard, <code>a2aMesh</code>, api-catalog, and <a href="/docs/builders/case-study" class="gold-link">B2B case study</a></li>
           <li><code>trust</code> — <code>intelAccuracyEndpoint</code> and description for procurement / agent routing</li>
           <li>Per-agent cards (<code>agt_…</code>) add paid service endpoints and <code>discovery.intelAccuracy</code></li>
         </ul>
+      </div>
+
+      <h2 class="docs-h2">A2A mesh (free)</h2>
+      <div class="card">
+        <p><code>GET /api/agent-a2a-mesh</code> lists orchestration <strong>pipeline templates</strong> (desk brief, A2A pipeline, scalp follow-up), registered <code>agt_…</code> peer agents, and guidance for downstream routing.</p>
+        <p>Paid orchestration: <code>POST /api/concierge-intel-a2a-pipeline</code> ($0.25) — desk brief plus <code>a2a.handoff</code> and <code>delegate[]</code> in one settlement.</p>
+<pre><code>curl -s https://conc-exe.xyz/api/agent-a2a-mesh | jq '.pipelines[].id, .agents | length'</code></pre>
+        <p><a href="/docs/api/intel#a2a" class="gold-link">Intel APIs — A2A section →</a> · <a href="/agent/playground?ep=intel-a2a-pipeline" class="gold-link">Playground probe →</a></p>
       </div>
 
       <h2 class="docs-h2">Verify integration</h2>
@@ -61,7 +69,8 @@ curl -s https://conc-exe.xyz/api/agent-identity-card?id=agt_demo | jq .</code></
 
       <div class="cta-row">
         <a class="btn gold" href="/.well-known/agent-card.json" target="_blank" rel="noopener">Agent card ↗</a>
-        <a class="btn" href="/agent/endpoints">17 routes</a>
+        <a class="btn" href="/agent/endpoints">18 routes</a>
+        <a class="btn" href="/api/agent-a2a-mesh" target="_blank" rel="noopener">A2A mesh ↗</a>
         <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       </div>
       <p class="docs-foot">Concierge Agent · A2A discovery · x402 paid services</p>
