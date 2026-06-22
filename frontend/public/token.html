@@ -30,15 +30,18 @@
       <span class="tok-soon-badge">Pre-launch</span>
     </div>
     <p class="tok-draft-note">
-      Contract address and Pump.fun link publish at <strong>T0</strong>. Tokenomics below are the operating policy — not financial advice.
+      <strong>Fair launch on Pump.fun</strong> — no presale, no ICO, no launchpad allocation.
+      Contract address and curve link publish at <strong>T0</strong>.
+      Policy below describes how protocol <em>revenue</em> and <em>treasury holdings</em> are used after launch — not a guaranteed genesis cap table.
     </p>
     <p class="tok-lead">
-      <strong>SOON</strong> ties the agent economy to the Concierge desk: pay-per-call x402 today, holder utility on Lounge and Agent routes,
-      and <em>revenue-linked</em> buyback plus on-chain burns when users pay in SOON.
+      <strong>SOON</strong> ties the agent economy to the Concierge desk: pay-per-call x402 in USDC today;
+      after T0, holders pay in SOON on Token Pay (price from DexScreener once the pair is live).
+      <em>Revenue-linked</em> USDC buyback plus on-chain burns when users pay in SOON.
     </p>
     <div class="tok-pills">
-      <span class="tok-pill">Solana · Pump.fun → Raydium</span>
-      <span class="tok-pill">17 x402 routes · from $0.02</span>
+      <span class="tok-pill">Fair launch · Pump.fun → Raydium</span>
+      <span class="tok-pill">18 x402 routes · from $0.02</span>
       <span class="tok-pill">55% ops · 25% to token · 20% treasury</span>
       <span class="tok-pill"><a href="/token/transparency" style="color:inherit;text-decoration:none">Weekly transparency →</a></span>
     </div>
@@ -106,7 +109,8 @@
       <span class="tok-flow-arrow">·</span>
       <span>20% treasury</span>
     </div>
-    <p><strong>~30% discount</strong> vs USDC list price when checkout uses SOON (<code>SOON_TOKEN_DISCOUNT_PERCENT</code> — e.g. $0.10 signal route → ~$0.07 equivalent in SOON).</p>
+    <p><strong>~30% discount</strong> vs USDC list price when checkout uses SOON (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>).
+      Token amount is priced from <strong>DexScreener</strong> after the pair exists; until then checkout stays disabled (Coming soon).</p>
   </section>
 
   <section class="tok-section" aria-labelledby="utility-h">
@@ -148,7 +152,7 @@
         <tbody>
           <tr class="tok-matrix-group"><td colspan="4">Payment &amp; intel (x402)</td></tr>
           <tr>
-            <td>SOON checkout — all 17 paid routes <span class="tok-status live">Live</span></td>
+            <td>SOON checkout — all 18 paid routes <span class="tok-status live">Live at T0</span></td>
             <td class="tok-yes">✓</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
           </tr>
           <tr>
@@ -160,7 +164,7 @@
             <td>5 / day</td><td>5 / day <span class="tok-status phased">→ 10 · Q1</span></td><td>5 / day <span class="tok-status phased">→ 15 · Q2+</span></td>
           </tr>
           <tr>
-            <td>intel-desk-brief bundle ($0.25) SOON pricing <span class="tok-status phased">Q2+</span></td>
+            <td>Bundle intel — desk-brief, a2a-pipeline ($0.25) SOON pricing <span class="tok-status phased">Q2+</span></td>
             <td class="tok-no">—</td><td class="tok-no">—</td><td>~20% lower effective</td>
           </tr>
           <tr>
@@ -224,7 +228,7 @@
 
   <section class="tok-section" aria-labelledby="milestones-h">
     <h2 id="milestones-h">Milestone <em>burns</em></h2>
-    <p>One-time burns from protocol treasury SOON (not from operations budget) when cumulative net revenue hits:</p>
+    <p>One-time burns from <strong>protocol treasury SOON already on hand</strong> (buybacks + 20% of SOON payments — not a pre-minted genesis slice) when cumulative net revenue hits:</p>
     <div class="tok-table-wrap">
       <table class="tok-table">
         <thead>
@@ -248,7 +252,7 @@
         <tbody>
           <tr><td>Raw intel — tvl, macro, wire, whales</td><td>$0.02</td><td>Deluxe+ free allowance · SOON pay</td></tr>
           <tr><td>Signal intel — verdict, meteora, yields, wallet, …</td><td>$0.10</td><td>SOON pay ~−30%</td></tr>
-          <tr><td>intel-desk-brief</td><td>$0.25</td><td>President SOON pricing · Q2+</td></tr>
+          <tr><td>Bundle — desk-brief, a2a-pipeline</td><td>$0.25</td><td>SOON pay at T0 · President pricing · Q2+</td></tr>
           <tr><td>Concierge chat</td><td>$0.10</td><td>Deluxe credits · Q4 · SOON pay</td></tr>
           <tr><td>News / wire unlock</td><td>$0.10</td><td>SOON pay · credits roadmap</td></tr>
           <tr><td>Signal open</td><td>$0.10</td><td>Executive credits · 50% to creator</td></tr>
@@ -260,17 +264,22 @@
   </section>
 
   <section class="tok-section" aria-labelledby="supply-h">
-    <h2 id="supply-h">Supply <em>allocation</em> (post-migrate)</h2>
+    <h2 id="supply-h">Fair launch <em>model</em> (Pump.fun)</h2>
+    <p>
+      This is <strong>not</strong> a launchpad or ICO. One bonding-curve fair launch on Pump.fun — anyone can buy on the curve before migrate.
+      There is no private presale tranche represented on this site.
+    </p>
     <div class="tok-table-wrap">
       <table class="tok-table">
         <thead>
-          <tr><th>Bucket</th><th>%</th><th>Notes</th></tr>
+          <tr><th>Phase</th><th>What happens</th></tr>
         </thead>
         <tbody>
-          <tr><td>Public (curve + Raydium)</td><td><strong>68%</strong></td><td>Market liquidity</td></tr>
-          <tr><td>Protocol treasury</td><td><strong>20%</strong></td><td>Multisig 2-of-3 · buyback milestones · LP · grants</td></tr>
-          <tr><td>Team</td><td><strong>9%</strong></td><td>12-month vest · 90-day cliff</td></tr>
-          <tr><td>Community / agents</td><td><strong>3%</strong></td><td>Early <code>agt_</code> · testers · 6-month linear</td></tr>
+          <tr><td>Bonding curve (T0)</td><td>Public buys only on Pump.fun until the migrate threshold is met</td></tr>
+          <tr><td>Raydium migrate</td><td>Standard Pump.fun mechanics — circulating supply from curve buyers; LP seeded from the migrate pool</td></tr>
+          <tr><td>Concierge utility</td><td>After mint is set in env + DexScreener indexes the pair → SOON checkout, holder tiers, and oracle pricing go live</td></tr>
+          <tr><td>Protocol treasury SOON</td><td><strong>Not pre-allocated at genesis.</strong> Accumulates from USDC revenue buybacks, 20% of SOON payments, and optional open-market purchases</td></tr>
+          <tr><td>Team &amp; community</td><td>Same curve as everyone else if participating; any grants or vesting are <em>policy commitments</em> funded from treasury over time — not a reserved mint % at T0</td></tr>
         </tbody>
       </table>
     </div>
@@ -279,7 +288,7 @@
   <section class="tok-section" aria-labelledby="roadmap-h">
     <h2 id="roadmap-h">Launch <em>roadmap</em></h2>
     <div class="tok-grid">
-      <div class="tok-card"><h3>2026 · Q3 · Launch</h3><p>Pump.fun → migrate → Raydium LP. Publish CA, enable SOON on Concierge pay rail, transparency page live.</p></div>
+      <div class="tok-card"><h3>2026 · Q3 · T0</h3><p>Pump.fun fair launch → curve → migrate → Raydium LP. Publish mint (CA). Enable SOON on Concierge pay rail once DexScreener lists the pair. Transparency page opens for weekly reports.</p></div>
       <div class="tok-card"><h3>2026 · Q4</h3><p>Holder snapshot, Concierge credits for Deluxe tier, first buyback window if net revenue threshold is met.</p></div>
       <div class="tok-card"><h3>2027 · Q1</h3><p>Executive tier perks — Discover badge, signal credits, weekly transparency report cadence.</p></div>
       <div class="tok-card"><h3>2027 · Q2+</h3><p>President governance polls · macro webhook beta · higher raw allowances · milestone burns as revenue scales.</p></div>
@@ -289,8 +298,9 @@
   <section class="tok-section">
     <p class="tok-disclaimer">
       <strong>Not financial advice.</strong> SOON is experimental utility for the Concierge desk. No guaranteed returns, yield, or profit.
-      Token launch involves high risk including total loss. Utility features ship in phases; dates may change.
-      Consult qualified counsel before participating in any token sale or trading.
+      Fair launch involves high risk including total loss. Utility features ship in phases; dates may change.
+      This site does not offer a presale or investment contract — only a public curve launch and post-launch protocol policy.
+      Consult qualified counsel before trading.
     </p>
   </section>
 
