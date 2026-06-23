@@ -31,3 +31,14 @@ npm run discovery:validate
 ```
 
 Do not add top-level `api/*.ts` files without checking the 12-function Hobby limit.
+
+## Git & deploy identity
+
+**Concierge repo only — no other identities.**
+
+- Remote: `theconcierge99-hue/gold-panel` on GitHub only.
+- Commits must use **repo-local** author & committer:
+  - `theconcierge99-hue <285804041+theconcierge99-hue@users.noreply.github.com>`
+- Do **not** commit as `0xsha10`, personal emails, or add `Co-authored-by: Cursor` / other co-authors.
+- Before push: `git log -1 --format="%an <%ae>"` must show `theconcierge99-hue`.
+- If a wrong-author commit lands on `main`, rewrite with Concierge identity and `git push --force-with-lease` (user-requested only).
