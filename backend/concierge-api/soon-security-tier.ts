@@ -150,7 +150,7 @@ export async function assertSoonSecurityTierAccess(
   const wallet = walletFromSecurityRequest(request);
   if (!wallet) {
     throw new SecurityTierDeniedError(
-      `SOON holder wallet required for ${accessTier} tier — set X-Soon-Holder-Wallet or pay via x402`,
+      `SOON holder wallet required for ${accessTier} tier - set X-Soon-Holder-Wallet or pay via x402`,
     );
   }
 
@@ -163,7 +163,7 @@ export async function assertSoonSecurityTierAccess(
   const tier = resolveSoonTier(balanceUi);
   if (!tier || balanceUi < minHold) {
     throw new SecurityTierDeniedError(
-      `Insufficient SOON for ${accessTier} security desk — minimum ${minHold.toLocaleString()} SOON (${requiredSoonId})`,
+      `Insufficient SOON for ${accessTier} security desk - minimum ${minHold.toLocaleString()} SOON (${requiredSoonId})`,
     );
   }
 }

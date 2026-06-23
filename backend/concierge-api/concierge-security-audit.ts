@@ -147,7 +147,7 @@ function scoreSpecPresence(openapi: Record<string, unknown> | null, openApiStatu
     return {
       score: 3,
       evidence: `${origin}/openapi.json`,
-      notes: [`OpenAPI ${openapi.openapi} — ${pathCount} paths / ${opCount} operations`, "info.x-guidance present"],
+      notes: [`OpenAPI ${openapi.openapi} - ${pathCount} paths / ${opCount} operations`, "info.x-guidance present"],
     };
   }
   return {
@@ -319,7 +319,7 @@ export async function runSecurityReadinessAudit(targetRaw: string): Promise<Secu
     dimensions,
     probes,
     disclaimer:
-      "Passive audit only — no exploitation. Target must be authorized by the caller. Concierge platform hosts are always blocked.",
+      "Passive audit only - no exploitation. Target must be authorized by the caller. Concierge platform hosts are always blocked.",
   };
 }
 
@@ -416,6 +416,6 @@ export function runSecurityScopeValidation(
     notes: allow.notes,
     tier: SECURITY_ROUTE_TIERS["security-scope"],
     disclaimer:
-      "Scope validation only — no active testing. Probing Concierge infrastructure (conc-exe.xyz, project Vercel hosts) is forbidden.",
+      "Scope validation only - no active testing. Probing Concierge infrastructure (conc-exe.xyz, project Vercel hosts) is forbidden.",
   };
 }

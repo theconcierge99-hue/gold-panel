@@ -205,7 +205,7 @@ export function normalizeSecurityTarget(raw: string): NormalizedSecurityTarget {
   }
 
   if (isNumericOrLiteralIp(hostname)) {
-    throw new SecurityTargetInvalidError("target_ip", "IP literal targets are not allowed — use a hostname");
+    throw new SecurityTargetInvalidError("target_ip", "IP literal targets are not allowed - use a hostname");
   }
 
   url.hash = "";
@@ -264,12 +264,12 @@ export function validateScopeAllowlist(
     : [];
 
   if (requireEntries && !entries.length) {
-    notes.push("allowlist is required — declare authorized hostnames (*.example.com)");
+    notes.push("allowlist is required - declare authorized hostnames (*.example.com)");
     return { ok: false, target, allowlist: [], matched: false, notes };
   }
 
   if (!entries.length) {
-    notes.push("No allowlist provided — target passed platform guard only");
+    notes.push("No allowlist provided - target passed platform guard only");
     return { ok: true, target, allowlist: [], matched: true, notes };
   }
 

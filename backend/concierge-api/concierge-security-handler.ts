@@ -70,7 +70,7 @@ function jsonResponse(
     status,
     headers: {
       ...corsHeadersFor(request),
-      "Content-Type": "application/json",
+      "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store",
       ...extra,
     },
@@ -101,7 +101,7 @@ function securityErrorStatus(e: unknown): number {
 function securityErrorBody(e: unknown, kind?: string) {
   if (e instanceof PlatformScopeForbiddenError) {
     return {
-      error: "Platform scope forbidden — Concierge infrastructure cannot be probed",
+      error: "Platform scope forbidden - Concierge infrastructure cannot be probed",
       code: e.code,
       kind,
     };
@@ -208,7 +208,7 @@ export async function handleConciergeSecurityRoute(
     if (body.authorized !== true) {
       throw new SecurityTargetInvalidError(
         "authorization_required",
-        "authorized must be true — caller attests permission to probe the target",
+        "authorized must be true - caller attests permission to probe the target",
       );
     }
 
