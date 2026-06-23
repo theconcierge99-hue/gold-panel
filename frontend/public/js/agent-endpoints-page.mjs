@@ -34,6 +34,7 @@ const SEGMENT_LABELS = {
   research: "Research",
   intel: "DeFi Intel",
   alpha: "Alpha Intel",
+  security: "Security Desk",
   lounge: "Lounge",
 };
 
@@ -53,6 +54,7 @@ function renderFilters() {
     { id: "research", label: "Research" },
     { id: "intel", label: "DeFi Intel" },
     { id: "alpha", label: "Alpha Intel" },
+    { id: "security", label: "Security Desk" },
     { id: "lounge", label: "Lounge" },
   ];
   filtersEl.innerHTML = segments
@@ -72,7 +74,8 @@ function renderFilters() {
 }
 
 function endpointCard(ep) {
-  const price = ep.priceUsd.startsWith("$") ? ep.priceUsd : `$${ep.priceUsd}`;
+  const price =
+    ep.priceUsd === "0" ? "Free" : ep.priceUsd.startsWith("$") ? ep.priceUsd : `$${ep.priceUsd}`;
   return `<a class="res-ep" href="/agent/playground?ep=${encodeURIComponent(ep.id)}">
     <div class="res-ep-head">
       <span class="res-ep-route"><span class="res-method">${ep.method}</span><span class="res-path">${ep.path}</span></span>
@@ -99,7 +102,7 @@ function renderCatalog() {
     if (!grouped[ep.segment]) grouped[ep.segment] = [];
     grouped[ep.segment].push(ep);
   }
-  const order = ["concierge", "research", "intel", "alpha", "lounge"];
+  const order = ["concierge", "research", "intel", "alpha", "security", "lounge"];
   listEl.innerHTML = order
     .filter((seg) => grouped[seg]?.length)
     .map((seg) => {

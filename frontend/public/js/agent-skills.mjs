@@ -15,6 +15,15 @@ const SKILLS = [
     path: "/skills/concierge-intel/SKILL.md",
     tags: ["x402", "MCP", "pay.sh", "intel", "A2A"],
   },
+  {
+    id: "concierge-security",
+    name: "concierge-security",
+    title: "Concierge Security Desk",
+    summary:
+      "Passive scope validation (free), agent-readiness audit, and HTTP header review for authorized external APIs — Concierge infrastructure always blocked.",
+    path: "/skills/concierge-security/SKILL.md",
+    tags: ["x402", "security", "scout", "passive"],
+  },
 ];
 
 function escapeHtml(s) {

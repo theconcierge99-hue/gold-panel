@@ -28,6 +28,7 @@ const SEGMENT_LABELS = {
   research: "Research",
   intel: "DeFi Intel",
   alpha: "Alpha Intel",
+  security: "Security Desk",
   lounge: "Lounge",
 };
 
@@ -67,7 +68,8 @@ function selectEndpoint(ep) {
   });
   methodEl.textContent = ep.method;
   pathEl.textContent = `${ep.method} ${ep.path}`;
-  priceEl.textContent = `$${ep.priceUsd} USDC`;
+  priceEl.textContent =
+    ep.priceUsd === "0" ? "Free" : `$${ep.priceUsd} USDC`;
   descEl.textContent = ep.description;
   urlEl.textContent = endpointUrl(ep.path);
   bodyEl.value = JSON.stringify(ep.sampleBody ?? {}, null, 2);
@@ -76,12 +78,12 @@ function selectEndpoint(ep) {
 }
 
 function renderPickList() {
-  const bySeg = { concierge: [], research: [], intel: [], alpha: [], lounge: [] };
+  const bySeg = { concierge: [], research: [], intel: [], alpha: [], security: [], lounge: [] };
   for (const ep of CONCIERGE_AGENT_ENDPOINTS) {
     if (bySeg[ep.segment]) bySeg[ep.segment].push(ep);
   }
 
-  pickList.innerHTML = ["concierge", "research", "intel", "alpha", "lounge"]
+  pickList.innerHTML = ["concierge", "research", "intel", "alpha", "security", "lounge"]
     .filter((seg) => bySeg[seg].length)
     .map(
       (seg) => `
@@ -95,7 +97,7 @@ function renderPickList() {
               <span class="pg-ep-method">${ep.method}</span>
               <span class="pg-ep-path">${ep.path}</span>
             </div>
-            <span class="pg-ep-price">$${ep.priceUsd}</span>
+            <span class="pg-ep-price">${ep.priceUsd === "0" ? "Free" : `$${ep.priceUsd}`}</span>
           </button>`,
           )
           .join("")}

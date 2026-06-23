@@ -8,6 +8,7 @@ export const CONCIERGE_AGENT_SEGMENTS = [
   { id: "research", label: "Research" },
   { id: "intel", label: "DeFi Intel" },
   { id: "alpha", label: "Alpha Intel" },
+  { id: "security", label: "Security Desk" },
   { id: "lounge", label: "Lounge" },
 ];
 
@@ -186,6 +187,51 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { message: "Solana desk orchestration", includeInsider: true },
   },
   {
+    id: "security-scope",
+    segment: "security",
+    method: "POST",
+    path: "/api/concierge-security-scope",
+    name: "Security — Scope",
+    description:
+      "Free scope validation — platform guard + allowlist match. No outbound fetch. Concierge hosts always blocked.",
+    priceUsd: "0",
+    sampleBody: {
+      target: "https://api.example.com",
+      allowlist: ["*.example.com"],
+    },
+  },
+  {
+    id: "security-readiness",
+    segment: "security",
+    method: "POST",
+    path: "/api/concierge-security-readiness",
+    name: "Security — Readiness",
+    description:
+      "Passive agent-readiness audit for authorized external APIs — OpenAPI, discovery, headers, MCP surface.",
+    priceUsd: "0.02",
+    tier: "raw",
+    sampleBody: {
+      target: "https://api.example.com",
+      allowlist: ["*.example.com"],
+      authorized: true,
+    },
+  },
+  {
+    id: "security-headers",
+    segment: "security",
+    method: "POST",
+    path: "/api/concierge-security-headers",
+    name: "Security — Headers",
+    description: "Passive HTTP security header checklist and grade for authorized external targets.",
+    priceUsd: "0.02",
+    tier: "raw",
+    sampleBody: {
+      target: "https://api.example.com",
+      allowlist: ["*.example.com"],
+      authorized: true,
+    },
+  },
+  {
     id: "news-open",
     segment: "lounge",
     method: "POST",
@@ -259,5 +305,6 @@ export function countBySegment() {
   const lounge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "lounge").length;
   const concierge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "concierge").length;
   const research = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "research").length;
-  return { total, intel, alpha, lounge, concierge, research };
+  const security = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "security").length;
+  return { total, intel, alpha, lounge, concierge, research, security };
 }

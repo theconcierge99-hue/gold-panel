@@ -167,10 +167,12 @@ async function load() {
     cards.push(
       discCard(
         "Agent Skills",
-        `<p>Portable <code>SKILL.md</code> for Cursor, Claude, and Grok — x402 probes, pricing tiers, MCP connect.</p>
+        `<p>Portable <code>SKILL.md</code> for Cursor, Claude, and Grok — x402 probes, pricing tiers, MCP connect, Security Desk scout audits.</p>
         <div class="res-disc-links">
           ${discLink("/agent/skills", `${origin}/agent/skills`)}
           ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
+          ${discLink("/skills/concierge-security/SKILL.md", `${origin}/skills/concierge-security/SKILL.md`)}
+          ${discLink("/docs/api/security", `${origin}/docs/api/security`)}
         </div>`,
       ),
     );
