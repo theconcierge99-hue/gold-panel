@@ -39,6 +39,7 @@
       { id: "api-overview", href: "/docs/api/overview", title: "API Overview" },
       { id: "api-concierge", href: "/docs/api/concierge", title: "Concierge Chat" },
       { id: "api-intel", href: "/docs/api/intel", title: "Intel APIs" },
+      { id: "api-security", href: "/docs/api/security", title: "Security Desk" },
       { id: "api-agent-identity", href: "/docs/api/agent-identity", title: "Agent Identity" },
       { id: "api-agent-readiness", href: "/docs/api/agent-readiness", title: "Agent Readiness" },
       { id: "api-lounge", href: "/docs/api/lounge", title: "Lounge & Signals" },
@@ -59,6 +60,7 @@
     "api-agents": "api-concierge",
     agents: "api-concierge",
     intel: "api-intel",
+    security: "api-security",
     "agent-identity": "api-agent-identity",
   };
 

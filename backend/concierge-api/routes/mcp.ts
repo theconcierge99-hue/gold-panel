@@ -6,11 +6,13 @@ import { corsHeadersFor } from "../concierge-security";
 import {
   ALL_X402_RESOURCE_KINDS,
   isIntelResourceKind,
+  isSecurityResourceKind,
   priceLabelForResource,
   priceUsdcForResource,
   type X402ResourceKind,
 } from "../x402-pricing";
 import { resolveIntelKindFromRequest, handleConciergeIntelRoute } from "../concierge-intel-handler";
+import { handleConciergeSecurityRoute } from "../concierge-security-handler";
 
 const MCP_VERSION = "2024-11-05";
 const SERVER_NAME = "concierge-intel";
@@ -33,6 +35,16 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
   "intel-desk-brief": { message: "morning desk brief", includeInsider: true },
   "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
   "intel-scalp": { symbols: ["BTC", "SOL"], intervals: ["5m", "15m"] },
+  "security-readiness": {
+    target: "https://api.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
+  "security-headers": {
+    target: "https://app.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
 };
 
 function siteOrigin(request: Request): string {
@@ -44,7 +56,7 @@ function siteOrigin(request: Request): string {
 function buildTools(origin: string): McpTool[] {
   const tools: McpTool[] = [];
   for (const kind of ALL_X402_RESOURCE_KINDS) {
-    if (!isIntelResourceKind(kind)) continue;
+    if (!isIntelResourceKind(kind) && !isSecurityResourceKind(kind)) continue;
     const path = `/api/concierge-${kind}`;
     const price = priceLabelForResource(kind);
     tools.push({
@@ -143,7 +155,7 @@ export default async function handleMcp(request: Request): Promise<Response> {
   if (method === "tools/call") {
     const toolName = String(params?.name ?? "");
     const kind = toolName.replace(/_/g, "-") as X402ResourceKind;
-    if (!isIntelResourceKind(kind)) {
+    if (!isIntelResourceKind(kind) && !isSecurityResourceKind(kind)) {
       return new Response(
         JSON.stringify(jsonRpcError(id, -32602, `Unknown tool: ${toolName}`)),
         { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
@@ -203,14 +215,18 @@ export default async function handleMcp(request: Request): Promise<Response> {
     });
 
     const intelKind = resolveIntelKindFromRequest(proxyReq);
-    if (!intelKind) {
+    const securityKind = isSecurityResourceKind(kind) ? kind : null;
+
+    if (!intelKind && !securityKind) {
       return new Response(
-        JSON.stringify(jsonRpcError(id, -32603, "Intel route resolution failed")),
+        JSON.stringify(jsonRpcError(id, -32603, "Route resolution failed")),
         { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
-    const res = await handleConciergeIntelRoute(proxyReq, intelKind);
+    const res = intelKind
+      ? await handleConciergeIntelRoute(proxyReq, intelKind)
+      : await handleConciergeSecurityRoute(proxyReq, securityKind!);
     const text = await res.text();
     return new Response(
       JSON.stringify({

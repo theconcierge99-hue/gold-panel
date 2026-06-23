@@ -237,6 +237,10 @@
       "destination": "/docs-agent-readiness.html"
     },
     {
+      "source": "/docs/api/security",
+      "destination": "/docs-security.html"
+    },
+    {
       "source": "/docs/api/lounge",
       "destination": "/docs-api-lounge.html"
     },

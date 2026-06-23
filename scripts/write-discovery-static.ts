@@ -69,6 +69,11 @@ const skillOutDir = join(publicDir, "skills", "concierge-intel");
 mkdirSync(skillOutDir, { recursive: true });
 copyFileSync(skillSrc, join(skillOutDir, "SKILL.md"));
 
+const securitySkillSrc = join(__dirname, "..", "skills", "concierge-security", "SKILL.md");
+const securitySkillOutDir = join(publicDir, "skills", "concierge-security");
+mkdirSync(securitySkillOutDir, { recursive: true });
+copyFileSync(securitySkillSrc, join(securitySkillOutDir, "SKILL.md"));
+
 const pathCount = Object.keys(openapi.paths as object).length;
 console.log(
   `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources, api-catalog + asyncapi + robots.txt + skill)`,

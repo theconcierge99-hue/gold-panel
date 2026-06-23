@@ -30,6 +30,7 @@ import {
   type TokenPayPaymentPayload,
 } from "./token-pay";
 import { trySoonHolderFreeTier } from "./soon-holder-free-tier";
+import { trySoonSecurityFreeTier } from "./soon-security-tier";
 
 export type { X402ResourceKind };
 
@@ -146,6 +147,20 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "research", "a2a", "bundle"],
   },
+  "security-readiness": {
+    name: "Concierge Security — API readiness",
+    description:
+      "Passive agent-readiness audit for an authorized external API — OpenAPI, discovery files, security headers (platform hosts blocked)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "security", "utility", "research"],
+  },
+  "security-headers": {
+    name: "Concierge Security — HTTP headers",
+    description:
+      "Passive HTTP security header review for an authorized external target (no exploitation; platform hosts blocked)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "security", "utility"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -237,6 +252,10 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-desk-brief";
     case "intel-a2a-pipeline":
       return "/api/concierge-intel-a2a-pipeline";
+    case "security-readiness":
+      return "/api/concierge-security-readiness";
+    case "security-headers":
+      return "/api/concierge-security-headers";
     default:
       return `/api/${kind}`;
   }
@@ -563,6 +582,15 @@ export async function requireX402Payment(
         return {
           ok: true,
           payer: freeTier.wallet,
+          transaction: "soon-holder-free-tier",
+          paymentResponseHeader: null,
+        };
+      }
+      const securityFree = await trySoonSecurityFreeTier(request, kind);
+      if (securityFree.ok) {
+        return {
+          ok: true,
+          payer: securityFree.wallet,
           transaction: "soon-holder-free-tier",
           paymentResponseHeader: null,
         };

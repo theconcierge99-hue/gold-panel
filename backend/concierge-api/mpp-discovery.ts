@@ -238,6 +238,22 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     [],
   ),
+  "security-readiness": jsonSchemaBody(
+    {
+      target: { type: "string", description: "Authorized external https origin (never conc-exe.xyz)" },
+      allowlist: { type: "array", items: { type: "string" }, description: "Optional hostname allowlist" },
+      authorized: { type: "boolean", description: "Must be true — caller attests permission" },
+    },
+    ["target", "authorized"],
+  ),
+  "security-headers": jsonSchemaBody(
+    {
+      target: { type: "string", description: "Authorized external https origin (never conc-exe.xyz)" },
+      allowlist: { type: "array", items: { type: "string" }, description: "Optional hostname allowlist" },
+      authorized: { type: "boolean", description: "Must be true — caller attests permission" },
+    },
+    ["target", "authorized"],
+  ),
 };
 
 const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -529,6 +545,28 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "a2a"],
   ),
+  "security-readiness": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      target: { type: "object" },
+      scores: { type: "object" },
+      dimensions: { type: "array", items: { type: "object" } },
+      disclaimer: { type: "string" },
+    },
+    ["ok", "kind", "target"],
+  ),
+  "security-headers": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      target: { type: "object" },
+      checks: { type: "array", items: { type: "object" } },
+      summary: { type: "object" },
+      disclaimer: { type: "string" },
+    },
+    ["ok", "kind", "target"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -565,6 +603,16 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-meteora": { sortByApy: true, limit: 8, poolHint: "SOL" },
   "intel-desk-brief": { message: "morning Solana desk brief", includeInsider: true },
   "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
+  "security-readiness": {
+    target: "https://api.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
+  "security-headers": {
+    target: "https://app.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
 };
 
 const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -660,6 +708,22 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
       ],
       mesh: "https://conc-exe.xyz/api/agent-a2a-mesh",
     },
+  },
+  "security-readiness": {
+    ok: true,
+    kind: "security-readiness",
+    target: { origin: "https://api.example.com", hostname: "api.example.com" },
+    scores: { mean: 2.1, max: 3, dimensions: 4 },
+    dimensions: [{ id: "spec-presence", name: "OpenAPI spec presence", score: 2, label: "present" }],
+    disclaimer: "Passive audit only — no exploitation.",
+  },
+  "security-headers": {
+    ok: true,
+    kind: "security-headers",
+    target: { origin: "https://app.example.com", hostname: "app.example.com" },
+    summary: { present: 4, total: 6, grade: "moderate" },
+    checks: [{ id: "x-content-type-options", header: "x-content-type-options", present: true }],
+    disclaimer: "Passive header review only.",
   },
 };
 

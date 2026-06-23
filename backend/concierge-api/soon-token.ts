@@ -48,6 +48,12 @@ export const SOON_TIERS: SoonTier[] = [
         status: "live",
       },
       {
+        id: "free-security-scout",
+        label: "Free security scout",
+        detail: "3 calls/day on security-readiness and security-headers (passive external audits only; platform hosts blocked).",
+        status: "live",
+      },
+      {
         id: "public-free",
         label: "Public free routes",
         detail: "GET /api/concierge-intel-accuracy and GET/POST /api/mcp — no hold required.",

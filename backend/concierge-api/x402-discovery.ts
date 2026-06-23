@@ -45,6 +45,7 @@ import {
   buildApiCatalogLinkset,
   buildAsyncApiDocument,
 } from "./agent-readiness";
+import { openApiSecurityScopePathItem } from "./concierge-security-openapi";
 import { getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { zauthMetaLinks } from "./zauth";
 
@@ -224,6 +225,26 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
       "Agent-to-agent orchestration — desk brief plus machine-readable A2A handoff and delegate routing to peer agents.",
     priceUsd: "0.25",
     tags: [...X402_OPERATION_TAGS["intel-a2a-pipeline"]],
+  },
+  {
+    kind: "security-readiness",
+    method: "POST",
+    path: "/api/concierge-security-readiness",
+    name: "Concierge Security — API readiness",
+    description:
+      "Passive agent-readiness audit for an authorized external API — OpenAPI, discovery, headers. Concierge platform hosts are blocked.",
+    priceUsd: "0.02",
+    tags: [...X402_OPERATION_TAGS["security-readiness"]],
+  },
+  {
+    kind: "security-headers",
+    method: "POST",
+    path: "/api/concierge-security-headers",
+    name: "Concierge Security — HTTP headers",
+    description:
+      "Passive HTTP security header review for an authorized external target. No exploitation; platform hosts blocked.",
+    priceUsd: "0.02",
+    tags: [...X402_OPERATION_TAGS["security-headers"]],
   },
 ];
 
@@ -412,6 +433,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
     paths[r.path] = openApiPathItem(r, base);
   }
   paths["/api/concierge-intel-accuracy"] = openApiIntelAccuracyPathItem(base);
+  paths["/api/concierge-security-scope"] = openApiSecurityScopePathItem(base);
 
   const proofs = ownershipProofs();
   const listing = x402ServiceListingMeta(base);
@@ -464,6 +486,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       { name: "research", description: "Macro snapshot and wire headline digest" },
       { name: "creator", description: "Creator signals & RWA" },
       { name: "rwa", description: "Real World Asset intelligence certificates" },
+      { name: "security", description: "Passive security desk — external targets only; platform hosts blocked" },
     ],
     components: { ...components, schemas },
   };

@@ -33,7 +33,9 @@ export const X402_OPERATION_TAGS: Record<
   | "intel-wire"
   | "intel-meteora"
   | "intel-desk-brief"
-  | "intel-a2a-pipeline",
+  | "intel-a2a-pipeline"
+  | "security-readiness"
+  | "security-headers",
   readonly string[]
 > = {
   news: ["Search", "News", "Research", "RWA"],
@@ -54,6 +56,8 @@ export const X402_OPERATION_TAGS: Record<
   "intel-meteora": ["AI", "Crypto", "Trading", "Utility"],
   "intel-desk-brief": ["AI", "Research", "Trading", "RWA"],
   "intel-a2a-pipeline": ["AI", "Research", "Trading", "RWA", "Utility"],
+  "security-readiness": ["Utility", "Research", "AI"],
+  "security-headers": ["Utility", "Research"],
 };
 
 export const X402_SERVICE_NAME = "Concierge Agent";

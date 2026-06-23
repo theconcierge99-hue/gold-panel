@@ -9,7 +9,16 @@ import {
   siteOriginFromRequest,
   type RateLimitState,
 } from "./agent-readiness";
-import { handleConciergeIntelRoute, resolveIntelKindFromRequest } from "./concierge-intel-handler";
+import {
+  handleConciergeIntelRoute,
+  resolveIntelKindFromRequest,
+} from "./concierge-intel-handler";
+import {
+  handleConciergeSecurityRoute,
+  handleSecurityScopeRoute,
+  isSecurityScopeRoute,
+  resolveSecurityKindFromRequest,
+} from "./concierge-security-handler";
 import handleAgentA2aMesh from "./routes/agent-a2a-mesh";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
@@ -115,6 +124,19 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
   const intelKind = resolveIntelKindFromRequest(request);
   if (intelKind) {
     return dispatchHandler(request, (req) => handleConciergeIntelRoute(req, intelKind), rateLimit);
+  }
+
+  const securityKind = resolveSecurityKindFromRequest(request);
+  if (securityKind) {
+    return dispatchHandler(
+      request,
+      (req) => handleConciergeSecurityRoute(req, securityKind),
+      rateLimit,
+    );
+  }
+
+  if (isSecurityScopeRoute(request)) {
+    return dispatchHandler(request, handleSecurityScopeRoute, rateLimit);
   }
 
   const handler = EXACT_ROUTES[pathname];

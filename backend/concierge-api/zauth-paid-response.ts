@@ -19,6 +19,8 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-scalp": "JSON with 5m/15m TA for BTC/ETH/BNB/SOL USDT (RSI, EMA, levels, perp overlay)",
   "intel-macro": "JSON with marks[], sentiment, macro yields/events/headlines",
   "intel-wire": "JSON with headlines[] from live RSS and Lounge wire memory",
+  "security-readiness": "JSON with passive agent-readiness dimensions and scores for external target",
+  "security-headers": "JSON with HTTP security header checks and grade for external target",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

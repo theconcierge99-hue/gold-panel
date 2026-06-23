@@ -18,7 +18,10 @@ export type X402IntelKind =
   | "intel-desk-brief"
   | "intel-a2a-pipeline";
 
-export type X402ResourceKind = X402CoreKind | X402IntelKind;
+/** Passive security desk — scout tier ($0.02), external targets only */
+export type X402SecurityKind = "security-readiness" | "security-headers";
+
+export type X402ResourceKind = X402CoreKind | X402IntelKind | X402SecurityKind;
 
 export const X402_READ_PRICE_USDC = 0.1;
 export const X402_READ_PRICE_ATOMIC = "100000";
@@ -47,8 +50,22 @@ export const X402_RAW_INTEL_KINDS: readonly X402IntelKind[] = [
   "intel-whales",
 ] as const;
 
+/** Security scout routes — same price band as raw intel */
+export const X402_RAW_SECURITY_KINDS: readonly X402SecurityKind[] = [
+  "security-readiness",
+  "security-headers",
+] as const;
+
 export function isRawIntelKind(kind: X402ResourceKind): kind is X402IntelKind {
   return (X402_RAW_INTEL_KINDS as readonly string[]).includes(kind);
+}
+
+export function isRawSecurityKind(kind: X402ResourceKind): kind is X402SecurityKind {
+  return (X402_RAW_SECURITY_KINDS as readonly string[]).includes(kind);
+}
+
+export function isSecurityResourceKind(kind: X402ResourceKind): kind is X402SecurityKind {
+  return kind.startsWith("security-") && kind !== "security-scope";
 }
 
 export function usdcToAtomic(usdc: number): string {
@@ -59,14 +76,14 @@ export function usdcToAtomic(usdc: number): string {
 export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
-  if (isRawIntelKind(kind)) return X402_RAW_PRICE_ATOMIC;
+  if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_ATOMIC;
   return X402_SIGNAL_PRICE_ATOMIC;
 }
 
 export function priceUsdcForResource(kind: X402ResourceKind): number {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_USDC;
-  if (isRawIntelKind(kind)) return X402_RAW_PRICE_USDC;
+  if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_USDC;
   return X402_SIGNAL_PRICE_USDC;
 }
 
@@ -98,4 +115,6 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "intel-meteora",
   "intel-desk-brief",
   "intel-a2a-pipeline",
+  "security-readiness",
+  "security-headers",
 ] as const;

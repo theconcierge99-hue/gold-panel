@@ -31,6 +31,14 @@ When payments are enabled, `GET /api/x402-config` may include **merchant receive
 - Do **not** publish screenshots of full config responses in tickets if you want to limit address visibility.
 - Never add private keys or RPC secrets to that endpoint (they are not included by design).
 
+## Security desk (platform guard)
+
+`POST /api/concierge-security-*` routes probe **external** targets only. `conc-exe.xyz`, Vercel project hosts, and private networks are **hard-blocked** in code — not configurable off in production. See [concierge-security.md](concierge-security.md).
+
+## Language in APIs and docs
+
+API errors, OpenAPI examples, skills, and integrator docs use **English only**. Multilingual output applies to **Concierge LLM chat** (`POST /api/concierge`), not to machine-facing routes or code samples.
+
 ## Documentation rules
 
 1. Use placeholders: `your-domain.com`, `0xYourMerchantAddress`, `your_gemini_api_key`.
