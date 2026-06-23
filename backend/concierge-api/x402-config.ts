@@ -232,7 +232,7 @@ export function getPublicX402Config() {
       walletHeader: "X-Soon-Holder-Wallet",
       freeRawPerDay: Number(process.env.SOON_HOLDER_FREE_RAW_PER_DAY ?? "5") || 5,
       minHoldUi: Number(process.env.SOON_HOLDER_MIN_TOKENS ?? "50000") || 50000,
-      note: "POST raw-tier intel with X-Soon-Holder-Wallet when SOON mint is live — no x402 if Deluxe tier+ balance.",
+      note: "POST raw-tier intel with X-Soon-Holder-Wallet when TCX mint is live — no x402 if Deluxe tier+ balance.",
     },
     soonHolderTiers: publicSoonHolderTiers(),
     mcpEndpoint: "/api/mcp",

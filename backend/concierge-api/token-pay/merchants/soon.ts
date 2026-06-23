@@ -54,8 +54,8 @@ export function buildSoonMerchantFromEnv(solPayTo: string | null): TokenPayMerch
 
   return {
     id: SOON_MERCHANT_ID,
-    symbol: process.env.TOKEN_PAY_SOON_SYMBOL?.trim() || "SOON",
-    name: process.env.TOKEN_PAY_SOON_NAME?.trim() || "SOON",
+    symbol: process.env.TOKEN_PAY_SOON_SYMBOL?.trim() || "TCX",
+    name: process.env.TOKEN_PAY_SOON_NAME?.trim() || "TCX",
     mint,
     decimals: numEnv("SOON_TOKEN_DECIMALS", 6),
     payTo: solPayTo,
@@ -70,6 +70,6 @@ export function buildSoonMerchantFromEnv(solPayTo: string | null): TokenPayMerch
     resourceKinds: parseSoonResourceKinds(),
     comingSoonMessage:
       process.env.TOKEN_PAY_SOON_COMING_SOON?.trim() ||
-      "SOON — not available yet. Will unlock after token launch.",
+      "TCX — coming soon. Fair launch on Pump.fun at T0.",
   };
 }

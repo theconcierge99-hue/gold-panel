@@ -93,6 +93,8 @@
   .btn:hover{border-color:var(--chrome);color:var(--chrome-bright)}
   .btn.gold{border-color:var(--gold);color:var(--gold)}
   .btn.gold:hover{background:var(--gold-hover-bg);border-color:var(--gold)}
+  a.btn.demo-nav-btn{border-color:var(--gold);color:var(--gold);text-decoration:none;background:rgba(201,168,76,.06)}
+  a.btn.demo-nav-btn:hover{background:var(--gold-hover-bg)}
 
   .theme-toggle{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden}
   .theme-btn{font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;padding:7px 11px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all .15s}
@@ -122,6 +124,12 @@
   .nav-i:hover{color:var(--text-primary)}
   .nav-i.active{border-left-color:var(--gold);background:var(--nav-active-bg);color:var(--text-primary)}
   .nav-i .badge{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--gold);background:rgba(201,168,76,.08);padding:1px 6px;border-radius:2px}
+  a.nav-i--demo{
+    margin:6px 10px 10px;border:1px solid var(--gold);border-left:2px solid var(--gold)!important;
+    border-radius:4px;color:var(--gold)!important;font-weight:500;letter-spacing:.04em;
+    background:rgba(201,168,76,.06);
+  }
+  a.nav-i--demo:hover{background:rgba(201,168,76,.12);color:var(--gold)!important}
   .cat-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:9px;vertical-align:middle}
 
   /* MAIN */
@@ -671,6 +679,7 @@
         <button type="button" class="theme-btn" data-theme-btn="light" id="themeLight">Light</button>
       </div>
       <div class="live" id="liveBadge" title="Market data source"><span class="dot"></span> <span id="liveLabel">Live</span></div>
+      <a class="btn demo-nav-btn" href="/demo">▶ Demo</a>
       <button type="button" class="btn gold" id="createSignalBtn">+ Create Signal</button>
       <button class="btn" id="loginBtn" onclick="openWalletModal()">Login</button>
     </div>
@@ -680,11 +689,12 @@
     <div class="sidebar-body">
     <div class="nav-group">
       <div class="nav-h">Navigate</div>
+      <a class="nav-i nav-i--demo" href="/demo">▶ Product demo</a>
       <a class="nav-i" href="/agent">Concierge Agent</a>
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
-      <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">SOON</span></div>
+      <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -821,21 +831,21 @@
     <!-- TOKEN (utility — full page at /token) -->
     <section class="view" id="view-token">
       <div class="tok-wrap">
-        <p class="tok-eyebrow">Utility token · pre-launch</p>
+        <p class="tok-eyebrow">Utility token · coming soon</p>
         <div class="tok-title-row">
-          <h1 class="tok-name">SOON</h1>
-          <span class="tok-symbol">SOON</span>
-          <span class="tok-soon-badge">Pre-launch</span>
+          <h1 class="tok-name">TCX</h1>
+          <span class="tok-symbol">TCX</span>
+          <span class="tok-soon-badge">Coming soon</span>
         </div>
-        <p class="tok-draft-note"><strong>SOON</strong> — CA at T0. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a></p>
-        <p class="tok-lead">55% ops · 25% to token (buyback + LP) · 20% treasury. Pay in SOON → 80% burn per tx.</p>
+        <p class="tok-draft-note"><strong>TCX</strong> — CA at T0. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a></p>
+        <p class="tok-lead">55% ops · 25% to token (buyback + LP) · 20% treasury. Pay in TCX → 80% burn per tx.</p>
         <div class="tok-pills" style="margin-bottom:28px">
           <span class="tok-pill">Deluxe 50k · Executive 250k · President 1M+</span>
-          <span class="tok-pill">~30% SOON checkout discount</span>
+          <span class="tok-pill">~30% TCX checkout discount</span>
           <span class="tok-pill">5 free raw intel / day (Deluxe+)</span>
         </div>
         <div class="tok-grid" style="margin-bottom:28px">
-          <div class="tok-card"><h3>Deluxe</h3><p>SOON pay · free raw intel · Concierge credits (Q4).</p></div>
+          <div class="tok-card"><h3>Deluxe</h3><p>TCX pay · free raw intel · Concierge credits (Q4).</p></div>
           <div class="tok-card"><h3>Executive</h3><p>Discover badge · signal credits · transparency early access.</p></div>
           <div class="tok-card"><h3>President</h3><p>Integration headroom · governance vote · webhook beta.</p></div>
           <div class="tok-card"><h3>Buyback</h3><p>15% net USDC → 60% burn / 40% LP weekly.</p></div>
@@ -1881,7 +1891,7 @@
         toast('Choose payment chain ($0.02 publish fee)…');
         chain=await showPaymentConfirm({
           title:'Publish signal',
-          subtitle:'Minimum settlement fee · USDC or SOON (coming soon)',
+          subtitle:'Minimum settlement fee · USDC or TCX (coming soon)',
           story:title,
           confirmLabel:'Pay & publish',
           amountUsdc:cfg.signalPublishUsdc||0.02,
@@ -2278,7 +2288,7 @@
       evmPayTo: cfg.evmPayTo || undefined,
       solMerchantUsdcAta: cfg.solMerchantUsdcAta,
       tokenMerchants: merchants,
-      tokenPaySymbol: cfg.tokenPaySymbol || def.symbol || 'SOON',
+      tokenPaySymbol: cfg.tokenPaySymbol || def.symbol || 'TCX',
       acceptsTokenPaySol: !!(cfg.acceptsTokenPaySol ?? cfg.acceptsSoonSol),
       tokenPayMint: cfg.tokenPayMint || cfg.soonMint || def.mint || undefined,
       tokenUsdcRate: cfg.tokenUsdcRate ?? cfg.soonUsdcRate,
@@ -2298,7 +2308,7 @@
     const m = err?.message || String(err);
     if(preferredChain === 'soon'){
       if(/Payment cancelled/i.test(m)) return m;
-      if(/Insufficient SOON|No SOON token account|Merchant SOON account/i.test(m)) return m;
+      if(/Insufficient TCX|No TCX token account|Merchant TCX account|Insufficient SOON|No SOON token account|Merchant SOON account/i.test(m)) return m;
       if(/SOL for fees/i.test(m)) return m;
     }
     if(preferredChain === 'sol'){
@@ -2755,7 +2765,7 @@
     try{
       payChain = await showPaymentConfirm({
         title: 'Open creator signal',
-        subtitle: '0.1 USDC or SOON · choose payment method',
+        subtitle: '0.1 USDC or TCX · choose payment method',
         story: title || source || signalId,
         confirmLabel: 'Pay & read signal',
         amountUsdc: cfg.signalOpenUsdc || 0.1,
@@ -2799,7 +2809,7 @@
     try{
       payChain = await showPaymentConfirm({
         title: 'Open article',
-        subtitle: '0.1 USDC or SOON · choose payment method',
+        subtitle: '0.1 USDC or TCX · choose payment method',
         story: title,
         confirmLabel: 'Pay & open article',
         openArticleTab: true,
@@ -2846,7 +2856,7 @@
       const preview = String(payload.message || payload.signal?.title || '').slice(0, 140);
       preferredChain = await showPaymentConfirm({
         title: payload.mode === 'enhance' ? 'AI enhance signal' : 'Concierge chat',
-        subtitle: '0.1 USDC or SOON · choose payment method',
+        subtitle: '0.1 USDC or TCX · choose payment method',
         story: preview,
         confirmLabel: payload.mode === 'enhance' ? 'Pay & enhance' : 'Pay & send',
       });

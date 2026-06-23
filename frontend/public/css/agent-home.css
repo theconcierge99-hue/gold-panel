@@ -29,6 +29,14 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 }
 .pg-theme-btn:hover{color:var(--pg-accent)}
 
+.pg-demo-btn{
+  font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--pg-accent);color:var(--pg-accent);
+  text-decoration:none;border-radius:4px;white-space:nowrap;flex-shrink:0;
+  background:rgba(201,168,76,.08);transition:background .15s,border-color .15s;
+}
+.pg-demo-btn:hover{background:var(--pg-accent-glow);border-color:var(--pg-accent)}
+
 .agent-hero-wrap{
   position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center;
   padding:0 20px 96px;min-height:calc(100vh - 52px);overflow:hidden;
@@ -78,7 +86,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 
 .agent-cta-row{
   display:inline-flex;flex-wrap:wrap;gap:12px;justify-content:center;
-  padding:14px 18px;border-radius:6px;
+  margin:0 auto 18px;padding:14px 18px;border-radius:6px;
   background:rgba(3,5,8,.82);backdrop-filter:blur(8px);
   border:1px solid var(--pg-panel-border);
 }

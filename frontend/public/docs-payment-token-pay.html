@@ -21,12 +21,12 @@
       <h1 class="docs-title">Token Pay Platform</h1>
       <p class="docs-lead">
         Let each project monetize its <strong>native SPL token</strong> via x402 <strong>self-settle</strong> — without building RPC, price oracle, or on-chain verification infra.
-        The default merchant today is <strong>SOON</strong> (Concierge utility token).
+        The default merchant today is <strong>TCX</strong> (Concierge utility token).
       </p>
 
       <div class="card">
         <p><strong>Concierge Token Pay</strong> complements USDC settlement via <a href="/docs/integration/payai">PayAI</a> / <a href="/docs/integration/dexter">Dexter</a>. Users pay in the project token on Solana (user pays SOL gas); the server verifies the transfer on-chain — no facilitator hot wallet.</p>
-        <p style="margin-top:12px"><strong>Status:</strong> SOON appears in the Lounge payment modal as <em>Coming soon</em> until the token launches. After launch, set <code>SOON_TOKEN_MINT</code> on Vercel — pricing flows from DexScreener with <code>SOON_USDC_RATE</code> as fallback.</p>
+        <p style="margin-top:12px"><strong>Status:</strong> TCX appears in the Lounge payment modal as <em>Coming soon</em> until the token launches. After launch, set <code>SOON_TOKEN_MINT</code> on Vercel — pricing flows from DexScreener with <code>SOON_USDC_RATE</code> as fallback.</p>
       </div>
 
       <h2 class="docs-h2">What is Token Pay?</h2>
@@ -189,7 +189,7 @@ const verified = await tp.verifyPayment({ merchantId: "acme", usdAmount: 0.1, re
             <tr><td><code>ready</code></td><td>Will appear in 402 accepts for the probed resource</td></tr>
             <tr><td><code>ata_missing</code></td><td>Send a tiny token transfer to <code>payTo</code> once</td></tr>
             <tr><td><code>price_unavailable</code></td><td>Set <code>fallbackUsd</code> or list on DexScreener</td></tr>
-            <tr><td><code>coming_soon</code></td><td>Mint not live yet (e.g. SOON pre-launch)</td></tr>
+            <tr><td><code>coming_soon</code></td><td>Mint not live yet (e.g. TCX pre-launch)</td></tr>
           </tbody>
         </table>
         <p>Browser UI: <a href="/agent/discover">Agent Discover</a> · <a href="/agent/token-pay">Token Pay Dashboard</a> shows live readiness + settlement analytics.</p>
@@ -363,20 +363,20 @@ curl -s -X POST https://conc-exe.xyz/api/concierge \
 <pre><code>{
   "scheme": "exact",
   "network": "solana:…",
-  "amount": "&lt;atomic SOON&gt;",
-  "asset": "&lt;SOON mint&gt;",
+  "amount": "&lt;atomic TCX&gt;",
+  "asset": "&lt;TCX mint&gt;",
   "payTo": "&lt;merchant receive wallet&gt;",
   "extra": {
     "settlement": "self",
     "merchantId": "soon",
-    "name": "SOON",
+    "name": "TCX",
     "decimals": 6
   }
 }</code></pre>
         <p>Executive Lounge signs <code>transferChecked</code> in the browser; the Edge API simulates, broadcasts, and confirms the merchant token delta.</p>
       </div>
 
-      <h2 class="docs-h2">Environment (SOON merchant)</h2>
+      <h2 class="docs-h2">Environment (TCX merchant)</h2>
       <div class="card">
 <pre><code>TOKEN_PAY_DEFAULT_MERCHANT=soon
 SOON_TOKEN_MINT=           # set after pump.fun launch
@@ -384,8 +384,8 @@ SOON_TOKEN_DECIMALS=6
 SOON_PRICE_SOURCE=dexscreener
 SOON_PRICE_MAX_AGE_SEC=60
 SOON_USDC_RATE=0.00008     # fallback
-X402_SOL_PAY_TO=           # merchant receive (USDC + SOON)</code></pre>
-        <p>Add partner merchants via <code>TOKEN_PAY_MERCHANTS_JSON</code> (see registration checklist). SOON uses <code>X402_SOL_PAY_TO</code> for receive. See <a href="/docs/architecture">Architecture</a> and <code>docs/token-pay-platform.md</code> in the repository.</p>
+X402_SOL_PAY_TO=           # merchant receive (USDC + TCX)</code></pre>
+        <p>Add partner merchants via <code>TOKEN_PAY_MERCHANTS_JSON</code> (see registration checklist). TCX uses <code>X402_SOL_PAY_TO</code> for receive. See <a href="/docs/architecture">Architecture</a> and <code>docs/token-pay-platform.md</code> in the repository.</p>
       </div>
 
       <h2 class="docs-h2">For your community (end users)</h2>
@@ -402,8 +402,8 @@ X402_SOL_PAY_TO=           # merchant receive (USDC + SOON)</code></pre>
       <h2 class="docs-h2">Related</h2>
       <div class="card">
         <ul>
-          <li><a href="/token">SOON tokenomics</a> — operating policy · holder tiers</li>
-          <li><a href="/token/transparency">SOON transparency</a> — weekly buyback &amp; burn ledger</li>
+          <li><a href="/token">TCX tokenomics</a> — operating policy · holder tiers</li>
+          <li><a href="/token/transparency">TCX transparency</a> — weekly buyback &amp; burn ledger</li>
           <li><a href="/lounge">Executive Lounge</a> — pay modal lists USDC + all live Token Pay merchants</li>
           <li><a href="/docs/builders">For Builders</a> — integration paths for agents</li>
           <li><a href="/docs/payment/x402">x402 Protocol</a> — USDC flow via PayAI/Dexter</li>
@@ -412,7 +412,7 @@ X402_SOL_PAY_TO=           # merchant receive (USDC + SOON)</code></pre>
 
       <div class="cta-row">
         <a class="btn gold" href="/docs/payment/x402">x402 USDC</a>
-        <a class="btn" href="/token">SOON token</a>
+        <a class="btn" href="/token">TCX token</a>
         <a class="btn" href="/docs/pricing">Pricing</a>
       </div>
       <p class="docs-foot">Concierge · Executive Lounge · Not financial advice</p>

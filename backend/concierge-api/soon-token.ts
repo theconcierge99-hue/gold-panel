@@ -37,8 +37,8 @@ export const SOON_TIERS: SoonTier[] = [
     benefits: [
       {
         id: "soon-checkout",
-        label: "SOON checkout (all 17 routes)",
-        detail: "~30% less SOON vs USDC list price (SOON_TOKEN_DISCOUNT_PERCENT). 80% of each payment burns.",
+        label: "TCX checkout (all 18 routes)",
+        detail: "~30% less TCX vs USDC list price (SOON_TOKEN_DISCOUNT_PERCENT). 80% of each payment burns.",
         status: "live",
       },
       {
@@ -78,7 +78,7 @@ export const SOON_TIERS: SoonTier[] = [
       {
         id: "inherits-deluxe",
         label: "Everything in Deluxe",
-        detail: "Includes live SOON checkout and raw intel allowance.",
+        detail: "Includes live TCX checkout and raw intel allowance.",
         status: "live",
       },
       {
@@ -91,7 +91,7 @@ export const SOON_TIERS: SoonTier[] = [
       {
         id: "discover-badge",
         label: "Discover agent badge",
-        detail: "Verified SOON holder badge on agt_… cards when min hold met at snapshot.",
+        detail: "Verified TCX holder badge on agt_… cards when min hold met at snapshot.",
         status: "phased",
         phase: "2027 · Q1",
       },
@@ -141,7 +141,7 @@ export const SOON_TIERS: SoonTier[] = [
       {
         id: "bundle-discount",
         label: "Desk-brief bundle",
-        detail: "intel-desk-brief ($0.25) at ~20% lower effective SOON vs list.",
+        detail: "intel-desk-brief ($0.25) at ~20% lower effective TCX vs list.",
         status: "phased",
         phase: "2027 · Q2+",
       },
@@ -226,7 +226,7 @@ export function resolveSoonTier(balanceUi: number): SoonTier | null {
 /** Public API shape for /api/x402-config */
 export function publicSoonHolderTiers() {
   return {
-    snapshotNote: "Phased perks require a published snapshot + 7-day minimum continuous hold. Live rails (SOON pay, free raw) follow env after mint is set.",
+    snapshotNote: "Phased perks require a published snapshot + 7-day minimum continuous hold. Live rails (TCX pay, free raw) follow env after mint is set.",
     tiers: SOON_TIERS.map((t) => ({
       id: t.id,
       label: t.label,

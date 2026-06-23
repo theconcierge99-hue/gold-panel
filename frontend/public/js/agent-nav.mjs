@@ -9,6 +9,8 @@ export function renderAgentSiteFooter(containerId = "agent-site-footer") {
         <nav class="agent-foot-links" aria-label="Site links">
           <a class="agent-foot-link" href="/integrations">Integrations</a>
           <span class="agent-foot-dot" aria-hidden="true">·</span>
+          <a class="agent-foot-link" href="/demo">Demo</a>
+          <span class="agent-foot-dot" aria-hidden="true">·</span>
           <a class="agent-foot-link" href="/agent/skills">Skills</a>
           <span class="agent-foot-dot" aria-hidden="true">·</span>
           <a class="agent-foot-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
@@ -80,6 +82,7 @@ export function renderAgentTopNav(activeId) {
         .join("")}
     </nav>
     <div class="pg-topnav-right">
+      <a class="pg-demo-btn" href="/demo" title="Watch product demo">▶ Demo</a>
       <div class="el-status-pill" title="x402 pay-per-call API">
         <span class="dot"></span> Live API
       </div>

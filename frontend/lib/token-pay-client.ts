@@ -1,11 +1,11 @@
 /**
- * Token Pay UI branding — change symbol/name here when default merchant renames (still "SOON" today).
+ * Token Pay UI branding — default merchant ticker (TCX). Env: TOKEN_PAY_SOON_SYMBOL.
  */
-export const TOKEN_PAY_DEFAULT_SYMBOL = "SOON";
-export const TOKEN_PAY_DEFAULT_NAME = "SOON";
+export const TOKEN_PAY_DEFAULT_SYMBOL = "TCX";
+export const TOKEN_PAY_DEFAULT_NAME = "TCX";
 
 export const TOKEN_PAY_COMING_SOON_DEFAULT =
-  "SOON — not available yet. Will unlock after token launch.";
+  "TCX — coming soon. Fair launch on Pump.fun at T0.";
 
 export type TokenPayServerSlice = {
   defaultMerchantId?: string;

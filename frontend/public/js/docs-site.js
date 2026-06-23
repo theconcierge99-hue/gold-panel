@@ -12,7 +12,7 @@
       { id: "builders-case-study", href: "/docs/builders/case-study", title: "B2B Case Study" },
       { id: "quickstart", href: "/docs/quickstart", title: "Quickstart" },
       { id: "pricing", href: "/docs/pricing", title: "Pricing" },
-      { id: "launch", href: "/docs/launch", title: "SOON Launch" },
+      { id: "launch", href: "/docs/launch", title: "TCX Launch" },
     ]},
     { label: "Payment", items: [
       { id: "payment-x402", href: "/docs/payment/x402", title: "x402 Protocol" },

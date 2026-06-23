@@ -22,6 +22,13 @@ body.pg-page{font-family:'DM Mono','Outfit',monospace;background:var(--pg-bg);co
 .pg-nav a:hover{color:var(--pg-text)}
 .pg-nav a.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
 .pg-topnav-right{justify-self:end;display:flex;align-items:center;gap:10px;margin-left:0}
+.pg-demo-btn{
+  font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--pg-accent);color:var(--pg-accent);
+  text-decoration:none;border-radius:4px;white-space:nowrap;flex-shrink:0;
+  background:rgba(201,168,76,.08);transition:background .15s,border-color .15s;
+}
+.pg-demo-btn:hover{background:var(--pg-accent-glow);border-color:var(--pg-accent)}
 .pg-theme-btn{
   width:34px;height:34px;border:1px solid var(--pg-panel-border);background:transparent;
   color:var(--pg-muted);border-radius:6px;cursor:pointer;font-size:14px;
