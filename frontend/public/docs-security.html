@@ -72,7 +72,7 @@
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"]}'</code></pre>
       <p><strong>Windows PowerShell</strong> — use <code>curl.exe</code> (one line) or:</p>
 <pre><code>Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://api.example.com","allowlist":["*.example.com"]}'</code></pre>
-      <p class="note">Test denylist: use <code>your-preview.vercel.app</code> as <code>target</code>. <strong>403</strong> = blocked; <strong>200</strong> = add to <code>SECURITY_PLATFORM_DENY_HOSTS</code> if it is your infra.</p>
+      <p class="note">Test denylist: use <code>your-preview.vercel.app</code> as <code>target</code>. <strong>403</strong> = platform blocked · <strong>200</strong> = external allowlist pass.</p>
     </div>
   </section>
 

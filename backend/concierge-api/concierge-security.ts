@@ -103,6 +103,11 @@ export function isOriginAllowed(request: Request): boolean {
 }
 
 export function assertAllowedOrigin(request: Request): void {
+  if (!requestOrigin(request)) {
+    // Server-side x402 / agent clients omit Origin (curl, pay, MCP, PowerShell).
+    const method = request.method;
+    if (method === "GET" || method === "HEAD" || method === "POST") return;
+  }
   if (!isOriginAllowed(request)) {
     throw new Error("Origin not allowed");
   }

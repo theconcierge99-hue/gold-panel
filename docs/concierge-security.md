@@ -90,6 +90,8 @@ Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security
 - **403** `platform_scope_forbidden` — host is blocked (expected for Concierge infra)
 - **200** with `platformGuard.passed: true` — not on denylist; add to `SECURITY_PLATFORM_DENY_HOSTS` if it is yours
 
+**Expected:** `403` for `conc-exe.xyz` · `200` for `api.example.com` (after deploy with integrator Origin fix).
+
 ## Rate limits
 
 Stricter than general `/api/*` limits:
