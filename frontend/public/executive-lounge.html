@@ -93,8 +93,6 @@
   .btn:hover{border-color:var(--chrome);color:var(--chrome-bright)}
   .btn.gold{border-color:var(--gold);color:var(--gold)}
   .btn.gold:hover{background:var(--gold-hover-bg);border-color:var(--gold)}
-  a.btn.demo-nav-btn{border-color:var(--gold);color:var(--gold);text-decoration:none;background:rgba(201,168,76,.06)}
-  a.btn.demo-nav-btn:hover{background:var(--gold-hover-bg)}
 
   .theme-toggle{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden}
   .theme-btn{font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.22em;text-transform:uppercase;padding:7px 11px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all .15s}
@@ -124,12 +122,6 @@
   .nav-i:hover{color:var(--text-primary)}
   .nav-i.active{border-left-color:var(--gold);background:var(--nav-active-bg);color:var(--text-primary)}
   .nav-i .badge{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--gold);background:rgba(201,168,76,.08);padding:1px 6px;border-radius:2px}
-  a.nav-i--demo{
-    margin:6px 10px 10px;border:1px solid var(--gold);border-left:2px solid var(--gold)!important;
-    border-radius:4px;color:var(--gold)!important;font-weight:500;letter-spacing:.04em;
-    background:rgba(201,168,76,.06);
-  }
-  a.nav-i--demo:hover{background:rgba(201,168,76,.12);color:var(--gold)!important}
   .cat-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:9px;vertical-align:middle}
 
   /* MAIN */
@@ -679,7 +671,6 @@
         <button type="button" class="theme-btn" data-theme-btn="light" id="themeLight">Light</button>
       </div>
       <div class="live" id="liveBadge" title="Market data source"><span class="dot"></span> <span id="liveLabel">Live</span></div>
-      <a class="btn demo-nav-btn" href="/demo">▶ Demo</a>
       <button type="button" class="btn gold" id="createSignalBtn">+ Create Signal</button>
       <button class="btn" id="loginBtn" onclick="openWalletModal()">Login</button>
     </div>
@@ -689,7 +680,6 @@
     <div class="sidebar-body">
     <div class="nav-group">
       <div class="nav-h">Navigate</div>
-      <a class="nav-i nav-i--demo" href="/demo">▶ Product demo</a>
       <a class="nav-i" href="/agent">Concierge Agent</a>
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
