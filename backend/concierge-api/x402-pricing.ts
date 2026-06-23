@@ -65,7 +65,7 @@ export function isRawSecurityKind(kind: X402ResourceKind): kind is X402SecurityK
 }
 
 export function isSecurityResourceKind(kind: X402ResourceKind): kind is X402SecurityKind {
-  return kind.startsWith("security-") && kind !== "security-scope";
+  return isRawSecurityKind(kind);
 }
 
 export function usdcToAtomic(usdc: number): string {
