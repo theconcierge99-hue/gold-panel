@@ -136,6 +136,65 @@
 
   /* Featured cards */
   .featured{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+  /* MARKET DESK CLOCKS */
+  .market-desk-clocks{
+    position:relative;margin-bottom:30px;padding:22px 24px 20px;
+    border:1px solid var(--border);background:var(--gcard-bg, rgba(12,16,26,.72));
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .market-desk-clocks::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.75;
+  }
+  .market-desk-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .market-desk-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--text-primary);letter-spacing:.02em;line-height:1}
+  .market-desk-sessions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:100%}
+  .sess-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 10px;
+    border:1px solid var(--border);border-radius:999px;
+    font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);
+    transition:border-color .2s,color .2s,background .2s;
+  }
+  .sess-chip--gold{border-color:rgba(201,168,76,.25)}
+  .sess-chip.open{color:var(--text-primary);background:var(--nav-active-bg);border-color:rgba(46,204,138,.35)}
+  .sess-chip--gold.open{border-color:rgba(201,168,76,.55);color:var(--gold)}
+  .sess-dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);opacity:.45;transition:all .2s}
+  .sess-chip.open .sess-dot{background:var(--signal-green);opacity:1;box-shadow:0 0 8px rgba(46,204,138,.45)}
+  .sess-chip--gold.open .sess-dot{background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.45)}
+  .market-desk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px}
+  .clk-card{
+    position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:14px 10px 12px;border:1px solid var(--border);background:var(--sidebar-bg);
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .clk-card:hover{border-color:rgba(201,168,76,.35);box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .clk-face{display:block;margin-bottom:10px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.28))}
+  .clk-ring-outer{fill:rgba(6,8,14,.55);stroke:rgba(201,168,76,.22);stroke-width:1.4}
+  .clk-ring-inner{fill:none;stroke:rgba(255,255,255,.06);stroke-width:1}
+  .clk-mark{stroke:var(--text-muted);stroke-width:.8;stroke-linecap:round;opacity:.35}
+  .clk-mark.major{stroke:var(--gold-dim);stroke-width:1.5;opacity:.75}
+  .clk-num{font-family:'DM Mono',monospace;font-size:8px;fill:var(--text-muted);opacity:.55;user-select:none}
+  .clk-hand-stack{pointer-events:none}
+  .clk-hand-shape.hour{filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+  .clk-hand-shape.minute{filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+  .clk-hand-line.second{opacity:.92}
+  .clk-second-tail{opacity:.92}
+  .clk-hub-ring{fill:rgba(8,10,15,.92);stroke:rgba(201,168,76,.5);stroke-width:1.2}
+  .clk-hub{fill:var(--gold);stroke:rgba(255,255,255,.18);stroke-width:.6}
+  [data-theme="light"] .clk-ring-outer{fill:rgba(255,255,255,.88);stroke:rgba(154,122,50,.35)}
+  [data-theme="light"] .clk-mark{opacity:.5}
+  .clk-label{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--text-primary);letter-spacing:.02em;line-height:1.15}
+  .clk-digital{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);margin-top:6px;letter-spacing:.06em}
+  .clk-date{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--text-secondary);margin-top:5px;letter-spacing:.04em;line-height:1.3}
+  .clk-sub{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-muted);margin-top:4px}
+  .clk-session-dot{
+    position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;
+    background:var(--text-muted);opacity:.35;transition:all .2s;
+  }
+  .clk-session-dot.open{background:var(--signal-green);opacity:1;box-shadow:0 0 8px rgba(46,204,138,.5)}
+  @media (prefers-reduced-motion:reduce){
+    .clk-hand-group[data-hand="second"]{display:none}
+  }
   .creator-signals-lane{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:34px}
   .fcard{position:relative;display:flex;flex-direction:column;min-height:168px;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));border:1px solid var(--border);padding:22px 24px;cursor:pointer;overflow:hidden}
   .fcard::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.7;z-index:1}
@@ -517,6 +576,10 @@
     .app.concierge-mode aside.right{grid-row:unset;display:none}
     .app.concierge-mode main{grid-row:2;min-height:0;padding:0;overflow:hidden}
     .featured{grid-template-columns:1fr}
+    .market-desk-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .market-desk-clocks{padding:18px 16px 16px;margin-bottom:24px}
+    .market-desk-title{font-size:18px}
+    .clk-face{width:96px!important;height:96px!important}
     .creator-signals-lane{grid-template-columns:1fr}
     .grid{grid-template-columns:1fr}
     .header-menu-btn,.nav-backdrop,.mobile-nav,.conc-drawer-btn{display:flex}
@@ -719,6 +782,14 @@
   <main>
     <!-- LOUNGE -->
     <section class="view show" id="view-lounge">
+      <section class="market-desk-clocks" id="marketDeskClocks" aria-label="Global market desk clocks">
+        <div class="market-desk-head">
+          <h2 class="market-desk-title">Market Desk</h2>
+          <div class="market-desk-sessions" id="marketSessionStrip" aria-label="Trading session status"></div>
+        </div>
+        <div class="market-desk-grid" id="marketDeskClockGrid"></div>
+      </section>
+
       <div class="section-h">
         <h2>Creator Signals</h2>
         <div class="meta" id="creatorMeta">Lounge desk</div>
@@ -3356,5 +3427,6 @@
   window.addEventListener('orientationchange',()=>setTimeout(syncHeaderHeight,150));
   window.visualViewport?.addEventListener('resize',syncHeaderHeight);
 </script>
+<script type="module" src="/js/market-clocks.mjs"></script>
 </body>
 </html>
