@@ -1,6 +1,7 @@
 @import url("/css/concierge-tokens.css");
 @import url("/css/concierge-premium.css");
 @import url("/css/concierge-light-mode.css");
+@import url("/css/concierge-surface-v2.css");
 
 *{box-sizing:border-box;margin:0;padding:0}
 body.int-page{
@@ -9,6 +10,7 @@ body.int-page{
 }
 .int-wrap{max-width:1100px;margin:0 auto;padding:40px 24px 72px}
 .int-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:40px;flex-wrap:wrap}
+.int-top-actions{display:flex;align-items:center;gap:12px}
 .int-back{
   font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--int-muted);
   text-decoration:none;

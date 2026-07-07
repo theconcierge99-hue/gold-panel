@@ -1,6 +1,6 @@
 (function () {
   function markPremium() {
-    document.body.classList.add("el-premium");
+    document.body.classList.add("el-premium", "docs-v2");
   }
   if (document.body) markPremium();
   else document.addEventListener("DOMContentLoaded", markPremium);
