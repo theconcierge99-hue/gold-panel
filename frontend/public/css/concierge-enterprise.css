@@ -365,9 +365,12 @@ body.el-premium .agent-subline {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(15px, 2.2vw, 19px);
   font-style: italic;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.55;
   color: var(--pg-muted);
+}
+body.el-premium .agent-home-shell {
+  animation: el-enter 0.55s var(--el-ease) both;
 }
 body.el-premium .agent-terminal {
   border-radius: var(--el-radius-md);

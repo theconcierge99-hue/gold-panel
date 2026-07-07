@@ -239,3 +239,74 @@ export function initTypewriter(el, phrases, intervalMs = 4200) {
   tick();
   return () => clearTimeout(timer);
 }
+
+/** Payment-flow terminal demo — command then x402 settlement status. */
+export function initAgentTerminalDemo(cmdEl, statusEl, origin = "") {
+  if (!cmdEl) return () => {};
+
+  const host = origin.replace(/\/$/, "") || "https://conc-exe.xyz";
+  const scenarios = [
+    {
+      cmd: `pay curl ${host}/api/concierge-intel-macro -d '{}'`,
+      status: "→ 402 Payment Required · USDC $0.02 · Solana",
+      ok: "✔ x402 settled · 200 · macro brief ready",
+    },
+    {
+      cmd: `pay curl ${host}/api/concierge-intel-verdict -d '{"asset":"BTC"}'`,
+      status: "→ 402 Payment Required · USDC $0.10 · Base",
+      ok: "✔ x402 settled · 200 · 48h desk verdict",
+    },
+    {
+      cmd: `curl -s ${host}/.well-known/x402 | jq '.resources | length'`,
+      status: "→ 200 · machine discovery fan-out",
+      ok: "✔ 21 paid routes indexed for agents",
+    },
+    {
+      cmd: `npx agentcash add ${host}`,
+      status: "→ AgentCash catalog · conc-exe/concierge-agent",
+      ok: "✔ Ready for pay-per-call intel probes",
+    },
+  ];
+
+  let si = 0;
+  let phase = "type";
+  let ci = 0;
+  let timer = 0;
+
+  function setStatus(text, ok = false) {
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.classList.toggle("ok", ok);
+  }
+
+  function tick() {
+    const s = scenarios[si];
+    if (phase === "type") {
+      ci++;
+      cmdEl.textContent = s.cmd.slice(0, ci);
+      if (ci >= s.cmd.length) {
+        phase = "status";
+        setStatus(s.status, false);
+        timer = window.setTimeout(tick, 1800);
+        return;
+      }
+      timer = window.setTimeout(tick, 18);
+      return;
+    }
+    if (phase === "status") {
+      setStatus(s.ok, true);
+      phase = "hold";
+      timer = window.setTimeout(tick, 2400);
+      return;
+    }
+    si = (si + 1) % scenarios.length;
+    phase = "type";
+    ci = 0;
+    setStatus("", false);
+    cmdEl.textContent = "";
+    timer = window.setTimeout(tick, 400);
+  }
+
+  tick();
+  return () => clearTimeout(timer);
+}

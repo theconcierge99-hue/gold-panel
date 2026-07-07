@@ -249,6 +249,39 @@ html[data-theme="light"] .agent-foot-link {
   color: #4a3a0e !important;
   font-weight: 500;
 }
+html[data-theme="light"] .agent-module-card p {
+  color: #1e2a3a !important;
+}
+html[data-theme="light"] .agent-proof-item {
+  background: #ffffff !important;
+  border-color: #c8c2b6 !important;
+  box-shadow: 0 2px 14px rgba(10, 16, 24, 0.06);
+}
+html[data-theme="light"] .agent-proof-label {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .agent-module-card {
+  background: #ffffff !important;
+  border-color: #c8c2b6 !important;
+  box-shadow: 0 2px 16px rgba(10, 16, 24, 0.06);
+}
+html[data-theme="light"] .agent-trust-set span:not(.dot) {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .agent-terminal-status {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .agent-terminal-status.ok {
+  color: #157a47 !important;
+}
+html[data-theme="light"] body.el-premium .app {
+  font-weight: 400;
+}
+html[data-theme="light"] .app .fcard .news-teaser,
+html[data-theme="light"] .app .gcard .news-teaser {
+  font-weight: 400 !important;
+  font-size: 13.5px !important;
+}
 
 /* Agent / resources nav */
 html[data-theme="light"] .pg-topnav {
