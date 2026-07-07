@@ -9,9 +9,9 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 /* Top nav — logo / links / theme in balanced columns so nav sits true center */
 .pg-topnav{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
-  padding:0 20px;height:52px;
-  border-bottom:1px solid var(--pg-panel-border);background:rgba(10,14,20,.92);
-  backdrop-filter:blur(8px);position:relative;z-index:20;flex-shrink:0;
+  padding:0 24px;height:60px;
+  border-bottom:1px solid var(--pg-panel-border);background:rgba(6,8,16,.85);
+  backdrop-filter:blur(20px) saturate(1.25);position:relative;z-index:20;flex-shrink:0;
 }
 .pg-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pg-text);font-family:'DM Mono',monospace;font-size:15px;justify-self:start}
 .pg-logo-dim{color:var(--pg-accent)}
@@ -19,6 +19,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 .pg-nav a{
   font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   padding:8px 12px;color:var(--pg-muted);text-decoration:none;border-radius:4px;
+  position:relative;
 }
 .pg-nav a:hover{color:var(--pg-text)}
 .pg-nav a.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
@@ -39,7 +40,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 
 .agent-hero-wrap{
   position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center;
-  padding:0 20px 96px;min-height:calc(100vh - 52px);overflow:hidden;
+  padding:0 24px 100px;min-height:calc(100vh - 60px);overflow:hidden;
 }
 #agent-matrix-canvas,#agent-logo-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #agent-matrix-canvas{z-index:0;opacity:.85}
@@ -86,17 +87,39 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 
 .agent-cta-row{
   display:inline-flex;flex-wrap:wrap;gap:12px;justify-content:center;
-  margin:0 auto 18px;padding:14px 18px;border-radius:6px;
-  background:rgba(3,5,8,.82);backdrop-filter:blur(8px);
-  border:1px solid var(--pg-panel-border);
+  margin:22px auto 20px;padding:16px 20px;border-radius:var(--el-radius-lg,12px);
+  background:rgba(6,8,16,.78);backdrop-filter:blur(16px);
+  border:1px solid rgba(212,179,86,.15);
+  box-shadow:var(--el-shadow-md,0 8px 36px rgba(0,0,0,.38));
 }
 .agent-cta-btn{
   font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-  padding:14px 22px;border:1px solid rgba(255,255,255,.35);background:transparent;
-  color:var(--pg-text);text-decoration:none;border-radius:2px;transition:all .15s;
+  padding:14px 24px;border:1px solid rgba(255,255,255,.2);background:transparent;
+  color:var(--pg-text);text-decoration:none;border-radius:var(--el-radius-sm,5px);
+  transition:all .22s cubic-bezier(.22,1,.36,1);
 }
-.agent-cta-btn:hover{border-color:var(--pg-accent);color:var(--pg-accent);background:var(--pg-accent-glow)}
-.agent-cta-btn.primary{border-color:var(--pg-accent);color:var(--pg-accent)}
+.agent-cta-btn:hover{border-color:var(--pg-accent);color:var(--pg-accent);background:var(--pg-accent-glow);transform:translateY(-1px)}
+.agent-cta-btn.primary{
+  border-color:var(--pg-accent);color:var(--pg-accent);
+  background:linear-gradient(135deg,rgba(212,179,86,.2),rgba(212,179,86,.08));
+  box-shadow:0 0 32px rgba(212,179,86,.12);
+}
+
+.agent-stats-row{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:28px 40px;
+  margin-top:8px;padding:18px 24px;
+  border:1px solid var(--pg-panel-border);border-radius:var(--el-radius-md,8px);
+  background:rgba(6,8,16,.55);backdrop-filter:blur(10px);
+  max-width:520px;margin-left:auto;margin-right:auto;
+}
+.agent-stat{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.agent-stat-val{
+  font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;
+  color:var(--pg-accent);letter-spacing:.02em;line-height:1;
+}
+.agent-stat-lbl{
+  font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--pg-dim);
+}
 
 .agent-home-foot{
   position:absolute;bottom:0;left:0;right:0;z-index:10;padding:10px 20px 12px;

@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -9,26 +8,17 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import statusCss from "../components/concierge-status-page.css?url";
+import { ConciergeStatusPage } from "../components/concierge-status-page";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ConciergeStatusPage
+      code="404"
+      title="Intelligence not found"
+      lead="This route isn't on the Concierge desk. The page may have moved, or the URL was mistyped."
+      terminal="concierge --route-not-found"
+    />
   );
 }
 
@@ -37,31 +27,48 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+    <div className="concierge-status-page">
+      <div className="concierge-status-ambient" aria-hidden="true">
+        <div className="concierge-status-blob concierge-status-blob--blue" />
+        <div className="concierge-status-blob concierge-status-blob--gold" />
+      </div>
+      <div className="concierge-status-shell">
+        <div className="concierge-status-logo">
+          <img
+            src="/images/the-concierge-logo.png"
+            alt="The Concierge"
+            width={72}
+            height={72}
+          />
+        </div>
+        <div className="concierge-status-code" aria-hidden="true">
+          500
+        </div>
+        <h1 className="concierge-status-title">Desk interrupted</h1>
+        <p className="concierge-status-lead">
+          Something went wrong loading this view. Refresh or return to the Lounge.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <nav className="concierge-status-actions" aria-label="Recovery actions">
           <button
+            type="button"
+            className="concierge-status-btn gold"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
+          <a className="concierge-status-btn" href="/lounge">
+            Executive Lounge
           </a>
-        </div>
+          <a className="concierge-status-btn" href="/agent">
+            Agent Hub
+          </a>
+        </nav>
+        <p className="concierge-status-term" aria-hidden="true">
+          <span className="prompt">$</span> concierge --recover
+        </p>
       </div>
     </div>
   );
@@ -79,13 +86,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Private intelligence terminal for markets and the onchain economy." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@Th3concierge_" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: statusCss },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap",
       },
+      { rel: "icon", href: "/images/the-concierge-logo.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -96,11 +106,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body style={{ margin: 0 }}>
         {children}
         <Scripts />
       </body>

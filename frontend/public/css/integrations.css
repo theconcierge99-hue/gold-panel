@@ -124,9 +124,9 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-registry.is-expanded .int-grid--full{display:grid}
 .int-registry.is-expanded .int-registry-hint{display:none}
 .int-card{
-  padding:18px 18px 16px;border:1px solid var(--int-border);background:var(--int-panel);
-  border-radius:8px;text-decoration:none;color:inherit;display:flex;flex-direction:column;
-  min-height:0;transition:border-color .15s,background .15s;
+  padding:20px 20px 18px;border:1px solid var(--int-border);background:var(--int-panel);
+  border-radius:var(--el-radius-lg,12px);text-decoration:none;color:inherit;display:flex;flex-direction:column;
+  min-height:0;transition:border-color .2s,background .2s,box-shadow .2s,transform .2s;
 }
 a.int-card:hover{border-color:var(--int-gold-dim);background:var(--int-glow)}
 .int-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}

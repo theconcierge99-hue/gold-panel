@@ -5,15 +5,20 @@ import {
   initMatrixRain,
   initTypewriter,
 } from "./agent-home-fx.mjs";
+import { initConciergeFx } from "./concierge-fx.mjs";
 
 renderAgentTopNav("home");
 renderAgentSiteFooter();
 
 const countEl = document.getElementById("agent-endpoint-count");
-if (countEl) countEl.textContent = String(countBySegment().total);
+const statEndpoints = document.getElementById("agent-stat-endpoints");
+const total = countBySegment().total;
+if (countEl) countEl.textContent = String(total);
+if (statEndpoints) statEndpoints.textContent = `${total}+`;
 
 const stopMatrix = initMatrixRain(document.getElementById("agent-matrix-canvas"));
 const stopLogo = initConciergeLogoParticles(document.getElementById("agent-logo-canvas"));
+const stopFx = initConciergeFx();
 
 initTypewriter(document.getElementById("agent-typewriter"), [
   "hottest meteora dlmm yields",
@@ -30,4 +35,5 @@ initTypewriter(document.getElementById("agent-typewriter"), [
 window.addEventListener("pagehide", () => {
   stopMatrix();
   stopLogo();
+  stopFx();
 });

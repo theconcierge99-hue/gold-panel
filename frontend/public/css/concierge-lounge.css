@@ -1,0 +1,533 @@
+/**
+ * Concierge Lounge — chat, mobile nav, drawers, modals.
+ * Loaded on executive-lounge.html only.
+ */
+
+/* ═══════════════════════════════════════════
+   CONCIERGE AI — Chat panel
+   ═══════════════════════════════════════════ */
+
+body.el-premium .concierge-shell {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(212, 179, 86, 0.04), transparent 55%),
+    var(--bg);
+}
+
+body.el-premium .conc-topbar {
+  background: var(--el-glass-header) !important;
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-bottom: 1px solid var(--el-border-subtle);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  position: relative;
+  min-height: 76px;
+  padding: 16px 28px;
+}
+
+body.el-premium .conc-topbar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold) 25%,
+    var(--el-gold-bright) 50%,
+    var(--gold) 75%,
+    transparent
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+body.el-premium .conc-model-title {
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+}
+
+body.el-premium .conc-model-menu {
+  border-radius: var(--el-radius-lg);
+  box-shadow: var(--el-shadow-lg), var(--el-shadow-glow-gold);
+  backdrop-filter: blur(20px);
+  border-color: var(--el-border-subtle);
+  padding: 8px;
+}
+
+body.el-premium .conc-model-opt {
+  border-radius: var(--el-radius-md);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .conc-model-opt.active {
+  box-shadow: inset 0 0 0 1px rgba(212, 179, 86, 0.2);
+}
+
+/* Hero empty state */
+body.el-premium .conc-hero {
+  position: relative;
+  padding: 32px 24px 48px;
+}
+
+body.el-premium .conc-hero-orb {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 179, 86, 0.12), transparent 68%);
+  filter: blur(40px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+  animation: conc-orb-pulse 6s ease-in-out infinite;
+}
+
+@keyframes conc-orb-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -58%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -58%) scale(1.08);
+  }
+}
+
+body.el-premium .conc-greeting {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(32px, 5vw, 44px) !important;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.35);
+}
+
+body.el-premium .conc-hero-sub {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: "Outfit", sans-serif;
+  font-weight: 400;
+}
+
+/* Chat messages */
+body.el-premium .chat {
+  gap: 28px;
+  padding: 32px 28px 16px;
+  scroll-behavior: smooth;
+}
+
+body.el-premium .msg {
+  animation: conc-msg-in 0.4s var(--el-ease) both;
+}
+
+@keyframes conc-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.el-premium .msg.user .bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 125, 216, 0.14) 0%,
+    rgba(59, 125, 216, 0.06) 100%
+  );
+  border: 1px solid rgba(59, 125, 216, 0.35);
+  border-radius: 20px 20px 4px 20px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  max-width: 85%;
+}
+
+body.el-premium .msg.ai .bubble {
+  position: relative;
+  padding-left: 16px;
+  border-left: 2px solid rgba(212, 179, 86, 0.35);
+  margin-left: 4px;
+}
+
+body.el-premium .msg.ai .bubble p.conc-section > strong:first-child {
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+body.el-premium .msg.ai .bubble code {
+  border: 1px solid var(--el-border-subtle);
+  border-radius: var(--el-radius-xs);
+  padding: 2px 8px;
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+}
+
+body.el-premium .msg.ai .bubble .conc-img {
+  border-radius: var(--el-radius-md);
+  box-shadow: var(--el-shadow-md);
+}
+
+/* Typing indicator */
+body.el-premium .typing {
+  gap: 6px;
+  padding: 8px 0 8px 16px;
+  border-left: 2px solid rgba(212, 179, 86, 0.2);
+  margin-left: 4px;
+}
+
+body.el-premium .typing span {
+  width: 7px;
+  height: 7px;
+  background: linear-gradient(135deg, var(--gold), var(--el-gold-bright));
+  box-shadow: 0 0 10px rgba(212, 179, 86, 0.4);
+  animation: conc-typing 1.4s ease-in-out infinite;
+}
+
+body.el-premium .typing span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+body.el-premium .typing span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes conc-typing {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Input area */
+body.el-premium .conc-footer {
+  padding: 0 28px 32px;
+}
+
+body.el-premium .conc-input-wrap {
+  background: var(--el-glass-card, rgba(18, 26, 46, 0.82));
+  border: 1px solid var(--el-border-subtle);
+  border-radius: 28px;
+  padding: 10px 12px 10px 8px;
+  box-shadow:
+    var(--el-shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.el-premium .conc-input-wrap:focus-within {
+  border-color: rgba(212, 179, 86, 0.45);
+  box-shadow:
+    var(--el-shadow-md),
+    var(--el-shadow-glow-gold),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+body.el-premium #chatInput {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+body.el-premium .conc-send-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+body.el-premium .conc-icon-btn {
+  width: 38px;
+  height: 38px;
+}
+
+body.el-premium .conc-icon-btn:hover {
+  background: rgba(212, 179, 86, 0.08);
+  color: var(--gold);
+}
+
+/* Suggestion chips */
+body.el-premium .conc-suggestions {
+  margin-top: 16px;
+  gap: 10px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+body.el-premium .conc-chip {
+  background: var(--el-glass-card);
+  border-color: var(--el-border-subtle);
+  padding: 9px 16px;
+  font-size: 12px;
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .conc-chip:hover {
+  border-color: rgba(212, 179, 86, 0.45);
+  background: rgba(212, 179, 86, 0.08);
+  transform: translateY(-1px);
+  box-shadow: var(--el-shadow-sm);
+}
+
+body.el-premium .conc-chip .ico {
+  filter: saturate(1.1);
+}
+
+/* History sidebar */
+body.el-premium .conc-new-chat {
+  border-radius: var(--el-radius-md);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .conc-new-chat:hover {
+  border-color: var(--gold);
+  box-shadow: var(--el-shadow-glow-gold);
+}
+
+body.el-premium .conc-hist-h {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+body.el-premium .conc-hist-item {
+  border-radius: var(--el-radius-sm);
+  font-size: 12.5px;
+  border-left: 2px solid transparent;
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .conc-hist-item:hover,
+body.el-premium .conc-hist-item.active {
+  border-left-color: var(--gold);
+  padding-left: 14px;
+}
+
+body.el-premium .conc-drawer-btn {
+  border-radius: var(--el-radius-md);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .conc-drawer-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: var(--el-shadow-glow-gold);
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE NAV — iOS-style tab bar
+   ═══════════════════════════════════════════ */
+
+body.el-premium .mobile-nav {
+  background: var(--el-glass-header) !important;
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-top: 1px solid var(--el-border-subtle);
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  gap: 6px;
+}
+
+body.el-premium .mob-nav-i {
+  position: relative;
+  border-radius: var(--el-radius-md);
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  min-height: 48px;
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .mob-nav-i::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-dim));
+  transition: transform var(--el-duration) var(--el-ease);
+}
+
+body.el-premium .mob-nav-i.active::before {
+  transform: translateX(-50%) scaleX(1);
+}
+
+body.el-premium .mob-nav-i.active {
+  color: var(--gold);
+  background: rgba(212, 179, 86, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(212, 179, 86, 0.12);
+}
+
+body.el-premium .mob-nav-i svg {
+  transition: transform var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .mob-nav-i.active svg {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 6px rgba(212, 179, 86, 0.35));
+}
+
+/* ═══════════════════════════════════════════
+   DRAWERS & BACKDROP
+   ═══════════════════════════════════════════ */
+
+body.el-premium aside.left.open {
+  background: var(--el-glass-sidebar);
+  backdrop-filter: blur(28px) saturate(1.25);
+  -webkit-backdrop-filter: blur(28px) saturate(1.25);
+  box-shadow:
+    16px 0 48px rgba(0, 0, 0, 0.45),
+    inset -1px 0 0 var(--el-border-subtle);
+}
+
+body.el-premium aside.conc-sidebar.open {
+  background: var(--el-glass-sidebar);
+  backdrop-filter: blur(28px) saturate(1.25);
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.4);
+}
+
+body.el-premium .nav-backdrop.show {
+  backdrop-filter: blur(6px) saturate(1.1);
+}
+
+body.el-premium .header-menu-btn {
+  border-radius: var(--el-radius-md);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .header-menu-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: var(--el-shadow-glow-gold);
+}
+
+/* ═══════════════════════════════════════════
+   PAY & SIGNAL MODALS
+   ═══════════════════════════════════════════ */
+
+body.el-premium .pay-amount {
+  font-size: 32px;
+  font-weight: 300;
+  text-shadow: 0 0 32px rgba(212, 179, 86, 0.2);
+}
+
+body.el-premium .pay-chain-opt {
+  border-radius: var(--el-radius-md);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .pay-chain-opt.sel {
+  box-shadow: var(--el-shadow-glow-gold);
+}
+
+body.el-premium .pay-chain-opt:hover:not(.disabled) {
+  transform: translateY(-1px);
+}
+
+body.el-premium .signal-reader-modal {
+  border-radius: var(--el-radius-lg);
+}
+
+body.el-premium .reader-badge-card,
+body.el-premium .creator-standing-card {
+  border-radius: var(--el-radius-md);
+  box-shadow: var(--el-shadow-sm);
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .reader-badge-card:hover,
+body.el-premium .creator-standing-card:hover {
+  border-color: rgba(212, 179, 86, 0.3);
+}
+
+body.el-premium .rwa-chip {
+  border-radius: var(--el-radius-pill);
+  background: rgba(212, 179, 86, 0.08);
+}
+
+/* ═══════════════════════════════════════════
+   WALLET VIEW
+   ═══════════════════════════════════════════ */
+
+body.el-premium #view-profile .pcard {
+  border-radius: var(--el-radius-lg);
+  overflow: hidden;
+}
+
+body.el-premium .pav {
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(212, 179, 86, 0.2);
+}
+
+body.el-premium .accbar .bar .fill {
+  background: linear-gradient(90deg, var(--accent-teal), var(--gold), var(--signal-green));
+  box-shadow: 0 0 12px rgba(34, 200, 122, 0.35);
+}
+
+body.el-premium .plist {
+  border-radius: var(--el-radius-md);
+  overflow: hidden;
+}
+
+body.el-premium .pitem {
+  transition: all var(--el-duration-fast) var(--el-ease);
+}
+
+body.el-premium .pitem:hover {
+  padding-left: 22px;
+  border-left: 2px solid rgba(212, 179, 86, 0.3);
+}
+
+/* Intel empty / loading in lounge */
+body.el-premium .intel-empty {
+  border-radius: var(--el-radius-md);
+  font-style: italic;
+  letter-spacing: 0.06em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.el-premium .conc-hero-orb,
+  body.el-premium .msg,
+  body.el-premium .typing span {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body.el-premium .conc-greeting {
+    font-size: clamp(26px, 7vw, 34px) !important;
+  }
+
+  body.el-premium .conc-hero-sub {
+    font-size: 9px;
+    letter-spacing: 0.26em;
+  }
+
+  body.el-premium .mob-nav-i::before {
+    width: 16px;
+  }
+}

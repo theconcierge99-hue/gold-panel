@@ -21,8 +21,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-prima
 }
 .docs-nav a:hover{color:var(--gold)}
 .docs-nav a.active{color:var(--gold);background:var(--nav-active-bg);border-left-color:var(--gold)}
-.docs-main{flex:1;min-width:0;padding:32px 28px 72px}
-.docs-content{max-width:760px}
+.docs-main{flex:1;min-width:0;padding:40px 36px 80px}
+.docs-content{max-width:780px}
 .docs-topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:28px;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
 .docs-topbar a{color:var(--text-muted);text-decoration:none}
 .docs-topbar a:hover{color:var(--gold)}
@@ -37,8 +37,8 @@ h3.docs-h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var
 .card-grid.cols-3{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 .doc-card{
   display:block;background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));
-  border:1px solid var(--border);padding:18px 20px;text-decoration:none;color:inherit;
-  transition:border-color .15s,background .15s;
+  border:1px solid var(--border);padding:20px 22px;text-decoration:none;color:inherit;
+  transition:border-color .2s,background .2s,box-shadow .2s,transform .2s;
 }
 .doc-card:hover{border-color:var(--gold-dim)}
 .doc-card h4{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;margin-bottom:6px;color:var(--text-primary)}

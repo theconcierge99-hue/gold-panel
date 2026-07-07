@@ -110,8 +110,27 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", renderSidebar);
+    document.addEventListener("DOMContentLoaded", function () {
+      renderSidebar();
+      initDocsReveal();
+    });
   } else {
     renderSidebar();
+    initDocsReveal();
+  }
+
+  function initDocsReveal() {
+    [".docs-title", ".docs-lead", ".doc-card", ".card-grid", "h2.docs-h2", ".docs-content .card"].forEach(
+      function (sel) {
+        document.querySelectorAll(sel).forEach(function (el) {
+          el.classList.add("el-reveal");
+        });
+      },
+    );
+    import("/js/concierge-fx.mjs")
+      .then(function (m) {
+        m.initScrollReveal();
+      })
+      .catch(function () {});
   }
 })();

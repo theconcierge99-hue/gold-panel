@@ -1,4 +1,7 @@
 /* Concierge Agent — endpoints catalog (resources-style layout) */
+@import url("/css/concierge-tokens.css");
+@import url("/css/concierge-premium.css");
+
 body.res-page{
   font-family:'Outfit',sans-serif;background:var(--pg-bg);color:var(--pg-text);
   min-height:100vh;overflow:auto;line-height:1.5;
@@ -25,8 +28,8 @@ body.res-page{
 
 .res-hero{margin-bottom:28px}
 .res-hero h1{
-  font-family:'Outfit',sans-serif;font-weight:700;font-size:clamp(26px,4.2vw,38px);
-  letter-spacing:-.02em;line-height:1.15;margin-bottom:12px;
+  font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(28px,4.5vw,42px);
+  letter-spacing:.02em;line-height:1.12;margin-bottom:12px;
 }
 .res-lead{font-size:15px;color:var(--pg-muted);max-width:640px;line-height:1.65}
 .res-base{
@@ -73,10 +76,10 @@ body.res-page{
 
 .res-ep{
   display:block;padding:14px 16px;border:1px solid var(--pg-panel-border);
-  background:var(--pg-panel);text-decoration:none;color:inherit;border-radius:6px;
-  transition:border-color .15s,background .15s;
+  background:var(--pg-panel);text-decoration:none;color:inherit;border-radius:var(--el-radius-lg,12px);
+  transition:border-color .2s,background .2s,box-shadow .2s,transform .2s;
 }
-.res-ep:hover{border-color:var(--pg-accent-dim);background:var(--pg-accent-glow)}
+.res-ep:hover{border-color:var(--pg-accent-dim);background:var(--pg-accent-glow);transform:translateY(-1px);box-shadow:var(--el-shadow-sm)}
 
 .res-ep-head{
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;

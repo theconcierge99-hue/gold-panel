@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>404 — Executive Lounge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/brand-logo.css" />
+<link rel="stylesheet" href="/css/concierge-tokens.css" />
+<link rel="stylesheet" href="/css/concierge-premium.css" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body.el-premium{
+    font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-primary);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:32px 20px;overflow:hidden;
+  }
+  .nf-shell{position:relative;z-index:1;text-align:center;max-width:520px;width:100%}
+  .nf-logo{margin:0 auto 28px}
+  .nf-logo img{width:72px;height:72px;padding:6px}
+  .nf-code{
+    font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(72px,18vw,120px);
+    line-height:1;letter-spacing:.04em;margin-bottom:8px;
+    background:linear-gradient(105deg,var(--gold),var(--el-gold-bright),var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .nf-title{
+    font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(24px,4vw,32px);
+    letter-spacing:.02em;margin-bottom:12px;
+  }
+  .nf-lead{
+    font-size:14px;line-height:1.65;color:var(--text-secondary);margin-bottom:32px;
+    max-width:400px;margin-left:auto;margin-right:auto;
+  }
+  .nf-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .nf-btn{
+    font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    padding:12px 20px;border:1px solid var(--border);background:transparent;
+    color:var(--text-secondary);text-decoration:none;border-radius:var(--el-radius-sm);
+    transition:all .2s cubic-bezier(.22,1,.36,1);
+  }
+  .nf-btn:hover{border-color:var(--gold-dim);color:var(--gold);background:var(--nav-active-bg);transform:translateY(-1px)}
+  .nf-btn.gold{
+    border-color:rgba(212,179,86,.55);color:var(--gold);
+    background:linear-gradient(135deg,rgba(212,179,86,.16),rgba(212,179,86,.06));
+    box-shadow:var(--el-shadow-glow-gold);
+  }
+  .nf-btn.gold:hover{border-color:var(--gold);box-shadow:var(--el-shadow-glow-gold)}
+  .nf-term{
+    margin-top:28px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);
+    padding:10px 16px;border:1px solid var(--border);border-radius:var(--el-radius-md);
+    background:var(--gcard-bg);display:inline-block;
+  }
+  .nf-term .prompt{color:var(--signal-green)}
+</style>
+</head>
+<body class="el-premium">
+<div class="ambient" style="position:fixed;inset:0;pointer-events:none;z-index:0">
+  <div class="blob b1" style="position:absolute;width:720px;height:720px;border-radius:50%;filter:blur(120px);opacity:var(--blob-opacity);background:radial-gradient(circle,#3b7dd8,transparent 60%);top:-200px;left:-200px"></div>
+  <div class="blob b3" style="position:absolute;width:480px;height:480px;border-radius:50%;filter:blur(140px);opacity:calc(var(--blob-opacity)*.6);background:radial-gradient(circle,var(--gold),transparent 65%);top:35%;left:42%"></div>
+</div>
+<div class="nf-shell">
+  <div class="nf-logo">
+    <img class="el-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="72" height="72" />
+  </div>
+  <div class="nf-code" aria-hidden="true">404</div>
+  <h1 class="nf-title">Intelligence not found</h1>
+  <p class="nf-lead">This route isn't on the Concierge desk. The page may have moved, or the URL was mistyped.</p>
+  <nav class="nf-actions" aria-label="Recovery links">
+    <a class="nf-btn gold" href="/lounge">Executive Lounge</a>
+    <a class="nf-btn" href="/agent">Agent Hub</a>
+    <a class="nf-btn" href="/docs">Documentation</a>
+  </nav>
+  <p class="nf-term" aria-hidden="true"><span class="prompt">$</span> concierge --route-not-found</p>
+</div>
+</body>
+</html>

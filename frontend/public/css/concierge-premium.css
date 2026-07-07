@@ -2,6 +2,7 @@
  * Concierge Premium — institutional polish layer.
  * Apply on body.el-premium or globally via shared imports.
  */
+@import url("/css/concierge-enterprise.css");
 
 /* —— Global refinements —— */
 ::selection {
@@ -188,7 +189,20 @@ html[data-theme="light"] .doc-card::after {
   letter-spacing: 0.16em;
 }
 .pg-nav a.active {
-  box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(212, 179, 86, 0.15);
+  position: relative;
+}
+.pg-nav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 1px;
+  background: var(--gold, var(--el-gold));
+  border-radius: 1px;
+  opacity: 0.7;
 }
 .pg-logo {
   font-family: "Cormorant Garamond", serif !important;
@@ -324,5 +338,52 @@ body.el-premium .int-headline {
 /* —— Footer —— */
 .agent-site-footer {
   border-top: 1px solid var(--border, var(--el-border));
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.15));
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.22));
+  backdrop-filter: blur(8px);
+}
+
+/* —— Premium data labels —— */
+.el-label {
+  font-size: var(--el-text-xs, 9px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-muted, var(--el-text-muted));
+  font-weight: 400;
+}
+
+/* —— Skeleton shimmer for loading states —— */
+@keyframes el-skeleton {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.intel-loading,
+.intel-empty {
+  border-radius: var(--el-radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--gcard-bg) 0%,
+    rgba(212, 179, 86, 0.04) 50%,
+    var(--gcard-bg) 100%
+  );
+  background-size: 200% 100%;
+}
+body.el-premium .intel-loading {
+  animation: el-skeleton 2.5s ease-in-out infinite;
+}
+
+/* —— Table polish —— */
+body.el-premium table {
+  border-radius: var(--el-radius-md);
+  overflow: hidden;
+}
+body.el-premium th {
+  background: rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.14em;
+}
+body.el-premium tr:hover td {
+  background: rgba(212, 179, 86, 0.03);
 }

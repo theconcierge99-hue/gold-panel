@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="/css/brand-logo.css" />
 <link rel="stylesheet" href="/css/concierge-tokens.css" />
 <link rel="stylesheet" href="/css/concierge-premium.css" />
+<link rel="stylesheet" href="/css/concierge-lounge.css" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -27,6 +28,8 @@
     font-family:'Outfit',sans-serif; font-weight:300;
     font-size:13px; letter-spacing:.01em; overflow:hidden;
     -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
   }
   /* ambient blobs */
   .ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -45,7 +48,7 @@
 
   .app{
     position:relative;z-index:1;
-    display:grid;grid-template-columns:200px minmax(0,1fr) 240px;grid-template-rows:var(--header-h,60px) minmax(0,1fr);
+    display:grid;grid-template-columns:200px minmax(0,1fr) 240px;grid-template-rows:var(--header-h,64px) minmax(0,1fr);
     height:100vh;height:100dvh;width:100%;max-width:100vw;overflow:hidden;
   }
   header{grid-column:1/-1;grid-row:1}
@@ -67,7 +70,7 @@
   }
   .brand-mark{display:flex;align-items:center;gap:12px}
   .brand-text{display:flex;flex-direction:column;line-height:1}
-  .logo .name{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:23px;color:var(--text-primary);letter-spacing:.03em}
+  .logo .name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:25px;color:var(--text-primary);letter-spacing:.04em}
   .logo .sub{font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-dim);margin-top:6px}
 
   .ticker-wrap{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
@@ -782,7 +785,7 @@
   <main>
     <!-- LOUNGE -->
     <section class="view show" id="view-lounge">
-      <section class="market-desk-clocks" id="marketDeskClocks" aria-label="Global market desk clocks">
+      <section class="market-desk-clocks el-reveal" id="marketDeskClocks" aria-label="Global market desk clocks">
         <div class="market-desk-head">
           <h2 class="market-desk-title">Market Desk</h2>
           <div class="market-desk-sessions" id="marketSessionStrip" aria-label="Trading session status"></div>
@@ -790,7 +793,7 @@
         <div class="market-desk-grid" id="marketDeskClockGrid"></div>
       </section>
 
-      <div class="section-h">
+      <div class="section-h el-reveal">
         <h2>Creator Signals</h2>
         <div class="meta" id="creatorMeta">Lounge desk</div>
       </div>
@@ -798,7 +801,7 @@
         <div class="intel-loading">Loading creator signals…</div>
       </div>
 
-      <div class="section-h">
+      <div class="section-h el-reveal">
         <h2>Market Intelligence</h2>
         <div class="meta" id="intelMeta">Live wire</div>
       </div>
@@ -839,7 +842,9 @@
         </div>
         <div class="conc-body">
           <div class="conc-hero" id="concHero">
+            <div class="conc-hero-orb" aria-hidden="true"></div>
             <h2 class="conc-greeting">What's on the agenda today?</h2>
+            <p class="conc-hero-sub">Institutional desk · Live markets · x402 depth</p>
         </div>
         <div class="chat" id="chat"></div>
           </div>
@@ -3428,5 +3433,10 @@
   window.visualViewport?.addEventListener('resize',syncHeaderHeight);
 </script>
 <script type="module" src="/js/market-clocks.mjs"></script>
+<script type="module">
+  import { initConciergeFx } from "/js/concierge-fx.mjs";
+  const stop = initConciergeFx();
+  window.addEventListener("pagehide", () => stop(), { once: true });
+</script>
 </body>
 </html>

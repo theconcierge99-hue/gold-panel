@@ -2,11 +2,11 @@
  * Concierge / Executive Lounge — shared logo treatment (visibility + gold ring).
  */
 html,html[data-theme="dark"]{
-  --el-logo-gold:#c9a84c;
-  --el-logo-gold-bright:#e8c968;
-  --el-logo-ring:rgba(201,168,76,.55);
-  --el-logo-glow:rgba(201,168,76,.42);
-  --el-logo-glow-soft:rgba(201,168,76,.22);
+  --el-logo-gold:#d4b356;
+  --el-logo-gold-bright:#f0d878;
+  --el-logo-ring:rgba(212,179,86,.6);
+  --el-logo-glow:rgba(212,179,86,.48);
+  --el-logo-glow-soft:rgba(212,179,86,.24);
   --el-logo-bg:transparent;
 }
 html[data-theme="light"]{
@@ -32,11 +32,11 @@ html[data-theme="light"]{
   background:var(--el-logo-bg);
   border:1.5px solid var(--el-logo-ring);
   box-shadow:
-    0 0 0 1px rgba(201,168,76,.2),
-    0 0 20px var(--el-logo-glow),
-    0 0 36px var(--el-logo-glow-soft),
-    0 4px 14px rgba(0,0,0,.35);
-  filter:brightness(1.04) contrast(1.04) saturate(1.06);
+    0 0 0 1px rgba(212,179,86,.22),
+    0 0 24px var(--el-logo-glow),
+    0 0 48px var(--el-logo-glow-soft),
+    0 6px 20px rgba(0,0,0,.4);
+  filter:brightness(1.06) contrast(1.05) saturate(1.08);
 }
 
 /* Header — Executive Lounge */

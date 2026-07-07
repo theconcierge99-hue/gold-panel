@@ -6,21 +6,21 @@ html,
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Core palette */
-  --el-bg: #080a0f;
-  --el-navy: #0c1120;
-  --el-graphite: #111827;
-  --el-panel: #141b2d;
-  --el-border: #1e2d4a;
-  --el-border-subtle: rgba(30, 45, 74, 0.55);
-  --el-gold: #c9a84c;
-  --el-gold-bright: #e8c968;
-  --el-gold-dim: #7a6030;
-  --el-chrome: #8899bb;
-  --el-chrome-bright: #aabbd0;
-  --el-text: #d8e4f0;
-  --el-text-secondary: #6b7d9a;
-  --el-text-muted: #3a4a62;
+  /* Core palette — refined institutional depth */
+  --el-bg: #060810;
+  --el-navy: #0a0f1c;
+  --el-graphite: #0f1524;
+  --el-panel: #121a2e;
+  --el-border: #1a2844;
+  --el-border-subtle: rgba(26, 40, 68, 0.65);
+  --el-gold: #d4b356;
+  --el-gold-bright: #f0d878;
+  --el-gold-dim: #8a6f38;
+  --el-chrome: #94a8c8;
+  --el-chrome-bright: #b8c8dc;
+  --el-text: #e4edf5;
+  --el-text-secondary: #7a8ea8;
+  --el-text-muted: #445568;
   --el-accent-blue: #3b7dd8;
   --el-accent-teal: #1d8f7a;
   --el-signal-green: #22c87a;
@@ -35,16 +35,44 @@ html[data-theme="dark"] {
   --el-radius-xl: 16px;
   --el-radius-pill: 999px;
 
-  --el-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.22);
-  --el-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.32);
-  --el-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.42);
-  --el-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --el-shadow-glow-gold: 0 0 32px rgba(201, 168, 76, 0.14);
+  --el-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.28);
+  --el-shadow-md: 0 8px 36px rgba(0, 0, 0, 0.38);
+  --el-shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.48);
+  --el-shadow-card:
+    0 4px 28px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset;
+  --el-shadow-glow-gold: 0 0 40px rgba(212, 179, 86, 0.16), 0 0 80px rgba(212, 179, 86, 0.06);
+
+  /* Glass surfaces */
+  --el-glass-header: rgba(6, 8, 16, 0.82);
+  --el-glass-sidebar: rgba(10, 15, 28, 0.68);
+  --el-glass-card: rgba(18, 26, 46, 0.72);
+
+  /* Typography scale */
+  --el-text-xs: 9px;
+  --el-text-sm: 11px;
+  --el-text-base: 13px;
+  --el-text-lg: 15px;
+  --el-text-xl: 18px;
+  --el-text-2xl: 24px;
+  --el-text-3xl: 32px;
+  --el-text-display: clamp(28px, 4vw, 42px);
+
+  /* Spacing rhythm */
+  --el-space-xs: 4px;
+  --el-space-sm: 8px;
+  --el-space-md: 16px;
+  --el-space-lg: 24px;
+  --el-space-xl: 32px;
+  --el-space-2xl: 48px;
 
   /* Motion */
   --el-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --el-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --el-duration-fast: 0.15s;
-  --el-duration: 0.25s;
+  --el-duration: 0.28s;
+  --el-duration-slow: 0.45s;
 
   /* Lounge aliases */
   --bg: var(--el-bg);
@@ -65,12 +93,12 @@ html[data-theme="dark"] {
   --signal-red: var(--el-signal-red);
   --signal-amber: var(--el-signal-amber);
 
-  --header-bg: rgba(8, 10, 15, 0.92);
-  --sidebar-bg: rgba(12, 17, 32, 0.55);
-  --card-grad-1: rgba(20, 27, 45, 0.82);
-  --card-grad-2: rgba(12, 17, 32, 0.62);
-  --gcard-bg: rgba(17, 24, 39, 0.62);
-  --gcard-hover: rgba(20, 27, 45, 0.78);
+  --header-bg: rgba(6, 8, 16, 0.88);
+  --sidebar-bg: rgba(10, 15, 28, 0.58);
+  --card-grad-1: rgba(18, 26, 46, 0.88);
+  --card-grad-2: rgba(10, 15, 28, 0.72);
+  --gcard-bg: rgba(15, 21, 36, 0.68);
+  --gcard-hover: rgba(22, 30, 50, 0.82);
   --bubble-bg: rgba(20, 27, 45, 0.7);
   --bubble-accent: rgba(59, 125, 216, 0.4);
   --user-bubble-bg: rgba(59, 125, 216, 0.08);
@@ -95,7 +123,7 @@ html[data-theme="dark"] {
   --pg-dim: var(--el-text-muted);
   --pg-accent: var(--el-gold);
   --pg-accent-dim: var(--el-gold-dim);
-  --pg-accent-glow: rgba(201, 168, 76, 0.1);
+  --pg-accent-glow: rgba(212, 179, 86, 0.12);
   --pg-term-bg: #060810;
   --pg-input: var(--el-graphite);
   --pg-method: var(--el-signal-green);

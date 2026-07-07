@@ -1,5 +1,11 @@
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
+import fs from "node:fs";
+import path from "node:path";
+import {
+  resolveStaticRewrite,
+  shouldSkipStaticRewrite,
+} from "./concierge-static-routes";
 import { normalizeGeminiApiKey, runConciergeGemini } from "./concierge-api/concierge-gemini";
 import {
   readBodyWithLimit,
@@ -95,7 +101,38 @@ async function handleConcierge(
 export function conciergeDevPlugin(): Plugin {
   return {
     name: "concierge-api-dev",
+    enforce: "pre",
     configureServer(server) {
+      // Clean URLs → static HTML (same as vercel.json rewrites)
+      server.middlewares.use((req, res, next) => {
+        const raw = req.url ?? "/";
+        const q = raw.indexOf("?");
+        const pathname = q === -1 ? raw : raw.slice(0, q);
+        const search = q === -1 ? "" : raw.slice(q);
+
+        if (shouldSkipStaticRewrite(pathname)) return next();
+
+        const html = resolveStaticRewrite(pathname);
+        if (html) {
+          req.url = html + search;
+          return next();
+        }
+
+        if (!pathname.includes(".")) {
+          const filePath = path.join(server.config.root, "public", "404.html");
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "text/html; charset=utf-8");
+          if (fs.existsSync(filePath)) {
+            res.end(fs.readFileSync(filePath, "utf8"));
+            return;
+          }
+          res.end("<!doctype html><title>404</title><h1>Not found</h1>");
+          return;
+        }
+
+        return next();
+      });
+
       const env = loadEnv(server.config.mode, process.cwd(), "");
 
       server.middlewares.use(async (req, res, next) => {

@@ -36,9 +36,12 @@ body.tok-page .tok-wrap{padding:40px 24px 72px}
 
 .tok-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .tok-card{
-  padding:16px;border:1px solid var(--tok-border);background:var(--tok-panel);border-radius:8px;
+  padding:18px;border:1px solid var(--tok-border);background:var(--tok-panel);
+  border-radius:var(--el-radius-lg,12px);
+  transition:border-color .2s,box-shadow .2s,transform .2s;
 }
-.tok-card h3{font-size:13px;font-weight:600;margin-bottom:6px}
+a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:translateY(-1px);box-shadow:var(--el-shadow-sm)}
+.tok-card h3{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;letter-spacing:.02em;margin-bottom:6px}
 .tok-card p{font-size:12px;color:var(--tok-muted);line-height:1.55;margin:0}
 
 .tok-table-wrap{overflow-x:auto;border:1px solid var(--tok-border);border-radius:8px;background:var(--tok-panel)}

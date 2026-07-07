@@ -1,0 +1,147 @@
+.concierge-status-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  overflow: hidden;
+  font-family: "Outfit", sans-serif;
+  background: #060810;
+  color: #e4edf5;
+}
+
+.concierge-status-ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.concierge-status-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+.concierge-status-blob--blue {
+  width: 720px;
+  height: 720px;
+  top: -200px;
+  left: -200px;
+  background: radial-gradient(circle, #3b7dd8, transparent 60%);
+  opacity: 0.14;
+}
+
+.concierge-status-blob--gold {
+  width: 480px;
+  height: 480px;
+  top: 35%;
+  left: 42%;
+  background: radial-gradient(circle, #d4b356, transparent 65%);
+  opacity: 0.1;
+}
+
+.concierge-status-shell {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+
+.concierge-status-logo img {
+  display: block;
+  margin: 0 auto 28px;
+  width: 72px;
+  height: 72px;
+  padding: 6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(212, 179, 86, 0.55);
+  box-shadow:
+    0 0 24px rgba(212, 179, 86, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.concierge-status-code {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: clamp(72px, 18vw, 120px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  background: linear-gradient(105deg, #d4b356, #f0d878, #d4b356);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.concierge-status-title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: clamp(24px, 4vw, 32px);
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.concierge-status-lead {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #7a8ea8;
+  margin-bottom: 32px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.concierge-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.concierge-status-btn {
+  font-family: "Outfit", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  border: 1px solid #1a2844;
+  background: transparent;
+  color: #7a8ea8;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.concierge-status-btn:hover {
+  border-color: #8a6f38;
+  color: #d4b356;
+  background: rgba(212, 179, 86, 0.08);
+  transform: translateY(-1px);
+}
+
+.concierge-status-btn.gold {
+  border-color: rgba(212, 179, 86, 0.55);
+  color: #d4b356;
+  background: linear-gradient(135deg, rgba(212, 179, 86, 0.16), rgba(212, 179, 86, 0.06));
+  box-shadow: 0 0 40px rgba(212, 179, 86, 0.16);
+}
+
+.concierge-status-term {
+  margin-top: 28px;
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  color: #445568;
+  padding: 10px 16px;
+  border: 1px solid #1a2844;
+  border-radius: 8px;
+  background: rgba(15, 21, 36, 0.68);
+  display: inline-block;
+}
+
+.concierge-status-term .prompt {
+  color: #22c87a;
+}
