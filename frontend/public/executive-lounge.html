@@ -712,7 +712,8 @@
 <style>
   /* Token Research — Lounge-native (gold desk, not scanner clone) */
   #view-token-research .tcx-wrap{max-width:none;padding:0}
-  #view-token-research .tcx-hero{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  #view-token-research .tcx-hero{margin-bottom:18px;padding-bottom:0;border-bottom:none}
+  #view-token-research .tcx-pill-row,#view-token-research .tcx-lead{display:none!important}
   #view-token-research .tcx-pill{
     border-color:rgba(201,168,76,.28);color:var(--gold);background:rgba(201,168,76,.06);
     font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;
@@ -1012,12 +1013,11 @@
       </div>
       <div class="tcx-wrap lounge-tcx">
         <header class="tcx-hero">
-          <div class="tcx-pill-row">
-            <span class="tcx-pill" id="tcx-phase-pill"><span class="tcx-pill-dot" aria-hidden="true"></span> <span id="tcx-phase-label">Loading…</span></span>
-            <span class="tcx-pill tcx-pill--gold" id="tcx-mint-pill" hidden aria-hidden="true"><span class="tcx-pill-dot"></span> Mint live</span>
+          <div class="tcx-pill-row" hidden aria-hidden="true">
+            <span class="tcx-pill" id="tcx-phase-pill"><span class="tcx-pill-dot" aria-hidden="true"></span> <span id="tcx-phase-label"></span></span>
+            <span class="tcx-pill tcx-pill--gold" id="tcx-mint-pill" hidden aria-hidden="true"></span>
           </div>
-          <p class="tcx-lead">Holder balance bands and Concierge tier perks — refreshed with each transparency snapshot after T0.</p>
-          <div class="tcx-cta-row">
+          <div class="tcx-cta-row" style="margin-bottom:18px">
             <button type="button" class="tcx-btn tcx-btn--primary" id="tcx-connect-btn">Check wallet</button>
           </div>
         </header>
@@ -1032,7 +1032,6 @@
               <p class="tcx-panel-meta" id="tcx-snapshot-meta">—</p>
             </div>
             <div class="tcx-bars" id="tcx-bars" aria-live="polite"></div>
-            <p class="tcx-panel-meta" id="tcx-snapshot-note" style="margin-top:14px;line-height:1.5"></p>
           </section>
 
           <section class="tcx-panel tcx-wallet-panel" aria-labelledby="tcx-wallet-title">
@@ -1042,7 +1041,7 @@
                 <h3 class="tcx-panel-title" id="tcx-wallet-title">TCX position</h3>
               </div>
             </div>
-            <p class="tcx-wallet-status" id="tcx-wallet-status">Connect Lounge wallet or Phantom to see balance and tier.</p>
+            <p class="tcx-wallet-status" id="tcx-wallet-status" hidden></p>
             <div class="tcx-wallet-grid" id="tcx-wallet-grid" hidden>
               <div class="tcx-wallet-stat"><span>Balance</span><strong id="tcx-w-balance">—</strong></div>
               <div class="tcx-wallet-stat"><span>Band</span><strong id="tcx-w-band">—</strong></div>

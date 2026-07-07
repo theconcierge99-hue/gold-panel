@@ -37,7 +37,7 @@ export const DEFAULT_TCX_SNAPSHOT: TcxHolderSnapshot = {
   snapshotDate: "2026-07-07",
   phase: "pre-t0",
   note:
-    "Illustrative holder bands until the first on-chain snapshot is published after T0 fair launch. Updates weekly with /token/transparency.",
+    "",
   bands: [
     { id: "shrimp", label: "Shrimp", range: "< 10K TCX", pct: 42, conciergeTier: null },
     { id: "crab", label: "Crab", range: "10K – 50K", pct: 28, conciergeTier: null },
@@ -181,7 +181,7 @@ export async function buildTcxHolderPayload(origin: string, walletRaw: string) {
       tier: null as SoonTier | null,
       band: null as TcxDistributionBand | null,
       nextTier: SOON_TIER_LADDER[0] ?? null,
-      message: "TCX mint not live yet — connect again after T0 fair launch on Pump.fun.",
+      message: "",
       benefits: [] as SoonTier["benefits"],
     };
   }

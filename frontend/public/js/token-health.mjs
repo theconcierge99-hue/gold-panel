@@ -51,8 +51,15 @@ function setWalletUi(data) {
   }
 
   if (status) {
-    status.textContent = data.message ?? "Lookup complete";
-    status.className = `tcx-wallet-status ${data.tier ? "ok" : ""}`;
+    const msg = data.message?.trim() ?? "";
+    if (msg) {
+      status.textContent = msg;
+      status.className = `tcx-wallet-status ${data.tier ? "ok" : ""}`;
+      status.hidden = false;
+    } else {
+      status.textContent = "";
+      status.hidden = true;
+    }
   }
   if (grid) grid.hidden = false;
 
@@ -124,7 +131,11 @@ function paintHealth(data) {
     meta.textContent = data.snapshotDate ? `Snapshot ${data.snapshotDate}` : "—";
     if (data.stats?.circulatingSupply) meta.textContent += ` · ${data.stats.circulatingSupply} TCX`;
   }
-  if (note) note.textContent = data.snapshotNote ?? "";
+  if (note) {
+    const n = data.snapshotNote?.trim() ?? "";
+    note.textContent = n;
+    note.hidden = !n;
+  }
 
   renderBars(data.distribution ?? []);
   renderTierCards(data.holderTiers);
