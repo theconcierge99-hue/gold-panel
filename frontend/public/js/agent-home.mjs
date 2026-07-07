@@ -29,35 +29,15 @@ const STACK_PARTNERS = [
 
 function renderStackMarquee() {
   const track = document.getElementById("agent-trust-track");
-  const viewport = track?.closest(".agent-stack-viewport");
-  if (!track || !viewport) return;
+  if (!track) return;
 
   const chip = (p) => {
     const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
     return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="18" height="18" loading="lazy" /><span>${p.name}</span></a>`;
   };
-  const inner = STACK_PARTNERS.map(chip).join("");
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function paint() {
-    const set = track.querySelector(".agent-stack-set");
-    const setW = set?.offsetWidth ?? 0;
-    const needsMarquee = !reduced && setW > viewport.clientWidth + 8;
-
-    if (needsMarquee) {
-      track.innerHTML =
-        `<div class="agent-stack-set">${inner}</div>` +
-        `<div class="agent-stack-set" aria-hidden="true">${inner}</div>`;
-      track.classList.add("agent-stack-track--scroll");
-    } else {
-      track.innerHTML = `<div class="agent-stack-set">${inner}</div>`;
-      track.classList.remove("agent-stack-track--scroll");
-    }
-  }
-
-  track.innerHTML = `<div class="agent-stack-set">${inner}</div>`;
-  paint();
-  if (!reduced) window.addEventListener("resize", paint, { passive: true });
+  track.classList.remove("agent-stack-track--scroll");
+  track.innerHTML = `<div class="agent-stack-set">${STACK_PARTNERS.map(chip).join("")}</div>`;
 }
 
 renderStackMarquee();
