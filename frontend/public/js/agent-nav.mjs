@@ -47,15 +47,30 @@ function bindMoreMenu(root) {
   const menu = root?.querySelector(".pg-nav-more-menu");
   if (!btn || !menu) return;
 
+  const close = () => {
+    menu.classList.remove("open");
+    btn.classList.remove("active");
+    btn.setAttribute("aria-expanded", "false");
+  };
+
   btn.addEventListener("click", (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    const open = menu.classList.toggle("open");
+    const open = !menu.classList.contains("open");
+    menu.classList.toggle("open", open);
+    btn.classList.toggle("active", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
   });
 
-  document.addEventListener("click", () => {
-    menu.classList.remove("open");
-    btn.setAttribute("aria-expanded", "false");
+  menu.addEventListener("click", (e) => e.stopPropagation());
+
+  document.addEventListener("click", (e) => {
+    if (btn.contains(e.target) || menu.contains(e.target)) return;
+    close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
   });
 }
 
@@ -115,10 +130,12 @@ export function renderAgentTopNav(activeId, options = {}) {
       <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="36" height="36" />
       <span>Concierge<span class="pg-logo-dim"> Agent</span></span>
     </a>
-    <nav class="pg-nav" aria-label="Concierge Agent">
-      ${links.map((l) => navLink(l, activeId)).join("")}
+    <div class="pg-nav-wrap">
+      <nav class="pg-nav" aria-label="Concierge Agent">
+        ${links.map((l) => navLink(l, activeId)).join("")}
+      </nav>
       ${moreMenu(activeId)}
-    </nav>
+    </div>
     <div class="pg-topnav-right">
       <a class="pg-lounge-btn" href="/lounge" title="Executive Lounge">Lounge</a>
       <div class="el-status-pill" title="x402 pay-per-call API">

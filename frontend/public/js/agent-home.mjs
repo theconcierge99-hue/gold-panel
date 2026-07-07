@@ -33,13 +33,38 @@ const TRUST_PARTNERS = [
 
 function renderTrustStrip() {
   const track = document.getElementById("agent-trust-track");
-  if (!track) return;
+  const wrap = track?.closest(".agent-trust");
+  if (!track || !wrap) return;
+
   const chip = (p) => {
     const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
     return `<a class="agent-trust-link" href="${p.href}"${attrs}>${p.name}</a>`;
   };
   const inner = TRUST_PARTNERS.map((p, i) => `${i ? '<span class="dot">·</span>' : ""}${chip(p)}`).join("");
-  track.innerHTML = `<div class="agent-trust-set">${inner}</div><div class="agent-trust-set" aria-hidden="true">${inner}</div>`;
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function paint() {
+    const setW = track.querySelector(".agent-trust-set")?.offsetWidth ?? 0;
+    const needsMarquee = !reduced && setW > wrap.clientWidth + 8;
+
+    if (needsMarquee) {
+      track.innerHTML =
+        `<div class="agent-trust-set">${inner}</div>` +
+        `<div class="agent-trust-set" aria-hidden="true">${inner}</div>`;
+      track.classList.add("agent-trust-track--scroll");
+    } else {
+      track.innerHTML = `<div class="agent-trust-set agent-trust-set--static">${inner}</div>`;
+      track.classList.remove("agent-trust-track--scroll");
+    }
+  }
+
+  track.innerHTML = `<div class="agent-trust-set agent-trust-set--static">${inner}</div>`;
+  paint();
+
+  if (!reduced) {
+    window.addEventListener("resize", paint, { passive: true });
+  }
 }
 
 renderTrustStrip();
