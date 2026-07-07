@@ -110,6 +110,14 @@ Content-Type: application/json
   "message": "Identity registered. Store private keys only on the agent…"
 }</code></pre>
       <p>Re-registering the same wallet pair is <strong>idempotent</strong> — you receive the existing <code>agt_…</code> id.</p>
+      <h3>OOBE Synapse SAP (optional)</h3>
+      <pre><code>{
+  "name": "OOBE Trader",
+  "solAddress": "7xKX…",
+  "sapWallet": "7xKX…",
+  "sapAgentPda": "AgentPDA…"
+}</code></pre>
+      <p>Link later: <code>PATCH /api/agent-identity</code> with <code>id</code>, <code>sapWallet</code>, and/or <code>sapAgentPda</code>. See <a href="/docs/integration/oobe" class="gold-link">OOBE integration</a>.</p>
     </div>
   </section>
 

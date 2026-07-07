@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<title>OOBE Protocol — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Use Concierge Intel from OOBE Synapse agents — desk verdict and Meteora DLMM via x402 USDC. SAP tool manifest, pay.sh, and Synapse Studio flows." />
+<meta property="og:image" content="https://www.oobeprotocol.ai/og-image.png" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/oobe" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body>
+<div class="docs-layout" data-docs-page="integration-oobe">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <div class="docs-integration-brand">
+        <img src="https://www.oobeprotocol.ai/favicon.ico" alt="OOBE Protocol" width="52" height="52" style="border-radius:12px" />
+        <h1 class="docs-title">OOBE Protocol</h1>
+      </div>
+      <p class="docs-lead">
+        <a class="ext" href="https://www.oobeprotocol.ai/" target="_blank" rel="noopener">OOBE Protocol</a> powers autonomous AI agents on Solana via the <strong>Synapse Agent Protocol (SAP)</strong>. Concierge is an <strong>intel provider</strong> — pay-per-call desk verdict and Meteora DLMM data before your agent executes on-chain actions. Settlement uses <strong>x402 USDC</strong> (PayAI facilitator). <strong>No Concierge API key</strong> required.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live — SAP manifest, agt_ ↔ SAP linking, OOBE settlement adapter</p>
+        <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
+        <p><strong>OOBE:</strong> <a class="ext" href="https://www.oobeprotocol.ai/" target="_blank" rel="noopener">oobeprotocol.ai ↗</a></p>
+        <p><strong>SAP docs:</strong> <a class="ext" href="https://explorer.oobeprotocol.ai/docs" target="_blank" rel="noopener">explorer.oobeprotocol.ai ↗</a></p>
+        <p><strong>Manifest:</strong> <a href="/distribution/oobe/sap-tools-manifest.json" target="_blank" rel="noopener">sap-tools-manifest.json</a></p>
+        <p><strong>Agent skill:</strong> <a href="/skills/concierge-oobe/SKILL.md" target="_blank" rel="noopener">concierge-oobe/SKILL.md</a></p>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="card">
+        <ol>
+          <li>Your OOBE agent (Synapse Studio or SAP CLI) needs market intel before a swap, LP, or stake action.</li>
+          <li>Call a Concierge tool — <code>concierge:intel-verdict</code> or <code>concierge:intel-meteora</code> — from the SAP manifest.</li>
+          <li>Agent wallet pays <strong>$0.10 USDC</strong> per call via x402 (<code>PAYMENT-SIGNATURE</code> header, PayAI facilitator).</li>
+          <li>Branch on <code>verdict.signal</code> (<code>snipe</code> · <code>watch</code> · <code>avoid</code>) or Meteora pool data, then run your on-chain action.</li>
+        </ol>
+        <p class="note">Concierge uses PayAI/Dexter facilitator x402 today — not SAP escrow headers. Use <code>pay curl</code> or SAP CLI with <code>--endpoint</code> override (see below).</p>
+      </div>
+
+      <h2 class="docs-h2">SAP tools (phase 1)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>SAP tool id</th><th>Endpoint</th><th>USDC</th></tr></thead>
+          <tbody>
+            <tr><td><code>concierge:intel-verdict</code></td><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td></tr>
+            <tr><td><code>concierge:intel-meteora</code></td><td><code>POST /api/concierge-intel-meteora</code></td><td>$0.10</td></tr>
+          </tbody>
+        </table>
+        <p>Full manifest: <a href="/distribution/oobe/sap-tools-manifest.json" target="_blank" rel="noopener">/distribution/oobe/sap-tools-manifest.json</a></p>
+      </div>
+
+      <h2 class="docs-h2">Synapse Studio flow</h2>
+      <div class="card">
+<pre><code>[Trigger] User asks agent to evaluate SOL LP
+    ↓
+[HTTP] concierge:intel-verdict  →  verdict.signal = watch
+    ↓
+[HTTP] concierge:intel-meteora  →  top SOL-USDC pools + risk flags
+    ↓
+[On-chain] Meteora / Jupiter action (OOBE agent tools)</code></pre>
+        <p>Free trust signal before routing: <code>GET /api/concierge-intel-accuracy</code> (verdict track record vs BTC).</p>
+      </div>
+
+      <h2 class="docs-h2">Call with pay.sh (recommended)</h2>
+      <div class="card">
+<pre><code>pay setup && pay topup
+
+pay curl https://conc-exe.xyz/api/concierge-intel-verdict \
+  -d '{"message":"Solana DeFi outlook","includeInsider":true}'
+
+pay curl https://conc-exe.xyz/api/concierge-intel-meteora \
+  -d '{"sortByApy":true,"limit":8,"poolHint":"SOL"}'</code></pre>
+        <p>See <a href="/docs/payment/paysh" class="gold-link">pay.sh guide</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">SAP CLI</h2>
+      <div class="card">
+<pre><code>npm install -g @oobe-protocol-labs/synapse-sap-cli
+
+synapse-sap tools manifest validate \
+  https://conc-exe.xyz/distribution/oobe/sap-tools-manifest.json
+
+synapse-sap x402 call &lt;AGENT_WALLET&gt; concierge:intel-verdict \
+  --args '{"message":"SOL desk","includeInsider":true}' \
+  --endpoint https://conc-exe.xyz/api/concierge-intel-verdict \
+  --save out/verdict.json</code></pre>
+        <p>SAP x402 docs: <a class="ext" href="https://explorer.oobeprotocol.ai/docs/cli/x402" target="_blank" rel="noopener">explorer.oobeprotocol.ai ↗</a></p>
+      </div>
+
+      <h2 class="docs-h2">Publish to SAP (merchant, one-off)</h2>
+      <div class="card">
+        <p>Register Concierge on-chain as an intel provider — run off Vercel with your merchant wallet (<code>X402_SOL_PAY_TO</code>):</p>
+<pre><code>synapse-sap env init --cluster mainnet-beta
+synapse-sap tools manifest validate distribution/oobe/sap-tools-manifest.json
+synapse-sap agent register --manifest distribution/oobe/sap-tools-manifest.json
+synapse-sap tools publish distribution/oobe/sap-tools-manifest.json</code></pre>
+        <p>Repo path: <code>distribution/oobe/README.md</code> · verify: <code>npm run oobe:verify</code></p>
+      </div>
+
+      <h2 class="docs-h2">Link agt_ ↔ SAP profile</h2>
+      <div class="card">
+        <p>After registering on <a href="/docs/api/agent-identity" class="gold-link">Agent Identity</a>, link your OOBE on-chain agent:</p>
+<pre><code>POST /api/agent-identity
+{
+  "name": "OOBE Trader",
+  "solAddress": "7xKX…",
+  "sapWallet": "7xKX…",
+  "sapAgentPda": "EscrowPDAorAgentPDA…"
+}
+
+PATCH /api/agent-identity
+{
+  "id": "agt_…",
+  "sapAgentPda": "…"
+}</code></pre>
+        <p>Response includes <code>sapVerified: true</code> when both <code>sapWallet</code> and <code>sapAgentPda</code> are set. Agent card exposes <code>sap.explorerUrl</code> on OOBE Explorer.</p>
+      </div>
+
+      <h2 class="docs-h2">OOBE settlement adapter (alternative to PayAI)</h2>
+      <div class="card">
+        <p>When <code>PAYMENT-SIGNATURE</code> is absent, Concierge accepts a <strong>confirmed Solana USDC settlement tx</strong> from SAP escrow flows:</p>
+        <table>
+          <thead><tr><th>Header</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td><code>X-OOBE-SETTLEMENT-TX</code></td><td>Solana transaction signature (recommended)</td></tr>
+            <tr><td><code>X-PAYMENT-SETTLEMENT</code></td><td>Alias</td></tr>
+            <tr><td><code>X-PAYMENT-SIG</code></td><td>Settlement tx when OOBE escrow headers are also present</td></tr>
+          </tbody>
+        </table>
+        <p>Server verifies USDC credit to <code>X402_SOL_PAY_TO</code> via <code>SOLANA_RPC_URL</code>. Env: <code>OOBE_SAP_X402_ENABLED=1</code> (default on). Disable with <code>0</code>.</p>
+<pre><code>curl -X POST https://conc-exe.xyz/api/concierge-intel-verdict \
+  -H "Content-Type: application/json" \
+  -H "X-OOBE-SETTLEMENT-TX: &lt;confirmed-tx-sig&gt;" \
+  -d '{"message":"SOL desk","includeInsider":true}'</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> — full route catalog</li>
+          <li><a href="/docs/integration/agent-card" class="gold-link">Agent card (A2A)</a> — <code>agt_…</code> identity</li>
+          <li><a href="/docs/integration/payai" class="gold-link">PayAI</a> — x402 facilitator</li>
+          <li><a href="/docs/integration/poncho" class="gold-link">Poncho</a> — similar marketplace pattern</li>
+          <li><a href="/docs/builders" class="gold-link">For Builders</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="https://www.oobeprotocol.ai/" target="_blank" rel="noopener">Open OOBE ↗</a>
+        <a class="btn" href="/distribution/oobe/sap-tools-manifest.json" target="_blank" rel="noopener">SAP manifest</a>
+        <a class="btn" href="/agent/endpoints">Endpoints</a>
+      </div>
+      <p class="docs-foot">Concierge Agent · OOBE Protocol · <a href="https://www.oobeprotocol.ai/" class="ext" target="_blank" rel="noopener">oobeprotocol.ai</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

@@ -156,13 +156,29 @@ export function conciergeDevPlugin(): Plugin {
           req.on("end", async () => {
             const bodyText = Buffer.concat(chunks).toString("utf8");
             const fullUrl = `http://localhost${req.url ?? url}`;
+            const fwdHeaders = new Headers({
+              "content-type": req.headers["content-type"] ?? "application/json",
+              "content-length": String(Buffer.byteLength(bodyText)),
+              origin: req.headers.origin ?? "http://localhost:8080",
+            });
+            for (const name of [
+              "payment-signature",
+              "payment-required",
+              "x-agent-id",
+              "x-oobe-settlement-tx",
+              "x-payment-settlement",
+              "x-payment-settlement-tx",
+              "x-payment-amount",
+              "x-payment-sig",
+              "x-payment-escrow",
+              "x-soon-holder-wallet",
+            ]) {
+              const v = req.headers[name];
+              if (typeof v === "string" && v) fwdHeaders.set(name, v);
+            }
             const fakeRequest = new Request(fullUrl, {
               method: req.method,
-              headers: {
-                "content-type": req.headers["content-type"] ?? "application/json",
-                "content-length": String(Buffer.byteLength(bodyText)),
-                origin: req.headers.origin ?? "http://localhost:8080",
-              },
+              headers: fwdHeaders,
               body: bodyText || undefined,
             });
             const res2 = await dispatchApiRoute(fakeRequest);

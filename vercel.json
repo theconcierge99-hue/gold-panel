@@ -213,6 +213,10 @@
       "destination": "/docs-integration-privy.html"
     },
     {
+      "source": "/docs/integration/oobe",
+      "destination": "/docs-integration-oobe.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

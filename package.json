@@ -20,6 +20,8 @@
     "mcp-registry:generate-key": "node scripts/generate-mcp-registry-auth.mjs --generate",
     "distribution:thebuyside-pr": "node scripts/prepare-thebuyside-pr.mjs",
     "distribution:paysh-pr": "node scripts/prepare-paysh-pr.mjs",
+    "oobe:verify": "node scripts/verify-oobe-integration.mjs",
+    "oobe:verify:local": "node scripts/verify-oobe-integration.mjs --origin=http://localhost:8080",
     "launch:verify": "node scripts/verify-launch-readiness.mjs",
     "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
     "paysh:sync-token-pay-openapi": "npx tsx scripts/generate-paysh-token-pay-openapi.ts",

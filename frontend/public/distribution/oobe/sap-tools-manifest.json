@@ -1,0 +1,140 @@
+{
+  "$schema": "https://conc-exe.xyz/distribution/oobe/sap-manifest-schema.json",
+  "version": "1.0.0",
+  "manifestKind": "concierge-sap-tools-v1",
+  "agent": {
+    "name": "Concierge Intel",
+    "description": "Pay-per-call market intelligence for Solana agents — desk verdict (snipe/watch/avoid) and Meteora DLMM deep-dive. Settlement via x402 USDC (PayAI facilitator) on Solana or Base. No API keys.",
+    "protocols": ["x402", "A2A", "MCP", "MPP"],
+    "categories": ["intel", "trading", "defi", "solana"],
+    "homepage": "https://conc-exe.xyz",
+    "docs": "https://conc-exe.xyz/docs/integration/oobe",
+    "skill": "https://conc-exe.xyz/skills/concierge-oobe/SKILL.md"
+  },
+  "discovery": {
+    "openapi": "https://conc-exe.xyz/openapi.json",
+    "x402": "https://conc-exe.xyz/.well-known/x402",
+    "agentCard": "https://conc-exe.xyz/.well-known/agent-card.json",
+    "mcp": "https://conc-exe.xyz/api/mcp",
+    "intelAccuracy": "https://conc-exe.xyz/api/concierge-intel-accuracy",
+    "a2aMesh": "https://conc-exe.xyz/api/agent-a2a-mesh"
+  },
+  "payment": {
+    "protocol": "x402-v2",
+    "facilitator": "payai",
+    "facilitatorUrl": "https://facilitator.payai.network",
+    "fallbackFacilitator": "dexter",
+    "fallbackFacilitatorUrl": "https://x402.dexter.cash",
+    "networks": ["solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "eip155:8453"],
+    "asset": "USDC",
+    "header": "PAYMENT-SIGNATURE"
+  },
+  "tools": [
+    {
+      "id": "concierge:intel-verdict",
+      "name": "Concierge Intel — Verdict",
+      "description": "Structured desk verdict with Fear & Greed, Binance positioning, top yields, and optional Lounge insider signals. Returns snipe | watch | avoid bias for downstream on-chain actions.",
+      "version": "1.0.0",
+      "method": "POST",
+      "endpoint": "https://conc-exe.xyz/api/concierge-intel-verdict",
+      "priceUsdc": 0.1,
+      "priceAtomic": "100000",
+      "tags": ["AI", "Crypto", "Trading", "Solana"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Question or theme for the desk verdict (e.g. Solana DeFi outlook)"
+          },
+          "includeInsider": {
+            "type": "boolean",
+            "description": "Include Lounge creator signals (default true)"
+          }
+        },
+        "required": ["message"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "verdict": {
+            "type": "object",
+            "properties": {
+              "signal": { "type": "string", "enum": ["snipe", "watch", "avoid", "follow", "rebalance"] },
+              "confidence": { "type": "string" },
+              "summary": { "type": "string" }
+            }
+          },
+          "insider": { "type": "array" },
+          "supporting": { "type": "object" }
+        }
+      },
+      "exampleArgs": {
+        "message": "Solana DeFi outlook",
+        "includeInsider": true
+      }
+    },
+    {
+      "id": "concierge:intel-meteora",
+      "name": "Concierge Intel — Meteora DLMM",
+      "description": "Meteora DLMM pool deep-dive — TVL, APY, bin step, volume, and IL risk flags. Solana-native liquidity intelligence for agent swap/LP flows.",
+      "version": "1.0.0",
+      "method": "POST",
+      "endpoint": "https://conc-exe.xyz/api/concierge-intel-meteora",
+      "priceUsdc": 0.1,
+      "priceAtomic": "100000",
+      "tags": ["Crypto", "Trading", "DeFi", "Solana", "Meteora"],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sortByApy": {
+            "type": "boolean",
+            "description": "Sort by APY instead of TVL (default false)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max pools 1–20 (default 8)"
+          },
+          "poolHint": {
+            "type": "string",
+            "description": "Substring filter on pool name (e.g. SOL, SOL-USDC)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "pools": { "type": "array" },
+          "filters": { "type": "object" },
+          "riskFlags": { "type": "array" }
+        }
+      },
+      "exampleArgs": {
+        "sortByApy": true,
+        "limit": 8,
+        "poolHint": "SOL"
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "oobe-intel-then-action",
+      "name": "Intel → decision → on-chain action",
+      "description": "Typical OOBE Synapse Studio flow: call intel-verdict, branch on signal, then invoke Jupiter/Meteora on-chain action.",
+      "steps": [
+        { "tool": "concierge:intel-verdict", "args": { "message": "SOL momentum desk", "includeInsider": true } },
+        { "tool": "concierge:intel-meteora", "args": { "sortByApy": true, "limit": 5, "poolHint": "SOL-USDC" } },
+        { "action": "on-chain", "note": "Branch on verdict.signal — execute via OOBE agent tools" }
+      ]
+    }
+  ],
+  "publish": {
+    "cli": "synapse-sap tools manifest validate distribution/oobe/sap-tools-manifest.json",
+    "register": "synapse-sap agent register --manifest distribution/oobe/sap-agent-manifest.json",
+    "docs": "https://conc-exe.xyz/docs/integration/oobe"
+  }
+}

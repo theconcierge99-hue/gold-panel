@@ -3,9 +3,11 @@ import { corsHeadersFor, readBodyWithLimit, sanitizePublicError } from "../conci
 import {
   normalizeEvmAddress,
   normalizeSolAddress,
+  normalizeSapAgentPda,
   registerAgent,
   getAgentById,
   listAgents,
+  linkAgentSap,
   toPublicView,
 } from "../agent-identity-store";
 
@@ -30,11 +32,12 @@ function agentCors(request: Request): Record<string, string> {
   const base = corsHeadersFor(request);
   return {
     ...base,
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Origin": request.headers.get("origin") && base["Access-Control-Allow-Origin"] !== "*"
       ? base["Access-Control-Allow-Origin"]
       : "*",
     "Access-Control-Allow-Headers":
-      "Content-Type, X-Agent-Id, payment-signature, PAYMENT-SIGNATURE, PAYMENT-REQUIRED, PAYMENT-RESPONSE",
+      "Content-Type, X-Agent-Id, payment-signature, PAYMENT-SIGNATURE, PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-OOBE-SETTLEMENT-TX, X-PAYMENT-SETTLEMENT, X-PAYMENT-AMOUNT, X-PAYMENT-SIG, X-PAYMENT-ESCROW",
   };
 }
 
@@ -92,6 +95,43 @@ export default async function handler(request: Request): Promise<Response> {
       );
     }
 
+    if (request.method === "PATCH") {
+      const raw = await readBodyWithLimit(request);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        return json(request, { error: "Invalid JSON body" }, 400);
+      }
+      const body = raw as Record<string, unknown>;
+      const id = String(body.id ?? "").trim();
+      if (!id) return json(request, { error: "id is required" }, 400);
+
+      const sapWalletRaw = String(body.sapWallet ?? "").trim();
+      const sapAgentPdaRaw = String(body.sapAgentPda ?? "").trim();
+      if (!sapWalletRaw && !sapAgentPdaRaw) {
+        return json(request, { error: "At least one of sapWallet or sapAgentPda is required" }, 400);
+      }
+
+      try {
+        const agent = await linkAgentSap(id, {
+          sapWallet: sapWalletRaw || undefined,
+          sapAgentPda: sapAgentPdaRaw || undefined,
+        });
+        if (!agent) return json(request, { error: "Agent not found or invalid SAP fields" }, 404);
+        return json(
+          request,
+          {
+            ok: true,
+            agent: toPublicView(origin, agent),
+            card: buildAgentCard(origin, agent),
+            message: "SAP profile linked to agt_ identity.",
+          },
+          200,
+        );
+      } catch (e) {
+        const msg = sanitizePublicError(e);
+        return json(request, { error: msg }, 400);
+      }
+    }
+
     if (request.method !== "POST") {
       return json(request, { error: "Method not allowed" }, 405);
     }
@@ -116,11 +156,23 @@ export default async function handler(request: Request): Promise<Response> {
       return json(request, { error: "At least one of solAddress or evmAddress is required" }, 400);
     }
 
+    const sapWalletRaw = String(body.sapWallet ?? "").trim();
+    const sapAgentPdaRaw = String(body.sapAgentPda ?? "").trim();
+    const sapWallet = sapWalletRaw ? normalizeSolAddress(sapWalletRaw) : undefined;
+    const sapAgentPda = sapAgentPdaRaw ? normalizeSapAgentPda(sapAgentPdaRaw) : undefined;
+    if (sapWalletRaw && !sapWallet) return json(request, { error: "Invalid sapWallet (Solana base58)" }, 400);
+    if (sapAgentPdaRaw && !sapAgentPda) return json(request, { error: "Invalid sapAgentPda" }, 400);
+    if (sapWallet && solAddress && sapWallet !== solAddress) {
+      return json(request, { error: "sapWallet must match solAddress when both are provided" }, 400);
+    }
+
     const agent = await registerAgent({
       name,
       description,
       solAddress: solAddress ?? undefined,
       evmAddress: evmAddress ?? undefined,
+      sapWallet: sapWallet ?? (sapAgentPda && solAddress ? solAddress : undefined),
+      sapAgentPda,
     });
 
     const view = toPublicView(origin, agent);

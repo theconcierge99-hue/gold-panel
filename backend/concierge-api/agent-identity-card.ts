@@ -13,7 +13,7 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     registerEndpoint: `${base}/api/agent-identity`,
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
-    protocols: ["x402", "mpp"],
+    protocols: ["x402", "mpp", "SAP"],
     networks: ["solana", "eip155:8453"],
     discovery: {
       x402: `${base}/.well-known/x402`,
@@ -22,6 +22,8 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
       intelAccuracy: `${base}/api/concierge-intel-accuracy`,
       apiCatalog: `${base}/.well-known/api-catalog`,
       a2aMesh: `${base}/api/agent-a2a-mesh`,
+      oobe: `${base}/docs/integration/oobe`,
+      sapToolsManifest: `${base}/distribution/oobe/sap-tools-manifest.json`,
       caseStudy: `${base}/docs/builders/case-study`,
     },
     trust: {
@@ -37,6 +39,20 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
   const accounts: { chain: string; address: string }[] = [];
   if (agent.solAddress) accounts.push({ chain: "solana", address: agent.solAddress });
   if (agent.evmAddress) accounts.push({ chain: "eip155:8453", address: agent.evmAddress });
+  if (agent.sapWallet && agent.sapWallet !== agent.solAddress) {
+    accounts.push({ chain: "sap", address: agent.sapWallet });
+  }
+
+  const sap =
+    agent.sapWallet || agent.sapAgentPda
+      ? {
+          wallet: agent.sapWallet,
+          agentPda: agent.sapAgentPda,
+          explorerUrl: agent.sapAgentPda
+            ? `https://explorer.oobeprotocol.ai/agent/${agent.sapAgentPda}`
+            : undefined,
+        }
+      : undefined;
 
   return {
     schema: "executive-lounge-agent-card-v1",
@@ -46,6 +62,7 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
     description: agent.description,
     registered: agent.createdAt,
     accounts,
+    sap,
     services: [
       {
         name: "concierge",
@@ -129,6 +146,8 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
       payshGuide: `${base}/docs/payment/paysh`,
       grokBuild: "https://x.ai/cli",
       grokBuildGuide: `${base}/docs/grok-build`,
+      oobe: `${base}/docs/integration/oobe`,
+      sapToolsManifest: `${base}/distribution/oobe/sap-tools-manifest.json`,
     },
   };
 }

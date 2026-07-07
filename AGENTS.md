@@ -15,6 +15,7 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 ## Integrations
 
 - **Poncho** — `/docs/integration/poncho` · discoverable via x402scan; no Concierge API key for consumers
+- **OOBE Protocol** — `/docs/integration/oobe` · SAP tool manifest for Synapse agents (`concierge:intel-verdict`, `concierge:intel-meteora`)
 - **x402scan / MPPscan / pay.sh** — discovery + AgentCash settlement
 
 ## Grok Build

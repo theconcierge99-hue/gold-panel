@@ -206,9 +206,9 @@ export function corsHeadersFor(request: Request): Record<string, string> {
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Headers":
-      "Content-Type, X-Agent-Id, Idempotency-Key, payment-signature, PAYMENT-SIGNATURE, PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-Soon-Holder-Wallet",
+      "Content-Type, X-Agent-Id, Idempotency-Key, payment-signature, PAYMENT-SIGNATURE, PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-Soon-Holder-Wallet, X-OOBE-SETTLEMENT-TX, X-PAYMENT-SETTLEMENT, X-PAYMENT-AMOUNT, X-PAYMENT-SIG, X-PAYMENT-ESCROW",
     "Access-Control-Expose-Headers":
       "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Policy, RateLimit-Limit, RateLimit-Remaining, Retry-After, Link, Signature-Agent",
     "Access-Control-Max-Age": "86400",

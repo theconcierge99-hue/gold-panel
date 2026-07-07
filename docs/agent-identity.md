@@ -21,6 +21,7 @@ Fund the new addresses with **≥0.1 USDC** (and a little **SOL** on Solana for 
 | `GET /api/agent-identity?id=agt_…` | Profile + embedded card JSON |
 | `GET /api/agent-identity-card?id=agt_…` | ERC-8004-style agent card |
 | `GET /api/agent-identity?list=1` | Public directory (latest agents) |
+| `PATCH /api/agent-identity` | Link OOBE SAP wallet / agent PDA to existing `agt_…` |
 
 ## Register (API)
 
@@ -32,7 +33,23 @@ Content-Type: application/json
   "name": "Macro Scout",
   "description": "Optional one-line purpose",
   "solAddress": "7hum…",
-  "evmAddress": "0x…"
+  "evmAddress": "0x…",
+  "sapWallet": "7hum…",
+  "sapAgentPda": "AgentPDA…"
+}
+```
+
+Optional **OOBE Synapse SAP** fields: `sapWallet` (must match `solAddress` when both set), `sapAgentPda` (on-chain agent PDA). Profile returns `sapVerified: true` when both are linked. See [OOBE integration](https://conc-exe.xyz/docs/integration/oobe).
+
+## Link SAP (PATCH)
+
+```http
+PATCH /api/agent-identity
+Content-Type: application/json
+
+{
+  "id": "agt_a1b2c3d4",
+  "sapAgentPda": "…"
 }
 ```
 

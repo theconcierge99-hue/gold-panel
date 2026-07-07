@@ -45,14 +45,25 @@ export function normalizeEvmAddress(raw: string): string | null {
   return a.toLowerCase();
 }
 
+/** SAP agent PDA / escrow — base58 Solana pubkey */
+export function normalizeSapAgentPda(raw: string): string | null {
+  const s = raw.trim();
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s)) return null;
+  return s;
+}
+
 export function toPublicView(origin: string, rec: AgentIdentityRecord): AgentPublicView {
   const base = origin.replace(/\/$/, "");
+  const sapVerified = !!(rec.sapWallet && rec.sapAgentPda);
   return {
     id: rec.id,
     name: rec.name,
     description: rec.description,
     solAddress: rec.solAddress,
     evmAddress: rec.evmAddress,
+    sapWallet: rec.sapWallet,
+    sapAgentPda: rec.sapAgentPda,
+    sapVerified,
     createdAt: rec.createdAt,
     cardUrl: `${base}/api/agent-identity-card?id=${encodeURIComponent(rec.id)}`,
     profileUrl: `${base}/api/agent-identity?id=${encodeURIComponent(rec.id)}`,
@@ -95,9 +106,20 @@ export async function registerAgent(input: {
   description?: string;
   solAddress?: string;
   evmAddress?: string;
+  sapWallet?: string;
+  sapAgentPda?: string;
 }): Promise<AgentIdentityRecord> {
   const existing = await findAgentByWallets(input.solAddress, input.evmAddress);
-  if (existing) return existing;
+  if (existing) {
+    if (input.sapWallet || input.sapAgentPda) {
+      const linked = await linkAgentSap(existing.id, {
+        sapWallet: input.sapWallet,
+        sapAgentPda: input.sapAgentPda,
+      });
+      return linked ?? existing;
+    }
+    return existing;
+  }
 
   const rec: AgentIdentityRecord = {
     id: generateAgentId(),
@@ -105,6 +127,8 @@ export async function registerAgent(input: {
     description: input.description,
     solAddress: input.solAddress,
     evmAddress: input.evmAddress,
+    sapWallet: input.sapWallet,
+    sapAgentPda: input.sapAgentPda,
     createdAt: new Date().toISOString(),
   };
 
@@ -136,4 +160,39 @@ export async function listAgents(limit = 24): Promise<AgentIdentityRecord[]> {
     return out;
   }
   return devAgents.slice(0, cap);
+}
+
+async function persistAgent(rec: AgentIdentityRecord): Promise<void> {
+  if (hasRedis()) {
+    const kv = await kvClient();
+    await kv.set(agentKey(rec.id), rec);
+    return;
+  }
+  const idx = devAgents.findIndex((a) => a.id === rec.id);
+  if (idx >= 0) devAgents[idx] = rec;
+}
+
+export async function linkAgentSap(
+  id: string,
+  input: { sapWallet?: string; sapAgentPda?: string },
+): Promise<AgentIdentityRecord | null> {
+  const agent = await getAgentById(id);
+  if (!agent) return null;
+
+  const sapWallet = input.sapWallet ? normalizeSolAddress(input.sapWallet) : undefined;
+  const sapAgentPda = input.sapAgentPda ? normalizeSapAgentPda(input.sapAgentPda) : undefined;
+  if (input.sapWallet && !sapWallet) return null;
+  if (input.sapAgentPda && !sapAgentPda) return null;
+
+  if (sapWallet && agent.solAddress && sapWallet !== agent.solAddress) {
+    throw new Error("sapWallet must match solAddress when both are set");
+  }
+
+  const updated: AgentIdentityRecord = {
+    ...agent,
+    sapWallet: sapWallet ?? agent.sapWallet,
+    sapAgentPda: sapAgentPda ?? agent.sapAgentPda,
+  };
+  await persistAgent(updated);
+  return updated;
 }

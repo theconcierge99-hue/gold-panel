@@ -6,6 +6,10 @@ export type AgentIdentityRecord = {
   description?: string;
   solAddress?: string;
   evmAddress?: string;
+  /** OOBE Synapse SAP agent wallet (usually same as solAddress) */
+  sapWallet?: string;
+  /** On-chain SAP agent PDA */
+  sapAgentPda?: string;
   createdAt: string;
 };
 
@@ -15,6 +19,9 @@ export type AgentPublicView = {
   description?: string;
   solAddress?: string;
   evmAddress?: string;
+  sapWallet?: string;
+  sapAgentPda?: string;
+  sapVerified?: boolean;
   createdAt: string;
   cardUrl: string;
   profileUrl: string;
@@ -28,6 +35,11 @@ export type AgentCardJson = {
   description?: string;
   registered: string;
   accounts: { chain: string; address: string }[];
+  sap?: {
+    wallet?: string;
+    agentPda?: string;
+    explorerUrl?: string;
+  };
   services: {
     name: string;
     endpoint: string;
@@ -46,6 +58,8 @@ export type AgentCardJson = {
     payshGuide?: string;
     grokBuild?: string;
     grokBuildGuide?: string;
+    oobe?: string;
+    sapToolsManifest?: string;
   };
 };
 
@@ -66,6 +80,8 @@ export type LoungeAgentServiceCard = {
     apiCatalog: string;
     a2aMesh: string;
     caseStudy: string;
+    oobe?: string;
+    sapToolsManifest?: string;
   };
   trust: {
     intelAccuracyEndpoint: string;

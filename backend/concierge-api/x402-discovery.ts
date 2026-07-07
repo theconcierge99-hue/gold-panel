@@ -34,6 +34,7 @@ export { buildBazaarExtension, buildApiCatalogLinkset, buildAsyncApiDocument };
 import { corbitsDiscoveryLinks } from "./corbits-links";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { grokDiscoveryLinks } from "./grok-links";
+import { oobeDiscoveryLinks } from "./oobe-links";
 import { payshDiscoveryLinks } from "./paysh-links";
 import {
   openApiAgentHeadersParameter,
@@ -311,6 +312,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
       ...dexterDiscoveryLinks(origin),
       ...payshDiscoveryLinks(origin),
       ...grokDiscoveryLinks(origin),
+      ...oobeDiscoveryLinks(origin),
       corbits: corbitsDiscoveryLinks(),
       zauth: zauthMetaLinks(origin),
     },
@@ -469,6 +471,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       ...mppDiscoveryLinks(base),
       ...dexterDiscoveryLinks(base),
       ...payshDiscoveryLinks(base),
+      ...oobeDiscoveryLinks(base),
       serviceName: listing.serviceName,
       description: listing.description,
       tags: listing.tags,
@@ -477,7 +480,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       facilitatorUrl: facilitator.url,
       fallbackFacilitator: getX402FacilitatorFallback().name,
       fallbackFacilitatorUrl: getX402FacilitatorFallback().url,
-      protocols: ["x402", "mpp"],
+      protocols: ["x402", "mpp", "SAP"],
     },
     tags: [
       { name: "news", description: "Wire article unlock" },
@@ -509,7 +512,7 @@ export function discoveryMetaForConfig(origin: string) {
     x402scanExploreUrl: X402SCAN_EXPLORE_URL,
     zauth: zauthMetaLinks(base),
     ownershipProofs: ownershipProofs(),
-    protocols: ["x402", "mpp"],
+    protocols: ["x402", "mpp", "SAP"],
     facilitator: facilitator.name,
     facilitatorId: facilitator.id,
     facilitatorUrl: facilitator.url,
@@ -528,6 +531,7 @@ export function discoveryMetaForConfig(origin: string) {
     ...mppDiscoveryLinks(base),
     ...dexterDiscoveryLinks(base),
     ...payshDiscoveryLinks(base),
+    ...oobeDiscoveryLinks(base),
     corbits: corbitsDiscoveryLinks(),
   };
 }

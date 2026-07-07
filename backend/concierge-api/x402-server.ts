@@ -31,6 +31,7 @@ import {
 } from "./token-pay";
 import { trySoonHolderFreeTier } from "./soon-holder-free-tier";
 import { trySoonSecurityFreeTier } from "./soon-security-tier";
+import { verifyOobeSapSettlement } from "./oobe-sap-x402";
 
 export type { X402ResourceKind };
 
@@ -595,6 +596,30 @@ export async function requireX402Payment(
           paymentResponseHeader: null,
         };
       }
+
+      const oobe = await verifyOobeSapSettlement(request, kind);
+      if (oobe?.ok) {
+        const paymentResponseHeader = b64EncodeJson({
+          success: true,
+          transaction: oobe.transaction,
+          network: getX402NetworkProfile().sol,
+          payer: oobe.payer,
+          scheme: "oobe-sap-settlement",
+        });
+        return {
+          ok: true,
+          payer: oobe.payer,
+          transaction: oobe.transaction,
+          paymentResponseHeader,
+        };
+      }
+      if (oobe && !oobe.ok) {
+        return {
+          ok: false,
+          response: await buildPaymentRequiredResponse(request, kind, cors, oobe.reason),
+        };
+      }
+
       return { ok: false, response: await buildPaymentRequiredResponse(request, kind, cors) };
     }
 
