@@ -87,12 +87,12 @@ html[data-theme="light"] .theme-toggle {
 }
 
 /* —— Institutional header —— */
-body.el-premium header,
+body.el-premium .app > header,
 body.el-premium .pg-topnav {
   position: relative;
   box-shadow: var(--el-shadow-sm), inset 0 -1px 0 var(--el-border-subtle);
 }
-body.el-premium header::before,
+body.el-premium .app > header::before,
 body.el-premium .pg-topnav::before {
   content: "";
   position: absolute;
@@ -180,7 +180,10 @@ html[data-theme="light"] .doc-card::after {
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   background: var(--header-bg, rgba(8, 10, 15, 0.92)) !important;
-  height: 56px;
+  min-height: 56px;
+  height: auto;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 .pg-nav a {
   border-radius: var(--el-radius-sm);

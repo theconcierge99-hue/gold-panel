@@ -1,7 +1,6 @@
 import {
   CONCIERGE_AGENT_ENDPOINTS,
   CONCIERGE_AGENT_ORIGIN,
-  endpointUrl,
   countBySegment,
 } from "./concierge-agent-endpoints.mjs";
 import { renderAgentTopNav } from "./agent-nav.mjs";
@@ -21,11 +20,10 @@ if (baseUrlEl) baseUrlEl.textContent = origin;
 
 if (chipsEl) {
   chipsEl.innerHTML = [
-    `<span><strong>${c.total}</strong> Endpoints</span>`,
+    `<span><strong>${c.total}</strong> routes</span>`,
     `<span class="dot">·</span><span>x402</span>`,
     `<span class="dot">·</span><span>from $0.02</span>`,
     `<span class="dot">·</span><span>Solana · Base</span>`,
-    `<span class="dot">·</span><span>AI-enhanced</span>`,
   ].join("");
 }
 
@@ -82,7 +80,6 @@ function endpointCard(ep) {
       <span class="res-ep-price">${price}</span>
     </div>
     <p class="res-ep-desc">${ep.description}</p>
-    <code class="res-ep-url">${endpointUrl(ep.path)}</code>
   </a>`;
 }
 
@@ -103,11 +100,13 @@ function renderCatalog() {
     grouped[ep.segment].push(ep);
   }
   const order = ["concierge", "research", "intel", "alpha", "security", "lounge"];
+  const showHeadings = activeSegment === "all";
   listEl.innerHTML = order
     .filter((seg) => grouped[seg]?.length)
     .map((seg) => {
       const items = grouped[seg].map(endpointCard).join("");
-      return `<section class="res-seg">${segmentHeading(seg, grouped[seg].length)}<div class="res-ep-list">${items}</div></section>`;
+      const head = showHeadings ? segmentHeading(seg, grouped[seg].length) : "";
+      return `<section class="res-seg">${head}<div class="res-ep-list">${items}</div></section>`;
     })
     .join("");
 }

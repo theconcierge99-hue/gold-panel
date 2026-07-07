@@ -8,27 +8,59 @@ body.pg-page{font-family:'DM Mono','Outfit',monospace;background:var(--pg-bg);co
 
 /* —— Top nav —— */
 .pg-topnav{
-  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
-  padding:0 20px;height:52px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px 12px;
+  padding:6px 20px;min-height:52px;height:auto;
   border-bottom:1px solid var(--pg-panel-border);background:var(--pg-panel);flex-shrink:0;
+  position:relative;z-index:40;
 }
-.pg-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pg-text);font-family:'DM Mono',monospace;font-size:15px;font-weight:400;letter-spacing:.02em;justify-self:start}
+.pg-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pg-text);font-family:'DM Mono',monospace;font-size:15px;font-weight:400;letter-spacing:.02em;justify-self:start;min-width:0}
 .pg-logo-dim{color:var(--pg-accent)}
-.pg-nav{display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:center;justify-self:center;margin:0}
+.pg-nav{
+  display:flex;align-items:center;gap:2px;flex-wrap:nowrap;justify-content:center;justify-self:center;
+  margin:0;max-width:min(52vw,420px);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.pg-nav::-webkit-scrollbar{display:none}
 .pg-nav a{
   font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   padding:8px 14px;color:var(--pg-muted);text-decoration:none;border-radius:4px;
+  flex-shrink:0;white-space:nowrap;
 }
 .pg-nav a:hover{color:var(--pg-text)}
 .pg-nav a.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
-.pg-topnav-right{justify-self:end;display:flex;align-items:center;gap:10px;margin-left:0}
-.pg-demo-btn{
-  font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-  padding:8px 14px;border:1px solid var(--pg-accent);color:var(--pg-accent);
-  text-decoration:none;border-radius:4px;white-space:nowrap;flex-shrink:0;
-  background:rgba(201,168,76,.08);transition:background .15s,border-color .15s;
+.pg-nav-more{position:relative;display:inline-flex}
+.pg-nav-more-btn{
+  font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:8px 12px;color:var(--pg-muted);background:transparent;border:none;border-radius:4px;
+  cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap;
 }
-.pg-demo-btn:hover{background:var(--pg-accent-glow);border-color:var(--pg-accent)}
+.pg-nav-more-btn:hover,.pg-nav-more-btn.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
+.pg-nav-more-menu{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:148px;padding:6px;
+  background:var(--pg-panel);border:1px solid var(--pg-panel-border);border-radius:8px;
+  box-shadow:var(--el-shadow-md,0 8px 32px rgba(0,0,0,.38));z-index:30;
+}
+.pg-nav-more-menu.open{display:block}
+.pg-nav-more-menu a{
+  display:block;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--pg-muted);text-decoration:none;
+  border-radius:4px;
+}
+.pg-nav-more-menu a:hover,.pg-nav-more-menu a.active{color:var(--pg-accent);background:var(--pg-accent-glow)}
+.pg-topnav-right{justify-self:end;display:flex;align-items:center;gap:6px;margin-left:0;flex-shrink:0}
+.pg-lounge-btn{
+  font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:7px 12px;border:1px solid var(--pg-accent-dim);color:var(--pg-accent);
+  text-decoration:none;border-radius:4px;white-space:nowrap;flex-shrink:0;
+  background:rgba(212,179,86,.06);transition:all .15s;
+}
+.pg-lounge-btn:hover{background:var(--pg-accent-glow);border-color:var(--pg-accent)}
+.pg-demo-btn{
+  font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:7px 12px;border:1px solid var(--pg-panel-border);color:var(--pg-muted);
+  text-decoration:none;border-radius:4px;white-space:nowrap;flex-shrink:0;
+  background:transparent;transition:all .15s;
+}
+.pg-demo-btn:hover{color:var(--pg-text);border-color:var(--pg-accent-dim)}
 .pg-theme-btn{
   width:34px;height:34px;border:1px solid var(--pg-panel-border);background:transparent;
   color:var(--pg-muted);border-radius:6px;cursor:pointer;font-size:14px;

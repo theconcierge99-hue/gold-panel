@@ -72,8 +72,8 @@ html[data-theme="light"] body.el-premium .agent-headline .line2 {
   animation-duration: 10s;
 }
 
-/* —— Executive Lounge — header —— */
-body.el-premium header {
+/* —— Executive Lounge — header (scoped to .app shell only) —— */
+body.el-premium .app > header {
   height: var(--header-h, 64px);
   background: var(--el-glass-header, rgba(8, 10, 15, 0.78)) !important;
   backdrop-filter: blur(28px) saturate(1.35);
@@ -133,8 +133,8 @@ body.el-premium .nav-i.active {
   box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.12);
 }
 
-/* —— Main content area —— */
-body.el-premium main {
+/* —— Main content area (Executive Lounge .app only) —— */
+body.el-premium .app > main {
   padding: 28px 36px 64px;
 }
 body.el-premium .section-h h2 {
@@ -316,11 +316,15 @@ body.el-premium .agent-hero-wrap::after {
     linear-gradient(180deg, transparent 60%, rgba(8, 10, 15, 0.85) 100%);
   z-index: 2;
 }
-body.el-premium .agent-badge {
-  border-color: rgba(201, 168, 76, 0.25);
-  background: rgba(8, 10, 15, 0.75);
-  backdrop-filter: blur(12px);
-  letter-spacing: 0.06em;
+body.el-premium .agent-eyebrow {
+  border-radius: var(--el-radius-pill);
+  padding: 6px 14px;
+  background: rgba(6, 8, 16, 0.65);
+  border: 1px solid var(--el-border-subtle);
+  backdrop-filter: blur(8px);
+}
+body.el-premium .agent-hero-actions {
+  margin-top: 4px;
 }
 body.el-premium .agent-headline {
   font-family: "Cormorant Garamond", serif !important;
@@ -347,30 +351,6 @@ body.el-premium .agent-terminal {
   border-radius: var(--el-radius-md);
   border-color: rgba(201, 168, 76, 0.2);
   box-shadow: var(--el-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-body.el-premium .agent-cta-row {
-  border-radius: var(--el-radius-lg);
-  border-color: rgba(201, 168, 76, 0.15);
-  background: rgba(8, 10, 15, 0.78);
-  backdrop-filter: blur(16px);
-  padding: 16px 20px;
-}
-body.el-premium .agent-cta-btn.primary {
-  background: linear-gradient(
-    135deg,
-    rgba(201, 168, 76, 0.18) 0%,
-    rgba(201, 168, 76, 0.08) 100%
-  );
-  border-color: var(--pg-accent);
-  box-shadow: var(--el-shadow-glow-gold);
-}
-body.el-premium .agent-cta-btn.primary:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(201, 168, 76, 0.28) 0%,
-    rgba(201, 168, 76, 0.14) 100%
-  );
-  transform: translateY(-1px);
 }
 
 /* —— Docs enterprise —— */
@@ -663,15 +643,6 @@ body.el-premium .step::before {
   box-shadow: 0 0 12px rgba(212, 179, 86, 0.2);
 }
 
-/* —— Agent stats row —— */
-body.el-premium .agent-stats-row {
-  border-color: rgba(212, 179, 86, 0.2);
-  box-shadow: var(--el-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-body.el-premium .agent-stat-val {
-  text-shadow: 0 0 32px rgba(212, 179, 86, 0.25);
-}
-
 /* —— Nav badge TCX —— */
 body.el-premium .nav-i .badge {
   border-radius: var(--el-radius-pill);
@@ -884,10 +855,10 @@ body.el-premium .el-reveal.is-visible {
 }
 
 @media (max-width: 768px) {
-  body.el-premium main {
+  body.el-premium .app > main {
     padding: 20px 16px 48px;
   }
-  body.el-premium header {
+  body.el-premium .app > header {
     height: 56px;
   }
 }

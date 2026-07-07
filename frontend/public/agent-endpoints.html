@@ -16,20 +16,18 @@
 <div class="pg-shell res-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
   <main class="res-main">
-    <div class="res-term-line" aria-hidden="true">
-      <span class="res-prompt">$</span><span class="res-cmd">concierge --list-endpoints</span><span class="res-cursor">▌</span>
-    </div>
-    <div class="res-chips" id="res-chips"></div>
-
     <header class="res-hero">
+      <p class="res-eyebrow" id="res-chips"></p>
       <h1>Concierge Agent Endpoints</h1>
-      <p class="res-lead">Seventeen intelligence endpoints plus Security Desk scout routes — paid via x402 on Solana and Base (USDC via PayAI/Dexter) plus <strong>Token Pay</strong> native tokens on supported routes when merchants are live. Free <code>POST /api/concierge-security-scope</code> validates external targets only; Concierge hosts are always blocked. No API keys. Payment is the gate for paid audits.</p>
+      <p class="res-lead">Pay-per-call intelligence routes on Solana and Base. No API keys — x402 and Token Pay settle each call.</p>
       <p class="res-base">Base URL: <code id="res-base-url"></code></p>
     </header>
 
-    <div class="res-filter-row">
-      <span class="res-filter-prompt" aria-hidden="true">❯</span>
-      <div class="res-filters" id="agent-filters"></div>
+    <div class="res-toolbar">
+      <div class="res-filter-row">
+        <span class="res-filter-prompt" aria-hidden="true">Filter</span>
+        <div class="res-filters" id="agent-filters"></div>
+      </div>
     </div>
 
     <div id="endpoint-catalog"></div>

@@ -7,14 +7,11 @@ import {
 } from "./agent-home-fx.mjs";
 import { initConciergeFx } from "./concierge-fx.mjs";
 
-renderAgentTopNav("home");
+renderAgentTopNav("home", { variant: "home" });
 renderAgentSiteFooter();
 
 const countEl = document.getElementById("agent-endpoint-count");
-const statEndpoints = document.getElementById("agent-stat-endpoints");
-const total = countBySegment().total;
-if (countEl) countEl.textContent = String(total);
-if (statEndpoints) statEndpoints.textContent = `${total}+`;
+if (countEl) countEl.textContent = String(countBySegment().total);
 
 const stopMatrix = initMatrixRain(document.getElementById("agent-matrix-canvas"));
 const stopLogo = initConciergeLogoParticles(document.getElementById("agent-logo-canvas"));
@@ -25,11 +22,8 @@ initTypewriter(document.getElementById("agent-typewriter"), [
   "btc desk verdict 48h",
   "alpha momentum scan btc",
   "concierge intel airdrop sol",
-  "concierge intel tvl snapshot",
   "register agt_ agent identity",
-  "concierge intel a2a pipeline",
   "agent a2a mesh discovery",
-  "whale positioning eth sol",
 ]);
 
 window.addEventListener("pagehide", () => {

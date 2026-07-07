@@ -1,4 +1,4 @@
-/** Lounge-style site footer: Integrations, About Us, X + Telegram. */
+/** Lounge-style site footer — minimal, no nav duplication. */
 export function renderAgentSiteFooter(containerId = "agent-site-footer") {
   const el = document.getElementById(containerId);
   if (!el) return;
@@ -9,11 +9,8 @@ export function renderAgentSiteFooter(containerId = "agent-site-footer") {
         <nav class="agent-foot-links" aria-label="Site links">
           <a class="agent-foot-link" href="/integrations">Integrations</a>
           <span class="agent-foot-dot" aria-hidden="true">·</span>
-          <a class="agent-foot-link" href="/agent/skills">Skills</a>
-          <span class="agent-foot-dot" aria-hidden="true">·</span>
-          <a class="agent-foot-link" href="/about" target="_blank" rel="noopener noreferrer">About Us</a>
+          <a class="agent-foot-link" href="/about" rel="noopener noreferrer">About</a>
         </nav>
-        <span class="agent-foot-divider" aria-hidden="true"></span>
         <div class="agent-foot-social">
           <a class="agent-foot-social-btn" href="https://x.com/Th3concierge_" target="_blank" rel="noopener noreferrer" aria-label="Follow on X @Th3concierge_">
             <img src="/images/x-social.png" alt="" width="16" height="16" />
@@ -23,7 +20,6 @@ export function renderAgentSiteFooter(containerId = "agent-site-footer") {
           </a>
         </div>
       </div>
-      <p class="agent-foot-tag">Concierge Agent · Executive Lounge</p>
     </div>`;
 }
 
@@ -46,43 +42,87 @@ function bindThemeToggle(root) {
   syncThemeButtons();
 }
 
-/** Shared top nav for Concierge Agent hub pages. */
-export function renderAgentTopNav(activeId) {
+function bindMoreMenu(root) {
+  const btn = root?.querySelector(".pg-nav-more-btn");
+  const menu = root?.querySelector(".pg-nav-more-menu");
+  if (!btn || !menu) return;
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = menu.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", () => {
+    menu.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+  });
+}
+
+const MORE_LINKS = [
+  { id: "skills", href: "/agent/skills", label: "Skills" },
+  { id: "token-pay", href: "/agent/token-pay", label: "Token Pay" },
+  { id: "identity", href: "/agent/identity", label: "Identity" },
+  { id: "demo", href: "/demo", label: "Demo" },
+];
+
+const HUB_LINKS = [
+  { id: "endpoints", href: "/agent/endpoints", label: "Endpoints" },
+  { id: "playground", href: "/agent/playground", label: "Playground" },
+  { id: "discover", href: "/agent/discover", label: "Discover" },
+  { id: "docs", href: "/docs", label: "Docs" },
+];
+
+const HOME_LINKS = [
+  { id: "discover", href: "/agent/discover", label: "Discover" },
+  { id: "docs", href: "/docs", label: "Docs" },
+];
+
+function navLink(l, activeId) {
+  const cls = l.id === activeId ? " active" : "";
+  return `<a href="${l.href}" class="${cls.trim()}">${l.label}</a>`;
+}
+
+function moreMenu(activeId) {
+  const items = MORE_LINKS.map((l) => {
+    const cls = l.id === activeId ? " active" : "";
+    return `<a href="${l.href}" class="${cls.trim()}">${l.label}</a>`;
+  }).join("");
+  const isOpen = MORE_LINKS.some((l) => l.id === activeId);
+  return `
+    <div class="pg-nav-more">
+      <button type="button" class="pg-nav-more-btn${isOpen ? " active" : ""}" aria-expanded="false" aria-haspopup="true">More</button>
+      <div class="pg-nav-more-menu" role="menu">${items}</div>
+    </div>`;
+}
+
+/**
+ * Shared top nav for Concierge Agent hub pages.
+ * @param {string} activeId
+ * @param {{ variant?: 'home' | 'hub' }} [options]
+ */
+export function renderAgentTopNav(activeId, options = {}) {
   const el = document.getElementById("agent-topnav");
   if (!el) return;
 
   document.body.classList.add("el-premium");
 
-  const links = [
-    { id: "home", href: "/agent", label: "Home" },
-    { id: "endpoints", href: "/agent/endpoints", label: "Endpoints" },
-    { id: "playground", href: "/agent/playground", label: "Playground" },
-    { id: "discover", href: "/agent/discover", label: "Discover" },
-    { id: "skills", href: "/agent/skills", label: "Skills" },
-    { id: "token-pay", href: "/agent/token-pay", label: "Token Pay (Beta)" },
-    { id: "identity", href: "/agent/identity", label: "Identity" },
-    { id: "lounge", href: "/lounge", label: "Lounge" },
-    { id: "concierge", href: "/lounge#concierge", label: "Concierge AI" },
-    { id: "docs", href: "/docs", label: "Docs" },
-  ];
+  const isHome = options.variant === "home" || activeId === "home";
+  const links = isHome ? HOME_LINKS : HUB_LINKS;
 
   el.innerHTML = `
-    <a class="pg-logo" href="/agent">
+    <a class="pg-logo" href="/agent" aria-label="Concierge Agent home">
       <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="36" height="36" />
       <span>Concierge<span class="pg-logo-dim"> Agent</span></span>
     </a>
     <nav class="pg-nav" aria-label="Concierge Agent">
-      ${links
-        .map((l) => {
-          const cls = l.id === activeId ? " active" : "";
-          return `<a href="${l.href}" class="${cls.trim()}">${l.label}</a>`;
-        })
-        .join("")}
+      ${links.map((l) => navLink(l, activeId)).join("")}
+      ${moreMenu(activeId)}
     </nav>
     <div class="pg-topnav-right">
-      <a class="pg-demo-btn" href="/demo" title="Watch product demo">▶ Demo</a>
+      <a class="pg-lounge-btn" href="/lounge" title="Executive Lounge">Lounge</a>
       <div class="el-status-pill" title="x402 pay-per-call API">
-        <span class="dot"></span> Live API
+        <span class="dot"></span> Live
       </div>
       <div class="el-theme-toggle theme-toggle" role="group" aria-label="Theme mode">
         <button type="button" class="theme-btn" data-theme-btn="dark">Dark</button>
@@ -91,4 +131,5 @@ export function renderAgentTopNav(activeId) {
     </div>`;
 
   bindThemeToggle(el);
+  bindMoreMenu(el);
 }

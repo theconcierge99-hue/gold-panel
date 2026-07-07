@@ -8,9 +8,8 @@
 <meta name="description" content="Concierge Agent — AI market and DeFi intelligence via x402 pay-per-call. Endpoints, playground, discovery, and agent identity." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/agent-home.css" />
-<link rel="stylesheet" href="/css/agent-playground.css" />
 </head>
 <body class="agent-home-page el-premium" data-agent-page="home">
 <div class="agent-home-shell">
@@ -21,14 +20,12 @@
     <canvas id="agent-logo-canvas" aria-hidden="true"></canvas>
 
     <div class="agent-hero-content">
-      <div class="agent-badge">
-        <span class="agent-badge-dot"></span>
-        <span><strong id="agent-endpoint-count">12</strong> Live Endpoints</span>
-        <span>·</span>
-        <span>Institutional API</span>
-        <span>·</span>
-        <span>x402 · Solana · Base</span>
-      </div>
+      <p class="agent-eyebrow">
+        <span class="agent-badge-dot" aria-hidden="true"></span>
+        <span><strong id="agent-endpoint-count">12</strong> live routes</span>
+        <span class="agent-eyebrow-sep">·</span>
+        <span>x402 pay-per-call</span>
+      </p>
 
       <h1 class="agent-headline">
         <span class="line1">Market Intelligence</span>
@@ -36,33 +33,16 @@
       </h1>
 
       <p class="agent-subline">
-        AI-powered Concierge desk via pay-per-call. No API keys. No signup.
-        Payment is the only gate.
+        Institutional desk for agents and builders. No API keys — payment is the gate.
       </p>
 
       <div class="agent-terminal" aria-live="polite">
         <span class="prompt">&gt; </span><span id="agent-typewriter"></span><span class="cursor" aria-hidden="true"></span>
       </div>
 
-      <div class="agent-cta-row">
-        <a class="agent-cta-btn primary" href="/agent/endpoints">Explore Endpoints</a>
-        <a class="agent-cta-btn" href="/agent/playground">Open Playground</a>
-        <a class="agent-cta-btn" href="/lounge">Executive Lounge</a>
-      </div>
-
-      <div class="agent-stats-row" aria-label="Platform metrics">
-        <div class="agent-stat">
-          <span class="agent-stat-val" id="agent-stat-endpoints">15+</span>
-          <span class="agent-stat-lbl">Live Routes</span>
-        </div>
-        <div class="agent-stat">
-          <span class="agent-stat-val">x402</span>
-          <span class="agent-stat-lbl">Pay Per Call</span>
-        </div>
-        <div class="agent-stat">
-          <span class="agent-stat-val">0</span>
-          <span class="agent-stat-lbl">API Keys</span>
-        </div>
+      <div class="agent-hero-actions">
+        <a class="agent-cta-btn primary" href="/agent/playground">Open Playground</a>
+        <a class="agent-cta-link" href="/agent/endpoints">Browse API catalog →</a>
       </div>
     </div>
 
