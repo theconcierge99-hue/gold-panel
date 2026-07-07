@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
 <title>TCX Transparency — Concierge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Weekly TCX buyback and burn transparency for Concierge — net x402 revenue, Jupiter swaps, and on-chain burn links." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/token/transparency" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/brand-logo.css" />
 <link rel="stylesheet" href="/css/token.css" />
 </head>
-<body class="tok-page el-premium">
+<body class="tok-page tok-v2 el-premium">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="tok-wrap">
   <div class="tok-top">
     <a class="tok-back" href="/token">← TCX tokenomics</a>
@@ -160,5 +161,6 @@
   if (noteEl) noteEl.textContent = "Last updated: " + REPORTS[0].weekEnd + " UTC";
 })();
 </script>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 </body>
 </html>

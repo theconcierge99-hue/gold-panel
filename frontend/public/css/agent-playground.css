@@ -3,6 +3,7 @@
 @import url("/css/concierge-premium.css");
 @import url("/css/concierge-light-mode.css");
 @import url("/css/agent-shell.css");
+@import url("/css/agent-hub-v2.css");
 
 *{box-sizing:border-box;margin:0;padding:0}
 body.pg-page{font-family:'DM Mono','Outfit',monospace;background:var(--pg-bg);color:var(--pg-text);min-height:100vh;overflow:hidden}

@@ -283,3 +283,208 @@ body.about-v2 .btn.gold{
   color:#0a1018 !important;border:none !important;
   background:linear-gradient(135deg,#f0d878,#d4b356) !important;
 }
+
+/* ── Demo ── */
+body.demo-v2{
+  font-family:'Inter',system-ui,sans-serif !important;
+  background:#04060c !important;color:#e8eef6;
+}
+html[data-theme="light"] body.demo-v2{background:#f6f4ef !important;color:#0a1018}
+body.demo-v2::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 72%);
+}
+body.demo-v2 .demo-top,
+body.demo-v2 .demo-main{position:relative;z-index:1}
+body.demo-v2 .demo-top{
+  background:rgba(6,8,14,.88) !important;
+  border-bottom-color:rgba(255,255,255,.06) !important;
+}
+html[data-theme="light"] body.demo-v2 .demo-top{background:#fff !important}
+body.demo-v2 .demo-brand{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:600 !important;font-size:16px !important;letter-spacing:-.02em !important;
+}
+body.demo-v2 .demo-brand em{font-style:normal !important;color:#d4b356 !important}
+body.demo-v2 .demo-top-cta{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:12px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  border-radius:8px !important;color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}
+body.demo-v2 .demo-eyebrow{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:11px !important;font-weight:600 !important;letter-spacing:.14em !important;
+  color:#d4b356 !important;
+}
+body.demo-v2 .demo-intro h1{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:clamp(28px,4vw,38px) !important;
+  letter-spacing:-.03em !important;
+}
+body.demo-v2 .demo-lead{
+  font-size:16px !important;line-height:1.65 !important;color:#8a9bb4 !important;
+}
+body.demo-v2 .demo-player-wrap{border-radius:14px !important;overflow:hidden}
+body.demo-v2 .demo-chapters a{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;border-radius:8px !important;
+}
+body.demo-v2 .demo-btn{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  border-radius:8px !important;
+  border-color:rgba(255,255,255,.12) !important;
+}
+body.demo-v2 .demo-btn.primary{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}
+body.demo-v2 .demo-foot{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:12px !important;letter-spacing:0 !important;
+  border-top-color:rgba(255,255,255,.06) !important;
+}
+
+/* ── 404 ── */
+body.nf-v2{
+  font-family:'Inter',system-ui,sans-serif !important;
+  background:#04060c !important;color:#e8eef6;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:32px 20px;overflow:hidden;
+}
+html[data-theme="light"] body.nf-v2{background:#f6f4ef !important;color:#0a1018}
+body.nf-v2::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,#000 25%,transparent 75%);
+}
+body.nf-v2 .nf-shell{position:relative;z-index:1;text-align:center;max-width:520px;width:100%}
+body.nf-v2 .nf-logo{margin:0 auto 28px}
+body.nf-v2 .nf-logo img{width:72px;height:72px;padding:6px}
+body.nf-v2 .nf-code{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:clamp(72px,18vw,120px) !important;
+  line-height:1 !important;letter-spacing:-.04em !important;margin-bottom:8px;
+  background:linear-gradient(135deg,#f0d878,#d4b356);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+body.nf-v2 .nf-title{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:clamp(24px,4vw,32px) !important;
+  letter-spacing:-.02em !important;margin-bottom:12px;
+}
+body.nf-v2 .nf-lead{
+  font-size:15px !important;line-height:1.65 !important;color:#8a9bb4 !important;
+  margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto;
+}
+body.nf-v2 .nf-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+body.nf-v2 .nf-btn{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  padding:11px 20px !important;border:1px solid rgba(255,255,255,.12) !important;
+  background:rgba(255,255,255,.04) !important;color:#e8eef6 !important;
+  text-decoration:none;border-radius:8px !important;
+}
+html[data-theme="light"] body.nf-v2 .nf-btn{
+  border-color:rgba(10,16,24,.12) !important;background:#fff !important;color:#0a1018 !important;
+}
+body.nf-v2 .nf-btn.gold{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+  box-shadow:0 4px 20px rgba(212,179,86,.22);
+}
+body.nf-v2 .nf-term{
+  margin-top:28px;font-family:'DM Mono',monospace;font-size:11px;color:#5a6a7e;
+  padding:10px 16px;border:1px solid rgba(255,255,255,.08);border-radius:10px;
+  background:rgba(255,255,255,.02);display:inline-block;
+}
+body.nf-v2 .nf-term .prompt{color:#7dcea0}
+
+/* ── Token pages ── */
+body.tok-v2{
+  font-family:'Inter',system-ui,sans-serif !important;
+  background:#04060c !important;color:#e8eef6;
+}
+html[data-theme="light"] body.tok-v2{background:#f6f4ef !important;color:#0a1018}
+body.tok-v2::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 72%);
+}
+body.tok-v2 .tok-wrap{position:relative;z-index:1}
+body.tok-v2 .tok-back{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:500 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+}
+body.tok-v2 .tok-brand span{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:600 !important;font-size:15px !important;letter-spacing:-.02em;
+}
+body.tok-v2 .tok-brand em{color:#d4b356 !important;font-style:normal}
+body.tok-v2 .tok-eyebrow{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:11px !important;font-weight:600 !important;letter-spacing:.14em !important;
+}
+body.tok-v2 .tok-name{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;letter-spacing:-.03em !important;
+}
+body.tok-v2 .tok-symbol{font-family:'Inter',system-ui,sans-serif !important;font-weight:600 !important}
+body.tok-v2 .tok-soon-badge{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:10px !important;font-weight:600 !important;letter-spacing:.08em !important;
+  border-radius:6px !important;
+}
+body.tok-v2 .tok-lead,
+body.tok-v2 .tok-draft-note{font-size:15px !important;line-height:1.65 !important;color:#8a9bb4 !important}
+body.tok-v2 .tok-section h2{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;letter-spacing:-.02em !important;
+}
+body.tok-v2 .tok-section h2 em{color:#d4b356 !important;font-style:normal}
+body.tok-v2 .tok-card{
+  border-radius:12px !important;
+  border-color:rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.02) !important;
+}
+html[data-theme="light"] body.tok-v2 .tok-card{background:#fff !important}
+body.tok-v2 .tok-card h3{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:600 !important;font-size:15px !important;
+}
+body.tok-v2 .tok-table-wrap{border-radius:12px !important}
+body.tok-v2 .tok-table th{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:10px !important;font-weight:600 !important;letter-spacing:.1em !important;
+}
+body.tok-v2 .tok-pill{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:11px !important;font-weight:500 !important;
+  border-radius:999px !important;
+}
+body.tok-v2 .tok-report-card{border-radius:14px !important}
+body.tok-v2 .tok-btn{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  border-radius:8px !important;
+}
+body.tok-v2 .tok-btn.gold{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}

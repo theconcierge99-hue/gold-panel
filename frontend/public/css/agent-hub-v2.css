@@ -1,0 +1,233 @@
+/**
+ * Agent hub v2 — playground, resources, token-pay, identity (OOBE / Xona).
+ */
+
+body.agent-v2.pg-page,
+body.agent-v2.res-page{
+  font-family:'Inter',system-ui,sans-serif !important;
+  background:#04060c !important;
+  color:#e8eef6;
+}
+html[data-theme="light"] body.agent-v2.pg-page,
+html[data-theme="light"] body.agent-v2.res-page{
+  background:#f6f4ef !important;color:#0a1018;
+}
+
+body.agent-v2.pg-page::before,
+body.agent-v2.res-page::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 18%,transparent 72%);
+}
+html[data-theme="light"] body.agent-v2.pg-page::before,
+html[data-theme="light"] body.agent-v2.res-page::before{
+  background-image:
+    linear-gradient(rgba(10,16,24,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(10,16,24,.04) 1px,transparent 1px);
+}
+body.agent-v2 .pg-shell,
+body.agent-v2 .res-shell{position:relative;z-index:1}
+
+body.agent-v2.pg-page .pg-topnav,
+body.agent-v2.res-page .pg-topnav{
+  display:flex !important;
+  grid-template-columns:unset !important;
+}
+
+/* ── Playground ── */
+body.agent-v2.pg-page{background:#04060c !important}
+body.agent-v2 .pg-sidebar{
+  background:rgba(8,12,22,.9) !important;
+  border-right-color:rgba(255,255,255,.06) !important;
+}
+html[data-theme="light"] body.agent-v2 .pg-sidebar{
+  background:#fff !important;border-right-color:rgba(10,16,24,.08) !important;
+}
+body.agent-v2 .pg-panel-title{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:10px !important;font-weight:600 !important;
+  letter-spacing:.12em !important;
+}
+body.agent-v2 .pg-ep-row{border-radius:10px !important}
+body.agent-v2 .pg-ep-row.active{
+  border-color:rgba(212,179,86,.35) !important;
+  box-shadow:0 0 0 1px rgba(212,179,86,.15) !important;
+}
+body.agent-v2 .pg-terminal-window{border-radius:14px !important}
+body.agent-v2 .pg-detail-label{
+  font-family:'Inter',system-ui,sans-serif !important;
+  letter-spacing:.08em !important;
+}
+body.agent-v2 .pg-exec-btn{border-radius:10px !important}
+body.agent-v2 .pg-ph-logo{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;letter-spacing:.2em !important;
+}
+
+/* ── Resources hero ── */
+body.agent-v2 .res-main{max-width:920px !important;padding:40px clamp(20px,4vw,36px) 64px !important}
+body.agent-v2 .res-hero{
+  border-bottom-color:rgba(255,255,255,.06) !important;
+  padding-bottom:28px !important;margin-bottom:8px !important;
+}
+body.agent-v2 .res-hero h1{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:clamp(28px,4vw,38px) !important;
+  letter-spacing:-.03em !important;
+}
+body.agent-v2 .res-lead{
+  font-size:16px !important;line-height:1.65 !important;color:#8a9bb4 !important;
+}
+html[data-theme="light"] body.agent-v2 .res-lead{color:#3a4a5e !important}
+body.agent-v2 .res-eyebrow,
+body.agent-v2 .res-chips{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:12px !important;font-weight:500 !important;
+}
+body.agent-v2 .res-filter{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:12px !important;border-radius:8px !important;
+}
+body.agent-v2 .res-filter.active{
+  color:#0a1018 !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+  border-color:transparent !important;
+}
+body.agent-v2 .res-seg-head h2{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:20px !important;
+}
+body.agent-v2 .res-ep{
+  border-radius:12px !important;
+  border-color:rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.02) !important;
+}
+html[data-theme="light"] body.agent-v2 .res-ep{
+  background:#fff !important;border-color:rgba(10,16,24,.08) !important;
+}
+body.agent-v2 .res-ep:hover{
+  border-color:rgba(212,179,86,.3) !important;
+  box-shadow:0 10px 32px rgba(0,0,0,.18) !important;
+}
+body.agent-v2 .res-disc-card,
+body.agent-v2 .res-skill-view,
+body.agent-v2 .res-integrate{
+  border-radius:14px !important;
+  border-color:rgba(255,255,255,.08) !important;
+}
+body.agent-v2 .res-disc-card h3,
+body.agent-v2 .res-skill-view-head h2{
+  font-family:'Inter',system-ui,sans-serif !important;font-weight:600 !important;
+}
+body.agent-v2 .res-integrate h3{font-family:'Inter',system-ui,sans-serif !important}
+body.agent-v2 .res-integrate-actions a{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:500 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  border-radius:8px !important;
+}
+body.agent-v2 .res-integrate-actions a.primary{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}
+body.agent-v2 .res-skill-card .res-skill-open{
+  font-family:'Inter',system-ui,sans-serif !important;
+  border-radius:8px !important;
+  color:#0a1018 !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}
+
+/* ── Token Pay dashboard ── */
+body.agent-v2.tp-dash-page .tp-card{
+  border-radius:14px !important;
+  border-color:rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.02) !important;
+}
+html[data-theme="light"] body.agent-v2.tp-dash-page .tp-card{
+  background:#fff !important;
+}
+body.agent-v2 .tp-stat{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;
+}
+body.agent-v2 .tp-field label,
+body.agent-v2 .tp-card h3{
+  font-family:'Inter',system-ui,sans-serif !important;
+  letter-spacing:.08em !important;text-transform:uppercase !important;
+}
+body.agent-v2 .tp-refresh,
+body.agent-v2 .tp-onboard-btn{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:12px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  border-radius:8px !important;
+}
+body.agent-v2 .tp-refresh{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+}
+body.agent-v2 .tp-field select,
+body.agent-v2 .tp-field input{
+  border-radius:8px !important;
+}
+
+/* ── Agent Identity page ── */
+body.agent-v2 .agent-main{
+  max-width:760px !important;margin:0 auto !important;
+  padding:40px clamp(20px,4vw,32px) 64px !important;
+}
+body.agent-v2 .agent-main .agent-eyebrow{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:11px !important;font-weight:600 !important;
+  letter-spacing:.14em !important;
+  color:#d4b356 !important;margin-bottom:12px;
+}
+body.agent-v2 .agent-title{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-weight:700 !important;font-size:clamp(28px,4vw,36px) !important;
+  letter-spacing:-.03em !important;margin-bottom:12px !important;
+}
+body.agent-v2 .agent-lead{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-style:normal !important;font-size:16px !important;
+  line-height:1.65 !important;color:#8a9bb4 !important;
+  margin-bottom:28px !important;
+}
+body.agent-v2 .agent-main .card{
+  border-radius:14px !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  background:rgba(255,255,255,.02) !important;
+  padding:24px !important;margin-bottom:16px !important;
+}
+html[data-theme="light"] body.agent-v2 .agent-main .card{
+  background:#fff !important;border-color:rgba(10,16,24,.08) !important;
+}
+body.agent-v2 .agent-main .card h3{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:11px !important;font-weight:600 !important;
+  letter-spacing:.12em !important;
+}
+body.agent-v2 .agent-main .card p,
+body.agent-v2 .agent-main .card li{
+  font-size:14px !important;line-height:1.65 !important;color:#8a9bb4 !important;
+}
+body.agent-v2 .agent-cta-btn{
+  font-family:'Inter',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:600 !important;
+  letter-spacing:0 !important;text-transform:none !important;
+  padding:11px 20px !important;border-radius:8px !important;
+  text-decoration:none !important;display:inline-block;
+  border:1px solid rgba(255,255,255,.12) !important;
+  color:#e8eef6 !important;background:rgba(255,255,255,.04) !important;
+}
+body.agent-v2 .agent-cta-btn.primary{
+  color:#0a1018 !important;border:none !important;
+  background:linear-gradient(135deg,#f0d878,#d4b356) !important;
+  box-shadow:0 4px 20px rgba(212,179,86,.22);
+}
+body.agent-v2 .agent-main .card code{color:#d4b356}
+body.agent-v2 .agent-main .card ul{padding-left:18px}
+body.agent-v2 .agent-cta-row{margin-top:24px}

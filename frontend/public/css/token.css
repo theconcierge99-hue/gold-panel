@@ -1,6 +1,7 @@
 @import url("/css/concierge-tokens.css");
 @import url("/css/concierge-premium.css");
 @import url("/css/concierge-light-mode.css");
+@import url("/css/concierge-surface-v2.css");
 
 body.tok-page{
   font-family:'Outfit',sans-serif;background:var(--tok-bg);color:var(--tok-text);

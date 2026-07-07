@@ -3,6 +3,7 @@
 @import url("/css/concierge-premium.css");
 @import url("/css/concierge-light-mode.css");
 @import url("/css/agent-shell.css");
+@import url("/css/agent-hub-v2.css");
 
 body.res-page{
   font-family:'Outfit',sans-serif;background:var(--pg-bg);color:var(--pg-text);

@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
 <title>Product Demo — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Watch the Concierge Agent product demo — Executive Lounge, Concierge AI, x402 endpoints, and agent discovery." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/demo" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/brand-logo.css" />
 <link rel="stylesheet" href="/css/demo.css" />
 </head>
-<body class="demo-page el-premium">
+<body class="demo-page demo-v2 el-premium">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <header class="demo-top">
   <a class="demo-back" href="/agent">← Concierge Agent</a>
   <div class="demo-brand">
@@ -56,5 +57,6 @@
   <span>·</span>
   <span>Pay per call · Agent-ready</span>
 </footer>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 </body>
 </html>
