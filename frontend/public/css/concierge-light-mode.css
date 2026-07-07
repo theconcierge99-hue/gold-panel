@@ -1,0 +1,319 @@
+/**
+ * Institutional light mode — WCAG AA+ contrast.
+ * Loaded after premium/lounge layers; overrides thin weights & low-contrast gold.
+ */
+
+html[data-theme="light"] {
+  --el-bg: #e8e5de;
+  --el-text: #0a1018;
+  --el-text-secondary: #1e2a3a;
+  --el-text-muted: #3a4a5e;
+  --el-gold: #4a3a0e;
+  --el-gold-bright: #6b5218;
+  --el-gold-dim: #3d3010;
+  --el-border: #b5aea2;
+  --el-border-subtle: rgba(90, 82, 70, 0.35);
+  --el-glass-header: rgba(10, 14, 24, 0.94);
+  --el-glass-sidebar: rgba(248, 246, 241, 0.98);
+  --header-bg: rgba(10, 14, 24, 0.94);
+  --sidebar-bg: #f5f3ee;
+  --gcard-bg: #ffffff;
+  --card-grad-1: #ffffff;
+  --card-grad-2: #faf8f4;
+  --nav-active-bg: rgba(74, 58, 14, 0.1);
+}
+
+html[data-theme="light"] body {
+  font-weight: 400;
+  color: var(--el-text);
+}
+
+/* —— Executive Lounge: dark header, light body —— */
+html[data-theme="light"] body.el-premium .app > header {
+  background: var(--el-glass-header) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="light"] body.el-premium .app > header .logo .name {
+  color: #eef2f8 !important;
+  -webkit-text-fill-color: #eef2f8 !important;
+  background: none !important;
+}
+html[data-theme="light"] body.el-premium .app > header .logo .sub {
+  color: #d4b356 !important;
+  -webkit-text-fill-color: #d4b356 !important;
+}
+html[data-theme="light"] body.el-premium .app > header .tk .sym {
+  color: #8a9bb4 !important;
+}
+html[data-theme="light"] body.el-premium .app > header .tk .val {
+  color: #eef2f8 !important;
+}
+html[data-theme="light"] body.el-premium .app > header .live {
+  color: #a8b8cc !important;
+}
+html[data-theme="light"] body.el-premium .app > header .btn {
+  color: #eef2f8 !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+html[data-theme="light"] body.el-premium .app > header .btn.gold {
+  color: #e8c968 !important;
+  border-color: rgba(212, 179, 86, 0.45) !important;
+}
+html[data-theme="light"] body.el-premium .app > header .theme-btn {
+  color: #a8b8cc !important;
+}
+html[data-theme="light"] body.el-premium .app > header .theme-btn.active {
+  color: #e8c968 !important;
+  background: rgba(212, 179, 86, 0.12) !important;
+}
+
+/* Lounge sidebars & nav */
+html[data-theme="light"] .app .nav-h {
+  color: #3a4a5e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .nav-i,
+html[data-theme="light"] .app a.nav-i {
+  color: #1e2a3a !important;
+  font-weight: 450;
+}
+html[data-theme="light"] .app .nav-i:hover,
+html[data-theme="light"] .app .nav-i.active {
+  color: #0a1018 !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .sidebar-about-link {
+  color: #4a3a0e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .sidebar-social {
+  color: #1e2a3a !important;
+}
+
+/* Lounge cards & body copy */
+html[data-theme="light"] .app .fcard,
+html[data-theme="light"] .app .gcard,
+html[data-theme="light"] .app .market-desk-clocks {
+  background: #ffffff !important;
+  border-color: #c8c2b6 !important;
+  box-shadow: 0 2px 18px rgba(10, 16, 24, 0.07) !important;
+}
+html[data-theme="light"] .app .fcard h3,
+html[data-theme="light"] .app .gcard h4,
+html[data-theme="light"] .app .section-h h2,
+html[data-theme="light"] .app .market-desk-title {
+  color: #0a1018 !important;
+  font-weight: 400 !important;
+}
+html[data-theme="light"] .app .fcard .news-teaser,
+html[data-theme="light"] .app .gcard .news-teaser {
+  color: #1e2a3a !important;
+  font-weight: 400 !important;
+  font-size: 13.5px !important;
+  line-height: 1.65 !important;
+}
+html[data-theme="light"] .app .card-read-hint {
+  color: #4a3a0e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .meta-row {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .app .section-h .meta {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .app .sess-chip {
+  color: #3a4a5e !important;
+  border-color: #b5aea2 !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .sess-chip.open {
+  color: #0a1018 !important;
+}
+html[data-theme="light"] .app .clk-label {
+  color: #0a1018 !important;
+}
+html[data-theme="light"] .app .clk-digital {
+  color: #4a3a0e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .app .clk-date {
+  color: #1e2a3a !important;
+}
+html[data-theme="light"] .app .clk-sub {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .app .narr .ttl {
+  color: #0a1018 !important;
+}
+html[data-theme="light"] .app .narr .bot {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .app .pitem .un,
+html[data-theme="light"] .app .pitem .ts {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .app aside.left,
+html[data-theme="light"] .app aside.right {
+  background: #f5f3ee !important;
+  border-color: #c8c2b6 !important;
+}
+
+/* —— Agent hub home —— */
+html[data-theme="light"] #agent-logo-canvas {
+  opacity: 1 !important;
+}
+html[data-theme="light"] #agent-matrix-canvas {
+  opacity: 0.1 !important;
+}
+html[data-theme="light"] .agent-hero-wrap::before {
+  content: "";
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, 78vw);
+  height: min(440px, 52vh);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.2) 58%, transparent 72%);
+  border: 1px solid rgba(107, 82, 24, 0.12);
+  z-index: 2;
+  pointer-events: none;
+}
+html[data-theme="light"] body.el-premium .agent-eyebrow,
+html[data-theme="light"] .agent-eyebrow {
+  background: #ffffff !important;
+  color: #1e2a3a !important;
+  border: 1px solid #b5aea2 !important;
+  box-shadow: 0 4px 20px rgba(10, 16, 24, 0.1) !important;
+  position: relative;
+  z-index: 12;
+  font-weight: 500;
+}
+html[data-theme="light"] .agent-eyebrow strong {
+  color: #4a3a0e !important;
+}
+html[data-theme="light"] body.el-premium .agent-headline .line1 {
+  color: #0a1018 !important;
+  -webkit-text-fill-color: #0a1018 !important;
+  font-weight: 400 !important;
+}
+html[data-theme="light"] body.el-premium .agent-headline .line2,
+html[data-theme="light"] .agent-headline .line2 {
+  color: #3d3010 !important;
+  -webkit-text-fill-color: #3d3010 !important;
+  background: none !important;
+  font-weight: 600 !important;
+  font-style: italic;
+  text-shadow: none !important;
+}
+html[data-theme="light"] body.el-premium .agent-subline,
+html[data-theme="light"] .agent-subline {
+  color: #1e2a3a !important;
+  font-weight: 400 !important;
+  opacity: 1 !important;
+}
+html[data-theme="light"] .agent-cta-btn.primary {
+  background: #0a1018 !important;
+  border-color: #0a1018 !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(10, 16, 24, 0.15) !important;
+}
+html[data-theme="light"] .agent-cta-btn.primary:hover {
+  background: #1e2a3a !important;
+  border-color: #1e2a3a !important;
+  color: #ffffff !important;
+}
+html[data-theme="light"] .agent-cta-link {
+  color: #3a4a5e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .agent-cta-link:hover {
+  color: #4a3a0e !important;
+}
+html[data-theme="light"] .agent-terminal {
+  background: #ffffff !important;
+  border-color: #b5aea2 !important;
+  color: #4a3a0e !important;
+  box-shadow: 0 2px 12px rgba(10, 16, 24, 0.08) !important;
+}
+html[data-theme="light"] .agent-home-foot {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-top-color: #c8c2b6 !important;
+}
+html[data-theme="light"] .agent-headline {
+  text-shadow: none !important;
+}
+html[data-theme="light"] .agent-foot-link {
+  color: #4a3a0e !important;
+  font-weight: 500;
+}
+
+/* Agent / resources nav */
+html[data-theme="light"] .pg-topnav {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-bottom-color: #c8c2b6 !important;
+}
+html[data-theme="light"] .pg-logo {
+  color: #0a1018 !important;
+}
+html[data-theme="light"] .pg-logo-dim {
+  color: #4a3a0e !important;
+  -webkit-text-fill-color: #4a3a0e !important;
+  background: none !important;
+}
+html[data-theme="light"] .pg-nav a,
+html[data-theme="light"] .pg-nav-more-btn {
+  color: #1e2a3a !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .pg-nav a:hover,
+html[data-theme="light"] .pg-nav a.active,
+html[data-theme="light"] .pg-nav-more-btn:hover,
+html[data-theme="light"] .pg-nav-more-btn.active {
+  color: #4a3a0e !important;
+}
+html[data-theme="light"] .pg-lounge-btn {
+  color: #4a3a0e !important;
+  border-color: #6b5218 !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .el-theme-toggle .theme-btn {
+  color: #3a4a5e !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .el-theme-toggle .theme-btn.active {
+  color: #4a3a0e !important;
+}
+
+/* Resources pages */
+html[data-theme="light"] .res-lead,
+html[data-theme="light"] .res-ep-desc,
+html[data-theme="light"] .res-disc-card p,
+html[data-theme="light"] .res-integrate p {
+  color: #1e2a3a !important;
+  font-weight: 400 !important;
+}
+html[data-theme="light"] .res-hero h1 {
+  color: #0a1018 !important;
+}
+html[data-theme="light"] .res-eyebrow {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .res-filter {
+  color: #1e2a3a !important;
+  border-color: #b5aea2 !important;
+  font-weight: 500;
+}
+html[data-theme="light"] .res-filter.active {
+  background: #4a3a0e !important;
+  border-color: #4a3a0e !important;
+  color: #ffffff !important;
+}
+
+/* Docs */
+html[data-theme="light"] .docs-content p,
+html[data-theme="light"] .docs-content li {
+  color: #1e2a3a !important;
+}

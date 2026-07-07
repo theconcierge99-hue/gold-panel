@@ -1,6 +1,7 @@
 @import url("/css/brand-logo.css");
 @import url("/css/concierge-tokens.css");
 @import url("/css/concierge-premium.css");
+@import url("/css/concierge-light-mode.css");
 
 *{box-sizing:border-box;margin:0;padding:0}
 body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);color:var(--pg-text);min-height:100vh;overflow-x:hidden}
@@ -73,7 +74,7 @@ body.agent-home-page{font-family:'Outfit',sans-serif;background:var(--pg-bg);col
 }
 #agent-matrix-canvas,#agent-logo-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #agent-matrix-canvas{z-index:0;opacity:.38}
-#agent-logo-canvas{z-index:1;opacity:.72}
+#agent-logo-canvas{z-index:3;opacity:.72}
 
 .agent-hero-content{
   position:relative;z-index:5;text-align:center;max-width:640px;width:100%;

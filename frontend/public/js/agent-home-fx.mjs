@@ -23,6 +23,19 @@ export function initConciergeLogoParticles(canvas) {
   const LOGO_SRC = 360;
   const LOGO_HALF = LOGO_SRC / 2;
 
+  function isLightTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
+
+  function particleFill(gold, pulse) {
+    if (isLightTheme()) {
+      if (gold) return `rgba(74,58,14,${0.62 + 0.28 * pulse})`;
+      return `rgba(58,74,94,${0.42 + 0.38 * pulse})`;
+    }
+    if (gold) return `rgba(232,200,104,${0.72 + 0.28 * pulse})`;
+    return `rgba(210,218,230,${0.4 + 0.48 * pulse})`;
+  }
+
   /** Fit assembled logo circle fully above the text block. */
   function logoMetrics(w, h) {
     const padX = 36;
@@ -85,10 +98,22 @@ export function initConciergeLogoParticles(canvas) {
     const w = rect.width;
     const h = rect.height;
     ctx.clearRect(0, 0, w, h);
-    const { cx, cy, scale } = logoMetrics(w, h);
+    const { cx, cy, scale, maxDiam } = logoMetrics(w, h);
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
     const ease = 1 - (1 - assemble) ** 3;
+
+    if (isLightTheme()) {
+      const glowR = (maxDiam / 2) * 1.08;
+      const g = ctx.createRadialGradient(cx, cy, glowR * 0.15, cx, cy, glowR);
+      g.addColorStop(0, "rgba(255,255,255,0.92)");
+      g.addColorStop(0.55, "rgba(255,255,255,0.45)");
+      g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     for (const p of particles) {
       const jx = Math.sin(elapsed * 1.2 + p.phase) * (1 - ease) * 2.5;
@@ -101,11 +126,7 @@ export function initConciergeLogoParticles(canvas) {
       const dotR = p.size * scale * 0.42 * pulse;
       ctx.beginPath();
       ctx.arc(x, y, dotR, 0, Math.PI * 2);
-      if (p.gold) {
-        ctx.fillStyle = `rgba(232,200,104,${0.72 + 0.28 * pulse})`;
-      } else {
-        ctx.fillStyle = `rgba(210,218,230,${0.4 + 0.48 * pulse})`;
-      }
+      ctx.fillStyle = particleFill(p.gold, pulse);
       ctx.fill();
     }
 
@@ -155,7 +176,8 @@ export function initMatrixRain(canvas) {
 
   function draw() {
     const rect = canvas.getBoundingClientRect();
-    ctx.fillStyle = "rgba(5,6,8,0.08)";
+    const light = document.documentElement.getAttribute("data-theme") === "light";
+    ctx.fillStyle = light ? "rgba(244,242,236,0.12)" : "rgba(5,6,8,0.08)";
     ctx.fillRect(0, 0, rect.width, rect.height);
     ctx.font = `${fontSize}px DM Mono, monospace`;
 
@@ -164,7 +186,11 @@ export function initMatrixRain(canvas) {
       const x = i * fontSize;
       const y = cols[i] * fontSize;
       const gold = Math.random() > 0.92;
-      ctx.fillStyle = gold ? "rgba(201,168,76,0.35)" : "rgba(60,80,60,0.22)";
+      if (light) {
+        ctx.fillStyle = gold ? "rgba(107,82,24,0.28)" : "rgba(58,74,94,0.16)";
+      } else {
+        ctx.fillStyle = gold ? "rgba(201,168,76,0.35)" : "rgba(60,80,60,0.22)";
+      }
       ctx.fillText(ch, x, y);
       if (y > rect.height && Math.random() > 0.975) cols[i] = 0;
       cols[i] += 0.4 + Math.random() * 0.6;

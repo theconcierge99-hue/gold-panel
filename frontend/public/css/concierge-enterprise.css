@@ -66,10 +66,22 @@ body.el-premium .agent-headline .line2 {
   animation: el-shimmer 8s ease-in-out infinite;
 }
 html[data-theme="light"] .el-gold-shimmer,
-html[data-theme="light"] body.el-premium .logo .name,
 html[data-theme="light"] body.el-premium .pg-logo-dim,
 html[data-theme="light"] body.el-premium .agent-headline .line2 {
-  animation-duration: 10s;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--el-gold);
+  color: var(--el-gold);
+  animation: none;
+}
+html[data-theme="light"] body.el-premium .logo .name {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--text-primary);
+  color: var(--text-primary);
+  animation: none;
 }
 
 /* —— Executive Lounge — header (scoped to .app shell only) —— */
@@ -316,6 +328,16 @@ body.el-premium .agent-hero-wrap::after {
     linear-gradient(180deg, transparent 60%, rgba(8, 10, 15, 0.85) 100%);
   z-index: 2;
 }
+html[data-theme="light"] body.el-premium .agent-hero-wrap::after {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(107, 82, 24, 0.06), transparent 60%),
+    linear-gradient(180deg, transparent 72%, rgba(244, 242, 236, 0.92) 100%);
+}
+html[data-theme="light"] body.el-premium .agent-eyebrow {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: var(--el-border);
+  color: var(--el-text-secondary);
+}
 body.el-premium .agent-eyebrow {
   border-radius: var(--el-radius-pill);
   padding: 6px 14px;
@@ -483,6 +505,29 @@ body.el-premium .live {
   letter-spacing: 0.32em;
 }
 html[data-theme="light"] body.el-premium .live {
+  color: var(--text-secondary);
+}
+html[data-theme="light"] body.el-premium .card-read-hint,
+html[data-theme="light"] body.el-premium .logo .sub {
+  color: var(--gold-dim);
+}
+html[data-theme="light"] body.el-premium .fcard .news-teaser,
+html[data-theme="light"] body.el-premium .gcard .news-teaser,
+html[data-theme="light"] body.el-premium .meta-row,
+html[data-theme="light"] body.el-premium .nav-i,
+html[data-theme="light"] body.el-premium a.nav-i {
+  color: var(--text-secondary);
+}
+html[data-theme="light"] body.el-premium .nav-i.active,
+html[data-theme="light"] body.el-premium .nav-i:hover {
+  color: var(--text-primary);
+}
+html[data-theme="light"] body.el-premium .narr .bot {
+  color: var(--text-muted);
+}
+html[data-theme="light"] body.el-premium .conc-greeting {
+  text-shadow: none;
+}
   background: rgba(255, 255, 255, 0.6);
 }
 

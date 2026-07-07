@@ -38,6 +38,11 @@ body.el-premium::after {
     radial-gradient(ellipse 120% 80% at 50% -20%, rgba(201, 168, 76, 0.06), transparent 55%),
     radial-gradient(ellipse 90% 60% at 50% 110%, rgba(0, 0, 0, 0.35), transparent 50%);
 }
+html[data-theme="light"] body.el-premium::after {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(107, 82, 24, 0.04), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(18, 26, 40, 0.06), transparent 50%);
+}
 
 body.el-premium .app,
 body.el-premium .agent-home-shell,
