@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>document.documentElement.classList.add('concierge-booting');</script>
 <title>Concierge Agent — Market Intelligence for Autonomous Agents</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Concierge Agent — pay-per-call market intelligence for autonomous agents. x402 on Solana and Base. Executive Lounge, research intel, playground, and agent identity." />
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="/css/agent-home.css" />
 </head>
 <body class="agent-home-page el-premium" data-agent-page="home">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="agent-home-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
 
@@ -51,22 +53,8 @@
   </section>
 
   <div class="agent-trust" aria-label="Ecosystem partners">
-    <div class="agent-trust-track">
-      <div class="agent-trust-set">
-        <span>PayAI</span><span class="dot">·</span><span>x402scan</span><span class="dot">·</span>
-        <span>OOBE Protocol</span><span class="dot">·</span><span>AgentCash</span><span class="dot">·</span>
-        <span>MCP Registry</span><span class="dot">·</span><span>Metaplex</span><span class="dot">·</span>
-        <span>Solana</span><span class="dot">·</span><span>Base</span><span class="dot">·</span>
-        <span>Token Pay</span><span class="dot">·</span><span>pay.sh</span>
-      </div>
-      <div class="agent-trust-set" aria-hidden="true">
-        <span>PayAI</span><span class="dot">·</span><span>x402scan</span><span class="dot">·</span>
-        <span>OOBE Protocol</span><span class="dot">·</span><span>AgentCash</span><span class="dot">·</span>
-        <span>MCP Registry</span><span class="dot">·</span><span>Metaplex</span><span class="dot">·</span>
-        <span>Solana</span><span class="dot">·</span><span>Base</span><span class="dot">·</span>
-        <span>Token Pay</span><span class="dot">·</span><span>pay.sh</span>
-      </div>
-    </div>
+    <div class="agent-trust-track" id="agent-trust-track"></div>
+    <p class="agent-trust-more"><a href="/integrations">View all integrations →</a></p>
   </div>
 
   <section class="agent-proof el-reveal" aria-label="Protocol metrics">
@@ -100,6 +88,7 @@
 
   <footer class="agent-home-foot" id="agent-site-footer"></footer>
 </div>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 <script type="module" src="/js/agent-home.mjs"></script>
 </body>
 </html>

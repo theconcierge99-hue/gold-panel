@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>document.documentElement.classList.add('concierge-booting');</script>
 <title>Agent Identity — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
@@ -11,7 +12,8 @@
 <link rel="stylesheet" href="/css/agent-playground.css" />
 <link rel="stylesheet" href="/css/agent-home.css" />
 </head>
-<body data-agent-page="identity">
+<body class="el-premium" data-agent-page="identity">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="pg-shell" style="min-height:100vh;height:auto">
   <header class="pg-topnav" id="agent-topnav"></header>
   <main class="agent-main" style="max-width:760px;padding-top:32px">
@@ -41,6 +43,7 @@
     </div>
   </main>
 </div>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 <script type="module">
 import { renderAgentTopNav } from "/js/agent-nav.mjs";
 renderAgentTopNav("identity");

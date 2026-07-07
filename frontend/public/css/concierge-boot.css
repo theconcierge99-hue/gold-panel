@@ -1,0 +1,132 @@
+/**
+ * Concierge boot shell — branded first paint (OOBE-style).
+ * Pair with #concierge-boot markup + concierge-boot.mjs on premium surfaces.
+ */
+
+html.concierge-booting body {
+  overflow: hidden;
+}
+
+html.concierge-booting body > *:not(#concierge-boot) {
+  opacity: 0;
+}
+
+.concierge-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #060810;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-theme="light"] .concierge-boot {
+  background: #f4f1ea;
+}
+
+.concierge-boot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 38%, rgba(201, 168, 76, 0.14), transparent 62%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0, 0, 0, 0.45), transparent 55%);
+}
+
+html[data-theme="light"] .concierge-boot::before {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 38%, rgba(107, 82, 24, 0.08), transparent 62%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(18, 26, 40, 0.05), transparent 55%);
+}
+
+.concierge-boot-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: concierge-boot-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes concierge-boot-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.concierge-boot img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(201, 168, 76, 0.25));
+}
+
+.concierge-boot-brand {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 22px;
+  letter-spacing: 0.22em;
+  color: #f0ece4;
+  font-weight: 400;
+}
+
+html[data-theme="light"] .concierge-boot-brand {
+  color: #0a1018;
+}
+
+.concierge-boot-brand em,
+.concierge-boot-dim {
+  font-style: normal;
+  color: #c9a84c;
+}
+
+.concierge-boot-pulse {
+  width: 48px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  opacity: 0.7;
+  animation: concierge-boot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes concierge-boot-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleX(0.65);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.concierge-boot-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html.concierge-booting.concierge-boot-done body > *:not(#concierge-boot) {
+  opacity: 1;
+  transition: opacity 0.35s ease 0.05s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .concierge-boot-inner,
+  .concierge-boot-pulse {
+    animation: none !important;
+  }
+  .concierge-boot {
+    transition-duration: 0.01ms;
+  }
+}

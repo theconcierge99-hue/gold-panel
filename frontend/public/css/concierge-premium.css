@@ -2,6 +2,7 @@
  * Concierge Premium — institutional polish layer.
  * Apply on body.el-premium or globally via shared imports.
  */
+@import url("/css/concierge-boot.css");
 @import url("/css/concierge-enterprise.css");
 
 /* —— Global refinements —— */

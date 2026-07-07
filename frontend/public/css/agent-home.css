@@ -169,8 +169,19 @@ html[data-theme="light"] .agent-trust{background:rgba(255,255,255,.7)}
   color:var(--pg-muted);
 }
 .agent-trust-set .dot{opacity:.35;user-select:none}
-.agent-trust-set span:not(.dot){color:var(--pg-muted);transition:color .15s}
-.agent-trust:hover .agent-trust-set span:not(.dot){color:var(--pg-text)}
+.agent-trust-link{
+  color:var(--pg-muted);text-decoration:none;transition:color .15s;
+  border-radius:2px;padding:2px 0;
+}
+.agent-trust-link:hover{color:var(--pg-accent)}
+.agent-trust-more{
+  text-align:center;margin-top:10px;padding:0 24px;
+}
+.agent-trust-more a{
+  font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--pg-muted);text-decoration:none;transition:color .15s;
+}
+.agent-trust-more a:hover{color:var(--pg-accent)}
 
 /* —— Proof metrics —— */
 .agent-proof{

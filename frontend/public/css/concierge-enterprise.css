@@ -531,6 +531,7 @@ html[data-theme="light"] body.el-premium .narr .bot {
 html[data-theme="light"] body.el-premium .conc-greeting {
   text-shadow: none;
 }
+html[data-theme="light"] body.el-premium .live {
   background: rgba(255, 255, 255, 0.6);
 }
 
@@ -713,8 +714,46 @@ body.el-premium .privy-card {
 }
 
 /* —— Creator signals lane —— */
+body.el-premium .app main {
+  padding: 32px 36px 72px;
+}
+body.el-premium .creator-signals-lane {
+  gap: 22px;
+  margin-bottom: 40px;
+}
 body.el-premium .creator-signals-lane .fcard {
-  min-height: 180px;
+  min-height: 188px;
+  background: linear-gradient(180deg, rgba(16, 20, 32, 0.96), rgba(10, 14, 24, 0.9));
+  border-color: rgba(201, 168, 76, 0.2);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.28);
+}
+body.el-premium .creator-signals-lane .fcard .news-teaser {
+  color: rgba(218, 226, 238, 0.9);
+  font-weight: 400;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+body.el-premium .creator-signals-lane .fcard h3 {
+  font-weight: 400;
+}
+body.el-premium .featured {
+  gap: 22px;
+  margin-bottom: 28px;
+}
+body.el-premium .section-h {
+  margin-bottom: 18px;
+}
+body.el-premium .market-desk-clocks {
+  margin-bottom: 36px;
+}
+body.el-premium .fcard .news-teaser,
+body.el-premium .gcard .news-teaser {
+  color: rgba(210, 218, 230, 0.9);
+  font-weight: 400;
+}
+body.el-premium .fcard h3,
+body.el-premium .gcard h4 {
+  font-weight: 400;
 }
 
 /* —— Meta row avatars —— */

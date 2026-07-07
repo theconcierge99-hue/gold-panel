@@ -265,8 +265,17 @@ html[data-theme="light"] .agent-module-card {
   border-color: #c8c2b6 !important;
   box-shadow: 0 2px 16px rgba(10, 16, 24, 0.06);
 }
-html[data-theme="light"] .agent-trust-set span:not(.dot) {
+html[data-theme="light"] .agent-trust-link {
   color: #3a4a5e !important;
+}
+html[data-theme="light"] .agent-trust-link:hover {
+  color: #4a3a0e !important;
+}
+html[data-theme="light"] .agent-trust-more a {
+  color: #3a4a5e !important;
+}
+html[data-theme="light"] .agent-trust-more a:hover {
+  color: #4a3a0e !important;
 }
 html[data-theme="light"] .agent-terminal-status {
   color: #3a4a5e !important;

@@ -18,6 +18,32 @@ for (const id of ["agent-endpoint-count", "agent-proof-routes"]) {
   if (el) el.textContent = String(total);
 }
 
+const TRUST_PARTNERS = [
+  { name: "PayAI", href: "https://docs.payai.network/", external: true },
+  { name: "x402scan", href: "/docs/integration/x402scan", external: false },
+  { name: "OOBE Protocol", href: "/docs/integration/oobe", external: false },
+  { name: "AgentCash", href: "/integrations", external: false },
+  { name: "MCP Registry", href: "/integrations", external: false },
+  { name: "Metaplex", href: "https://www.metaplex.com/", external: true },
+  { name: "Solana", href: "https://solana.com/", external: true },
+  { name: "Base", href: "https://base.org/", external: true },
+  { name: "Token Pay", href: "/agent/token-pay", external: false },
+  { name: "pay.sh", href: "/docs/payment/paysh", external: false },
+];
+
+function renderTrustStrip() {
+  const track = document.getElementById("agent-trust-track");
+  if (!track) return;
+  const chip = (p) => {
+    const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
+    return `<a class="agent-trust-link" href="${p.href}"${attrs}>${p.name}</a>`;
+  };
+  const inner = TRUST_PARTNERS.map((p, i) => `${i ? '<span class="dot">·</span>' : ""}${chip(p)}`).join("");
+  track.innerHTML = `<div class="agent-trust-set">${inner}</div><div class="agent-trust-set" aria-hidden="true">${inner}</div>`;
+}
+
+renderTrustStrip();
+
 const MODULES = [
   {
     tag: "Desk",

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>document.documentElement.classList.add('concierge-booting');</script>
 <title>Playground — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Concierge Agent API Playground — execute x402 endpoints and inspect the 402 payment challenge." />
@@ -12,6 +13,7 @@
 <link rel="stylesheet" href="/css/agent-playground.css" />
 </head>
 <body class="pg-page el-premium" data-agent-page="playground">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="pg-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
 
@@ -89,6 +91,7 @@
     </main>
   </div>
 </div>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 <script type="module" src="/js/agent-playground.mjs"></script>
 </body>
 </html>

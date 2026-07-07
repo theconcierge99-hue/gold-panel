@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>document.documentElement.classList.add('concierge-booting');</script>
 <title>Token Pay (Beta) Dashboard — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Token Pay beta analytics — per-merchant readiness, transaction volume, and settlement history on Concierge." />
@@ -14,6 +15,7 @@
 <link rel="stylesheet" href="/css/agent-token-pay.css" />
 </head>
 <body class="res-page tp-dash-page el-premium" data-agent-page="token-pay">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="pg-shell res-shell">
   <header class="pg-topnav" id="agent-topnav"></header>
   <main class="res-main tp-main">
@@ -105,6 +107,7 @@
     </section>
   </main>
 </div>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 <script type="module" src="/js/agent-token-pay.mjs"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>document.documentElement.classList.add('concierge-booting');</script>
 <script>(function(){if(/\/executive-lounge\.html$/i.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/\/executive-lounge\.html$/i,'/lounge')+location.search+location.hash);}})();</script>
 <link rel="canonical" href="/lounge" />
 <title>Executive Lounge — Private Intelligence Lobby</title>
@@ -26,7 +27,7 @@
   body{
     background:var(--bg); color:var(--text-primary);
     transition:background .25s ease,color .2s ease;
-    font-family:'Outfit',sans-serif; font-weight:300;
+    font-family:'Outfit',sans-serif; font-weight:400;
     font-size:13px; letter-spacing:.01em; overflow:hidden;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
@@ -712,6 +713,8 @@
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
 <body class="el-premium">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
+<script type="module" src="/js/concierge-boot.mjs"></script>
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
 <div class="app">
