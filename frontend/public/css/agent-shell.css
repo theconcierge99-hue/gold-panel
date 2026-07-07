@@ -1,0 +1,88 @@
+/**
+ * Agent shell v2 — shared nav (OOBE / Xona inspired).
+ */
+
+.agent-nav-v2.pg-topnav,
+body.agent-v2 .pg-topnav{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px clamp(16px,4vw,40px);min-height:64px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  background:rgba(4,6,12,.72);
+  backdrop-filter:blur(16px) saturate(1.2);
+  position:sticky;top:0;z-index:50;
+}
+html[data-theme="light"] body.agent-v2 .pg-topnav{
+  background:rgba(255,255,255,.88);
+  border-bottom-color:rgba(10,16,24,.1);
+}
+
+body.agent-v2 .pg-logo{
+  font-family:'Inter',system-ui,sans-serif;font-size:15px;font-weight:600;
+  letter-spacing:-.02em;color:var(--pg-text);gap:10px;
+}
+body.agent-v2 .pg-logo-dim{color:var(--pg-accent);font-weight:500}
+
+body.agent-v2 .pg-nav-wrap{display:flex;align-items:center;gap:4px;overflow:visible}
+body.agent-v2 .pg-nav{display:flex;align-items:center;gap:2px;overflow:visible}
+body.agent-v2 .pg-nav a{
+  font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:0;text-transform:none;padding:8px 14px;
+  color:var(--pg-muted);border-radius:8px;
+}
+body.agent-v2 .pg-nav a:hover{color:var(--pg-text);background:rgba(255,255,255,.04)}
+body.agent-v2 .pg-nav a.active{color:var(--pg-text);background:rgba(212,179,86,.12)}
+
+body.agent-v2 .pg-nav-more-btn{
+  font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:0;text-transform:none;padding:8px 14px;border-radius:8px;
+}
+body.agent-v2 .pg-nav-more-menu{
+  border-radius:12px;padding:8px;
+  background:rgba(12,16,28,.96);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 16px 48px rgba(0,0,0,.45);
+}
+html[data-theme="light"] body.agent-v2 .pg-nav-more-menu{
+  background:#fff;border-color:rgba(10,16,24,.1);
+}
+body.agent-v2 .pg-nav-more-menu a{
+  font-size:13px;letter-spacing:0;text-transform:none;border-radius:8px;
+}
+
+body.agent-v2 .pg-topnav-right{gap:10px}
+body.agent-v2 .pg-lounge-btn{
+  font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:500;
+  letter-spacing:0;text-transform:none;padding:8px 14px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.1);color:var(--pg-muted);background:transparent;
+}
+body.agent-v2 .pg-lounge-btn:hover{
+  color:var(--pg-text);border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04);
+}
+body.agent-v2 .pg-cta-btn{
+  font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:0;text-transform:none;padding:9px 16px;border-radius:8px;
+  border:none;color:#0a1018;text-decoration:none;
+  background:linear-gradient(135deg,#f0d878,#d4b356);
+  box-shadow:0 4px 20px rgba(212,179,86,.25);
+  transition:transform .15s,box-shadow .15s;
+}
+body.agent-v2 .pg-cta-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 28px rgba(212,179,86,.35);
+}
+body.agent-v2 .el-status-pill{
+  font-family:'Inter',system-ui,sans-serif;font-size:11px;font-weight:500;
+  letter-spacing:0;text-transform:none;padding:6px 10px;border-radius:999px;
+  border:1px solid rgba(34,200,122,.25);background:rgba(34,200,122,.08);color:#6ee7a8;
+}
+body.agent-v2 .el-theme-toggle{border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+body.agent-v2 .theme-btn{
+  font-family:'Inter',system-ui,sans-serif;font-size:11px;font-weight:500;
+  letter-spacing:0;text-transform:none;padding:7px 10px;
+}
+
+@media(max-width:900px){
+  body.agent-v2 .pg-nav{max-width:min(42vw,200px);overflow-x:auto;scrollbar-width:none}
+  body.agent-v2 .pg-topnav-right .el-status-pill{display:none}
+  body.agent-v2 .pg-cta-btn{display:none}
+}

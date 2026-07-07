@@ -292,6 +292,11 @@ html[data-theme="light"] .app .gcard .news-teaser {
   font-size: 13.5px !important;
 }
 
+html[data-theme="light"] body.agent-v2 .pg-cta-btn{color:#0a1018}
+html[data-theme="light"] body.agent-v2 .agent-demo-status.ok{color:#157a47}
+html[data-theme="light"] body.agent-v2 .agent-demo-line{color:#1e2a3a}
+html[data-theme="light"] body.agent-v2 .agent-demo-prefix{color:#157a47}
+
 /* Agent / resources nav */
 html[data-theme="light"] .pg-topnav {
   background: rgba(255, 255, 255, 0.97) !important;

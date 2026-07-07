@@ -120,14 +120,14 @@ export function renderAgentTopNav(activeId, options = {}) {
   const el = document.getElementById("agent-topnav");
   if (!el) return;
 
-  document.body.classList.add("el-premium");
+  document.body.classList.add("el-premium", "agent-v2");
 
   const isHome = options.variant === "home" || activeId === "home";
   const links = isHome ? HOME_LINKS : HUB_LINKS;
 
   el.innerHTML = `
     <a class="pg-logo" href="/agent" aria-label="Concierge Agent home">
-      <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="36" height="36" />
+      <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="32" height="32" />
       <span>Concierge<span class="pg-logo-dim"> Agent</span></span>
     </a>
     <div class="pg-nav-wrap">
@@ -138,6 +138,7 @@ export function renderAgentTopNav(activeId, options = {}) {
     </div>
     <div class="pg-topnav-right">
       <a class="pg-lounge-btn" href="/lounge" title="Executive Lounge">Lounge</a>
+      <a class="pg-cta-btn" href="/agent/playground">Playground</a>
       <div class="el-status-pill" title="x402 pay-per-call API">
         <span class="dot"></span> Live
       </div>

@@ -1,10 +1,6 @@
 import { renderAgentSiteFooter, renderAgentTopNav } from "./agent-nav.mjs";
 import { CONCIERGE_AGENT_ORIGIN, countBySegment } from "./concierge-agent-endpoints.mjs";
-import {
-  initAgentTerminalDemo,
-  initConciergeLogoParticles,
-  initMatrixRain,
-} from "./agent-home-fx.mjs";
+import { initAgentTerminalDemo } from "./agent-home-fx.mjs";
 import { initConciergeFx } from "./concierge-fx.mjs";
 
 renderAgentTopNav("home", { variant: "home" });
@@ -18,56 +14,75 @@ for (const id of ["agent-endpoint-count", "agent-proof-routes"]) {
   if (el) el.textContent = String(total);
 }
 
-const TRUST_PARTNERS = [
-  { name: "PayAI", href: "https://docs.payai.network/", external: true },
-  { name: "x402scan", href: "/docs/integration/x402scan", external: false },
-  { name: "OOBE Protocol", href: "/docs/integration/oobe", external: false },
-  { name: "AgentCash", href: "/integrations", external: false },
-  { name: "MCP Registry", href: "/integrations", external: false },
-  { name: "Metaplex", href: "https://www.metaplex.com/", external: true },
-  { name: "Solana", href: "https://solana.com/", external: true },
-  { name: "Base", href: "https://base.org/", external: true },
-  { name: "Token Pay", href: "/agent/token-pay", external: false },
-  { name: "pay.sh", href: "/docs/payment/paysh", external: false },
+const STACK_PARTNERS = [
+  { name: "PayAI", logo: "/images/integrations/payai.png", href: "https://docs.payai.network/", external: true },
+  { name: "x402scan", logo: "/images/integrations/x402scan.png", href: "/docs/integration/x402scan", external: false },
+  { name: "OOBE", logo: "https://www.oobeprotocol.ai/favicon.ico", href: "/docs/integration/oobe", external: false },
+  { name: "pay.sh", logo: "/images/integrations/paysh.svg", href: "/docs/payment/paysh", external: false },
+  { name: "Solana", logo: "/images/integrations/solana.svg", href: "https://solana.com/", external: true },
+  { name: "Base", logo: "/images/integrations/base.svg", href: "https://base.org/", external: true },
+  { name: "x402", logo: "/images/integrations/x402.svg", href: "/docs/payment/x402", external: false },
+  { name: "Metaplex", logo: "/images/integrations/openapi.svg", href: "/docs/integration/metaplex", external: false },
+  { name: "Privy", logo: "/images/integrations/privy.svg", href: "/docs/integration/privy", external: false },
+  { name: "Poncho", logo: "/images/integrations/poncho.png", href: "/docs/integration/poncho", external: false },
 ];
 
-function renderTrustStrip() {
+function renderStackMarquee() {
   const track = document.getElementById("agent-trust-track");
-  const wrap = track?.closest(".agent-trust");
-  if (!track || !wrap) return;
+  const viewport = track?.closest(".agent-stack-viewport");
+  if (!track || !viewport) return;
 
   const chip = (p) => {
     const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
-    return `<a class="agent-trust-link" href="${p.href}"${attrs}>${p.name}</a>`;
+    return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="18" height="18" loading="lazy" /><span>${p.name}</span></a>`;
   };
-  const inner = TRUST_PARTNERS.map((p, i) => `${i ? '<span class="dot">·</span>' : ""}${chip(p)}`).join("");
-
+  const inner = STACK_PARTNERS.map(chip).join("");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function paint() {
-    const setW = track.querySelector(".agent-trust-set")?.offsetWidth ?? 0;
-    const needsMarquee = !reduced && setW > wrap.clientWidth + 8;
+    const set = track.querySelector(".agent-stack-set");
+    const setW = set?.offsetWidth ?? 0;
+    const needsMarquee = !reduced && setW > viewport.clientWidth + 8;
 
     if (needsMarquee) {
       track.innerHTML =
-        `<div class="agent-trust-set">${inner}</div>` +
-        `<div class="agent-trust-set" aria-hidden="true">${inner}</div>`;
-      track.classList.add("agent-trust-track--scroll");
+        `<div class="agent-stack-set">${inner}</div>` +
+        `<div class="agent-stack-set" aria-hidden="true">${inner}</div>`;
+      track.classList.add("agent-stack-track--scroll");
     } else {
-      track.innerHTML = `<div class="agent-trust-set agent-trust-set--static">${inner}</div>`;
-      track.classList.remove("agent-trust-track--scroll");
+      track.innerHTML = `<div class="agent-stack-set">${inner}</div>`;
+      track.classList.remove("agent-stack-track--scroll");
     }
   }
 
-  track.innerHTML = `<div class="agent-trust-set agent-trust-set--static">${inner}</div>`;
+  track.innerHTML = `<div class="agent-stack-set">${inner}</div>`;
   paint();
-
-  if (!reduced) {
-    window.addEventListener("resize", paint, { passive: true });
-  }
+  if (!reduced) window.addEventListener("resize", paint, { passive: true });
 }
 
-renderTrustStrip();
+renderStackMarquee();
+
+const ABOUT = [
+  {
+    title: "Intel routes",
+    desc: "Macro briefs, wire digest, desk verdict, and Meteora yields — tiered pay-per-call research APIs.",
+  },
+  {
+    title: "x402 settlement",
+    desc: "HTTP 402 micropayments on Solana and Base. Payment is the only gate — no API keys or subscriptions.",
+  },
+  {
+    title: "Agent mesh",
+    desc: "Discover x402 resources, agent cards, MCP skills, and register agt_ identities for autonomous workflows.",
+  },
+];
+
+const aboutGrid = document.getElementById("agent-about-grid");
+if (aboutGrid) {
+  aboutGrid.innerHTML = ABOUT.map(
+    (a) => `<article class="agent-about-card"><h3>${a.title}</h3><p>${a.desc}</p></article>`,
+  ).join("");
+}
 
 const MODULES = [
   {
@@ -80,21 +95,21 @@ const MODULES = [
   {
     tag: "Intel",
     title: "Research API",
-    desc: "Macro, wire digest, desk verdict, Meteora yields — tiered x402 intel routes.",
+    desc: "Browse 15+ x402 intel routes — macro, wire, verdict, security desk, and more.",
     href: "/agent/endpoints",
     cta: "Browse catalog",
   },
   {
     tag: "Commerce",
     title: "x402 Playground",
-    desc: "Probe paid routes, settle USDC on Solana or Base, or Token Pay SPL merchants.",
+    desc: "Probe paid routes, settle USDC, or test Token Pay SPL merchants in one workspace.",
     href: "/agent/playground",
     cta: "Open Playground",
   },
   {
     tag: "Identity",
     title: "Agent mesh",
-    desc: "Discover x402 resources, agent cards, A2A mesh, and register agt_ identities.",
+    desc: "Discover resources, agent cards, A2A mesh, and register agt_ identities.",
     href: "/agent/discover",
     cta: "Discover",
   },
@@ -103,11 +118,11 @@ const MODULES = [
 const grid = document.getElementById("agent-modules-grid");
 if (grid) {
   grid.innerHTML = MODULES.map(
-    (m) => `<a class="agent-module-card" href="${m.href}">
-      <span class="agent-module-tag">${m.tag}</span>
+    (m) => `<a class="agent-eco-card" href="${m.href}">
+      <span class="agent-eco-tag">${m.tag}</span>
       <h3>${m.title}</h3>
       <p>${m.desc}</p>
-      <span class="agent-module-cta">${m.cta} →</span>
+      <span class="agent-eco-cta">${m.cta} →</span>
     </a>`,
   ).join("");
 }
@@ -131,8 +146,6 @@ async function loadAccuracy() {
 
 loadAccuracy();
 
-const stopMatrix = initMatrixRain(document.getElementById("agent-matrix-canvas"));
-const stopLogo = initConciergeLogoParticles(document.getElementById("agent-logo-canvas"));
 const stopFx = initConciergeFx();
 const stopTerminal = initAgentTerminalDemo(
   document.getElementById("agent-typewriter"),
@@ -141,8 +154,6 @@ const stopTerminal = initAgentTerminalDemo(
 );
 
 window.addEventListener("pagehide", () => {
-  stopMatrix();
-  stopLogo();
   stopFx();
   stopTerminal();
 });

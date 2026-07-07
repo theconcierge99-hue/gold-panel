@@ -9,82 +9,117 @@
 <meta name="description" content="Concierge Agent — pay-per-call market intelligence for autonomous agents. x402 on Solana and Base. Executive Lounge, research intel, playground, and agent identity." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/css/agent-home.css" />
 </head>
-<body class="agent-home-page el-premium" data-agent-page="home">
+<body class="agent-home-page el-premium agent-v2" data-agent-page="home">
 <div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <div class="agent-home-shell">
-  <header class="pg-topnav" id="agent-topnav"></header>
-
-  <section class="agent-hero-wrap">
-    <canvas id="agent-matrix-canvas" aria-hidden="true"></canvas>
-    <canvas id="agent-logo-canvas" aria-hidden="true"></canvas>
-
-    <div class="agent-hero-content">
-      <p class="agent-eyebrow">
-        <span class="agent-badge-dot" aria-hidden="true"></span>
-        <span><strong id="agent-endpoint-count">21</strong> live routes</span>
-        <span class="agent-eyebrow-sep">·</span>
-        <span>x402 · Solana &amp; Base</span>
-      </p>
-
-      <h1 class="agent-headline">
-        <span class="line1">Market Intelligence</span>
-        <span class="line2">for Autonomous Agents</span>
-      </h1>
-
-      <p class="agent-subline">
-        Pay-per-call institutional desk. No API keys — payment is the only gate.
-      </p>
-
-      <div class="agent-terminal-block" aria-live="polite">
-        <div class="agent-terminal">
-          <span class="prompt">&gt; </span><span id="agent-typewriter"></span><span class="cursor" aria-hidden="true"></span>
-        </div>
-        <p class="agent-terminal-status" id="agent-terminal-status"></p>
-      </div>
-
-      <div class="agent-hero-actions">
-        <a class="agent-cta-btn primary" href="/agent/playground">Open Playground</a>
-        <a class="agent-cta-link" href="/docs">Explore docs →</a>
-      </div>
-    </div>
-  </section>
-
-  <div class="agent-trust" aria-label="Ecosystem partners">
-    <div class="agent-trust-track" id="agent-trust-track"></div>
-    <p class="agent-trust-more"><a href="/integrations">View all integrations →</a></p>
+  <div class="agent-ambient" aria-hidden="true">
+    <div class="agent-orb agent-orb--gold"></div>
+    <div class="agent-orb agent-orb--blue"></div>
+    <div class="agent-grid"></div>
   </div>
 
-  <section class="agent-proof el-reveal" aria-label="Protocol metrics">
-    <div class="agent-proof-inner">
-      <div class="agent-proof-item">
-        <span class="agent-proof-val" id="agent-proof-routes">21</span>
-        <span class="agent-proof-label">Live routes</span>
-      </div>
-      <div class="agent-proof-item">
-        <span class="agent-proof-val">$0.02–0.25</span>
-        <span class="agent-proof-label">Per call</span>
-      </div>
-      <div class="agent-proof-item">
-        <span class="agent-proof-val">0</span>
-        <span class="agent-proof-label">API keys</span>
-      </div>
-      <div class="agent-proof-item">
-        <span class="agent-proof-val" id="agent-proof-accuracy">—</span>
-        <span class="agent-proof-label">Desk hit rate</span>
-      </div>
-    </div>
-  </section>
+  <header class="pg-topnav agent-nav-v2" id="agent-topnav"></header>
 
-  <section class="agent-modules el-reveal" aria-labelledby="agent-modules-title">
-    <div class="agent-modules-head">
-      <p class="agent-section-eyebrow">Command center</p>
-      <h2 id="agent-modules-title">Everything an agent needs to pay and act</h2>
-    </div>
-    <div class="agent-modules-grid" id="agent-modules-grid"></div>
-  </section>
+  <main class="agent-main">
+    <section class="agent-hero">
+      <div class="agent-hero-copy">
+        <div class="agent-pill">
+          <span class="agent-pill-dot" aria-hidden="true"></span>
+          x402 Live · <strong id="agent-endpoint-count">21</strong> routes · Solana &amp; Base
+        </div>
+        <h1 class="agent-hero-title">
+          Market intelligence<br /><em>for autonomous agents</em>
+        </h1>
+        <p class="agent-hero-lead">
+          Pay-per-call institutional desk. Discover intel routes, settle USDC on-chain, and ship agents without API keys.
+        </p>
+        <div class="agent-hero-ctas">
+          <a class="agent-btn agent-btn--primary" href="/agent/playground">Open Playground</a>
+          <a class="agent-btn agent-btn--outline" href="/docs">Explore docs</a>
+        </div>
+      </div>
+
+      <div class="agent-demo-panel" aria-live="polite">
+        <div class="agent-demo-chrome">
+          <span></span><span></span><span></span>
+          <span class="agent-demo-label">concierge · x402</span>
+        </div>
+        <div class="agent-demo-body">
+          <div class="agent-demo-line">
+            <span class="agent-demo-prefix">$</span>
+            <span id="agent-typewriter"></span><span class="agent-demo-cursor" aria-hidden="true"></span>
+          </div>
+          <p class="agent-demo-status" id="agent-terminal-status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="agent-stack" aria-label="Integrated partners">
+      <p class="agent-stack-kicker">Integrated across the stack</p>
+      <div class="agent-stack-viewport">
+        <div class="agent-stack-track" id="agent-trust-track"></div>
+      </div>
+    </section>
+
+    <section class="agent-about el-reveal">
+      <p class="agent-kicker">What is Concierge</p>
+      <h2 class="agent-section-title">A pay-per-call desk for <em>agentic commerce</em></h2>
+      <p class="agent-section-lead">
+        Concierge turns autonomous agents into economic actors — probe x402 routes, settle micropayments, and access institutional market intelligence from one command center.
+      </p>
+      <div class="agent-about-grid" id="agent-about-grid"></div>
+    </section>
+
+    <section class="agent-metrics el-reveal" aria-label="Protocol metrics">
+      <p class="agent-kicker">Proof metrics</p>
+      <h2 class="agent-section-title">Traction with <em>operational consistency</em></h2>
+      <div class="agent-metrics-grid">
+        <article class="agent-metric">
+          <span class="agent-metric-idx">Metric 01</span>
+          <span class="agent-metric-val" id="agent-proof-routes">21</span>
+          <span class="agent-metric-label">Live routes</span>
+        </article>
+        <article class="agent-metric">
+          <span class="agent-metric-idx">Metric 02</span>
+          <span class="agent-metric-val">$0.02–0.25</span>
+          <span class="agent-metric-label">Per call</span>
+        </article>
+        <article class="agent-metric">
+          <span class="agent-metric-idx">Metric 03</span>
+          <span class="agent-metric-val">0</span>
+          <span class="agent-metric-label">API keys</span>
+        </article>
+        <article class="agent-metric">
+          <span class="agent-metric-idx">Metric 04</span>
+          <span class="agent-metric-val" id="agent-proof-accuracy">—</span>
+          <span class="agent-metric-label">Desk hit rate</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="agent-ecosystem el-reveal" aria-labelledby="agent-eco-title">
+      <p class="agent-kicker">Command center</p>
+      <h2 class="agent-section-title" id="agent-eco-title">Everything an agent needs to <em>pay and act</em></h2>
+      <div class="agent-eco-grid" id="agent-modules-grid"></div>
+    </section>
+
+    <section class="agent-cta-band el-reveal">
+      <div class="agent-cta-band-inner">
+        <div>
+          <p class="agent-kicker">Launch window open</p>
+          <h2 class="agent-cta-band-title">Explore the Concierge ecosystem from one surface</h2>
+          <p class="agent-cta-band-lead">Executive Lounge, x402 playground, agent discovery, and paid intel routes — wired for Solana and Base.</p>
+        </div>
+        <div class="agent-cta-band-actions">
+          <a class="agent-btn agent-btn--primary" href="/lounge">Enter Lounge</a>
+          <a class="agent-btn agent-btn--outline" href="/agent/endpoints">Browse endpoints</a>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer class="agent-home-foot" id="agent-site-footer"></footer>
 </div>
