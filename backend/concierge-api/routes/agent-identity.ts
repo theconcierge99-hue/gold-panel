@@ -158,8 +158,8 @@ export default async function handler(request: Request): Promise<Response> {
 
     const sapWalletRaw = String(body.sapWallet ?? "").trim();
     const sapAgentPdaRaw = String(body.sapAgentPda ?? "").trim();
-    const sapWallet = sapWalletRaw ? normalizeSolAddress(sapWalletRaw) : undefined;
-    const sapAgentPda = sapAgentPdaRaw ? normalizeSapAgentPda(sapAgentPdaRaw) : undefined;
+    const sapWallet = sapWalletRaw ? normalizeSolAddress(sapWalletRaw) ?? undefined : undefined;
+    const sapAgentPda = sapAgentPdaRaw ? normalizeSapAgentPda(sapAgentPdaRaw) ?? undefined : undefined;
     if (sapWalletRaw && !sapWallet) return json(request, { error: "Invalid sapWallet (Solana base58)" }, 400);
     if (sapAgentPdaRaw && !sapAgentPda) return json(request, { error: "Invalid sapAgentPda" }, 400);
     if (sapWallet && solAddress && sapWallet !== solAddress) {
