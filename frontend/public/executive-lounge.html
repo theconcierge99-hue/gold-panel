@@ -15,12 +15,13 @@
 <meta name="theme-color" content="#080a0f" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@300;400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/brand-logo.css" />
 <link rel="stylesheet" href="/css/concierge-tokens.css" />
 <link rel="stylesheet" href="/css/concierge-premium.css" />
 <link rel="stylesheet" href="/css/concierge-lounge.css" />
 <link rel="stylesheet" href="/css/concierge-light-mode.css" />
+<link rel="stylesheet" href="/css/concierge-lounge-v2.css" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -712,7 +713,7 @@
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
-<body class="el-premium">
+<body class="el-premium lounge-v2">
 <div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <script type="module" src="/js/concierge-boot.mjs"></script>
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
@@ -736,6 +737,7 @@
       </div>
     </div>
     <div class="hright">
+      <a class="btn agent-hub-link" href="/agent">Agent Hub</a>
       <div class="theme-toggle" role="group" aria-label="Theme mode">
         <button type="button" class="theme-btn" data-theme-btn="dark" id="themeDark">Dark</button>
         <button type="button" class="theme-btn" data-theme-btn="light" id="themeLight">Light</button>
@@ -791,23 +793,26 @@
     <section class="view show" id="view-lounge">
       <section class="market-desk-clocks el-reveal" id="marketDeskClocks" aria-label="Global market desk clocks">
         <div class="market-desk-head">
-          <h2 class="market-desk-title">Market Desk</h2>
+          <div class="market-desk-intro">
+            <p class="lounge-kicker">Global sessions</p>
+            <h2 class="market-desk-title">Market Desk</h2>
+          </div>
           <div class="market-desk-sessions" id="marketSessionStrip" aria-label="Trading session status"></div>
         </div>
         <div class="market-desk-grid" id="marketDeskClockGrid"></div>
       </section>
 
       <div class="section-h el-reveal">
+        <div class="meta" id="creatorMeta">RWA desk</div>
         <h2>Creator Signals</h2>
-        <div class="meta" id="creatorMeta">Lounge desk</div>
       </div>
       <div class="creator-signals-lane" id="creatorSignalsGrid">
         <div class="intel-loading">Loading creator signals…</div>
       </div>
 
       <div class="section-h el-reveal">
-        <h2>Market Intelligence</h2>
         <div class="meta" id="intelMeta">Live wire</div>
+        <h2>Market Intelligence</h2>
       </div>
       <div class="featured" id="featuredWire">
         <div class="intel-loading">Loading live wire — FT, BBC, CNN, Bloomberg, Reuters, WSJ, NYT…</div>
