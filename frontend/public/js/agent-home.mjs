@@ -66,6 +66,13 @@ if (aboutGrid) {
 
 const MODULES = [
   {
+    tag: "TCX",
+    title: "Token Research",
+    desc: "Holder structure scanner — balance bands, tier gates, and Phantom wallet lookup for TCX perks.",
+    href: "/lounge#token-research",
+    cta: "Open in Lounge",
+  },
+  {
     tag: "Desk",
     title: "Executive Lounge",
     desc: "Concierge AI chat, RWA creator signals, and the private intelligence lobby.",

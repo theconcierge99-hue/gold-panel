@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script>if(!/\/lounge/.test(location.pathname)){location.replace('/lounge#token-research');}</script>
+<script src="/js/concierge-boot-head.js"></script>
+<title>TCX Token Research — Concierge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="TCX holder structure scanner — balance bands, Deluxe/Executive/President tiers, and wallet lookup for Concierge utility perks." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/token/health" />
+<link rel="stylesheet" href="/css/brand-logo.css" />
+<link rel="stylesheet" href="/css/token-health.css" />
+</head>
+<body class="tcx-health-page tok-v2 el-premium">
+<div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
+
+<div class="tcx-wrap">
+  <div class="tcx-top">
+    <a class="tcx-back" href="/token">← TCX tokenomics</a>
+    <div class="tcx-brand">
+      <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="44" height="44" />
+      <span>TCX <em>Health</em></span>
+    </div>
+    <nav class="tcx-nav-links" aria-label="TCX pages">
+      <a class="tcx-nav-pill tcx-nav-pill--active" href="/token/health">Token Health</a>
+      <a class="tcx-nav-pill" href="/token">Tokenomics</a>
+      <a class="tcx-nav-pill" href="/token/transparency">Transparency</a>
+    </nav>
+  </div>
+
+  <header class="tcx-hero">
+    <div class="tcx-pill-row">
+      <span class="tcx-pill" id="tcx-phase-pill"><span class="tcx-pill-dot" aria-hidden="true"></span> <span id="tcx-phase-label">Loading…</span></span>
+      <span class="tcx-pill tcx-pill--gold" id="tcx-mint-pill" hidden><span class="tcx-pill-dot" aria-hidden="true"></span> Mint live</span>
+    </div>
+    <h1 class="tcx-title">Read holder <em>structure</em> before perks unlock</h1>
+    <p class="tcx-lead">
+      TCX holder scanner for the Concierge desk — balance bands, tier gates, and on-chain lookup wired to
+      <code>soonHolderTiers</code> in <code>/api/x402-config</code>.
+    </p>
+    <p class="tcx-tagline">You are not early to the curve. You are early to the structure.</p>
+    <div class="tcx-cta-row">
+      <button type="button" class="tcx-btn tcx-btn--primary" id="tcx-connect-btn">Connect wallet</button>
+      <a class="tcx-btn" href="/token">Full tokenomics →</a>
+      <a class="tcx-btn tcx-btn--gold" href="/lounge">Executive Lounge</a>
+    </div>
+  </header>
+
+  <div class="tcx-stat-grid" id="tcx-signal-grid" aria-label="Scanner signals">
+    <article class="tcx-stat"><span class="tcx-stat-label">Signals</span><span class="tcx-stat-value" id="tcx-sig-focus">—</span><span class="tcx-stat-sub">Balance → tier mapping</span></article>
+    <article class="tcx-stat"><span class="tcx-stat-label">Coverage</span><span class="tcx-stat-value" id="tcx-sig-coverage">—</span><span class="tcx-stat-sub">Weekly snapshot cadence</span></article>
+    <article class="tcx-stat"><span class="tcx-stat-label">Focus</span><span class="tcx-stat-value">Structure first</span><span class="tcx-stat-sub">Perks vs raw price</span></article>
+    <article class="tcx-stat"><span class="tcx-stat-label">Output</span><span class="tcx-stat-value" id="tcx-sig-output">—</span><span class="tcx-stat-sub">Deluxe / Executive / President</span></article>
+  </div>
+
+  <section class="tcx-panel" aria-labelledby="tcx-dist-title">
+    <div class="tcx-panel-head">
+      <div>
+        <p class="tcx-panel-kicker">Holder tier distribution</p>
+        <h2 class="tcx-panel-title" id="tcx-dist-title">Community structure</h2>
+      </div>
+      <p class="tcx-panel-meta" id="tcx-snapshot-meta">Snapshot —</p>
+    </div>
+    <div class="tcx-bars" id="tcx-bars" aria-live="polite"></div>
+    <p class="tcx-panel-meta" id="tcx-snapshot-note" style="margin-top:16px"></p>
+  </section>
+
+  <section class="tcx-panel tcx-wallet-panel" aria-labelledby="tcx-wallet-title">
+    <div class="tcx-panel-head">
+      <div>
+        <p class="tcx-panel-kicker">Your position</p>
+        <h2 class="tcx-panel-title" id="tcx-wallet-title">Wallet lookup</h2>
+      </div>
+    </div>
+    <p class="tcx-wallet-status" id="tcx-wallet-status">Connect Phantom or paste a Solana address to check TCX tier.</p>
+    <div class="tcx-wallet-grid" id="tcx-wallet-grid" hidden>
+      <div class="tcx-wallet-stat"><span>Balance</span><strong id="tcx-w-balance">—</strong></div>
+      <div class="tcx-wallet-stat"><span>Band</span><strong id="tcx-w-band">—</strong></div>
+      <div class="tcx-wallet-stat"><span>Tier</span><strong id="tcx-w-tier">—</strong></div>
+    </div>
+    <div class="tcx-benefits" id="tcx-benefits" hidden>
+      <h4>Active benefits</h4>
+      <ul id="tcx-benefits-list"></ul>
+    </div>
+  </section>
+
+  <section class="tcx-panel" aria-labelledby="tcx-tiers-title">
+    <div class="tcx-panel-head">
+      <div>
+        <p class="tcx-panel-kicker">Concierge holder tiers</p>
+        <h2 class="tcx-panel-title" id="tcx-tiers-title">Perk ladder</h2>
+      </div>
+    </div>
+    <div class="tcx-tier-cards" id="tcx-tier-cards"></div>
+  </section>
+
+  <p class="tcx-api-hint" id="tcx-api-hint">
+    Agent API: <code>GET /api/tcx-health</code> · <code>GET /api/tcx-holder?wallet=…</code>
+  </p>
+
+  <footer class="tcx-foot">
+    <a class="tcx-btn tcx-btn--gold" href="/token">Tokenomics</a>
+    <a class="tcx-btn" href="/token/transparency">Transparency</a>
+    <a class="tcx-btn" href="/agent">Agent Hub</a>
+    <a class="tcx-btn" href="/docs/payment/token-pay">Token Pay</a>
+  </footer>
+</div>
+
+<script type="module" src="/js/concierge-boot.mjs"></script>
+<script type="module" src="/js/token-health.mjs"></script>
+</body>
+</html>

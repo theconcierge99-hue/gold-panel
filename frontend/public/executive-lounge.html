@@ -708,6 +708,80 @@
   .x402-hint strong{color:var(--gold);font-weight:500}
 </style>
 <link rel="stylesheet" href="/css/token.css" />
+<link rel="stylesheet" href="/css/token-health.css" />
+<style>
+  /* Token Research — Lounge-native (gold desk, not scanner clone) */
+  #view-token-research .tcx-wrap{max-width:none;padding:0}
+  #view-token-research .tcx-hero{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  #view-token-research .tcx-pill{
+    border-color:rgba(201,168,76,.28);color:var(--gold);background:rgba(201,168,76,.06);
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;
+  }
+  #view-token-research .tcx-pill-dot{background:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.45)}
+  #view-token-research .tcx-pill--gold{display:none}
+  #view-token-research .tcx-lead{
+    font-size:13px;line-height:1.6;color:var(--text-secondary);max-width:560px;margin:12px 0 0;
+  }
+  #view-token-research .tcx-cta-row{margin:14px 0 0}
+  #view-token-research .tcx-btn{
+    font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    padding:10px 18px;border-radius:4px;border:1px solid var(--border);color:var(--text-secondary);
+    background:transparent;
+  }
+  #view-token-research .tcx-btn--primary{
+    color:var(--bg);border-color:var(--gold);background:var(--gold);
+    box-shadow:none;letter-spacing:.18em;
+  }
+  #view-token-research .tcx-btn--primary:hover{filter:brightness(1.06)}
+  #view-token-research .tcx-grid-2{
+    display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;
+  }
+  #view-token-research .tcx-panel{
+    background:var(--gcard-bg);border:1px solid var(--border);border-radius:var(--el-radius-lg,12px);
+    padding:20px;margin-bottom:0;backdrop-filter:none;
+  }
+  #view-token-research .tcx-panel-kicker{
+    font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.28em;color:var(--text-muted);
+  }
+  #view-token-research .tcx-panel-title{
+    font-family:'Cormorant Garamond',serif;font-weight:300;font-size:20px;letter-spacing:.02em;
+    color:var(--text-primary);
+  }
+  #view-token-research .tcx-panel-meta{font-size:10px;color:var(--text-muted);letter-spacing:.06em}
+  #view-token-research .tcx-bar-track{background:rgba(255,255,255,.06);height:6px}
+  #view-token-research .tcx-bar-fill{background:linear-gradient(90deg,rgba(201,168,76,.55),var(--gold))}
+  #view-token-research .tcx-bar-row[data-tier="deluxe"] .tcx-bar-fill,
+  #view-token-research .tcx-bar-row[data-tier="executive"] .tcx-bar-fill,
+  #view-token-research .tcx-bar-row[data-tier="president"] .tcx-bar-fill{
+    background:linear-gradient(90deg,rgba(201,168,76,.45),var(--gold));
+  }
+  #view-token-research .tcx-bar-label{font-size:12px;color:var(--text-primary)}
+  #view-token-research .tcx-bar-label small{color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px}
+  #view-token-research .tcx-bar-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)}
+  #view-token-research .tcx-wallet-panel{border-color:var(--border);background:var(--gcard-bg)}
+  #view-token-research .tcx-wallet-status{font-size:12px;color:var(--text-secondary);margin:10px 0 14px}
+  #view-token-research .tcx-wallet-status.ok{color:var(--signal-green,#7dcea0)}
+  #view-token-research .tcx-wallet-stat{
+    background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;
+  }
+  #view-token-research .tcx-wallet-stat span{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--text-muted)}
+  #view-token-research .tcx-wallet-stat strong{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--text-primary)}
+  #view-token-research .tcx-benefits h4{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.24em;color:var(--gold)}
+  #view-token-research .tcx-benefits li{font-size:12px;color:var(--text-secondary);border-color:var(--border);background:var(--bg)}
+  #view-token-research .tcx-tier-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:4px}
+  #view-token-research .tcx-tier-card{
+    background:var(--gcard-bg);border:1px solid var(--border);border-radius:var(--el-radius-lg,12px);padding:16px;
+  }
+  #view-token-research .tcx-tier-card--gold{border-color:rgba(201,168,76,.35)}
+  #view-token-research .tcx-tier-card h3{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:17px}
+  #view-token-research .tcx-tier-min{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.08em}
+  #view-token-research .tcx-tier-card p{font-size:11px;color:var(--text-secondary)}
+  #view-token-research .tcx-foot,#view-token-research .tcx-stat-grid,#view-token-research .tcx-title,#view-token-research .tcx-tagline{display:none!important}
+  @media(max-width:900px){
+    #view-token-research .tcx-grid-2{grid-template-columns:1fr}
+    #view-token-research .tcx-tier-cards{grid-template-columns:1fr}
+  }
+</style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
@@ -757,6 +831,7 @@
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
+      <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">SOON</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -926,6 +1001,69 @@
           <div class="tok-card"><h3>Buyback</h3><p>15% net USDC → 60% burn / 40% LP weekly.</p></div>
         </div>
         <p class="tok-disclaimer" style="margin:0">Not financial advice. Experimental — high risk of total loss. <a href="/token" style="color:var(--gold)">Full policy →</a></p>
+      </div>
+    </section>
+
+    <!-- TOKEN RESEARCH (TCX holder desk) -->
+    <section class="view" id="view-token-research">
+      <div class="section-h" style="margin-bottom:20px">
+        <h2>Token Research</h2>
+        <div class="meta">Holder desk · SOON</div>
+      </div>
+      <div class="tcx-wrap lounge-tcx">
+        <header class="tcx-hero">
+          <div class="tcx-pill-row">
+            <span class="tcx-pill" id="tcx-phase-pill"><span class="tcx-pill-dot" aria-hidden="true"></span> <span id="tcx-phase-label">Loading…</span></span>
+            <span class="tcx-pill tcx-pill--gold" id="tcx-mint-pill" hidden aria-hidden="true"><span class="tcx-pill-dot"></span> Mint live</span>
+          </div>
+          <p class="tcx-lead">Holder balance bands and Concierge tier perks — refreshed with each transparency snapshot after T0.</p>
+          <div class="tcx-cta-row">
+            <button type="button" class="tcx-btn tcx-btn--primary" id="tcx-connect-btn">Check wallet</button>
+          </div>
+        </header>
+
+        <div class="tcx-grid-2">
+          <section class="tcx-panel" aria-labelledby="tcx-dist-title">
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Distribution</p>
+                <h3 class="tcx-panel-title" id="tcx-dist-title">Holder bands</h3>
+              </div>
+              <p class="tcx-panel-meta" id="tcx-snapshot-meta">—</p>
+            </div>
+            <div class="tcx-bars" id="tcx-bars" aria-live="polite"></div>
+            <p class="tcx-panel-meta" id="tcx-snapshot-note" style="margin-top:14px;line-height:1.5"></p>
+          </section>
+
+          <section class="tcx-panel tcx-wallet-panel" aria-labelledby="tcx-wallet-title">
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Your wallet</p>
+                <h3 class="tcx-panel-title" id="tcx-wallet-title">TCX position</h3>
+              </div>
+            </div>
+            <p class="tcx-wallet-status" id="tcx-wallet-status">Connect Lounge wallet or Phantom to see balance and tier.</p>
+            <div class="tcx-wallet-grid" id="tcx-wallet-grid" hidden>
+              <div class="tcx-wallet-stat"><span>Balance</span><strong id="tcx-w-balance">—</strong></div>
+              <div class="tcx-wallet-stat"><span>Band</span><strong id="tcx-w-band">—</strong></div>
+              <div class="tcx-wallet-stat"><span>Tier</span><strong id="tcx-w-tier">—</strong></div>
+            </div>
+            <div class="tcx-benefits" id="tcx-benefits" hidden>
+              <h4>Unlocked perks</h4>
+              <ul id="tcx-benefits-list"></ul>
+            </div>
+          </section>
+        </div>
+
+        <section class="tcx-panel" aria-labelledby="tcx-tiers-title" style="margin-top:18px">
+          <div class="tcx-panel-head">
+            <div>
+              <p class="tcx-panel-kicker">Perk ladder</p>
+              <h3 class="tcx-panel-title" id="tcx-tiers-title">Deluxe · Executive · President</h3>
+            </div>
+          </div>
+          <div class="tcx-tier-cards" id="tcx-tier-cards"></div>
+        </section>
       </div>
     </section>
   </main>
@@ -1735,6 +1873,7 @@
   window.addEventListener('hashchange', function(){
     if (location.hash === '#agent-identity') openAgentIdentityModal();
     if (location.hash === '#concierge') showView('concierge');
+    if (location.hash === '#token-research') showView('token-research');
   });
 
   function generateAgentWalletsUi(){
@@ -1913,6 +2052,32 @@
       fetchCreatorStanding();
       fetchReaderBadges();
     }
+    if(v==='token-research'){
+      initLoungeTokenResearch();
+    }
+  }
+  window.showView = showView;
+
+  let _tokenResearchReady = false;
+  async function initLoungeTokenResearch(){
+    if(!window.__initLoungeTokenResearch) return;
+    await window.__initLoungeTokenResearch({
+      getConnectedWallet: () => {
+        const s = typeof getWalletSession === 'function' ? getWalletSession() : null;
+        return s?.sol?.address || null;
+      },
+    });
+    if(!_tokenResearchReady){
+      _tokenResearchReady = true;
+      const s = typeof getWalletSession === 'function' ? getWalletSession() : null;
+      if(s?.sol?.address && window.__tcxLookupWallet){
+        void window.__tcxLookupWallet(s.sol.address);
+      }
+    }
+  }
+
+  if (location.hash === '#token-research') {
+    setTimeout(function(){ showView('token-research'); }, 120);
   }
 
   // MODAL
@@ -3442,6 +3607,7 @@
   window.visualViewport?.addEventListener('resize',syncHeaderHeight);
 </script>
 <script type="module" src="/js/market-clocks.mjs"></script>
+<script type="module" src="/js/token-health.mjs"></script>
 <script type="module">
   import { initConciergeFx } from "/js/concierge-fx.mjs";
   const stop = initConciergeFx();

@@ -93,6 +93,10 @@
       "destination": "/token-transparency.html"
     },
     {
+      "source": "/token/health",
+      "destination": "/lounge#token-research"
+    },
+    {
       "source": "/agent",
       "destination": "/agent.html"
     },
