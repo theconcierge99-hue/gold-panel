@@ -432,11 +432,11 @@ export const CONCIERGE_DESK_MODULE_DEFS: ConciergeDeskModuleDef[] = [
   {
     id: "sarif-export",
     phase: "reporting",
-    title: "SARIF export",
-    subtitle: "SARIF 2.1.0 for code scanning integrations",
+    title: "Security report export",
+    subtitle: "Machine-readable findings for GitHub Security and CI pipelines",
     minTier: "president",
     hobbyStatus: "soon",
-    soonNote: "President desk — SOON.",
+    soonNote: "President desk — Soon.",
   },
 ];
 

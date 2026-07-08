@@ -128,7 +128,7 @@ Full module map aligned to Oh My Open Pentest phases — **Concierge-branded onl
 | Live now | Waitlisted as **Soon** |
 |----------|------------------------|
 | Guest breakdown (grade + surface severity counts) | Deluxe / Executive / President depth |
-| Scope + attestation | Extended recon, intel layer, client-side, playbooks, orchestration, PDF/SARIF |
+| Scope + attestation | Extended recon, intel layer, client-side, playbooks, orchestration, PDF/report export |
 
 **Turn on after launch:** set `SOON_TOKEN_MINT` (or `SECURITY_DESK_LIVE_MAX_TIER=executive`) — richer tiers go live without rewriting the desk map.
 
