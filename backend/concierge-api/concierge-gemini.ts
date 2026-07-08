@@ -40,7 +40,16 @@ import {
   type LiveMarketSnapshot,
 } from "./market-data";
 import { GLM_CHAT_MODEL_ID, glmApiKeyFromEnv, glmChatCompletion } from "./concierge-glm";
-import type { ConciergeAgentModelId } from "./concierge-llm-models";
+import {
+  HYRE_CHAT_MODELS,
+  hyreChatCompletion,
+  hyreGatewayApiKeyFromEnv,
+} from "./concierge-hyre";
+import {
+  CONCIERGE_AGENT_MODELS,
+  type ConciergeAgentModelId,
+  isAlternateConciergeChatModel,
+} from "./concierge-llm-models";
 import { withTimeout } from "./with-timeout";
 
 export type ChatTurn = { role: "user" | "model"; text: string };
@@ -417,6 +426,83 @@ type ConciergeChatResult = {
   modelFallback?: boolean;
 };
 
+async function tryAlternateConciergeChat(options: {
+  agentModel: ConciergeAgentModelId;
+  systemPrompt: string;
+  history: ChatTurn[];
+  message: string;
+  recentUserMessages: string[];
+  maxTokens: number;
+  temperature: number;
+  timeoutMs: number;
+  topics: string[];
+  meta: Record<string, unknown>;
+}): Promise<ConciergeChatResult | null> {
+  const meta = CONCIERGE_AGENT_MODELS[options.agentModel];
+  if (!meta || meta.provider === "gemini") return null;
+
+  try {
+    let text = "";
+    let modelUsed = "";
+
+    if (meta.provider === "glm") {
+      const glmKey = glmApiKeyFromEnv();
+      if (!glmKey) {
+        console.warn("[concierge-gemini] GLM_API_KEY missing, fallback Gemini");
+        return null;
+      }
+      text = await glmChatCompletion({
+        apiKey: glmKey,
+        systemPrompt: options.systemPrompt,
+        history: options.history,
+        message: options.message,
+        recentUserMessages: options.recentUserMessages,
+        maxTokens: options.maxTokens,
+        temperature: options.temperature,
+        timeoutMs: options.timeoutMs,
+      });
+      modelUsed = GLM_CHAT_MODEL_ID;
+    } else if (meta.provider === "hyre") {
+      const hyreKey = hyreGatewayApiKeyFromEnv();
+      const upstream = HYRE_CHAT_MODELS[options.agentModel];
+      if (!hyreKey) {
+        console.warn("[concierge-gemini] HYRE_GATEWAY_KEY missing, fallback Gemini");
+        return null;
+      }
+      if (!upstream) {
+        console.warn("[concierge-gemini] unknown HYRE model, fallback Gemini");
+        return null;
+      }
+      text = await hyreChatCompletion({
+        apiKey: hyreKey,
+        model: upstream,
+        systemPrompt: options.systemPrompt,
+        history: options.history,
+        message: options.message,
+        recentUserMessages: options.recentUserMessages,
+        maxTokens: options.maxTokens,
+        temperature: options.temperature,
+        timeoutMs: options.timeoutMs,
+      });
+      modelUsed = upstream;
+    }
+
+    if (!text) return null;
+    return {
+      reply: wrapHtmlParagraphs(text),
+      topics: options.topics,
+      modelUsed,
+      ...options.meta,
+    };
+  } catch (e) {
+    console.warn(
+      `[concierge-gemini] ${options.agentModel} failed, fallback Gemini`,
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
 export async function runConciergeGemini(options: {
   apiKey: string;
   mode: ConciergeMode;
@@ -550,35 +636,20 @@ export async function runConciergeGemini(options: {
   const genConfig = generationConfigForMode(responseMode);
   const agentModel = options.agentModel ?? "gemini";
 
-  if (agentModel === "glm-4.7-flash" && !requireTradingPlan) {
-    const glmKey = glmApiKeyFromEnv();
-    if (glmKey) {
-      try {
-        const text = await glmChatCompletion({
-          apiKey: glmKey,
-          systemPrompt,
-          history: historyForLlm.slice(-historyTurns),
-          message,
-          recentUserMessages: recentUser,
-          maxTokens: Number(genConfig.maxOutputTokens ?? 3072),
-          temperature: Number(genConfig.temperature ?? 0.55),
-          timeoutMs: GEMINI_CALL_MS,
-        });
-        return {
-          reply: wrapHtmlParagraphs(text),
-          topics,
-          modelUsed: GLM_CHAT_MODEL_ID,
-          ...meta,
-        };
-      } catch (e) {
-        console.warn(
-          "[concierge-gemini] GLM failed, fallback Gemini",
-          e instanceof Error ? e.message : e,
-        );
-      }
-    } else {
-      console.warn("[concierge-gemini] GLM_API_KEY missing, fallback Gemini");
-    }
+  if (isAlternateConciergeChatModel(agentModel) && !requireTradingPlan) {
+    const alt = await tryAlternateConciergeChat({
+      agentModel,
+      systemPrompt,
+      history: historyForLlm.slice(-historyTurns),
+      message,
+      recentUserMessages: recentUser,
+      maxTokens: Number(genConfig.maxOutputTokens ?? 3072),
+      temperature: Number(genConfig.temperature ?? 0.55),
+      timeoutMs: GEMINI_CALL_MS,
+      topics,
+      meta,
+    });
+    if (alt) return alt;
   }
 
   const geminiPayload = {
@@ -588,7 +659,7 @@ export async function runConciergeGemini(options: {
   };
   let reply = "";
   let modelUsed: string | undefined;
-  const glmFallback = agentModel === "glm-4.7-flash";
+  const glmFallback = isAlternateConciergeChatModel(agentModel);
   const chatModels = requireTradingPlan ? TRADING_PLAN_MODELS : STANDARD_MODELS;
   const chatTimeout = requireTradingPlan ? GEMINI_TRADING_MS : GEMINI_CALL_MS;
   const geminiDeadline = requireTradingPlan ? Date.now() + GEMINI_TRADING_BUDGET_MS : 0;

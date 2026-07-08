@@ -95,7 +95,7 @@ Implementation:
 }
 ```
 
-Optional `agentModel`: `gemini` (default) or `glm-4.7-flash`. Trading-plan, image, and enhance paths always use Gemini. GLM requires `GLM_API_KEY` on the server and falls back to Gemini on error.
+Optional `agentModel`: `gemini` (default), `glm-4.7-flash`, `hyre-deepseek-v4-flash`, or `hyre-glm-4.7-flash`. Trading-plan, image, and enhance paths always use Gemini. GLM requires `GLM_API_KEY`; HYRE models require `HYRE_GATEWAY_KEY`. Alternate models fall back to Gemini on error.
 
 ## Response example (chat)
 
@@ -115,6 +115,8 @@ Optional `agentModel`: `gemini` (default) or `glm-4.7-flash`. Trading-plan, imag
 |-------|------|-------|
 | **Gemini 2.5 Flash** | Default; all modes | `GEMINI_API_KEY` — fallback list in `concierge-gemini.ts` |
 | **GLM-4.7 Flash** | Optional chat only | `GLM_API_KEY` (Z.ai) — `agentModel: "glm-4.7-flash"` |
+| **DeepSeek V4 Flash** | Optional chat only | `HYRE_GATEWAY_KEY` — `agentModel: "hyre-deepseek-v4-flash"` |
+| **GLM 4.7 Flash (HYRE)** | Optional chat only | `HYRE_GATEWAY_KEY` — `agentModel: "hyre-glm-4.7-flash"` |
 
 Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 
@@ -122,7 +124,7 @@ Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 - `gemini-2.5-flash-lite`
 - `gemini-2.0-flash`
 
-GLM adapter: `backend/concierge-api/concierge-glm.ts` · registry: `concierge-llm-models.ts`
+GLM adapter: `backend/concierge-api/concierge-glm.ts` · HYRE adapter: `concierge-hyre.ts` · registry: `concierge-llm-models.ts`
 
 ## External integration (agents)
 

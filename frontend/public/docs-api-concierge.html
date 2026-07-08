@@ -47,7 +47,7 @@
   "market": [],
   "agentModel": "gemini"
 }</code></pre>
-        <p>Optional <code>agentModel</code>: <code>gemini</code> (default) or <code>glm-4.7-flash</code> (Z.ai — server needs <code>GLM_API_KEY</code>). Image, enhance, and trading-plan paths always use Gemini. GLM failures fall back to Gemini (<code>modelFallback: true</code>).</p>
+        <p>Optional <code>agentModel</code>: <code>gemini</code> (default), <code>glm-4.7-flash</code> (Z.ai — <code>GLM_API_KEY</code>), <code>hyre-deepseek-v4-flash</code>, or <code>hyre-glm-4.7-flash</code> (HYRE Gateway — <code>HYRE_GATEWAY_KEY</code>). Image, enhance, and trading-plan paths always use Gemini. Alternate models fall back to Gemini (<code>modelFallback: true</code>).</p>
         <table>
           <thead><tr><th>mode</th><th>Purpose</th></tr></thead>
           <tbody>

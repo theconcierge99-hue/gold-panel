@@ -919,6 +919,14 @@
                 <span class="conc-model-opt-name">GLM-4.7 Flash</span>
                 <span class="conc-model-opt-sub">Z.ai</span>
               </button>
+              <button type="button" class="conc-model-opt" role="option" data-model="hyre-deepseek-v4-flash" aria-selected="false">
+                <span class="conc-model-opt-name">DeepSeek V4 Flash</span>
+                <span class="conc-model-opt-sub">HYRE Gateway</span>
+              </button>
+              <button type="button" class="conc-model-opt" role="option" data-model="hyre-glm-4.7-flash" aria-selected="false">
+                <span class="conc-model-opt-name">GLM 4.7 Flash</span>
+                <span class="conc-model-opt-sub">HYRE Gateway</span>
+              </button>
             </div>
           </div>
           <button type="button" class="conc-drawer-btn" id="concHistBtn" aria-label="Chat history" onclick="toggleConcDrawer()">
@@ -2267,6 +2275,8 @@
   const CONCIERGE_AGENT_MODELS = {
     gemini: { id: 'gemini', label: 'Gemini Flash', subtitle: 'Default · Google AI' },
     'glm-4.7-flash': { id: 'glm-4.7-flash', label: 'GLM-4.7 Flash', subtitle: 'Z.ai' },
+    'hyre-deepseek-v4-flash': { id: 'hyre-deepseek-v4-flash', label: 'DeepSeek V4 Flash', subtitle: 'HYRE Gateway' },
+    'hyre-glm-4.7-flash': { id: 'hyre-glm-4.7-flash', label: 'GLM 4.7 Flash', subtitle: 'HYRE Gateway' },
   };
   const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];
@@ -2275,13 +2285,13 @@
 
   function getConciergeAgentModel(){
     const raw = localStorage.getItem(CONC_AGENT_MODEL_KEY);
-    return raw === 'glm-4.7-flash' ? 'glm-4.7-flash' : 'gemini';
+    return raw && CONCIERGE_AGENT_MODELS[raw] ? raw : 'gemini';
   }
   function syncConciergeModelUi(){
     const model = getConciergeAgentModel();
     const meta = CONCIERGE_AGENT_MODELS[model] || CONCIERGE_AGENT_MODELS.gemini;
     const sub = document.getElementById('concModelSub');
-    if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : meta.subtitle);
+    if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : meta.subtitle.replace(/^Default · /, ''));
     document.querySelectorAll('.conc-model-opt').forEach(btn=>{
       const on = btn.dataset.model === model;
       btn.classList.toggle('active', on);
@@ -2309,7 +2319,8 @@
     menu.querySelectorAll('.conc-model-opt').forEach(opt=>{
       opt.addEventListener('click', (e)=>{
         e.stopPropagation();
-        const id = opt.dataset.model === 'glm-4.7-flash' ? 'glm-4.7-flash' : 'gemini';
+        const id = opt.dataset.model;
+        if(!id || !CONCIERGE_AGENT_MODELS[id]) return;
         localStorage.setItem(CONC_AGENT_MODEL_KEY, id);
         syncConciergeModelUi();
         closeConcModelMenu();
