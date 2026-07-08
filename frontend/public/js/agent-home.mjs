@@ -34,11 +34,15 @@ function renderStackMarquee() {
 
   const chip = (p) => {
     const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
-    return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="18" height="18" loading="lazy" /><span>${p.name}</span></a>`;
+    return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="28" height="28" loading="lazy" /><span>${p.name}</span></a>`;
   };
 
-  track.classList.remove("agent-stack-track--scroll");
-  track.innerHTML = `<div class="agent-stack-set">${STACK_PARTNERS.map(chip).join("")}</div>`;
+  const chips = STACK_PARTNERS.map(chip).join("");
+  track.classList.add("agent-stack-track--scroll");
+  track.innerHTML = `
+    <div class="agent-stack-group" aria-hidden="false">${chips}</div>
+    <div class="agent-stack-group" aria-hidden="true">${chips}</div>
+  `;
 }
 
 renderStackMarquee();

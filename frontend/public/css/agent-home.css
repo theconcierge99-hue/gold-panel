@@ -158,32 +158,52 @@ html[data-theme="light"] .agent-demo-chrome{background:#f0ece4;border-bottom-col
 html[data-theme="light"] .agent-stack{border-bottom-color:rgba(10,16,24,.08)}
 .agent-stack-kicker{
   text-align:center;font-size:11px;font-weight:600;letter-spacing:.14em;
-  text-transform:uppercase;color:#5a6a82;margin-bottom:18px;
+  text-transform:uppercase;color:#5a6a82;margin-bottom:22px;
 }
 html[data-theme="light"] .agent-stack-kicker{color:#6a7a90}
 .agent-stack-viewport{
-  max-width:1120px;margin:0 auto;padding:0 clamp(12px,3vw,24px);
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
 }
 .agent-stack-track{
-  display:flex;width:100%;justify-content:center;
+  display:flex;width:max-content;
 }
-.agent-stack-set{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  gap:10px;width:100%;
+.agent-stack-track--scroll{
+  animation:agent-stack-marquee 48s linear infinite;
+}
+.agent-stack-track--scroll:hover{animation-play-state:paused}
+.agent-stack-group{
+  display:flex;align-items:center;gap:16px;padding:0 16px;flex-shrink:0;
 }
 .agent-stack-chip{
-  display:inline-flex;align-items:center;gap:8px;padding:8px 14px;
-  border-radius:999px;border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.03);text-decoration:none;
-  font-size:12px;font-weight:500;color:#9aa8bc;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:12px;padding:14px 22px;
+  border-radius:999px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);text-decoration:none;
+  font-size:15px;font-weight:600;color:#c5d0e0;white-space:nowrap;
   transition:border-color .15s,background .15s,color .15s;
+  flex-shrink:0;
 }
-.agent-stack-chip:hover{border-color:rgba(212,179,86,.35);color:#e8eef6;background:rgba(212,179,86,.06)}
+.agent-stack-chip:hover{border-color:rgba(212,179,86,.4);color:#e8eef6;background:rgba(212,179,86,.08)}
 html[data-theme="light"] .agent-stack-chip{
-  background:#fff;border-color:rgba(10,16,24,.1);color:#3a4a5e;
+  background:#fff;border-color:rgba(10,16,24,.12);color:#2a3a4e;
 }
-html[data-theme="light"] .agent-stack-chip:hover{color:#0a1018;border-color:rgba(154,122,50,.35)}
-.agent-stack-chip img{width:18px;height:18px;object-fit:contain;border-radius:4px}
+html[data-theme="light"] .agent-stack-chip:hover{color:#0a1018;border-color:rgba(154,122,50,.4)}
+.agent-stack-chip img{width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0}
+
+@keyframes agent-stack-marquee{
+  from{transform:translateX(-50%)}
+  to{transform:translateX(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .agent-stack-viewport{
+    overflow-x:auto;-webkit-mask-image:none;mask-image:none;
+    max-width:1120px;margin:0 auto;padding:0 clamp(12px,3vw,24px);
+  }
+  .agent-stack-track--scroll{animation:none!important;width:100%;justify-content:center;flex-wrap:wrap}
+  .agent-stack-group[aria-hidden="true"]{display:none}
+  .agent-stack-group{padding:0;flex-wrap:wrap;justify-content:center;width:100%}
+}
 
 /* Sections */
 .agent-about,.agent-metrics,.agent-ecosystem{
