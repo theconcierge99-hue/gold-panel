@@ -63,9 +63,10 @@ function renderSummary(data) {
         <span class="sec-scan-grade-label">Grade</span>
         <strong>${s.overallGrade}</strong>
       </div>
-      <div class="sec-scan-stat-grid">
+      <div class="sec-scan-stat-grid sec-scan-stat-grid--5">
         <div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>
         <div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal} · ${s.headersGrade}</strong></div>
+        <div class="sec-scan-stat"><span>Surface</span><strong>${s.surfaceGrade ?? "—"} · ${s.surfaceFindings ?? 0}</strong></div>
         <div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles} files</strong></div>
         <div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>
       </div>
@@ -97,6 +98,33 @@ function renderHeaders(headers) {
         `<tr><td><code>${c.header}</code></td><td class="${c.present ? "ok" : "bad"}">${c.present ? "Present" : "Missing"}</td></tr>`,
     )
     .join("")}</tbody></table>`;
+}
+
+function renderSurface(surface) {
+  const panel = $("sec-scan-surface-panel");
+  const el = $("sec-scan-surface");
+  if (!el) return;
+  const findings = surface?.findings ?? [];
+  if (!findings.length) {
+    el.innerHTML = `<p class="sec-scan-dim-note">No surface signals — posture looks minimal on passive probes.</p>`;
+    if (panel) panel.hidden = false;
+    return;
+  }
+  if (panel) panel.hidden = false;
+  const sev = surface?.summary?.bySeverity ?? {};
+  el.innerHTML = `
+    <div class="sec-scan-sev-row" aria-label="Finding counts by severity">
+      <span class="sec-scan-sev sec-scan-sev--high" title="High">${sev.high ?? 0} high</span>
+      <span class="sec-scan-sev sec-scan-sev--medium" title="Medium">${sev.medium ?? 0} medium</span>
+      <span class="sec-scan-sev sec-scan-sev--low" title="Low">${sev.low ?? 0} low</span>
+      <span class="sec-scan-sev sec-scan-sev--info" title="Info">${sev.info ?? 0} info</span>
+    </div>
+    <table class="sec-scan-table sec-scan-findings-table"><thead><tr><th>Severity</th><th>Finding</th><th>Category</th></tr></thead><tbody>${findings
+      .map(
+        (f) =>
+          `<tr><td><span class="sec-scan-sev sec-scan-sev--${f.severity}">${f.severity}</span></td><td><strong>${String(f.title).replace(/</g, "&lt;")}</strong><br><span class="sec-scan-finding-detail">${String(f.detail).replace(/</g, "&lt;")}</span></td><td>${String(f.category).replace(/</g, "&lt;")}</td></tr>`,
+      )
+      .join("")}</tbody></table>`;
 }
 
 function renderRecommendations(recs) {
@@ -199,6 +227,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
       renderSummary(data);
       renderDimensions(data.breakdown?.readiness);
       renderHeaders(data.breakdown?.headers);
+      renderSurface(data.breakdown?.surface);
       renderRecommendations(data.recommendations);
       if (results) results.hidden = false;
       revealResultsPanels();
@@ -246,6 +275,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
       renderSummary(data);
       renderDimensions(data.breakdown?.readiness);
       renderHeaders(data.breakdown?.headers);
+      renderSurface(data.breakdown?.surface);
       renderRecommendations(data.recommendations);
       if (results) results.hidden = false;
       revealResultsPanels();

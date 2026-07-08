@@ -868,6 +868,7 @@
   #view-security-scan .sec-scan-stat-grid{
     flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:min(100%,420px);
   }
+  #view-security-scan .sec-scan-stat-grid--5{grid-template-columns:repeat(5,minmax(0,1fr))}
   #view-security-scan .sec-scan-stat{
     padding:12px 14px;border:1px solid var(--border);border-radius:var(--el-radius-md,10px);
     background:var(--bg);
@@ -908,8 +909,20 @@
   #view-security-scan .sec-scan-footnote{
     font-size:12px;line-height:1.6;color:var(--text-secondary);margin:4px 0 0;
   }
+  #view-security-scan .sec-scan-sev-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  #view-security-scan .sec-scan-sev{
+    display:inline-block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;
+    text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--border);
+  }
+  #view-security-scan .sec-scan-sev--high{color:#f0a89a;border-color:rgba(232,93,74,.45);background:rgba(232,93,74,.08)}
+  #view-security-scan .sec-scan-sev--medium{color:#f0d878;border-color:rgba(240,168,90,.4);background:rgba(240,168,90,.08)}
+  #view-security-scan .sec-scan-sev--low{color:var(--text-secondary);border-color:var(--border);background:rgba(255,255,255,.03)}
+  #view-security-scan .sec-scan-sev--info{color:var(--gold);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.06)}
+  #view-security-scan .sec-scan-finding-detail{display:block;font-size:11px;line-height:1.5;color:var(--text-secondary);margin-top:4px;font-weight:400}
+  #view-security-scan .sec-scan-findings-table td strong{font-weight:500;color:var(--text-primary)}
   @media(max-width:900px){
     #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #view-security-scan .sec-scan-stat-grid--5{grid-template-columns:repeat(2,minmax(0,1fr))}
     #view-security-scan .tcx-grid-2{grid-template-columns:1fr}
     #view-security-scan .tcx-bar-row{grid-template-columns:1fr;gap:6px}
     #view-security-scan .tcx-bar-pct{text-align:left}
@@ -1268,6 +1281,16 @@
             </section>
           </div>
 
+          <section class="tcx-panel el-reveal" id="sec-scan-surface-panel" hidden>
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Concierge Surface Review</p>
+                <h3 class="tcx-panel-title">Exposure breakdown</h3>
+              </div>
+            </div>
+            <div id="sec-scan-surface"></div>
+          </section>
+
           <section class="tcx-panel el-reveal" id="sec-scan-recs-panel" hidden>
             <div class="tcx-panel-head">
               <div>
@@ -1278,7 +1301,7 @@
             <ul class="sec-scan-recs" id="sec-scan-recs"></ul>
           </section>
 
-          <p class="sec-scan-footnote">Passive assessment only — no active exploitation.</p>
+          <p class="sec-scan-footnote">Concierge Surface Review — passive signals only. Confirm findings before bug bounty or remediation.</p>
         </div>
       </div>
     </section>

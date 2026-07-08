@@ -13,7 +13,7 @@ Passive security intelligence for **authorized targets** — unified website sca
 | Route | USDC | Purpose |
 |-------|------|---------|
 | `POST /api/concierge-security-scope` | Free | Validate target + allowlist (no fetch) |
-| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, recommendations |
+| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, **Concierge Surface Review**, recommendations |
 | `POST /api/concierge-security-scan` + `selfAudit: true` on `conc-exe.xyz` | **Free** | Canonical public self-audit (see below) |
 | `POST /api/concierge-security-readiness` | $0.02 | Scout — passive API readiness |
 | `POST /api/concierge-security-headers` | $0.02 | Scout — passive header review |
@@ -107,6 +107,18 @@ These targets are **rejected** (403 `platform_scope_forbidden`) unless noted:
 
 Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
 
+## Unified scan (`security-scan`)
+
+Returns **grade**, **readiness**, **headers**, and **Concierge Surface Review** — passive exposure breakdown (transport, cookies, CORS, disclosure headers, common sensitive paths). No exploit payloads; suitable for authorized recon before manual bug bounty validation.
+
+| Field | Meaning |
+|-------|---------|
+| `summary.surfaceGrade` | `minimal` · `clear` · `moderate` · `watch` · `elevated` |
+| `summary.surfaceFindings` | Total passive findings |
+| `breakdown.surface.findings[]` | `severity` (info/low/medium/high), `title`, `detail`, `remediation` |
+
+Surface probes (parallel, Hobby-safe): `/.env`, `/.git/HEAD`, `security.txt`, `robots.txt`, swagger/docs paths, plus homepage header analysis.
+
 ## Unified scan response (`security-scan`)
 
 ```json
@@ -119,10 +131,13 @@ Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
     "headersGrade": "moderate",
     "headersPresent": 4,
     "headersTotal": 6,
+    "surfaceGrade": "watch",
+    "surfaceFindings": 3,
+    "surfaceBySeverity": { "high": 0, "medium": 1, "low": 1, "info": 1 },
     "discoveryFiles": 2,
     "mcpReachable": true
   },
-  "breakdown": { "readiness": {}, "headers": {} },
+  "breakdown": { "readiness": {}, "headers": {}, "surface": { "findings": [], "summary": {} } },
   "recommendations": ["Add strict-transport-security — …"]
 }
 ```

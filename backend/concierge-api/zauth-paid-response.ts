@@ -21,7 +21,7 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-wire": "JSON with headlines[] from live RSS and Lounge wire memory",
   "security-readiness": "JSON with passive agent-readiness dimensions and scores for external target",
   "security-headers": "JSON with HTTP security header checks and grade for external target",
-  "security-scan": "JSON with unified security breakdown — summary grade, readiness, headers, recommendations",
+  "security-scan": "JSON with unified security breakdown — summary grade, readiness, headers, Concierge Surface Review findings, recommendations",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

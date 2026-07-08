@@ -253,7 +253,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     path: "/api/concierge-security-scan",
     name: "Concierge Security — Website scan",
     description:
-      "Unified passive security breakdown for an authorized external website — readiness dimensions, HTTP headers, grade, and recommendations. Concierge platform hosts are blocked.",
+      "Unified passive security breakdown for an authorized external website — readiness, HTTP headers, Concierge Surface Review (exposure findings), grade, and recommendations. No exploit payloads.",
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["security-scan"]],
   },

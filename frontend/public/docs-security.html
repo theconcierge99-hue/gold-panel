@@ -87,7 +87,7 @@
   <section id="scan">
     <h2>Website scan — <code>POST /api/concierge-security-scan</code></h2>
     <div class="card">
-      <p>Returns <code>summary.overallGrade</code>, readiness dimensions, header checks, and <code>recommendations[]</code>.</p>
+      <p>Returns <code>summary.overallGrade</code>, readiness dimensions, header checks, <strong>Concierge Surface Review</strong> (<code>breakdown.surface.findings[]</code> with severity), and <code>recommendations[]</code>. Passive exposure probes only — no exploit payloads.</p>
 <pre><code>pay curl https://conc-exe.xyz/api/concierge-security-scan \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'</code></pre>
     </div>

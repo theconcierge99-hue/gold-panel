@@ -11,6 +11,7 @@ import {
   type SecurityAccessTier,
   type SecurityScopeOptions,
 } from "./concierge-security-scope";
+import { runSecuritySurfaceAudit, type SecuritySurfaceReport } from "./concierge-security-surface";
 
 const FETCH_TIMEOUT_MS = 8_000;
 const MAX_REDIRECTS = 3;
@@ -391,10 +392,16 @@ export async function runSecurityHeadersAudit(
   };
 }
 
-function overallGradeFromScores(readinessMean: number, headersGrade: string): string {
+function overallGradeFromScores(
+  readinessMean: number,
+  headersGrade: string,
+  surfaceGrade?: string,
+): string {
   const headerScore =
     headersGrade === "strong" ? 3 : headersGrade === "moderate" ? 2 : headersGrade === "weak" ? 1 : 0;
-  const blended = (readinessMean + headerScore) / 2;
+  const surfacePenalty =
+    surfaceGrade === "elevated" ? 1.2 : surfaceGrade === "watch" ? 0.6 : surfaceGrade === "moderate" ? 0.3 : 0;
+  const blended = (readinessMean + headerScore) / 2 - surfacePenalty;
   if (blended >= 2.5) return "A";
   if (blended >= 2) return "B";
   if (blended >= 1.5) return "C";
@@ -405,6 +412,7 @@ function overallGradeFromScores(readinessMean: number, headersGrade: string): st
 function buildScanRecommendations(
   readiness: SecurityReadinessReport,
   headers: SecurityHeadersReport,
+  surface?: SecuritySurfaceReport,
 ): string[] {
   const recs: string[] = [];
   for (const dim of readiness.dimensions) {
@@ -413,7 +421,14 @@ function buildScanRecommendations(
   for (const check of headers.checks) {
     if (!check.present) recs.push(`Add ${check.header} — ${check.recommendation}`);
   }
-  return recs.slice(0, 12);
+  if (surface) {
+    for (const f of surface.findings) {
+      if (f.severity === "high" || f.severity === "medium") {
+        recs.push(`[${f.severity}] ${f.title} — ${f.remediation}`);
+      }
+    }
+  }
+  return recs.slice(0, 16);
 }
 
 export type SecurityScanReport = {
@@ -430,23 +445,28 @@ export type SecurityScanReport = {
     headersTotal: number;
     discoveryFiles: number;
     mcpReachable: boolean;
+    surfaceGrade: string;
+    surfaceFindings: number;
+    surfaceBySeverity: { info: number; low: number; medium: number; high: number };
   };
   breakdown: {
     readiness: SecurityReadinessReport;
     headers: SecurityHeadersReport;
+    surface: SecuritySurfaceReport;
   };
   recommendations: string[];
   disclaimer: string;
 };
 
-/** Unified passive website security breakdown — readiness + headers in one call. */
+/** Unified passive website security breakdown — readiness + headers + surface review. */
 export async function runSecurityScanAudit(
   targetRaw: string,
   options?: SecurityAuditOptions,
 ): Promise<SecurityScanReport> {
-  const [readiness, headers] = await Promise.all([
+  const [readiness, headers, surface] = await Promise.all([
     runSecurityReadinessAudit(targetRaw, options),
     runSecurityHeadersAudit(targetRaw, options),
+    runSecuritySurfaceAudit(targetRaw, options),
   ]);
 
   const discovery = readiness.probes.discovery as Record<string, boolean> | undefined;
@@ -455,7 +475,11 @@ export async function runSecurityScanAudit(
     : 0;
 
   const summary = {
-    overallGrade: overallGradeFromScores(readiness.scores.mean, headers.summary.grade),
+    overallGrade: overallGradeFromScores(
+      readiness.scores.mean,
+      headers.summary.grade,
+      surface.summary.grade,
+    ),
     readinessScore: readiness.scores.mean,
     readinessMax: readiness.scores.max,
     headersGrade: headers.summary.grade,
@@ -463,6 +487,9 @@ export async function runSecurityScanAudit(
     headersTotal: headers.summary.total,
     discoveryFiles: discoveryCount,
     mcpReachable: Boolean(readiness.probes.mcpReachable),
+    surfaceGrade: surface.summary.grade,
+    surfaceFindings: surface.summary.total,
+    surfaceBySeverity: surface.summary.bySeverity,
   };
 
   return {
@@ -471,12 +498,12 @@ export async function runSecurityScanAudit(
     target: readiness.target,
     auditedAt: new Date().toISOString(),
     summary,
-    breakdown: { readiness, headers },
-    recommendations: buildScanRecommendations(readiness, headers),
+    breakdown: { readiness, headers, surface },
+    recommendations: buildScanRecommendations(readiness, headers, surface),
     disclaimer:
       options?.selfAudit
-        ? "Passive self-audit on the canonical Concierge public site — no exploitation."
-        : "Passive security breakdown only — no exploitation or vulnerability scanning. Target must be authorized.",
+        ? "Passive self-audit on the canonical Concierge public site — Concierge Surface Review, no exploitation."
+        : "Concierge Surface Review — passive breakdown only. Confirm findings before bug bounty submission. Target must be authorized.",
   };
 }
 
