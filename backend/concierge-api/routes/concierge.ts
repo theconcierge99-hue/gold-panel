@@ -1,4 +1,4 @@
-import { normalizeGeminiApiKey, runConciergeGemini } from "../concierge-gemini";
+import { normalizeGeminiApiKey, runConciergeGemini, EDGE_HANDLER_BUDGET_MS } from "../concierge-gemini";
 import {
   assertAllowedOrigin,
   corsHeadersFor,
@@ -35,6 +35,7 @@ function jsonResponse(
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  const requestStartedAt = Date.now();
   const routed = await guardPaidX402Api(request, "concierge");
   if ("response" in routed) return routed.response;
   const { cors, gate: payGate } = routed.continue;
@@ -57,6 +58,7 @@ export default async function handler(request: Request): Promise<Response> {
       market,
       liveSnapshot,
       agentModel,
+      deadlineAt: requestStartedAt + EDGE_HANDLER_BUDGET_MS,
     });
 
     const agentId = parseAgentIdHeader(request);

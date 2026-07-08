@@ -141,6 +141,15 @@ const GEMINI_CALL_MS = 18_000;
 const GEMINI_TRADING_MS = 18_000;
 /** Wall-clock budget for Gemini on trading-plan path (fits Vercel Edge ~30s incl. x402 + intel). */
 const GEMINI_TRADING_BUDGET_MS = 20_000;
+/** HYRE/GLM chat — tighter LLM cap so intel + x402 fit Vercel Edge ~30s. */
+const ALT_CHAT_LLM_MS = 12_000;
+/** Total handler budget from first byte (incl. x402 verify). */
+export const EDGE_HANDLER_BUDGET_MS = 27_000;
+
+function remainingHandlerMs(deadlineAt?: number): number | undefined {
+  if (!deadlineAt) return undefined;
+  return Math.max(0, deadlineAt - Date.now());
+}
 
 const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
@@ -276,6 +285,7 @@ async function resolveIntelligenceContext(
   liveSnapshot?: LiveMarketSnapshot | null,
   responseMode: ConciergeResponseMode = "standard",
   deFiYieldQuestion = false,
+  fastAltChat = false,
 ): Promise<{
   intelBlock: string;
   ticks: MarketTick[];
@@ -291,7 +301,15 @@ async function resolveIntelligenceContext(
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
   const clientSnapshot = clientSnapshotIsFresh(liveSnapshot) ? liveSnapshot! : null;
-  const marketTimeout = clientSnapshot ? 0 : tradingPlan ? 3_500 : deFiYieldQuestion ? 5_000 : 6_500;
+  const marketTimeout = clientSnapshot
+    ? 0
+    : fastAltChat
+      ? 3_000
+      : tradingPlan
+        ? 3_500
+        : deFiYieldQuestion
+          ? 5_000
+          : 6_500;
   const generalTimeout = deFiYieldQuestion ? 2_000 : 4_000;
   const skipGeneral = tradingPlan || deFiYieldQuestion || !!clientSnapshot;
 
@@ -325,6 +343,7 @@ async function resolveIntelligenceContext(
     (t) => t.symbol.toUpperCase() === "BTC",
   );
   const wantsBtcAnchor =
+    !fastAltChat &&
     !tradingPlan &&
     !hasBtcInSnapshot &&
     (scalpDesk ||
@@ -352,7 +371,7 @@ async function resolveIntelligenceContext(
           generalTimeout,
           emptyGeneral,
         ),
-    tradingPlan
+    tradingPlan || fastAltChat
       ? Promise.resolve([])
       : withTimeout(selectRelevantLoungeMemory(queryMessage), 2_500, []),
     wantsBtcAnchor ? withTimeout(fetchBtcSpotTickFast(2_000), 2_000, null) : Promise.resolve(null),
@@ -370,8 +389,16 @@ async function resolveIntelligenceContext(
   }
 
   const btcTick = enrichedSnapshot.ticks.find((t) => t.symbol.toUpperCase() === "BTC");
-  const defiTimeout = clientSnapshot ? 2_000 : tradingPlan ? 2_500 : deFiYieldQuestion ? 5_000 : 5_500;
-  const scalpTimeout = clientSnapshot ? 3_500 : tradingPlan ? 4_500 : 4_000;
+  const defiTimeout = clientSnapshot
+    ? 2_000
+    : fastAltChat
+      ? 3_000
+      : tradingPlan
+        ? 2_500
+        : deFiYieldQuestion
+          ? 5_000
+          : 5_500;
+  const scalpTimeout = clientSnapshot ? 3_500 : fastAltChat ? 2_500 : tradingPlan ? 4_500 : 4_000;
   const skipDefiForTradingSnapshot = !!clientSnapshot && tradingPlan && !needDeFiIntel;
   const skipScalpForSnapshot = !!clientSnapshot && tradingPlan && !scalpDesk;
 
@@ -512,6 +539,8 @@ export async function runConciergeGemini(options: {
   market?: MarketTick[];
   liveSnapshot?: LiveMarketSnapshot | null;
   agentModel?: ConciergeAgentModelId;
+  /** Wall-clock deadline (ms since epoch) for entire Edge handler incl. x402. */
+  deadlineAt?: number;
 }): Promise<ConciergeChatResult | { title: string; summary: string; implication: string }> {
   const apiKey = normalizeGeminiApiKey(options.apiKey);
   const { message, history = [], signal, market = [] } = options;
@@ -520,12 +549,15 @@ export async function runConciergeGemini(options: {
   const deFiYieldQuestion = wantsDeFiYieldQuestion(queryMessage);
   const responseMode = detectResponseMode(queryMessage, topics, deFiYieldQuestion);
   const requireTradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
+  const agentModel = options.agentModel ?? "gemini";
+  const fastAltChat = isAlternateConciergeChatModel(agentModel) && !requireTradingPlan;
   const { intelBlock, ticks, snapshot, loungeMemoryBlock } = await resolveIntelligenceContext(
     market,
     queryMessage,
     options.liveSnapshot,
     responseMode,
     deFiYieldQuestion,
+    fastAltChat,
   );
   const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };
@@ -634,7 +666,12 @@ export async function runConciergeGemini(options: {
     text: h.role === "model" ? stripHtmlToText(h.text) : h.text,
   }));
   const genConfig = generationConfigForMode(responseMode);
-  const agentModel = options.agentModel ?? "gemini";
+
+  const altLlmBudget = (() => {
+    const left = remainingHandlerMs(options.deadlineAt);
+    if (left == null) return ALT_CHAT_LLM_MS;
+    return Math.max(4_000, Math.min(ALT_CHAT_LLM_MS, left - 800));
+  })();
 
   if (isAlternateConciergeChatModel(agentModel) && !requireTradingPlan) {
     const alt = await tryAlternateConciergeChat({
@@ -643,9 +680,9 @@ export async function runConciergeGemini(options: {
       history: historyForLlm.slice(-historyTurns),
       message,
       recentUserMessages: recentUser,
-      maxTokens: Number(genConfig.maxOutputTokens ?? 3072),
+      maxTokens: Math.min(2048, Number(genConfig.maxOutputTokens ?? 3072)),
       temperature: Number(genConfig.temperature ?? 0.55),
-      timeoutMs: GEMINI_CALL_MS,
+      timeoutMs: altLlmBudget,
       topics,
       meta,
     });

@@ -78,7 +78,7 @@ export async function hyreChatCompletion(options: {
       temperature: options.temperature,
       max_tokens: options.maxTokens,
     }),
-    signal: AbortSignal.timeout(options.timeoutMs ?? 24_000),
+    signal: AbortSignal.timeout(options.timeoutMs ?? 12_000),
   });
 
   if (!res.ok) {
