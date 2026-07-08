@@ -57,7 +57,8 @@
   <section id="lounge">
     <h2>Lounge UI</h2>
     <div class="card">
-      <p><a href="/lounge#security-scan">Executive Lounge → Security Scan</a> — enter any authorized external URL, or use <strong>Scan Concierge (free)</strong> for the public site posture report.</p>
+      <p><a href="/lounge#security-scan">Executive Lounge → Security Scan</a> — end-user surface only. Enter an authorized external URL or use <strong>Scan Concierge (free)</strong> for the public site posture report.</p>
+      <p class="note">Integrators and agents do not use the Lounge for production calls. Use <code>POST /api/concierge-security-scan</code> (x402), MCP tool <code>security_scan</code>, or the <a href="/skills/concierge-security/SKILL.md">concierge-security skill</a> — see <a href="#scan">Website scan</a> and <a href="#mcp">MCP</a> below.</p>
     </div>
   </section>
 

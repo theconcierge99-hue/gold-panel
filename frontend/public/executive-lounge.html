@@ -784,21 +784,6 @@
   }
   #view-security-scan .sec-scan-wrap{max-width:none;padding:0}
   #view-security-scan .tcx-wrap{max-width:none;padding:0}
-  #view-security-scan .sec-scan-hero{margin-bottom:18px}
-  #view-security-scan .sec-scan-lead{
-    font-size:14px;line-height:1.65;color:var(--text-secondary);max-width:640px;margin:0 0 10px;
-  }
-  #view-security-scan .sec-scan-api-hint{
-    font-family:'DM Mono',monospace;font-size:11px;line-height:1.55;color:var(--text-secondary);
-    padding:12px 14px;border-radius:var(--el-radius-md,10px);border:1px solid var(--border);
-    background:rgba(255,255,255,.03);margin:0 0 18px;
-  }
-  html[data-theme="light"] #view-security-scan .sec-scan-api-hint{background:rgba(10,16,24,.03)}
-  #view-security-scan .sec-scan-api-hint code{
-    font-size:10px;color:var(--gold);background:rgba(201,168,76,.08);padding:2px 6px;border-radius:4px;
-  }
-  #view-security-scan .sec-scan-api-hint a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.35)}
-  #view-security-scan .sec-scan-api-hint a:hover{border-bottom-color:var(--gold)}
   #view-security-scan .sec-scan-form{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:4px;align-items:flex-end}
   #view-security-scan .sec-scan-field{flex:1;min-width:220px}
   #view-security-scan .sec-scan-field label{
@@ -923,8 +908,6 @@
   #view-security-scan .sec-scan-footnote{
     font-size:12px;line-height:1.6;color:var(--text-secondary);margin:4px 0 0;
   }
-  #view-security-scan .sec-scan-footnote a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3)}
-  #view-security-scan .sec-scan-footnote a:hover{border-bottom-color:var(--gold)}
   @media(max-width:900px){
     #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     #view-security-scan .tcx-grid-2{grid-template-columns:1fr}
@@ -1231,11 +1214,6 @@
         <div class="meta">Passive posture · x402 $0.10</div>
       </div>
       <div class="tcx-wrap sec-scan-wrap">
-        <header class="sec-scan-hero el-reveal">
-          <p class="sec-scan-lead">Submit a URL you own or are explicitly authorized to assess. Results include readiness scores, HTTP security headers, and prioritized recommendations.</p>
-          <p class="sec-scan-api-hint">Integrators: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code> · <a href="/docs/api/security">API docs</a></p>
-        </header>
-
         <section class="tcx-panel sec-scan-input-panel el-reveal" aria-labelledby="sec-scan-input-title">
           <div class="tcx-panel-head">
             <div>
@@ -1300,7 +1278,7 @@
             <ul class="sec-scan-recs" id="sec-scan-recs"></ul>
           </section>
 
-          <p class="sec-scan-footnote">Passive assessment only — no active exploitation. Full integration details in the <a href="/docs/api/security">Security Desk documentation</a>.</p>
+          <p class="sec-scan-footnote">Passive assessment only — no active exploitation.</p>
         </div>
       </div>
     </section>

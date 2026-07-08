@@ -3,7 +3,9 @@
 Passive security intelligence for **authorized targets** — unified website scan, agent-readiness audit, and HTTP header review. No exploitation.
 
 **Web:** `https://conc-exe.xyz/docs/api/security`  
-**Lounge UI:** `https://conc-exe.xyz/lounge#security-scan`  
+**Lounge UI (end users):** `https://conc-exe.xyz/lounge#security-scan` — URL input, scope check, and scan results. No API paths or MCP names in the Lounge chrome.
+
+**Integrators / agents:** `POST /api/concierge-security-scan` · MCP `security_scan` · skill `/skills/concierge-security/SKILL.md` · OpenAPI `/openapi.json`  
 **OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402` · **MCP:** `security_scan`, `security_readiness`, `security_headers`
 
 ## Pricing
@@ -55,7 +57,7 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-security-scan \
   -d '{"target":"https://conc-exe.xyz","allowlist":["*.conc-exe.xyz"],"authorized":true,"selfAudit":true}'
 ```
 
-**Lounge:** Executive Lounge → **Security Scan** → **Scan Concierge (free)**.
+**Lounge:** Executive Lounge → **Security Scan** → **Scan Concierge (free)**. Consumer UI only — integrator wiring is documented above and in [docs/api/security](https://conc-exe.xyz/docs/api/security).
 
 **Local CLI (repo):**
 

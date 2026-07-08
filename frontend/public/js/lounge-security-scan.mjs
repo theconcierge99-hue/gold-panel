@@ -145,9 +145,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
   _secScanReady = true;
 
   document
-    .querySelectorAll(
-      "#view-security-scan .section-h.el-reveal, #view-security-scan .sec-scan-hero.el-reveal, #view-security-scan .sec-scan-input-panel.el-reveal",
-    )
+    .querySelectorAll("#view-security-scan .section-h.el-reveal, #view-security-scan .sec-scan-input-panel.el-reveal")
     .forEach((el) => el.classList.add("is-visible"));
 
   async function checkScope() {
