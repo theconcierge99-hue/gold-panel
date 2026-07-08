@@ -230,7 +230,17 @@ export async function runSecurityReadinessAudit(targetRaw: string): Promise<Secu
   let openapi: Record<string, unknown> | null = null;
   let openApiStatus = 0;
 
-  const openApiProbe = await safeFetchProbe(`${origin}/openapi.json`);
+  const [openApiProbe, x402Probe, agentCardProbe, llmsProbe, catalogProbe, homeProbe, mcpProbe] =
+    await Promise.all([
+      safeFetchProbe(`${origin}/openapi.json`),
+      safeFetchProbe("/.well-known/x402", origin),
+      safeFetchProbe("/.well-known/agent-card.json", origin),
+      safeFetchProbe("/llms.txt", origin),
+      safeFetchProbe("/.well-known/api-catalog", origin),
+      safeFetchProbe("/", origin),
+      safeFetchProbe("/api/mcp", origin),
+    ]);
+
   openApiStatus = openApiProbe.status;
   probes.openApiStatus = openApiStatus;
   if (openApiProbe.ok) {
@@ -249,33 +259,15 @@ export async function runSecurityReadinessAudit(targetRaw: string): Promise<Secu
   }
 
   const discoveryFlags = {
-    wellKnownX402: false,
-    apiCatalog: false,
-    agentCard: false,
-    llmsTxt: false,
+    wellKnownX402: x402Probe.ok,
+    apiCatalog: catalogProbe.ok && (catalogProbe.headers["content-type"] ?? "").includes("linkset"),
+    agentCard: agentCardProbe.ok,
+    llmsTxt: llmsProbe.ok,
   };
-
-  const discoveryPaths: [keyof typeof discoveryFlags, string][] = [
-    ["wellKnownX402", "/.well-known/x402"],
-    ["agentCard", "/.well-known/agent-card.json"],
-    ["llmsTxt", "/llms.txt"],
-  ];
-
-  for (const [key, path] of discoveryPaths) {
-    const p = await safeFetchProbe(path, origin);
-    discoveryFlags[key] = p.ok;
-  }
-
-  const catalogProbe = await safeFetchProbe("/.well-known/api-catalog", origin);
-  discoveryFlags.apiCatalog =
-    catalogProbe.ok && (catalogProbe.headers["content-type"] ?? "").includes("linkset");
   probes.discovery = discoveryFlags;
 
-  const homeProbe = await safeFetchProbe("/", origin);
   probes.homeStatus = homeProbe.status;
   probes.homeError = homeProbe.error ?? null;
-
-  const mcpProbe = await safeFetchProbe("/api/mcp", origin);
   probes.mcpReachable = mcpProbe.ok;
 
   const dimensions = [
@@ -344,12 +336,10 @@ export async function runSecurityHeadersAudit(targetRaw: string): Promise<Securi
   const target = normalizeSecurityTarget(targetRaw);
   assertOutOfPlatformScope(target);
 
-  const home = await safeFetchProbe("/", target.origin);
-  let apiSample: FetchProbe | null = null;
-
-  if (home.ok || home.status > 0) {
-    apiSample = await safeFetchProbe("/api/openapi", target.origin);
-  }
+  const [home, apiSample] = await Promise.all([
+    safeFetchProbe("/", target.origin),
+    safeFetchProbe("/api/openapi", target.origin),
+  ]);
 
   const mergedHeaders = { ...home.headers };
   if (apiSample) {
@@ -381,6 +371,90 @@ export async function runSecurityHeadersAudit(targetRaw: string): Promise<Securi
     probes: { home, apiSample },
     disclaimer:
       "Passive header review only. No vulnerability scanning. Concierge platform hosts are always blocked.",
+  };
+}
+
+function overallGradeFromScores(readinessMean: number, headersGrade: string): string {
+  const headerScore =
+    headersGrade === "strong" ? 3 : headersGrade === "moderate" ? 2 : headersGrade === "weak" ? 1 : 0;
+  const blended = (readinessMean + headerScore) / 2;
+  if (blended >= 2.5) return "A";
+  if (blended >= 2) return "B";
+  if (blended >= 1.5) return "C";
+  if (blended >= 1) return "D";
+  return "F";
+}
+
+function buildScanRecommendations(
+  readiness: SecurityReadinessReport,
+  headers: SecurityHeadersReport,
+): string[] {
+  const recs: string[] = [];
+  for (const dim of readiness.dimensions) {
+    if (dim.score < 2) recs.push(`${dim.name}: ${dim.notes[0] ?? "improve posture"}`);
+  }
+  for (const check of headers.checks) {
+    if (!check.present) recs.push(`Add ${check.header} — ${check.recommendation}`);
+  }
+  return recs.slice(0, 12);
+}
+
+export type SecurityScanReport = {
+  ok: true;
+  kind: "security-scan";
+  target: { origin: string; hostname: string };
+  auditedAt: string;
+  summary: {
+    overallGrade: string;
+    readinessScore: number;
+    readinessMax: number;
+    headersGrade: string;
+    headersPresent: number;
+    headersTotal: number;
+    discoveryFiles: number;
+    mcpReachable: boolean;
+  };
+  breakdown: {
+    readiness: SecurityReadinessReport;
+    headers: SecurityHeadersReport;
+  };
+  recommendations: string[];
+  disclaimer: string;
+};
+
+/** Unified passive website security breakdown — readiness + headers in one call. */
+export async function runSecurityScanAudit(targetRaw: string): Promise<SecurityScanReport> {
+  const [readiness, headers] = await Promise.all([
+    runSecurityReadinessAudit(targetRaw),
+    runSecurityHeadersAudit(targetRaw),
+  ]);
+
+  const discovery = readiness.probes.discovery as Record<string, boolean> | undefined;
+  const discoveryCount = discovery
+    ? Object.values(discovery).filter(Boolean).length
+    : 0;
+
+  const summary = {
+    overallGrade: overallGradeFromScores(readiness.scores.mean, headers.summary.grade),
+    readinessScore: readiness.scores.mean,
+    readinessMax: readiness.scores.max,
+    headersGrade: headers.summary.grade,
+    headersPresent: headers.summary.present,
+    headersTotal: headers.summary.total,
+    discoveryFiles: discoveryCount,
+    mcpReachable: Boolean(readiness.probes.mcpReachable),
+  };
+
+  return {
+    ok: true,
+    kind: "security-scan",
+    target: readiness.target,
+    auditedAt: new Date().toISOString(),
+    summary,
+    breakdown: { readiness, headers },
+    recommendations: buildScanRecommendations(readiness, headers),
+    disclaimer:
+      "Passive security breakdown only — no exploitation or vulnerability scanning. Target must be authorized. Concierge platform hosts are always blocked.",
   };
 }
 

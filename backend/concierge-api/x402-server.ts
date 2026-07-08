@@ -162,6 +162,13 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "security", "utility"],
   },
+  "security-scan": {
+    name: "Concierge Security — Website scan",
+    description:
+      "Unified passive security breakdown — agent-readiness + HTTP headers + recommendations for an authorized external website (platform hosts blocked)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "security", "utility", "research"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -257,6 +264,8 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-security-readiness";
     case "security-headers":
       return "/api/concierge-security-headers";
+    case "security-scan":
+      return "/api/concierge-security-scan";
     default:
       return `/api/${kind}`;
   }

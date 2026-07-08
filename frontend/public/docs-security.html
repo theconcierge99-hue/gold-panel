@@ -56,6 +56,7 @@
         <thead><tr><th>Endpoint</th><th>Price</th><th>Purpose</th></tr></thead>
         <tbody>
           <tr><td><code>POST /api/concierge-security-scope</code></td><td>Free</td><td>Validate target + allowlist (no fetch)</td></tr>
+          <tr><td><code>POST /api/concierge-security-scan</code></td><td>$0.10</td><td>Unified breakdown — grade, readiness, headers, recommendations</td></tr>
           <tr><td><code>POST /api/concierge-security-readiness</code></td><td>$0.02</td><td>Passive agent-readiness subset</td></tr>
           <tr><td><code>POST /api/concierge-security-headers</code></td><td>$0.02</td><td>Security header checklist</td></tr>
         </tbody>
@@ -78,6 +79,16 @@
   </section>
 
   <section id="readiness">
+    <h2>Website scan — <code>POST /api/concierge-security-scan</code></h2>
+    <div class="card">
+      <p>Unified passive breakdown for Lounge and integrators — overall grade, readiness dimensions, HTTP headers, and recommendations in one response ($0.10).</p>
+<pre><code>pay curl https://conc-exe.xyz/api/concierge-security-scan \
+  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'</code></pre>
+      <p class="note">Lounge UI: <a href="/lounge#security-scan">Executive Lounge → Security Scan</a></p>
+    </div>
+  </section>
+
+  <section id="readiness-detail">
     <h2>API readiness — <code>POST /api/concierge-security-readiness</code></h2>
     <div class="card">
 <pre><code>{

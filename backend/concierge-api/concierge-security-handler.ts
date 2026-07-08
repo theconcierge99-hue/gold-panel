@@ -4,6 +4,7 @@
 import {
   runSecurityHeadersAudit,
   runSecurityReadinessAudit,
+  runSecurityScanAudit,
   runSecurityScopeValidation,
 } from "./concierge-security-audit";
 import {
@@ -31,6 +32,7 @@ export type { X402SecurityKind };
 export const SECURITY_ROUTE_PATH: Record<X402SecurityKind, string> = {
   "security-readiness": "/api/concierge-security-readiness",
   "security-headers": "/api/concierge-security-headers",
+  "security-scan": "/api/concierge-security-scan",
 };
 
 const PAID_SECURITY_KINDS = Object.keys(SECURITY_ROUTE_PATH) as X402SecurityKind[];
@@ -222,7 +224,9 @@ export async function handleConciergeSecurityRoute(
     const payload =
       kind === "security-readiness"
         ? await runSecurityReadinessAudit(body.target)
-        : await runSecurityHeadersAudit(body.target);
+        : kind === "security-headers"
+          ? await runSecurityHeadersAudit(body.target)
+          : await runSecurityScanAudit(body.target);
 
     const extraHeaders: Record<string, string> = {};
     if (payGate.paymentResponseHeader) {

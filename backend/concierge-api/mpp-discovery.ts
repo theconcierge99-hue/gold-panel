@@ -254,6 +254,14 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["target", "authorized"],
   ),
+  "security-scan": jsonSchemaBody(
+    {
+      target: { type: "string", description: "Authorized external https URL (never conc-exe.xyz)" },
+      allowlist: { type: "array", items: { type: "string" }, description: "Hostname allowlist (*.example.com)" },
+      authorized: { type: "boolean", description: "Must be true — caller attests permission" },
+    },
+    ["target", "authorized"],
+  ),
 };
 
 const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -567,6 +575,25 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "kind", "target"],
   ),
+  "security-scan": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      target: { type: "object" },
+      summary: {
+        type: "object",
+        properties: {
+          overallGrade: { type: "string" },
+          readinessScore: { type: "number" },
+          headersGrade: { type: "string" },
+        },
+      },
+      breakdown: { type: "object" },
+      recommendations: { type: "array", items: { type: "string" } },
+      disclaimer: { type: "string" },
+    },
+    ["ok", "kind", "target", "summary"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -610,6 +637,11 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   },
   "security-headers": {
     target: "https://app.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
+  "security-scan": {
+    target: "https://api.example.com",
     allowlist: ["*.example.com"],
     authorized: true,
   },
@@ -724,6 +756,24 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
     summary: { present: 4, total: 6, grade: "moderate" },
     checks: [{ id: "x-content-type-options", header: "x-content-type-options", present: true }],
     disclaimer: "Passive header review only.",
+  },
+  "security-scan": {
+    ok: true,
+    kind: "security-scan",
+    target: { origin: "https://api.example.com", hostname: "api.example.com" },
+    summary: {
+      overallGrade: "B",
+      readinessScore: 2.1,
+      readinessMax: 3,
+      headersGrade: "moderate",
+      headersPresent: 4,
+      headersTotal: 6,
+      discoveryFiles: 2,
+      mcpReachable: false,
+    },
+    breakdown: {},
+    recommendations: ["Add strict-transport-security — max-age with includeSubDomains on HTTPS"],
+    disclaimer: "Passive security breakdown only.",
   },
 };
 

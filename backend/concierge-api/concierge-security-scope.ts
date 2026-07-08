@@ -10,6 +10,7 @@ export const SECURITY_ROUTE_TIERS: Record<string, SecurityAccessTier> = {
   "security-scope": "scout",
   "security-readiness": "scout",
   "security-headers": "scout",
+  "security-scan": "scout",
 };
 
 export class PlatformScopeForbiddenError extends Error {

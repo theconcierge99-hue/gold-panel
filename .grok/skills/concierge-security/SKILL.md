@@ -1,6 +1,6 @@
 ---
 name: concierge-security
-description: Passive security desk on conc-exe.xyz — scope validation, agent-readiness audit, and HTTP header review for authorized external APIs. x402 $0.02 scout tier. Platform hosts (conc-exe.xyz) are always blocked. MCP tools security_readiness and security_headers.
+description: Passive security desk on conc-exe.xyz — scope validation, unified website scan breakdown, agent-readiness audit, and HTTP header review for authorized external APIs. x402 scout $0.02 or full scan $0.10. Platform hosts (conc-exe.xyz) are always blocked. MCP tools security_scan, security_readiness, security_headers.
 ---
 
 # Concierge Security Desk
@@ -39,6 +39,9 @@ Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security
 ## Paid scout audit
 
 ```bash
+pay curl https://conc-exe.xyz/api/concierge-security-scan \
+  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
+
 pay curl https://conc-exe.xyz/api/concierge-security-readiness \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
 
@@ -62,9 +65,10 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-security-readiness \
 | Tool / path | Price | Output |
 |-------------|-------|--------|
 | `POST /api/concierge-security-scope` | Free | Platform guard + allowlist match |
+| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, recommendations |
 | `POST /api/concierge-security-readiness` | $0.02 | OpenAPI, discovery, headers, MCP surface scores |
 | `POST /api/concierge-security-headers` | $0.02 | Security header checklist + grade |
 
 ## MCP
 
-`POST /api/mcp` — tools `security_readiness`, `security_headers` (underscore names).
+`POST /api/mcp` — tools `security_scan`, `security_readiness`, `security_headers` (underscore names).

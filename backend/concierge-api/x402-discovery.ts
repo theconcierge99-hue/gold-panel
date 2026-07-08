@@ -247,6 +247,16 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.02",
     tags: [...X402_OPERATION_TAGS["security-headers"]],
   },
+  {
+    kind: "security-scan",
+    method: "POST",
+    path: "/api/concierge-security-scan",
+    name: "Concierge Security — Website scan",
+    description:
+      "Unified passive security breakdown for an authorized external website — readiness dimensions, HTTP headers, grade, and recommendations. Concierge platform hosts are blocked.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["security-scan"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */

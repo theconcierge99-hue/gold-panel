@@ -782,6 +782,50 @@
     #view-token-research .tcx-grid-2{grid-template-columns:1fr}
     #view-token-research .tcx-tier-cards{grid-template-columns:1fr}
   }
+  #view-security-scan .sec-scan-wrap{max-width:none;padding:0}
+  #view-security-scan .sec-scan-form{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;align-items:flex-end}
+  #view-security-scan .sec-scan-field{flex:1;min-width:200px}
+  #view-security-scan .sec-scan-field label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--text-muted);margin-bottom:6px}
+  #view-security-scan .sec-scan-field input{
+    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;
+    background:var(--gcard-bg);color:var(--text-primary);font-size:14px;
+  }
+  #view-security-scan .sec-scan-actions{display:flex;gap:8px;flex-wrap:wrap}
+  #view-security-scan .sec-scan-btn{
+    padding:11px 16px;border-radius:8px;border:1px solid var(--border);background:var(--gcard-bg);
+    color:var(--text-primary);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;
+  }
+  #view-security-scan .sec-scan-btn--primary{background:linear-gradient(135deg,rgba(201,168,76,.22),rgba(201,168,76,.08));border-color:rgba(201,168,76,.45);color:var(--gold)}
+  #view-security-scan .sec-scan-btn:disabled{opacity:.55;cursor:not-allowed}
+  #view-security-scan .sec-scan-scope-status{font-size:12px;margin:0 0 14px;color:var(--text-secondary)}
+  #view-security-scan .sec-scan-scope-status.ok{color:var(--signal-green,#7dcea0)}
+  #view-security-scan .sec-scan-scope-status.bad{color:#e85d4a}
+  #view-security-scan .sec-scan-panel{border:1px solid var(--border);border-radius:12px;padding:18px;background:var(--gcard-bg);margin-bottom:14px}
+  #view-security-scan .sec-scan-panel-kicker{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.22em;color:var(--gold);margin:0 0 6px}
+  #view-security-scan .sec-scan-panel-title{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:20px;margin:0 0 12px}
+  #view-security-scan .sec-scan-grade{display:inline-flex;flex-direction:column;align-items:center;padding:14px 22px;border-radius:12px;border:1px solid var(--border);margin-bottom:14px}
+  #view-security-scan .sec-scan-grade strong{font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;color:var(--gold)}
+  #view-security-scan .sec-scan-grade-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--text-muted)}
+  #view-security-scan .sec-scan-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:4px}
+  #view-security-scan .sec-scan-stat{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+  #view-security-scan .sec-scan-stat span{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.16em;color:var(--text-muted);margin-bottom:4px}
+  #view-security-scan .sec-scan-stat strong{font-size:13px;color:var(--text-primary)}
+  #view-security-scan .sec-scan-dim{margin-bottom:12px}
+  #view-security-scan .sec-scan-dim-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+  #view-security-scan .sec-scan-dim-head em{font-style:normal;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px}
+  #view-security-scan .sec-scan-bar-track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+  #view-security-scan .sec-scan-bar-fill{height:100%;background:linear-gradient(90deg,rgba(201,168,76,.55),var(--gold))}
+  #view-security-scan .sec-scan-dim-note{font-size:11px;color:var(--text-muted);margin:6px 0 0}
+  #view-security-scan .sec-scan-table{width:100%;border-collapse:collapse;font-size:12px}
+  #view-security-scan .sec-scan-table th,#view-security-scan .sec-scan-table td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left}
+  #view-security-scan .sec-scan-table td.ok{color:var(--signal-green,#7dcea0)}
+  #view-security-scan .sec-scan-table td.bad{color:#e85d4a}
+  #view-security-scan .sec-scan-recs{margin:0;padding-left:18px;font-size:12px;color:var(--text-secondary)}
+  #view-security-scan .sec-scan-recs li{margin-bottom:6px}
+  #view-security-scan .sec-scan-note{font-size:11px;color:var(--text-muted);margin:12px 0 0}
+  @media(max-width:900px){
+    #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script type="module" src="/js/x402-pay.mjs?v=exact-svm-minimal-6"></script>
@@ -833,6 +877,7 @@
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
       <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">SOON</span></div>
+      <div class="nav-i" data-nav="security-scan" onclick="showView('security-scan')">Security Scan <span class="badge">API</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -1071,6 +1116,54 @@
           </div>
           <div class="tcx-tier-cards" id="tcx-tier-cards"></div>
         </section>
+      </div>
+    </section>
+
+    <!-- SECURITY SCAN (passive website breakdown) -->
+    <section class="view" id="view-security-scan">
+      <div class="section-h" style="margin-bottom:20px">
+        <h2>Security Scan</h2>
+        <div class="meta">Passive desk · x402 $0.10</div>
+      </div>
+      <div class="sec-scan-wrap">
+        <p class="sec-scan-note" style="margin-top:0">Enter a website you own or have permission to test. Concierge infrastructure cannot be scanned. Developers: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code>.</p>
+        <div class="sec-scan-form">
+          <div class="sec-scan-field">
+            <label for="sec-scan-url">Website URL</label>
+            <input id="sec-scan-url" type="url" inputmode="url" placeholder="https://api.example.com" autocomplete="off" />
+          </div>
+          <div class="sec-scan-actions">
+            <button type="button" class="sec-scan-btn" id="sec-scan-scope-btn">Check scope (free)</button>
+            <button type="button" class="sec-scan-btn sec-scan-btn--primary" id="sec-scan-run-btn">Run scan ($0.10)</button>
+          </div>
+        </div>
+        <p class="sec-scan-scope-status" id="sec-scan-scope-status" hidden></p>
+
+        <div id="sec-scan-results" hidden>
+          <section class="sec-scan-panel" aria-labelledby="sec-scan-summary-title">
+            <p class="sec-scan-panel-kicker">Breakdown</p>
+            <h3 class="sec-scan-panel-title" id="sec-scan-summary-title">Overall posture</h3>
+            <div id="sec-scan-summary"></div>
+          </section>
+          <div class="tcx-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <section class="sec-scan-panel">
+              <p class="sec-scan-panel-kicker">Readiness</p>
+              <h3 class="sec-scan-panel-title">API dimensions</h3>
+              <div id="sec-scan-dimensions"></div>
+            </section>
+            <section class="sec-scan-panel">
+              <p class="sec-scan-panel-kicker">Headers</p>
+              <h3 class="sec-scan-panel-title">HTTP security</h3>
+              <div id="sec-scan-headers"></div>
+            </section>
+          </div>
+          <section class="sec-scan-panel" id="sec-scan-recs-panel" hidden>
+            <p class="sec-scan-panel-kicker">Actions</p>
+            <h3 class="sec-scan-panel-title">Recommendations</h3>
+            <ul class="sec-scan-recs" id="sec-scan-recs"></ul>
+          </section>
+          <p class="sec-scan-note">Passive audit only — no exploitation. For integrators: <a href="/docs/api/security" style="color:var(--gold)">Security Desk docs →</a></p>
+        </div>
       </div>
     </section>
   </main>
@@ -2062,6 +2155,9 @@
     if(v==='token-research'){
       initLoungeTokenResearch();
     }
+    if(v==='security-scan'){
+      initLoungeSecurityScan();
+    }
   }
   window.showView = showView;
 
@@ -2085,6 +2181,20 @@
 
   if (location.hash === '#token-research') {
     setTimeout(function(){ showView('token-research'); }, 120);
+  }
+
+  let _securityScanReady = false;
+  async function initLoungeSecurityScan(){
+    if(!window.__initLoungeSecurityScan) return;
+    await window.__initLoungeSecurityScan({
+      paidApiFetch,
+      toast,
+    });
+    _securityScanReady = true;
+  }
+
+  if (location.hash === '#security-scan') {
+    setTimeout(function(){ showView('security-scan'); }, 120);
   }
 
   // MODAL
@@ -2831,6 +2941,7 @@
     if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
     else if(u.includes('/api/lounge-signal-publish')) toast('Approve $0.02 publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve payment on '+chainHint+' in your wallet…');
+    else if(u.includes('/api/concierge-security-scan')) toast('Approve $0.10 security scan on '+chainHint+'…');
     try{
       return await paidFetch(url, fetchOpts);
     }catch(e){
@@ -3625,6 +3736,7 @@
 </script>
 <script type="module" src="/js/market-clocks.mjs"></script>
 <script type="module" src="/js/token-health.mjs"></script>
+<script type="module" src="/js/lounge-security-scan.mjs"></script>
 <script type="module">
   import { initConciergeFx } from "/js/concierge-fx.mjs";
   const stop = initConciergeFx();

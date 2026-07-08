@@ -18,8 +18,8 @@ export type X402IntelKind =
   | "intel-desk-brief"
   | "intel-a2a-pipeline";
 
-/** Passive security desk — scout tier ($0.02), external targets only */
-export type X402SecurityKind = "security-readiness" | "security-headers";
+/** Passive security desk — scout ($0.02) + unified scan bundle ($0.10) */
+export type X402SecurityKind = "security-readiness" | "security-headers" | "security-scan";
 
 export type X402ResourceKind = X402CoreKind | X402IntelKind | X402SecurityKind;
 
@@ -65,7 +65,7 @@ export function isRawSecurityKind(kind: X402ResourceKind): kind is X402SecurityK
 }
 
 export function isSecurityResourceKind(kind: X402ResourceKind): kind is X402SecurityKind {
-  return isRawSecurityKind(kind);
+  return kind === "security-scan" || isRawSecurityKind(kind);
 }
 
 export function usdcToAtomic(usdc: number): string {
@@ -76,6 +76,7 @@ export function usdcToAtomic(usdc: number): string {
 export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
+  if (kind === "security-scan") return X402_SIGNAL_PRICE_ATOMIC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_ATOMIC;
   return X402_SIGNAL_PRICE_ATOMIC;
 }
@@ -83,6 +84,7 @@ export function atomicAmountForResource(kind: X402ResourceKind): string {
 export function priceUsdcForResource(kind: X402ResourceKind): number {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_USDC;
+  if (kind === "security-scan") return X402_SIGNAL_PRICE_USDC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_USDC;
   return X402_SIGNAL_PRICE_USDC;
 }
@@ -117,4 +119,5 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "intel-a2a-pipeline",
   "security-readiness",
   "security-headers",
+  "security-scan",
 ] as const;

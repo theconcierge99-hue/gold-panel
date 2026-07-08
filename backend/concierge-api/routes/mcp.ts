@@ -45,6 +45,11 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
     allowlist: ["*.example.com"],
     authorized: true,
   },
+  "security-scan": {
+    target: "https://api.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+  },
 };
 
 function siteOrigin(request: Request): string {

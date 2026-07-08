@@ -23,6 +23,7 @@ Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
 | Route | USDC | Tier |
 |-------|------|------|
 | `POST /api/concierge-security-scope` | Free | Scout — validation only, no fetch |
+| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — readiness + headers + recommendations |
 | `POST /api/concierge-security-readiness` | $0.02 | Scout — passive API readiness |
 | `POST /api/concierge-security-headers` | $0.02 | Scout — passive header review |
 
