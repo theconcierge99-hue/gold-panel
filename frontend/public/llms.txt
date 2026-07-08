@@ -1,6 +1,6 @@
 # Concierge — Executive Lounge
 
-> AI-powered market and DeFi intelligence. Pay per query via x402 (MPP-discoverable on mppscan.com) — no API keys, no subscriptions.
+> Market, DeFi, and security intelligence. Pay per query via x402 (MPP-discoverable on mppscan.com) — no API keys, no subscriptions.
 
 ## Docs
 
@@ -12,7 +12,7 @@
 - [MPP & AgentCash](https://conc-exe.xyz/docs/payment/mpp): MPPscan listing, 21 paid routes, agentcash add install.
 - [Poncho](https://conc-exe.xyz/docs/integration/poncho): Conversational agent marketplace — macro, wire, intel via x402 (no API key).
 - [pay.sh](https://conc-exe.xyz/docs/payment/paysh): pay CLI catalog — sandbox curl, Claude/Codex MCP, pay-skills listing.
-- [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel skill, pay.sh x402 probes.
+- [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel + concierge-security skills, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
 - [Security Desk](https://conc-exe.xyz/docs/api/security): Passive website scan, scout audits, free conc-exe.xyz self-audit — Lounge /lounge#security-scan
 - [Agent Skills](https://conc-exe.xyz/agent/skills): concierge-intel + concierge-security SKILL.md — raw at /skills/
@@ -25,7 +25,7 @@
 - [Agent Identity](https://conc-exe.xyz/docs/api/agent-identity): agt_ registry, agent cards, X-Agent-Id.
 - [Lounge & Signals](https://conc-exe.xyz/docs/api/lounge): Market feed, RWA signals, news unlock.
 - [Executive Lounge](https://conc-exe.xyz/docs/playground): Browser terminal and wallet UX.
-- [Concierge Agent home](https://conc-exe.xyz/agent): Hero hub — market intelligence as a service.
+- [Concierge Agent home](https://conc-exe.xyz/agent): Hero hub — market intelligence and Security Desk as a service.
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
 - [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, MCP Registry, agent cards. List on [MPPscan](https://www.mppscan.com/register).
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.

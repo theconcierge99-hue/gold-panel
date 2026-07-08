@@ -53,6 +53,10 @@ const ABOUT = [
     desc: "Macro briefs, wire digest, desk verdict, and Meteora yields — tiered pay-per-call research APIs.",
   },
   {
+    title: "Security Desk",
+    desc: "Passive website breakdown — Surface Review, scout readiness and headers, tiered desk modules. Authorized targets only.",
+  },
+  {
     title: "x402 settlement",
     desc: "HTTP 402 micropayments on Solana and Base. Payment is the only gate — no API keys or subscriptions.",
   },
@@ -85,9 +89,16 @@ const MODULES = [
     cta: "Enter Lounge",
   },
   {
+    tag: "Security",
+    title: "Security Desk",
+    desc: "Unified website scan ($0.10), scout routes ($0.02), free conc-exe.xyz self-audit — Lounge UI and x402 API.",
+    href: "/lounge#security-scan",
+    cta: "Open Security Scan",
+  },
+  {
     tag: "Intel",
     title: "Research API",
-    desc: "Browse 15+ x402 intel routes — macro, wire, verdict, security desk, and more.",
+    desc: "Browse 21 x402 routes — macro, wire, verdict, yields, alpha desks, and more.",
     href: "/agent/endpoints",
     cta: "Browse catalog",
   },
