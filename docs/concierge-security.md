@@ -119,6 +119,32 @@ Returns **grade**, **readiness**, **headers**, and **Concierge Surface Review** 
 
 Surface probes (parallel, Hobby-safe): `/.env`, `/.git/HEAD`, `security.txt`, `robots.txt`, swagger/docs paths, plus homepage header analysis.
 
+## Concierge Security Desk (OMOP-parity catalog)
+
+Full module map aligned to Oh My Open Pentest phases — **Concierge-branded only**. Response includes `deskModules[]` and `deskPhases[]`.
+
+### Pre-launch (TCX not live yet)
+
+| Live now | Waitlisted as **Soon** |
+|----------|------------------------|
+| Guest breakdown (grade + surface severity counts) | Deluxe / Executive / President depth |
+| Scope + attestation | Extended recon, intel layer, client-side, playbooks, orchestration, PDF/SARIF |
+
+**Turn on after launch:** set `SOON_TOKEN_MINT` (or `SECURITY_DESK_LIVE_MAX_TIER=executive`) — richer tiers go live without rewriting the desk map.
+
+### Post-launch ceilings
+
+| Tier | Breakdown depth | Status |
+|------|-----------------|--------|
+| **Guest** | Grade + surface severity counts | Live |
+| **Deluxe** | + readiness scores, header checklist, surface finding titles | Live after TCX launch |
+| **Executive** | + full evidence, path probes, remediation | Live ceiling on Hobby after launch |
+| **President** | Executive + extended desk modules | Extended modules remain **Soon** until worker rollout |
+
+Every external scan stays **pay-per-call**. Depth follows `access.liveCeiling` + wallet tier. Response fields: `access.tier`, `access.liveCeiling`, `access.tcxLaunched`, `deskModules[]`, `access.legalNotice`.
+
+**Legal:** Passive recon only — no exploitation. Caller accepts full responsibility (`authorized: true`).
+
 ## Unified scan response (`security-scan`)
 
 ```json

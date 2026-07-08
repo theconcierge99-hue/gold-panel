@@ -53,76 +53,176 @@ function revealResultsPanels() {
   root.querySelectorAll(".el-reveal").forEach((el) => el.classList.add("is-visible"));
 }
 
+function escapeHtml(s) {
+  return String(s ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderAccess(data) {
+  const el = $("sec-scan-access");
+  if (!el || !data?.access) return;
+  const a = data.access;
+  const counts = a.moduleCounts;
+  el.hidden = false;
+  el.innerHTML = `<div class="sec-scan-access-row">
+      <span class="sec-scan-access-kicker">Tier</span>
+      <strong>${escapeHtml(a.tierLabel)}</strong>
+      ${counts ? `<span class="sec-scan-access-meta">${counts.live} live · ${counts.soon} soon</span>` : ""}
+    </div>`;
+}
+
+function renderDeskModules(data) {
+  const panel = $("sec-scan-modules-panel");
+  const el = $("sec-scan-modules");
+  const phases = data?.deskPhases ?? [];
+  if (!el || !phases.length) return;
+  if (panel) panel.hidden = false;
+
+  const renderCard = (m) => {
+    const badge = m.status === "live" ? "live" : "soon";
+    const label = badge === "live" ? "Live" : "Soon";
+    return `<article class="sec-scan-module sec-scan-module--${badge}">
+      <div class="sec-scan-module-top">
+        <h4>${escapeHtml(m.title)}</h4>
+        <span class="sec-scan-module-badge sec-scan-module-badge--${badge}">${label}</span>
+      </div>
+      <p>${escapeHtml(m.subtitle)}</p>
+    </article>`;
+  };
+
+  el.innerHTML = phases
+    .map(
+      (phase) => `<section class="sec-scan-phase">
+        <h4 class="sec-scan-phase-title">${escapeHtml(phase.label)}</h4>
+        <div class="sec-scan-module-grid">${phase.modules.map(renderCard).join("")}</div>
+      </section>`,
+    )
+    .join("");
+}
+
+function lockedPanelHtml(message) {
+  return `<p class="sec-scan-locked-note">${escapeHtml(message)}</p>`;
+}
+
 function renderSummary(data) {
   const el = $("sec-scan-summary");
   if (!el || !data?.summary) return;
   const s = data.summary;
+  const tier = data.access?.tier ?? "guest";
+  const deluxe = tier !== "guest";
   el.innerHTML = `
     <div class="sec-scan-grade-row">
       <div class="sec-scan-grade sec-scan-grade--${gradeClass(s.overallGrade)}" aria-label="Overall grade ${s.overallGrade}">
         <span class="sec-scan-grade-label">Grade</span>
-        <strong>${s.overallGrade}</strong>
+        <strong>${escapeHtml(s.overallGrade)}</strong>
       </div>
-      <div class="sec-scan-stat-grid sec-scan-stat-grid--5">
-        <div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>
-        <div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal} · ${s.headersGrade}</strong></div>
-        <div class="sec-scan-stat"><span>Surface</span><strong>${s.surfaceGrade ?? "—"} · ${s.surfaceFindings ?? 0}</strong></div>
-        <div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles} files</strong></div>
-        <div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>
+      <div class="sec-scan-stat-grid ${deluxe ? "sec-scan-stat-grid--5" : ""}">
+        ${deluxe ? `<div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>` : ""}
+        ${deluxe ? `<div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal}</strong></div>` : ""}
+        <div class="sec-scan-stat"><span>Surface</span><strong>${escapeHtml(s.surfaceGrade ?? "—")} · ${s.surfaceFindings ?? 0}</strong></div>
+        ${deluxe ? `<div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles}</strong></div>` : ""}
+        ${deluxe ? `<div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>` : `<div class="sec-scan-stat"><span>Signals</span><strong>${s.surfaceFindings ?? 0}</strong></div>`}
       </div>
     </div>`;
 }
 
-function renderDimensions(readiness) {
-  const el = $("sec-scan-dimensions");
-  if (!el || !readiness?.dimensions) return;
-  el.innerHTML = readiness.dimensions
-    .map((d) => {
-      const pct = Math.round((d.score / 3) * 100);
-      const note = (d.notes?.[0] ?? "").replace(/</g, "&lt;");
-      return `<div class="tcx-bar-row">
-        <div class="tcx-bar-label">${d.name}<small>${d.label}</small></div>
-        <div class="tcx-bar-track"><div class="tcx-bar-fill" style="width:${pct}%"></div></div>
-        <span class="tcx-bar-pct">${d.score}/3</span>
-      </div>${note ? `<p class="sec-scan-dim-note">${note}</p>` : ""}`;
-    })
-    .join("");
+function shortDimLabel(label) {
+  const map = {
+    exemplary: "Strong",
+    present: "Present",
+    partial: "Partial",
+    absent: "Absent",
+    unknown: "—",
+  };
+  const key = String(label ?? "").toLowerCase();
+  return map[key] ?? String(label ?? "").replace(/^./, (c) => c.toUpperCase());
 }
 
-function renderHeaders(headers) {
+function truncateValue(value, max = 42) {
+  const v = String(value ?? "").trim();
+  if (!v) return "";
+  if (v.length <= max) return v;
+  return `${v.slice(0, max - 1)}…`;
+}
+
+function renderDimensions(readiness, access) {
+  const el = $("sec-scan-dimensions");
+  if (!el) return;
+  const tier = access?.tier ?? "guest";
+  if (tier === "guest" || !readiness?.dimensions?.length) {
+    el.innerHTML = lockedPanelHtml("Full readiness detail requires Deluxe or higher.");
+    return;
+  }
+  el.innerHTML = `<div class="sec-scan-dim-list">${readiness.dimensions
+    .map((d) => {
+      const pct = Math.round((d.score / 3) * 100);
+      return `<div class="sec-scan-dim-row">
+        <div class="tcx-bar-label">${escapeHtml(d.name)}<small>${escapeHtml(shortDimLabel(d.label))}</small></div>
+        <div class="tcx-bar-track"><div class="tcx-bar-fill" style="width:${pct}%"></div></div>
+        <span class="tcx-bar-pct">${d.score}/3</span>
+      </div>`;
+    })
+    .join("")}</div>`;
+}
+
+function renderHeaders(headers, access) {
   const el = $("sec-scan-headers");
-  if (!el || !headers?.checks) return;
-  el.innerHTML = `<table class="sec-scan-table"><thead><tr><th>Header</th><th>Status</th></tr></thead><tbody>${headers.checks
-    .map(
-      (c) =>
-        `<tr><td><code>${c.header}</code></td><td class="${c.present ? "ok" : "bad"}">${c.present ? "Present" : "Missing"}</td></tr>`,
-    )
+  if (!el) return;
+  const tier = access?.tier ?? "guest";
+  if (tier === "guest" || !headers?.checks?.length) {
+    el.innerHTML = lockedPanelHtml("Header checklist requires Deluxe or higher.");
+    return;
+  }
+  const showValue = tier !== "deluxe";
+  el.innerHTML = `<table class="sec-scan-table sec-scan-headers-table"><thead><tr><th>Header</th><th>Status</th></tr></thead><tbody>${headers.checks
+    .map((c) => {
+      const status = c.present ? "ok" : "bad";
+      const label = c.present ? "Present" : "Missing";
+      const detail =
+        showValue && c.present && c.value
+          ? `<span class="sec-scan-header-val" title="${escapeHtml(c.value)}">${escapeHtml(truncateValue(c.value))}</span>`
+          : "";
+      return `<tr>
+        <td><code>${escapeHtml(c.header)}</code></td>
+        <td class="${status}">
+          <span class="sec-scan-header-status">${label}</span>
+          ${detail}
+        </td>
+      </tr>`;
+    })
     .join("")}</tbody></table>`;
 }
 
-function renderSurface(surface) {
+function renderSurface(surface, access) {
   const panel = $("sec-scan-surface-panel");
   const el = $("sec-scan-surface");
   if (!el) return;
-  const findings = surface?.findings ?? [];
-  if (!findings.length) {
-    el.innerHTML = `<p class="sec-scan-dim-note">No surface signals — posture looks minimal on passive probes.</p>`;
-    if (panel) panel.hidden = false;
+  const tier = access?.tier ?? "guest";
+  if (panel) panel.hidden = false;
+
+  const sev = surface?.summary?.bySeverity ?? {};
+  const sevRow = `<div class="sec-scan-sev-row" aria-label="Finding counts by severity">
+      <span class="sec-scan-sev sec-scan-sev--high">${sev.high ?? 0} high</span>
+      <span class="sec-scan-sev sec-scan-sev--medium">${sev.medium ?? 0} medium</span>
+      <span class="sec-scan-sev sec-scan-sev--low">${sev.low ?? 0} low</span>
+      <span class="sec-scan-sev sec-scan-sev--info">${sev.info ?? 0} info</span>
+    </div>`;
+
+  if (tier === "guest") {
+    el.innerHTML = sevRow + lockedPanelHtml("Finding detail requires Deluxe or higher.");
     return;
   }
-  if (panel) panel.hidden = false;
-  const sev = surface?.summary?.bySeverity ?? {};
-  el.innerHTML = `
-    <div class="sec-scan-sev-row" aria-label="Finding counts by severity">
-      <span class="sec-scan-sev sec-scan-sev--high" title="High">${sev.high ?? 0} high</span>
-      <span class="sec-scan-sev sec-scan-sev--medium" title="Medium">${sev.medium ?? 0} medium</span>
-      <span class="sec-scan-sev sec-scan-sev--low" title="Low">${sev.low ?? 0} low</span>
-      <span class="sec-scan-sev sec-scan-sev--info" title="Info">${sev.info ?? 0} info</span>
-    </div>
+
+  const findings = surface?.findings ?? [];
+  if (!findings.length) {
+    el.innerHTML = `${sevRow}<p class="sec-scan-dim-note">No exposure signals detected.</p>`;
+    return;
+  }
+  const partial = tier === "deluxe";
+  el.innerHTML = `${sevRow}
     <table class="sec-scan-table sec-scan-findings-table"><thead><tr><th>Severity</th><th>Finding</th><th>Category</th></tr></thead><tbody>${findings
       .map(
         (f) =>
-          `<tr><td><span class="sec-scan-sev sec-scan-sev--${f.severity}">${f.severity}</span></td><td><strong>${String(f.title).replace(/</g, "&lt;")}</strong><br><span class="sec-scan-finding-detail">${String(f.detail).replace(/</g, "&lt;")}</span></td><td>${String(f.category).replace(/</g, "&lt;")}</td></tr>`,
+          `<tr><td><span class="sec-scan-sev sec-scan-sev--${f.severity}">${escapeHtml(f.severity)}</span></td><td><strong>${escapeHtml(f.title)}</strong>${!partial && f.detail ? `<br><span class="sec-scan-finding-detail">${escapeHtml(truncateValue(f.detail, 110))}</span>` : ""}</td><td>${escapeHtml(f.category)}</td></tr>`,
       )
       .join("")}</tbody></table>`;
 }
@@ -136,7 +236,7 @@ function renderRecommendations(recs) {
     return;
   }
   panel.hidden = false;
-  el.innerHTML = recs.map((r) => `<li>${String(r).replace(/</g, "&lt;")}</li>`).join("");
+  el.innerHTML = recs.map((r) => `<li>${escapeHtml(r)}</li>`).join("");
 }
 
 function setScopeStatus(msg, kind) {
@@ -152,15 +252,33 @@ function setLoading(on) {
   const self = $("sec-scan-self-btn");
   if (btn) {
     btn.disabled = on;
-    btn.textContent = on ? "Scanning…" : "Run scan ($0.10)";
+    btn.textContent = on ? "Scanning…" : "Run scan · $0.10";
   }
   if (self) self.disabled = on;
 }
 
 let _secScanReady = false;
 
+function scanHeaders(getSoonHolderWallet) {
+  const headers = { "Content-Type": "application/json", Accept: "application/json" };
+  const wallet = typeof getSoonHolderWallet === "function" ? getSoonHolderWallet() : null;
+  if (wallet) headers["X-Soon-Holder-Wallet"] = wallet;
+  return headers;
+}
+
+function renderScanResults(data) {
+  renderAccess(data);
+  renderDeskModules(data);
+  renderSummary(data);
+  renderDimensions(data.breakdown?.readiness, data.access);
+  renderHeaders(data.breakdown?.headers, data.access);
+  renderSurface(data.breakdown?.surface, data.access);
+  renderRecommendations(data.recommendations);
+}
+
 export async function initLoungeSecurityScan(ctx = {}) {
   const paidApiFetch = ctx.paidApiFetch;
+  const getSoonHolderWallet = ctx.getSoonHolderWallet;
   const toast = ctx.toast ?? ((m) => console.log(m));
   const input = $("sec-scan-url");
   const scopeBtn = $("sec-scan-scope-btn");
@@ -198,7 +316,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
         setScopeStatus(data.error ?? data.notes?.[0] ?? "Scope validation failed", "bad");
         return false;
       }
-      setScopeStatus(`Scope OK — ${data.target.hostname}`, "ok");
+      setScopeStatus(`Ready · ${data.target.hostname}`, "ok");
       return true;
     } catch (e) {
       setScopeStatus(e?.message ?? "Scope check failed", "bad");
@@ -215,7 +333,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
     try {
       const res = await fetch("/api/concierge-security-scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: scanHeaders(getSoonHolderWallet),
         body: JSON.stringify(selfAuditBody(SELF_AUDIT_TARGET)),
       });
       const data = await res.json();
@@ -223,15 +341,11 @@ export async function initLoungeSecurityScan(ctx = {}) {
         toast(data.error ?? "Self-audit failed");
         return;
       }
-      setScopeStatus("Self-audit — conc-exe.xyz", "ok");
-      renderSummary(data);
-      renderDimensions(data.breakdown?.readiness);
-      renderHeaders(data.breakdown?.headers);
-      renderSurface(data.breakdown?.surface);
-      renderRecommendations(data.recommendations);
+      setScopeStatus("Concierge self-audit", "ok");
+      renderScanResults(data);
       if (results) results.hidden = false;
       revealResultsPanels();
-      toast("Concierge self-audit complete");
+      toast("Scan complete");
     } catch (e) {
       toast(e?.message ?? "Self-audit failed");
     } finally {
@@ -260,7 +374,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
     try {
       const res = await paidApiFetch("/api/concierge-security-scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: scanHeaders(getSoonHolderWallet),
         body: JSON.stringify({
           target: origin,
           allowlist: allowlistFromTarget(raw),
@@ -272,14 +386,10 @@ export async function initLoungeSecurityScan(ctx = {}) {
         toast(data.error ?? "Scan failed");
         return;
       }
-      renderSummary(data);
-      renderDimensions(data.breakdown?.readiness);
-      renderHeaders(data.breakdown?.headers);
-      renderSurface(data.breakdown?.surface);
-      renderRecommendations(data.recommendations);
+      renderScanResults(data);
       if (results) results.hidden = false;
       revealResultsPanels();
-      toast("Security scan complete");
+      toast("Scan complete");
     } catch (e) {
       if (e?.message === "Payment cancelled") return;
       toast(e?.message ?? "Scan failed");

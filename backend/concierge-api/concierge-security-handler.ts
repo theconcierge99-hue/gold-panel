@@ -27,6 +27,7 @@ import {
 import { reportPaidRouteToZauth } from "./zauth-paid-response";
 import { guardPaidX402Api } from "./x402-server";
 import type { X402SecurityKind } from "./x402-pricing";
+import { applyScanTierFilter, resolveScanAccessTier } from "./concierge-security-breakdown";
 
 export type { X402SecurityKind };
 
@@ -248,12 +249,20 @@ export async function handleConciergeSecurityRoute(
       return jsonResponse(request, { ...scope, error: "Target outside declared allowlist", code: "allowlist_mismatch" }, 400);
     }
 
-    const payload =
+    let payload =
       kind === "security-readiness"
         ? await runSecurityReadinessAudit(body.target, auditOpts)
         : kind === "security-headers"
           ? await runSecurityHeadersAudit(body.target, auditOpts)
           : await runSecurityScanAudit(body.target, auditOpts);
+
+    if (kind === "security-scan") {
+      const accessTier = await resolveScanAccessTier(request, payGate.payer, {
+        selfAudit: selfAuditFree,
+        devBypass: payGate.payer === "dev-bypass",
+      });
+      payload = applyScanTierFilter(payload, accessTier);
+    }
 
     const extraHeaders: Record<string, string> = {};
     if (payGate.paymentResponseHeader) {
