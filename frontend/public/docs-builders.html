@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>For Builders — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, fifteen JSON endpoints, Poncho marketplace, no API keys." />
+<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, 21 paid routes, Security Desk, Poncho marketplace, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/builders" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -39,6 +39,7 @@
         <a class="doc-card" href="/docs/api/agent-readiness"><h4>⑤ Agent readiness</h4><p>Audit rubric, api-catalog, idempotency, rate-limit headers — for agent integrators.</p></a>
         <a class="doc-card" href="/docs/builders/case-study"><h4>⑥ B2B case study</h4><p>Procurement checklist, accuracy trust signal, example desk workflow — no API keys.</p></a>
         <a class="doc-card" href="/docs/integration/mcp-registry"><h4>⑦ MCP Registry</h4><p>Published <code>xyz.conc-exe/concierge-intel</code> — Cursor/Claude connect at <code>/api/mcp</code>.</p></a>
+        <a class="doc-card" href="/docs/api/security"><h4>⑧ Security Desk</h4><p>Passive website scan ($0.10), scout audits ($0.02), free <code>conc-exe.xyz</code> self-audit — Lounge UI.</p></a>
       </div>
 
       <h2 class="docs-h2">x402 flow (all paid routes)</h2>
@@ -65,7 +66,7 @@
         <p style="margin-top:12px"><a href="/docs/payment/token-pay" class="gold-link">Full Token Pay (Beta) integration guide →</a></p>
       </div>
 
-      <h2 class="docs-h2">Fifteen endpoints — pick by use case</h2>
+      <h2 class="docs-h2">21 paid routes — pick by use case</h2>
       <div class="card">
         <table>
           <thead><tr><th>Segment</th><th>Path</th><th>When to use</th></tr></thead>
@@ -75,19 +76,25 @@
             <tr><td><strong>Research</strong></td><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest — category or message filter</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-tvl</code></td><td>Chain + protocol TVL snapshot</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-yields</code></td><td>Screened yield pools (Meteora DLMM, Jupiter, …)</td></tr>
+            <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-meteora</code></td><td>Meteora DLMM pool intelligence</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-whales</code></td><td>BTC/ETH/SOL top-trader positioning</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-wallet</code></td><td>Solana/EVM wallet snapshot</td></tr>
             <tr><td>DeFi Intel</td><td><code>POST /api/concierge-intel-verdict</code></td><td>Desk verdict + Lounge insider overlay</td></tr>
+            <tr><td>Bundle</td><td><code>POST /api/concierge-intel-desk-brief</code></td><td>Multi-desk brief ($0.25)</td></tr>
+            <tr><td>Bundle</td><td><code>POST /api/concierge-intel-a2a-pipeline</code></td><td>A2A orchestration + delegate routing ($0.25)</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-airdrop</code></td><td>Potential airdrops — insider-first synthesis</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-listing</code></td><td>Potential exchange listings</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-momentum</code></td><td>Large-move candidates (up or down)</td></tr>
             <tr><td><strong>Alpha</strong></td><td><code>POST /api/concierge-intel-scalp</code></td><td>BTC/ETH/BNB/SOL scalp desk (5m/15m)</td></tr>
+            <tr><td><strong>Security</strong></td><td><code>POST /api/concierge-security-scan</code></td><td>Unified posture breakdown ($0.10) · <a href="/lounge#security-scan" class="gold-link">Lounge UI</a></td></tr>
+            <tr><td>Security</td><td><code>POST /api/concierge-security-readiness</code></td><td>Scout — API readiness ($0.02)</td></tr>
+            <tr><td>Security</td><td><code>POST /api/concierge-security-headers</code></td><td>Scout — HTTP security headers ($0.02)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/news-open</code></td><td>Unlock wire article URL</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-publish</code></td><td>Publish creator signal ($1)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-open</code></td><td>Unlock creator signal summary</td></tr>
           </tbody>
         </table>
-        <p><strong>Structured JSON</strong> → Research + Intel + Alpha routes. <strong>HTML narrative</strong> → Concierge chat. Agent marketplaces: <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/integration/x402scan" class="gold-link">x402scan</a>. Details: <a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a></p>
+        <p><strong>Free:</strong> <code>POST /api/concierge-security-scope</code> · <code>POST /api/concierge-security-scan</code> with <code>selfAudit: true</code> on <code>conc-exe.xyz</code>. <strong>Structured JSON</strong> → Research + Intel + Alpha + Security routes. <strong>HTML narrative</strong> → Concierge chat. Agent marketplaces: <a href="/docs/integration/poncho" class="gold-link">Poncho</a> · <a href="/docs/integration/x402scan" class="gold-link">x402scan</a>. Details: <a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/security" class="gold-link">Security Desk</a> · <a href="/docs/api/concierge" class="gold-link">Concierge Chat</a></p>
       </div>
 
       <h2 class="docs-h2">Example — probe Alpha Intel (curl)</h2>

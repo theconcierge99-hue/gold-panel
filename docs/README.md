@@ -19,7 +19,7 @@ Built as static HTML under `public/` with shared layout (`public/css/docs-site.c
 | [overview.md](overview.md) | Product overview |
 | [concierge-ai.md](concierge-ai.md) | Concierge modes and prompts |
 | [integration-hyre.md](integration-hyre.md) | HYRE LLM Gateway partner integration |
-| [concierge-intel.md](concierge-intel.md) | Intel API (markdown mirror) |
+| [concierge-security.md](concierge-security.md) | Security Desk — scope, scan, self-audit |
 | [agent-identity.md](agent-identity.md) | Agent registry |
 | [agents.md](agents.md) | Integrator guide (markdown mirror) |
 | [x402-payments.md](x402-payments.md) | Payment flow |

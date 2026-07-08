@@ -37,7 +37,13 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
 
 Path: `.grok/skills/concierge-intel/SKILL.md`
 
-Covers fifteen x402 routes (including `intel-macro` and `intel-wire` for Poncho), sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
+Covers **21 x402 routes** (intel, lounge, security desk), sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
+
+## Skill: `concierge-security`
+
+Path: `.grok/skills/concierge-security/SKILL.md`
+
+Passive Security Desk — `security_scan` ($0.10), scout routes ($0.02), free canonical self-audit on `conc-exe.xyz` with `selfAudit: true`. Lounge UI: `/lounge#security-scan`.
 
 ## Headless (CI / scripts)
 
@@ -64,3 +70,4 @@ Web guide: [/docs/grok-build](https://conc-exe.xyz/docs/grok-build) · Integrati
 - [pay.sh](paysh.md) — recommended payment CLI for Concierge calls
 - [builders.md](builders.md) — OpenAPI + AgentCash
 - [concierge-intel.md](concierge-intel.md) — intel route reference
+- [concierge-security.md](concierge-security.md) — Security Desk + self-audit

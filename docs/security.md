@@ -33,7 +33,7 @@ When payments are enabled, `GET /api/x402-config` may include **merchant receive
 
 ## Security desk (platform guard)
 
-`POST /api/concierge-security-*` routes probe **external** targets only. `conc-exe.xyz`, Vercel project hosts, and private networks are **hard-blocked** in code — not configurable off in production. See [concierge-security.md](concierge-security.md).
+`POST /api/concierge-security-*` routes probe **authorized** targets. Vercel preview hosts and private networks are **hard-blocked**. The canonical public site (`conc-exe.xyz`) supports **free passive self-audit** on `security-scan` when `selfAudit: true` — see [concierge-security.md](concierge-security.md).
 
 ## Language in APIs and docs
 

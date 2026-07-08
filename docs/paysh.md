@@ -11,7 +11,7 @@ Concierge Agent already ships what pay.sh probes expect: **OpenAPI 3.1**, **402 
 | `GET /openapi.json` | Provider spec (committed snapshot in pay-skills PR) |
 | `402` + `PAYMENT-REQUIRED` | `pay curl` auto-settlement |
 | Solana USDC (PayAI) | Required for pay-skills CI probe |
-| Fifteen POST routes | Catalog endpoints ($0.10 · $1.00 publish) |
+| 21 POST routes | Catalog endpoints (tiered $0.02 / $0.10 / $0.25 · $1.00 publish) |
 | `GET` intel probes | Marketplace probes (402 until paid POST) |
 
 **Not routed through pay.sh gateway** — agents call `https://conc-exe.xyz` directly (same as MPPscan / x402scan). pay.sh is **discovery + CLI payment**, not a proxy.
@@ -44,6 +44,10 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-wire \
 pay --sandbox curl https://conc-exe.xyz/api/concierge \
   -d '{"mode":"chat","message":"Solana DeFi outlook"}'
 
+# Security scan (authorized target)
+pay --sandbox curl https://conc-exe.xyz/api/concierge-security-scan \
+  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
+
 # Search catalog (after listing)
 pay skills update
 pay skills search "market intelligence"
@@ -66,22 +70,30 @@ pay --sandbox claude   # Pay MCP tools attached
 pay codex
 ```
 
-## Fifteen routes (pay-per-call)
+## 21 paid routes (pay-per-call)
+
+Tiered USDC pricing. Security Desk included. Free: `POST /api/concierge-security-scope` · `security-scan` with `selfAudit: true` on `conc-exe.xyz`.
 
 | Path | Price | Segment |
 |------|-------|---------|
 | `POST /api/concierge` | $0.10 | Concierge AI |
-| `POST /api/concierge-intel-tvl` | $0.10 | DeFi Intel |
-| `POST /api/concierge-intel-yields` | $0.10 | DeFi Intel |
-| `POST /api/concierge-intel-whales` | $0.10 | DeFi Intel |
-| `POST /api/concierge-intel-wallet` | $0.10 | DeFi Intel |
+| `POST /api/concierge-intel-tvl` | $0.02 | DeFi Intel |
+| `POST /api/concierge-intel-yields` | $0.02 | DeFi Intel |
+| `POST /api/concierge-intel-meteora` | $0.02 | DeFi Intel |
+| `POST /api/concierge-intel-whales` | $0.02 | DeFi Intel |
+| `POST /api/concierge-intel-wallet` | $0.02 | DeFi Intel |
 | `POST /api/concierge-intel-verdict` | $0.10 | DeFi Intel |
+| `POST /api/concierge-intel-desk-brief` | $0.25 | Bundle |
+| `POST /api/concierge-intel-a2a-pipeline` | $0.25 | Bundle · A2A |
 | `POST /api/concierge-intel-airdrop` | $0.10 | Alpha Intel |
 | `POST /api/concierge-intel-listing` | $0.10 | Alpha Intel |
 | `POST /api/concierge-intel-momentum` | $0.10 | Alpha Intel |
-| `POST /api/concierge-intel-macro` | $0.10 | Research |
-| `POST /api/concierge-intel-wire` | $0.10 | Research |
+| `POST /api/concierge-intel-macro` | $0.02 | Research |
+| `POST /api/concierge-intel-wire` | $0.02 | Research |
 | `POST /api/concierge-intel-scalp` | $0.10 | Alpha Intel |
+| `POST /api/concierge-security-scan` | $0.10 | Security Desk |
+| `POST /api/concierge-security-readiness` | $0.02 | Security scout |
+| `POST /api/concierge-security-headers` | $0.02 | Security scout |
 | `POST /api/news-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-publish` | $1.00 | Lounge |

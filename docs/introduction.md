@@ -19,6 +19,7 @@ Production docs (HYRE-style layout, Concierge-only branding):
 | DeFi Intel | `/docs/api/intel` |
 | Agent Identity | `/docs/api/agent-identity` |
 | Lounge & Signals | `/docs/api/lounge` |
+| Security Desk | `/docs/api/security` |
 | Executive Lounge | `/docs/playground` |
 | Architecture | `/docs/architecture` |
 

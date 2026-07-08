@@ -112,6 +112,18 @@ Structured JSON for agents — see [concierge-intel.md](concierge-intel.md) · w
 | `/api/concierge-intel-momentum` | Large-move candidates (up or down) |
 | `/api/concierge-intel-scalp` | BTC/ETH/BNB/SOL scalp desk (5m/15m) |
 
+### Security Desk
+
+Passive posture audits for **authorized** targets — see [concierge-security.md](concierge-security.md) · web `/docs/api/security` · Lounge `/lounge#security-scan`.
+
+| POST | Price | Purpose |
+|------|-------|---------|
+| `/api/concierge-security-scope` | Free | Scope validation (no fetch) |
+| `/api/concierge-security-scan` | $0.10 | Unified breakdown — grade, readiness, headers, recommendations |
+| `/api/concierge-security-scan` + `selfAudit: true` on `conc-exe.xyz` | Free | Canonical public self-audit |
+| `/api/concierge-security-readiness` | $0.02 | Scout — API readiness |
+| `/api/concierge-security-headers` | $0.02 | Scout — HTTP security headers |
+
 Agent marketplaces: [Poncho](https://conc-exe.xyz/docs/integration/poncho) discovers routes via x402scan — no Concierge API key.
 
 ## Paid endpoints

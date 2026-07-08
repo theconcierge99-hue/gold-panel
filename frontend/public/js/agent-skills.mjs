@@ -20,7 +20,7 @@ const SKILLS = [
     name: "concierge-security",
     title: "Concierge Security Desk",
     summary:
-      "Passive scope validation (free), agent-readiness audit, and HTTP header review for authorized external APIs — Concierge infrastructure always blocked.",
+      "Passive scope validation (free), unified website scan ($0.10), scout audits ($0.02), and free conc-exe.xyz self-audit — authorized external APIs only.",
     path: "/skills/concierge-security/SKILL.md",
     tags: ["x402", "security", "scout", "passive"],
   },

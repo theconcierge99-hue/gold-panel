@@ -2,7 +2,7 @@
 
 [Corbits](https://www.corbits.dev/) is an **Agent Operations** platform (neoteams): governance (**Interchange**), service discovery (**Discovery**), API monetization (**Marketplace**), and x402 payments (**Flex** / **Faremeter**).
 
-Concierge Agent (`https://conc-exe.xyz`) already ships what agents expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **fifteen pay-per-call routes**, and **MPP/AgentCash** discovery.
+Concierge Agent (`https://conc-exe.xyz`) already ships what agents expect: **OpenAPI 3.1**, **x402 USDC** (PayAI), **21 pay-per-call routes**, and **MPP/AgentCash** discovery.
 
 ## ABK Labs hosted services (June 2026)
 

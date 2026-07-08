@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>MPP &amp; AgentCash — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Agent on MPPscan — Machine Payments Protocol discovery, AgentCash install, fifteen pay-per-call routes, x402 settlement." />
+<meta name="description" content="Concierge Agent on MPPscan — Machine Payments Protocol discovery, AgentCash install, 21 pay-per-call routes, x402 settlement." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/payment/mpp" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -26,7 +26,7 @@
 
       <div class="card">
         <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
-        <p><strong>Service:</strong> Concierge Agent API · fifteen pay-per-call routes</p>
+        <p><strong>Service:</strong> Concierge Agent API · 21 pay-per-call routes</p>
         <p><strong>Protocols advertised:</strong> <code>x402</code> + <code>mpp</code> in <code>/openapi.json</code></p>
         <p><strong>Live profile:</strong> <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">conc-exe.xyz/go/mppscan ↗</a> (redirects to your MPPscan server URL when <code>MPPSCAN_SERVER_URL</code> is set in Vercel)</p>
       </div>
@@ -51,9 +51,9 @@
 npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-intel-tvl</code></pre>
       </div>
 
-      <h2 class="docs-h2">MPP structure (fifteen routes)</h2>
+      <h2 class="docs-h2">MPP structure (21 paid routes)</h2>
       <div class="card">
-        <p>All routes use <strong>POST</strong> with JSON after payment. Intel routes also advertise <strong>GET</strong> for marketplace probes (returns 402 until paid POST).</p>
+        <p>All routes use <strong>POST</strong> with JSON after payment. Intel routes also advertise <strong>GET</strong> for marketplace probes (returns 402 until paid POST). Tiered pricing: raw <strong>$0.02</strong>, signal <strong>$0.10</strong>, bundle <strong>$0.25</strong>. Free: <code>POST /api/concierge-security-scope</code> · <code>security-scan</code> self-audit on <code>conc-exe.xyz</code> — see <a href="/docs/api/security" class="gold-link">Security Desk</a>.</p>
         <table>
           <thead><tr><th>Route</th><th>Price</th><th>Category</th></tr></thead>
           <tbody>
@@ -69,6 +69,12 @@ npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-inte
             <tr><td><code>POST /api/concierge-intel-macro</code></td><td>$0.10</td><td>Research</td></tr>
             <tr><td><code>POST /api/concierge-intel-wire</code></td><td>$0.10</td><td>Research</td></tr>
             <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>$0.10</td><td>Alpha Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-meteora</code></td><td>$0.02</td><td>DeFi Intel</td></tr>
+            <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>$0.25</td><td>Bundle</td></tr>
+            <tr><td><code>POST /api/concierge-intel-a2a-pipeline</code></td><td>$0.25</td><td>Bundle · A2A</td></tr>
+            <tr><td><code>POST /api/concierge-security-scan</code></td><td>$0.10</td><td>Security Desk</td></tr>
+            <tr><td><code>POST /api/concierge-security-readiness</code></td><td>$0.02</td><td>Security scout</td></tr>
+            <tr><td><code>POST /api/concierge-security-headers</code></td><td>$0.02</td><td>Security scout</td></tr>
             <tr><td><code>POST /api/news-open</code></td><td>$0.10</td><td>Lounge · wire</td></tr>
             <tr><td><code>POST /api/lounge-signal-open</code></td><td>$0.10</td><td>Lounge · RWA</td></tr>
             <tr><td><code>POST /api/lounge-signal-publish</code></td><td>$1.00</td><td>Lounge · RWA</td></tr>

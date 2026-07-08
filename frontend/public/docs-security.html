@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>Security Desk — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Concierge Security Desk — passive API readiness and HTTP header audits for authorized external targets via x402." />
+<meta name="description" content="Concierge Security Desk — passive website scan, API readiness, and HTTP header audits for authorized targets via x402." />
 <meta name="robots" content="index,follow" />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/api/security" />
@@ -21,99 +21,103 @@
       <div class="docs-topbar"><a href="/docs/api/overview">← API Overview</a></div>
       <div class="docs-eyebrow">API Reference</div>
       <h1 class="docs-title">Security Desk</h1>
-      <p class="docs-lead">Passive security intelligence for <strong>authorized external APIs</strong> — scope validation, agent-readiness audit, and HTTP header review. No exploitation. <strong>Concierge infrastructure cannot be probed.</strong></p>
+      <p class="docs-lead">Passive security intelligence for <strong>authorized targets</strong> — unified website breakdown, agent-readiness dimensions, HTTP header review, and recommendations. No active exploitation.</p>
 
   <nav class="toc">
     <div class="toc-title">On this page</div>
     <ul>
-      <li><a href="#guard">Platform guard</a></li>
-      <li><a href="#pricing">Pricing &amp; SOON</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#lounge">Lounge UI</a></li>
+      <li><a href="#self-audit">Concierge self-audit</a></li>
       <li><a href="#scope">Scope validation</a></li>
-      <li><a href="#readiness">API readiness</a></li>
-      <li><a href="#headers">HTTP headers</a></li>
+      <li><a href="#scan">Website scan</a></li>
+      <li><a href="#scout">Scout routes</a></li>
+      <li><a href="#guard">Platform guard</a></li>
       <li><a href="#mcp">MCP</a></li>
     </ul>
   </nav>
 
-  <section id="guard">
-    <h2>Platform guard</h2>
-    <div class="card">
-      <p>Hard-blocked targets (403 <code>platform_scope_forbidden</code>):</p>
-      <ul>
-        <li><code>conc-exe.xyz</code> and subdomains</li>
-        <li>Deployment hosts (<code>VERCEL_URL</code>, <code>X402_SITE_ORIGIN</code>, …)</li>
-        <li>Private networks, IP literals, punycode, non-standard ports</li>
-        <li>Redirect hops to any forbidden host</li>
-      </ul>
-      <p>Paid routes require <code>allowlist</code> + <code>authorized: true</code>. Rate limits: 20/min (scope), 8/min (audits) per IP.</p>
-    </div>
-  </section>
-
   <section id="pricing">
-    <h2>Pricing &amp; SOON holders</h2>
+    <h2>Pricing</h2>
     <div class="card">
       <table>
         <thead><tr><th>Endpoint</th><th>Price</th><th>Purpose</th></tr></thead>
         <tbody>
           <tr><td><code>POST /api/concierge-security-scope</code></td><td>Free</td><td>Validate target + allowlist (no fetch)</td></tr>
           <tr><td><code>POST /api/concierge-security-scan</code></td><td>$0.10</td><td>Unified breakdown — grade, readiness, headers, recommendations</td></tr>
+          <tr><td><code>POST /api/concierge-security-scan</code> + <code>selfAudit: true</code></td><td>Free</td><td>Canonical <code>conc-exe.xyz</code> self-audit only</td></tr>
           <tr><td><code>POST /api/concierge-security-readiness</code></td><td>$0.02</td><td>Passive agent-readiness subset</td></tr>
           <tr><td><code>POST /api/concierge-security-headers</code></td><td>$0.02</td><td>Security header checklist</td></tr>
         </tbody>
       </table>
-      <p class="note">SOON Deluxe+ (post-launch): <strong>3 free scout audits/day</strong> with <code>X-Soon-Holder-Wallet</code> — separate from raw intel allowance.</p>
+      <p class="note">SOON Deluxe+ (post-launch): <strong>3 free scout audits/day</strong> on readiness/headers with <code>X-Soon-Holder-Wallet</code>.</p>
+    </div>
+  </section>
+
+  <section id="lounge">
+    <h2>Lounge UI</h2>
+    <div class="card">
+      <p><a href="/lounge#security-scan">Executive Lounge → Security Scan</a> — enter any authorized external URL, or use <strong>Scan Concierge (free)</strong> for the public site posture report.</p>
+    </div>
+  </section>
+
+  <section id="self-audit">
+    <h2>Concierge self-audit (free)</h2>
+    <div class="card">
+      <p>Passive audit of <code>https://conc-exe.xyz</code> with <code>selfAudit: true</code> — no x402 payment.</p>
+<pre><code>curl -s -X POST https://conc-exe.xyz/api/concierge-security-scan \
+  -H "Content-Type: application/json" \
+  -d '{"target":"https://conc-exe.xyz","allowlist":["*.conc-exe.xyz"],"authorized":true,"selfAudit":true}'</code></pre>
+      <p class="note">Repo CLI: <code>npx tsx scripts/run-self-security-scan.mjs</code></p>
     </div>
   </section>
 
   <section id="scope">
     <h2>Scope validation</h2>
     <div class="card">
-      <p><strong>bash / macOS / Linux</strong></p>
 <pre><code>curl -s -X POST https://conc-exe.xyz/api/concierge-security-scope \
   -H "Content-Type: application/json" \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"]}'</code></pre>
-      <p><strong>Windows PowerShell</strong> — use <code>curl.exe</code> (one line) or:</p>
+      <p><strong>Windows PowerShell:</strong></p>
 <pre><code>Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://api.example.com","allowlist":["*.example.com"]}'</code></pre>
-      <p class="note">Test denylist: use <code>your-preview.vercel.app</code> as <code>target</code>. <strong>403</strong> = platform blocked · <strong>200</strong> = external allowlist pass.</p>
     </div>
   </section>
 
-  <section id="readiness">
+  <section id="scan">
     <h2>Website scan — <code>POST /api/concierge-security-scan</code></h2>
     <div class="card">
-      <p>Unified passive breakdown for Lounge and integrators — overall grade, readiness dimensions, HTTP headers, and recommendations in one response ($0.10).</p>
+      <p>Returns <code>summary.overallGrade</code>, readiness dimensions, header checks, and <code>recommendations[]</code>.</p>
 <pre><code>pay curl https://conc-exe.xyz/api/concierge-security-scan \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'</code></pre>
-      <p class="note">Lounge UI: <a href="/lounge#security-scan">Executive Lounge → Security Scan</a></p>
     </div>
   </section>
 
-  <section id="readiness-detail">
-    <h2>API readiness — <code>POST /api/concierge-security-readiness</code></h2>
+  <section id="scout">
+    <h2>Scout routes ($0.02)</h2>
     <div class="card">
+      <p><code>POST /api/concierge-security-readiness</code> — OpenAPI, discovery files, MCP surface scores.</p>
+      <p><code>POST /api/concierge-security-headers</code> — per-header checklist and <code>summary.grade</code>.</p>
 <pre><code>{
   "target": "https://api.example.com",
   "allowlist": ["*.example.com"],
   "authorized": true
 }</code></pre>
-<pre><code>pay curl https://conc-exe.xyz/api/concierge-security-readiness \
-  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'</code></pre>
-      <p>Scores OpenAPI presence, discovery files, security headers, MCP surface — passive only.</p>
     </div>
   </section>
 
-  <section id="headers">
-    <h2>HTTP headers — <code>POST /api/concierge-security-headers</code></h2>
+  <section id="guard">
+    <h2>Platform guard</h2>
     <div class="card">
-      <p>Same body as readiness. Returns per-header checklist and <code>summary.grade</code> (strong / moderate / weak).</p>
+      <p>403 <code>platform_scope_forbidden</code> for Vercel preview hosts, private networks, IP literals, and punycode targets. <code>conc-exe.xyz</code> is permitted only via <code>selfAudit: true</code> on <code>security-scan</code>.</p>
+      <p>Paid external routes require <code>allowlist</code> + <code>authorized: true</code>. Rate limits: 20/min (scope), 8/min (audits) per IP.</p>
     </div>
   </section>
 
   <section id="mcp">
     <h2>MCP</h2>
     <div class="card">
-      <p><code>POST /api/mcp</code> — tools <code>security_readiness</code>, <code>security_headers</code>. Pass <code>paymentSignature</code> after x402.</p>
-      <p>Skill: <a href="/agent/skills">/agent/skills</a> · OpenAPI: <a href="/openapi.json">openapi.json</a></p>
+      <p><code>POST /api/mcp</code> — tools <code>security_scan</code>, <code>security_readiness</code>, <code>security_headers</code>. Pass <code>paymentSignature</code> after x402.</p>
+      <p>Skill: <a href="/skills/concierge-security/SKILL.md">/skills/concierge-security/SKILL.md</a> · OpenAPI: <a href="/openapi.json">openapi.json</a></p>
     </div>
   </section>
 

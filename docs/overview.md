@@ -20,7 +20,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/.well-known/x402` | x402 resource fan-out (discovery) |
 | `https://your-domain.com/openapi.json` | OpenAPI + x-payment-info (x402 + MPP discovery) |
 | `https://your-domain.com/docs/builders` | Builder integration guide — x402, OpenAPI, code examples |
-| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, fifteen-route structure |
+| `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, 21-route structure |
 | `https://your-domain.com/docs/payment/paysh` | pay.sh CLI catalog — `pay curl`, Claude/Codex MCP, pay-skills listing |
 | `https://your-domain.com/docs/integration/poncho` | Poncho marketplace — macro, wire, intel via x402 (no API key) |
 

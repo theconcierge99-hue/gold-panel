@@ -1,28 +1,29 @@
 ---
 name: concierge-security
-description: Passive security desk on conc-exe.xyz — scope validation, unified website scan breakdown, agent-readiness audit, and HTTP header review for authorized external APIs. x402 scout $0.02 or full scan $0.10. Platform hosts (conc-exe.xyz) are always blocked. MCP tools security_scan, security_readiness, security_headers.
+description: Passive security desk on conc-exe.xyz — scope validation, unified website scan breakdown, agent-readiness audit, and HTTP header review. x402 scout $0.02, full scan $0.10, free conc-exe.xyz self-audit with selfAudit. MCP tools security_scan, security_readiness, security_headers.
 ---
 
 # Concierge Security Desk
 
 **Origin:** `https://conc-exe.xyz`  
 **Docs:** `https://conc-exe.xyz/docs/api/security`  
-**Payment:** HTTP 402 + USDC, or SOON Deluxe+ free scout allowance (`X-Soon-Holder-Wallet`)
+**Lounge:** `https://conc-exe.xyz/lounge#security-scan`  
+**Payment:** HTTP 402 + USDC, SOON Deluxe+ scout allowance, or free self-audit on `conc-exe.xyz`
 
 ## When to use
 
 - Agent needs **passive API security posture** on a target the user **owns or has permission** to test
+- End user wants a **website breakdown** (grade, headers, readiness, recommendations)
 - Pre-flight **scope validation** before a paid audit
-- Bug-bounty / compliance workflows that must **not** scan Concierge infrastructure
+- **Concierge self-audit** on the canonical public site
 
-## Never probe
+## Never probe (without authorization)
 
-- `conc-exe.xyz` / any Concierge Vercel host — **hard forbidden** (403)
-- Targets without `allowlist` + `authorized: true` on paid routes
+- Vercel preview / internal deployment hosts
+- Targets without `allowlist` + `authorized: true` on paid external routes
+- Private or third-party hosts via `selfAudit` (only `conc-exe.xyz` / `www`)
 
 ## Quick scope check (free)
-
-**bash:**
 
 ```bash
 curl -s -X POST https://conc-exe.xyz/api/concierge-security-scope \
@@ -30,13 +31,17 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-security-scope \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"]}'
 ```
 
-**Windows PowerShell:**
+## Concierge self-audit (free)
 
-```powershell
-Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://api.example.com","allowlist":["*.example.com"]}'
+```bash
+curl -s -X POST https://conc-exe.xyz/api/concierge-security-scan \
+  -H "Content-Type: application/json" \
+  -d '{"target":"https://conc-exe.xyz","allowlist":["*.conc-exe.xyz"],"authorized":true,"selfAudit":true}'
 ```
 
-## Paid scout audit
+Lounge: **Security Scan → Scan Concierge (free)**.
+
+## Paid scans
 
 ```bash
 pay curl https://conc-exe.xyz/api/concierge-security-scan \
@@ -51,14 +56,7 @@ pay curl https://conc-exe.xyz/api/concierge-security-headers \
 
 ## SOON holder (post-launch)
 
-```bash
-curl -s -X POST https://conc-exe.xyz/api/concierge-security-readiness \
-  -H "Content-Type: application/json" \
-  -H "X-Soon-Holder-Wallet: <solana-wallet>" \
-  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
-```
-
-3 free scout calls/day (Deluxe 50k+ SOON) — separate from raw intel free tier.
+Scout routes only — 3 free/day on `security-readiness` / `security-headers` with `X-Soon-Holder-Wallet` (Deluxe 50k+ SOON).
 
 ## Routes
 
@@ -66,7 +64,8 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-security-readiness \
 |-------------|-------|--------|
 | `POST /api/concierge-security-scope` | Free | Platform guard + allowlist match |
 | `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, recommendations |
-| `POST /api/concierge-security-readiness` | $0.02 | OpenAPI, discovery, headers, MCP surface scores |
+| `POST /api/concierge-security-scan` + `selfAudit: true` | Free | `conc-exe.xyz` self-audit only |
+| `POST /api/concierge-security-readiness` | $0.02 | OpenAPI, discovery, headers, MCP scores |
 | `POST /api/concierge-security-headers` | $0.02 | Security header checklist + grade |
 
 ## MCP

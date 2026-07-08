@@ -13,7 +13,7 @@ Structured desk data as **separate x402 endpoints** with **tiered pricing**. Sam
 | **Signal** | $0.10 | yields, wallet, verdict, alpha desks, scalp, `intel-meteora`, concierge, news |
 | **Bundle** | $0.25 | `intel-desk-brief` |
 
-SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Holder-Wallet` when balance ≥ Deluxe tier (50k SOON). **3 free security scout audits/day** on `security-readiness` / `security-headers`. See [concierge-security.md](concierge-security.md) and [launch-playbook.md](launch-playbook.md).
+SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Holder-Wallet` when balance ≥ Deluxe tier (50k SOON). **3 free security scout audits/day** on `security-readiness` / `security-headers`. **Free Concierge self-audit** via `security-scan` with `selfAudit: true` on `conc-exe.xyz`. See [concierge-security.md](concierge-security.md) and [launch-playbook.md](launch-playbook.md).
 
 ## Endpoints
 

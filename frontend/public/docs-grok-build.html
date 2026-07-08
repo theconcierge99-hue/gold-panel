@@ -21,7 +21,7 @@
       <div class="docs-eyebrow">Integrations</div>
       <h1 class="docs-title">Grok Build CLI</h1>
       <p class="docs-lead">
-        <a class="ext" href="https://x.ai/cli" target="_blank" rel="noopener">Grok Build</a> is xAI’s terminal coding agent — plan mode, subagents, skills, MCP, and headless <code>-p</code> mode. This repo ships a <strong>concierge-intel</strong> skill so Grok sessions can call Concierge’s fifteen x402 routes with the right discovery and payment flow.
+        <a class="ext" href="https://x.ai/cli" target="_blank" rel="noopener">Grok Build</a> is xAI’s terminal coding agent — plan mode, subagents, skills, MCP, and headless <code>-p</code> mode. This repo ships <strong>concierge-intel</strong> and <strong>concierge-security</strong> skills so Grok sessions can call Concierge’s 21 x402 routes with the right discovery and payment flow.
       </p>
 
       <div class="card">
@@ -71,7 +71,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge \
       <h2 class="docs-h2">Skill reference</h2>
       <div class="card">
         <p>Invoke in Grok session: <code>/concierge-intel</code></p>
-        <p>Covers discovery (<code>/openapi.json</code>, <code>/.well-known/x402</code>), fifteen paid routes, sandbox commands, and repo paths (<code>lib/concierge-api/</code>, Vercel ≤12 function layout).</p>
+        <p>Covers discovery (<code>/openapi.json</code>, <code>/.well-known/x402</code>), 21 paid routes (intel, lounge, security desk), sandbox commands, and repo paths (<code>lib/concierge-api/</code>, Vercel ≤12 function layout). Security skill: free <code>conc-exe.xyz</code> self-audit via <code>security-scan</code>.</p>
         <p>Source: <code>.grok/skills/concierge-intel/SKILL.md</code></p>
       </div>
 

@@ -193,11 +193,27 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     path: "/api/concierge-security-scope",
     name: "Security — Scope",
     description:
-      "Free scope validation — platform guard + allowlist match. No outbound fetch. Concierge hosts always blocked.",
+      "Free scope validation — platform guard + allowlist match. No outbound fetch. Vercel previews blocked; conc-exe.xyz allowed via selfAudit on security-scan.",
     priceUsd: "0",
     sampleBody: {
       target: "https://api.example.com",
       allowlist: ["*.example.com"],
+    },
+  },
+  {
+    id: "security-scan",
+    segment: "security",
+    method: "POST",
+    path: "/api/concierge-security-scan",
+    name: "Security — Scan",
+    description:
+      "Unified posture breakdown — grade, readiness, headers, recommendations. Free on conc-exe.xyz with selfAudit: true.",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: {
+      target: "https://api.example.com",
+      allowlist: ["*.example.com"],
+      authorized: true,
     },
   },
   {

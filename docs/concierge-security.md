@@ -1,35 +1,24 @@
 # Concierge Security Desk (integrators)
 
-Passive security intelligence for **authorized external targets** — agent-readiness audit and HTTP header review. No exploitation. **Concierge platform hosts are always blocked.**
+Passive security intelligence for **authorized targets** — unified website scan, agent-readiness audit, and HTTP header review. No exploitation.
 
 **Web:** `https://conc-exe.xyz/docs/api/security`  
-**OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402` · **MCP:** `security_readiness`, `security_headers`
-
-## Platform guard (non-negotiable)
-
-These targets are **always rejected** (403 `platform_scope_forbidden`):
-
-- `conc-exe.xyz` and all subdomains
-- Vercel production/preview hosts from deployment env (`VERCEL_URL`, `X402_SITE_ORIGIN`, …)
-- `ALLOWED_ORIGINS` hosts (our own frontends)
-- Private/link-local IPs and hostnames
-- IP literals, punycode (`xn--`), non-default ports
-- Redirect chains that land on a forbidden host
-
-Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
+**Lounge UI:** `https://conc-exe.xyz/lounge#security-scan`  
+**OpenAPI:** `/openapi.json` · **x402:** `/.well-known/x402` · **MCP:** `security_scan`, `security_readiness`, `security_headers`
 
 ## Pricing
 
-| Route | USDC | Tier |
-|-------|------|------|
-| `POST /api/concierge-security-scope` | Free | Scout — validation only, no fetch |
-| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — readiness + headers + recommendations |
+| Route | USDC | Purpose |
+|-------|------|---------|
+| `POST /api/concierge-security-scope` | Free | Validate target + allowlist (no fetch) |
+| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, recommendations |
+| `POST /api/concierge-security-scan` + `selfAudit: true` on `conc-exe.xyz` | **Free** | Canonical public self-audit (see below) |
 | `POST /api/concierge-security-readiness` | $0.02 | Scout — passive API readiness |
 | `POST /api/concierge-security-headers` | $0.02 | Scout — passive header review |
 
-**SOON holders (Deluxe+, post-launch):** 3 free scout audits/day via `X-Soon-Holder-Wallet` (separate from raw intel allowance). Env: `SOON_SECURITY_SCOUT_FREE_PER_DAY`.
+**SOON holders (Deluxe+, post-launch):** 3 free scout audits/day on `security-readiness` / `security-headers` via `X-Soon-Holder-Wallet` (separate from raw intel allowance). Env: `SOON_SECURITY_SCOUT_FREE_PER_DAY`.
 
-## Required request body (paid routes)
+## Request body (paid routes)
 
 ```json
 {
@@ -42,18 +31,41 @@ Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
 | Field | Rule |
 |-------|------|
 | `target` | Required. `https` origin you own or have written permission to test |
-| `allowlist` | **Required** on paid routes (default). Hostname must match an entry |
+| `allowlist` | Required on paid external routes (default). Hostname must match an entry |
 | `authorized` | Must be `true` — caller attests legal authorization |
+| `selfAudit` | Optional. When `true` with `https://conc-exe.xyz` (or `www`), enables **free** canonical self-audit on `security-scan` only |
 
 Disable mandatory allowlist only in dev: `SECURITY_REQUIRE_ALLOWLIST=false`.
 
 ## Flow
 
-1. **Scope check (free):** `POST /api/concierge-security-scope` with `target` + `allowlist`
-2. **Pay:** x402 USDC **or** `X-Soon-Holder-Wallet` when SOON launched
-3. **Audit:** `POST /api/concierge-security-readiness` or `security-headers`
+### External website (integrators / Lounge)
 
-**macOS / Linux (bash):**
+1. **Scope check (free):** `POST /api/concierge-security-scope` with `target` + `allowlist`
+2. **Pay:** x402 USDC ($0.10 for unified scan, $0.02 for scout routes) **or** `X-Soon-Holder-Wallet` on scout routes when SOON launched
+3. **Audit:** `POST /api/concierge-security-scan` (recommended) or individual scout routes
+
+### Concierge self-audit (free)
+
+Passive audit of the **canonical public site** only (`conc-exe.xyz` / `www.conc-exe.xyz`):
+
+```bash
+curl -s -X POST https://conc-exe.xyz/api/concierge-security-scan \
+  -H "Content-Type: application/json" \
+  -d '{"target":"https://conc-exe.xyz","allowlist":["*.conc-exe.xyz"],"authorized":true,"selfAudit":true}'
+```
+
+**Lounge:** Executive Lounge → **Security Scan** → **Scan Concierge (free)**.
+
+**Local CLI (repo):**
+
+```bash
+npx tsx scripts/run-self-security-scan.mjs
+```
+
+## Examples
+
+**Scope validation:**
 
 ```bash
 curl -s -X POST https://conc-exe.xyz/api/concierge-security-scope \
@@ -61,37 +73,57 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-security-scope \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"]}'
 ```
 
-**Windows (PowerShell)** — use `curl.exe` (not the `curl` alias). Single line:
+**Paid unified scan:**
 
-```powershell
-curl.exe -s -X POST https://conc-exe.xyz/api/concierge-security-scope -H "Content-Type: application/json" -d "{\"target\":\"https://api.example.com\",\"allowlist\":[\"*.example.com\"]}"
+```bash
+pay curl https://conc-exe.xyz/api/concierge-security-scan \
+  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
 ```
 
-Or:
-
-```powershell
-Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://api.example.com","allowlist":["*.example.com"]}'
-```
-
-**Paid audit:**
+**Scout routes ($0.02 each):**
 
 ```bash
 pay curl https://conc-exe.xyz/api/concierge-security-readiness \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
 ```
 
-## Test platform denylist
-
-Replace `your-preview.vercel.app` with a hostname you want to verify (e.g. a Vercel preview URL for this project):
+**Windows PowerShell:**
 
 ```powershell
-Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://your-preview.vercel.app","allowlist":["*.vercel.app"]}'
+Invoke-RestMethod -Method POST -Uri "https://conc-exe.xyz/api/concierge-security-scope" -ContentType "application/json" -Body '{"target":"https://api.example.com","allowlist":["*.example.com"]}'
 ```
 
-- **403** `platform_scope_forbidden` — host is blocked (expected for Concierge infra)
-- **200** with `platformGuard.passed: true` — not on denylist; add to `SECURITY_PLATFORM_DENY_HOSTS` if it is yours
+## Platform guard
 
-**Expected:** `403` for `conc-exe.xyz` · `200` for `api.example.com` (after deploy with integrator Origin fix).
+These targets are **rejected** (403 `platform_scope_forbidden`) unless noted:
+
+| Target | Policy |
+|--------|--------|
+| `conc-exe.xyz` / `www.conc-exe.xyz` | Allowed only with `selfAudit: true` on `security-scan` |
+| Vercel preview / deployment hosts | Always blocked |
+| Private networks, IP literals, punycode | Always blocked |
+
+Extra denylist: `SECURITY_PLATFORM_DENY_HOSTS` (comma-separated hostnames).
+
+## Unified scan response (`security-scan`)
+
+```json
+{
+  "ok": true,
+  "kind": "security-scan",
+  "summary": {
+    "overallGrade": "B",
+    "readinessScore": 2.1,
+    "headersGrade": "moderate",
+    "headersPresent": 4,
+    "headersTotal": 6,
+    "discoveryFiles": 2,
+    "mcpReachable": true
+  },
+  "breakdown": { "readiness": {}, "headers": {} },
+  "recommendations": ["Add strict-transport-security — …"]
+}
+```
 
 ## Rate limits
 
@@ -100,19 +132,9 @@ Stricter than general `/api/*` limits:
 - Scope validation: **20/min** per IP
 - Paid audits: **8/min** per IP
 
-Responses include `X-Security-Desk: passive-only`.
-
-## Holder tiers (future analyst/principal routes)
-
-| SOON tier | Security access |
-|-----------|-----------------|
-| Deluxe (50k+) | Scout — readiness + headers |
-| Executive (250k+) | Analyst routes (phased) |
-| President (1M+) | Principal / orchestration (phased) |
-
 ## MCP
 
-`POST /api/mcp` → `tools/call` with `security_readiness` or `security_headers`. Pass `paymentSignature` after x402.
+`POST /api/mcp` → `tools/call` with `security_scan`, `security_readiness`, or `security_headers`. Pass `paymentSignature` after x402 (not required for free self-audit body above when called via HTTP directly).
 
 ## Related
 
