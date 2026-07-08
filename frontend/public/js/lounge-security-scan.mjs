@@ -47,20 +47,28 @@ function gradeClass(grade) {
   return "bad";
 }
 
+function revealResultsPanels() {
+  const root = $("sec-scan-results");
+  if (!root) return;
+  root.querySelectorAll(".el-reveal").forEach((el) => el.classList.add("is-visible"));
+}
+
 function renderSummary(data) {
   const el = $("sec-scan-summary");
   if (!el || !data?.summary) return;
   const s = data.summary;
   el.innerHTML = `
-    <div class="sec-scan-grade sec-scan-grade--${gradeClass(s.overallGrade)}" aria-label="Overall grade ${s.overallGrade}">
-      <span class="sec-scan-grade-label">Grade</span>
-      <strong>${s.overallGrade}</strong>
-    </div>
-    <div class="sec-scan-stat-grid">
-      <div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>
-      <div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal} · ${s.headersGrade}</strong></div>
-      <div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles} files</strong></div>
-      <div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>
+    <div class="sec-scan-grade-row">
+      <div class="sec-scan-grade sec-scan-grade--${gradeClass(s.overallGrade)}" aria-label="Overall grade ${s.overallGrade}">
+        <span class="sec-scan-grade-label">Grade</span>
+        <strong>${s.overallGrade}</strong>
+      </div>
+      <div class="sec-scan-stat-grid">
+        <div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>
+        <div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal} · ${s.headersGrade}</strong></div>
+        <div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles} files</strong></div>
+        <div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>
+      </div>
     </div>`;
 }
 
@@ -70,11 +78,12 @@ function renderDimensions(readiness) {
   el.innerHTML = readiness.dimensions
     .map((d) => {
       const pct = Math.round((d.score / 3) * 100);
-      return `<div class="sec-scan-dim">
-        <div class="sec-scan-dim-head"><span>${d.name}</span><em>${d.label}</em></div>
-        <div class="sec-scan-bar-track"><div class="sec-scan-bar-fill" style="width:${pct}%"></div></div>
-        <p class="sec-scan-dim-note">${(d.notes?.[0] ?? "").replace(/</g, "&lt;")}</p>
-      </div>`;
+      const note = (d.notes?.[0] ?? "").replace(/</g, "&lt;");
+      return `<div class="tcx-bar-row">
+        <div class="tcx-bar-label">${d.name}<small>${d.label}</small></div>
+        <div class="tcx-bar-track"><div class="tcx-bar-fill" style="width:${pct}%"></div></div>
+        <span class="tcx-bar-pct">${d.score}/3</span>
+      </div>${note ? `<p class="sec-scan-dim-note">${note}</p>` : ""}`;
     })
     .join("");
 }
@@ -120,6 +129,8 @@ function setLoading(on) {
   if (self) self.disabled = on;
 }
 
+let _secScanReady = false;
+
 export async function initLoungeSecurityScan(ctx = {}) {
   const paidApiFetch = ctx.paidApiFetch;
   const toast = ctx.toast ?? ((m) => console.log(m));
@@ -130,6 +141,14 @@ export async function initLoungeSecurityScan(ctx = {}) {
   const results = $("sec-scan-results");
 
   if (!input || !runBtn) return;
+  if (_secScanReady) return;
+  _secScanReady = true;
+
+  document
+    .querySelectorAll(
+      "#view-security-scan .section-h.el-reveal, #view-security-scan .sec-scan-hero.el-reveal, #view-security-scan .sec-scan-input-panel.el-reveal",
+    )
+    .forEach((el) => el.classList.add("is-visible"));
 
   async function checkScope() {
     const origin = normalizeTargetInput(input.value);
@@ -184,6 +203,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
       renderHeaders(data.breakdown?.headers);
       renderRecommendations(data.recommendations);
       if (results) results.hidden = false;
+      revealResultsPanels();
       toast("Concierge self-audit complete");
     } catch (e) {
       toast(e?.message ?? "Self-audit failed");
@@ -230,6 +250,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
       renderHeaders(data.breakdown?.headers);
       renderRecommendations(data.recommendations);
       if (results) results.hidden = false;
+      revealResultsPanels();
       toast("Security scan complete");
     } catch (e) {
       if (e?.message === "Payment cancelled") return;

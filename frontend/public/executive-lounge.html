@@ -783,49 +783,153 @@
     #view-token-research .tcx-tier-cards{grid-template-columns:1fr}
   }
   #view-security-scan .sec-scan-wrap{max-width:none;padding:0}
-  #view-security-scan .sec-scan-form{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;align-items:flex-end}
-  #view-security-scan .sec-scan-field{flex:1;min-width:200px}
-  #view-security-scan .sec-scan-field label{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--text-muted);margin-bottom:6px}
+  #view-security-scan .tcx-wrap{max-width:none;padding:0}
+  #view-security-scan .sec-scan-hero{margin-bottom:18px}
+  #view-security-scan .sec-scan-lead{
+    font-size:14px;line-height:1.65;color:var(--text-secondary);max-width:640px;margin:0 0 10px;
+  }
+  #view-security-scan .sec-scan-api-hint{
+    font-family:'DM Mono',monospace;font-size:11px;line-height:1.55;color:var(--text-secondary);
+    padding:12px 14px;border-radius:var(--el-radius-md,10px);border:1px solid var(--border);
+    background:rgba(255,255,255,.03);margin:0 0 18px;
+  }
+  html[data-theme="light"] #view-security-scan .sec-scan-api-hint{background:rgba(10,16,24,.03)}
+  #view-security-scan .sec-scan-api-hint code{
+    font-size:10px;color:var(--gold);background:rgba(201,168,76,.08);padding:2px 6px;border-radius:4px;
+  }
+  #view-security-scan .sec-scan-api-hint a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.35)}
+  #view-security-scan .sec-scan-api-hint a:hover{border-bottom-color:var(--gold)}
+  #view-security-scan .sec-scan-form{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:4px;align-items:flex-end}
+  #view-security-scan .sec-scan-field{flex:1;min-width:220px}
+  #view-security-scan .sec-scan-field label{
+    display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px;
+  }
   #view-security-scan .sec-scan-field input{
-    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;
+    width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:var(--el-radius-md,10px);
     background:var(--gcard-bg);color:var(--text-primary);font-size:14px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);transition:border-color .15s,box-shadow .15s;
+  }
+  #view-security-scan .sec-scan-field input:focus{
+    outline:none;border-color:rgba(201,168,76,.45);box-shadow:0 0 0 1px rgba(201,168,76,.2),inset 0 1px 0 rgba(255,255,255,.04);
   }
   #view-security-scan .sec-scan-actions{display:flex;gap:8px;flex-wrap:wrap}
-  #view-security-scan .sec-scan-btn{
-    padding:11px 16px;border-radius:8px;border:1px solid var(--border);background:var(--gcard-bg);
-    color:var(--text-primary);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;
+  #view-security-scan .tcx-btn{
+    font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    padding:11px 18px;border-radius:var(--el-radius-md,10px);border:1px solid var(--border);
+    color:var(--text-secondary);background:var(--gcard-bg);cursor:pointer;
+    transition:border-color .15s,color .15s,transform .15s,box-shadow .15s;
   }
-  #view-security-scan .sec-scan-btn--primary{background:linear-gradient(135deg,rgba(201,168,76,.22),rgba(201,168,76,.08));border-color:rgba(201,168,76,.45);color:var(--gold)}
-  #view-security-scan .sec-scan-btn:disabled{opacity:.55;cursor:not-allowed}
-  #view-security-scan .sec-scan-scope-status{font-size:12px;margin:0 0 14px;color:var(--text-secondary)}
+  #view-security-scan .tcx-btn:hover{border-color:rgba(201,168,76,.35);color:var(--text-primary);transform:translateY(-1px)}
+  #view-security-scan .tcx-btn--gold{
+    color:var(--bg);border-color:var(--gold);background:linear-gradient(135deg,var(--el-gold-bright,#e8c968),var(--gold));
+    box-shadow:0 4px 20px rgba(201,168,76,.22);
+  }
+  #view-security-scan .tcx-btn--gold:hover{filter:brightness(1.06)}
+  #view-security-scan .tcx-btn--primary{
+    color:var(--bg);border-color:var(--gold);background:var(--gold);box-shadow:0 4px 18px rgba(201,168,76,.18);
+  }
+  #view-security-scan .tcx-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  #view-security-scan .sec-scan-scope-status{
+    font-size:13px;font-weight:500;margin:14px 0 18px;color:var(--text-secondary);letter-spacing:.02em;
+  }
   #view-security-scan .sec-scan-scope-status.ok{color:var(--signal-green,#7dcea0)}
-  #view-security-scan .sec-scan-scope-status.bad{color:#e85d4a}
-  #view-security-scan .sec-scan-panel{border:1px solid var(--border);border-radius:12px;padding:18px;background:var(--gcard-bg);margin-bottom:14px}
-  #view-security-scan .sec-scan-panel-kicker{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.22em;color:var(--gold);margin:0 0 6px}
-  #view-security-scan .sec-scan-panel-title{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:20px;margin:0 0 12px}
-  #view-security-scan .sec-scan-grade{display:inline-flex;flex-direction:column;align-items:center;padding:14px 22px;border-radius:12px;border:1px solid var(--border);margin-bottom:14px}
-  #view-security-scan .sec-scan-grade strong{font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;color:var(--gold)}
-  #view-security-scan .sec-scan-grade-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--text-muted)}
-  #view-security-scan .sec-scan-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:4px}
-  #view-security-scan .sec-scan-stat{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
-  #view-security-scan .sec-scan-stat span{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.16em;color:var(--text-muted);margin-bottom:4px}
-  #view-security-scan .sec-scan-stat strong{font-size:13px;color:var(--text-primary)}
-  #view-security-scan .sec-scan-dim{margin-bottom:12px}
-  #view-security-scan .sec-scan-dim-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
-  #view-security-scan .sec-scan-dim-head em{font-style:normal;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px}
-  #view-security-scan .sec-scan-bar-track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
-  #view-security-scan .sec-scan-bar-fill{height:100%;background:linear-gradient(90deg,rgba(201,168,76,.55),var(--gold))}
-  #view-security-scan .sec-scan-dim-note{font-size:11px;color:var(--text-muted);margin:6px 0 0}
-  #view-security-scan .sec-scan-table{width:100%;border-collapse:collapse;font-size:12px}
-  #view-security-scan .sec-scan-table th,#view-security-scan .sec-scan-table td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left}
-  #view-security-scan .sec-scan-table td.ok{color:var(--signal-green,#7dcea0)}
-  #view-security-scan .sec-scan-table td.bad{color:#e85d4a}
-  #view-security-scan .sec-scan-recs{margin:0;padding-left:18px;font-size:12px;color:var(--text-secondary)}
-  #view-security-scan .sec-scan-recs li{margin-bottom:6px}
-  #view-security-scan .sec-scan-note{font-size:11px;color:var(--text-muted);margin:12px 0 0;line-height:1.55}
-  #view-security-scan .sec-scan-note--api{font-size:10px;letter-spacing:.02em}
+  #view-security-scan .sec-scan-scope-status.bad{color:#f0a89a}
+  #view-security-scan .tcx-grid-2{
+    display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;
+  }
+  #view-security-scan .tcx-panel{
+    position:relative;background:var(--gcard-bg);border:1px solid var(--border);
+    border-radius:var(--el-radius-lg,12px);padding:20px 20px 18px;margin-bottom:18px;
+    box-shadow:var(--el-shadow-card,0 8px 32px rgba(0,0,0,.18));
+    overflow:hidden;
+  }
+  #view-security-scan .tcx-panel::before{
+    content:"";position:absolute;top:0;left:16px;right:16px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--el-gold-bright,#e8c968) 50%,var(--gold) 80%,transparent);
+    opacity:.8;
+  }
+  #view-security-scan .tcx-panel-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  #view-security-scan .tcx-panel-kicker{
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold);margin:0 0 6px;
+  }
+  #view-security-scan .tcx-panel-title{
+    font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;letter-spacing:.02em;
+    color:var(--text-primary);margin:0;
+  }
+  #view-security-scan .sec-scan-grade-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  #view-security-scan .sec-scan-grade{
+    display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+    min-width:108px;padding:18px 24px;border-radius:var(--el-radius-lg,12px);
+    border:1px solid rgba(201,168,76,.35);
+    background:linear-gradient(145deg,rgba(201,168,76,.12),rgba(201,168,76,.03));
+    box-shadow:0 8px 28px rgba(201,168,76,.12);
+  }
+  #view-security-scan .sec-scan-grade--ok{border-color:rgba(125,206,160,.4);background:linear-gradient(145deg,rgba(125,206,160,.1),rgba(125,206,160,.02))}
+  #view-security-scan .sec-scan-grade--mid{border-color:rgba(201,168,76,.45)}
+  #view-security-scan .sec-scan-grade--warn{border-color:rgba(240,168,90,.4);background:linear-gradient(145deg,rgba(240,168,90,.1),rgba(240,168,90,.02))}
+  #view-security-scan .sec-scan-grade--bad{border-color:rgba(232,93,74,.35);background:linear-gradient(145deg,rgba(232,93,74,.1),rgba(232,93,74,.02))}
+  #view-security-scan .sec-scan-grade strong{
+    font-family:'Cormorant Garamond',serif;font-size:48px;line-height:1;font-weight:300;color:var(--gold);
+  }
+  #view-security-scan .sec-scan-grade--ok strong{color:var(--signal-green,#7dcea0)}
+  #view-security-scan .sec-scan-grade-label{
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--text-secondary);margin-bottom:6px;
+  }
+  #view-security-scan .sec-scan-stat-grid{
+    flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:min(100%,420px);
+  }
+  #view-security-scan .sec-scan-stat{
+    padding:12px 14px;border:1px solid var(--border);border-radius:var(--el-radius-md,10px);
+    background:var(--bg);
+  }
+  #view-security-scan .sec-scan-stat span{
+    display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--text-secondary);margin-bottom:6px;
+  }
+  #view-security-scan .sec-scan-stat strong{
+    font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--text-primary);line-height:1.2;
+  }
+  #view-security-scan .tcx-bar-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2fr) 40px;gap:12px;align-items:center;margin-bottom:4px}
+  #view-security-scan .tcx-bar-label{font-size:13px;color:var(--text-primary);line-height:1.35}
+  #view-security-scan .tcx-bar-label small{display:block;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-secondary);font-weight:400;margin-top:3px;letter-spacing:.02em}
+  #view-security-scan .tcx-bar-track{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  #view-security-scan .tcx-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,rgba(201,168,76,.55),var(--gold))}
+  #view-security-scan .tcx-bar-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-secondary);text-align:right}
+  #view-security-scan .sec-scan-dim-note{
+    font-size:12px;line-height:1.55;color:var(--text-secondary);margin:0 0 14px 0;padding-left:2px;
+  }
+  #view-security-scan .sec-scan-table{width:100%;border-collapse:collapse;font-size:13px}
+  #view-security-scan .sec-scan-table th{
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--text-secondary);padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;font-weight:500;
+  }
+  #view-security-scan .sec-scan-table td{
+    padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text-primary);vertical-align:middle;
+  }
+  #view-security-scan .sec-scan-table code{
+    font-family:'DM Mono',monospace;font-size:11px;color:var(--text-primary);background:rgba(255,255,255,.04);
+    padding:3px 7px;border-radius:4px;
+  }
+  #view-security-scan .sec-scan-table td.ok{color:var(--signal-green,#7dcea0);font-weight:500}
+  #view-security-scan .sec-scan-table td.bad{color:#f0a89a;font-weight:500}
+  #view-security-scan .sec-scan-recs{margin:0;padding-left:20px;font-size:13px;line-height:1.6;color:var(--text-secondary)}
+  #view-security-scan .sec-scan-recs li{margin-bottom:8px}
+  #view-security-scan .sec-scan-recs li::marker{color:var(--gold)}
+  #view-security-scan .sec-scan-footnote{
+    font-size:12px;line-height:1.6;color:var(--text-secondary);margin:4px 0 0;
+  }
+  #view-security-scan .sec-scan-footnote a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3)}
+  #view-security-scan .sec-scan-footnote a:hover{border-bottom-color:var(--gold)}
   @media(max-width:900px){
     #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #view-security-scan .tcx-grid-2{grid-template-columns:1fr}
+    #view-security-scan .tcx-bar-row{grid-template-columns:1fr;gap:6px}
+    #view-security-scan .tcx-bar-pct{text-align:left}
   }
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
@@ -1122,50 +1226,81 @@
 
     <!-- SECURITY SCAN (passive website breakdown) -->
     <section class="view" id="view-security-scan">
-      <div class="section-h" style="margin-bottom:20px">
+      <div class="section-h el-reveal" style="margin-bottom:20px">
         <h2>Security Scan</h2>
-        <div class="meta">Authorized external targets · x402 $0.10</div>
+        <div class="meta">Passive posture · x402 $0.10</div>
       </div>
-      <div class="sec-scan-wrap">
-        <p class="sec-scan-note" style="margin-top:0">Submit a URL you own or are explicitly authorized to assess. Results include readiness scores, HTTP security headers, and prioritized recommendations.</p>
-        <p class="sec-scan-note sec-scan-note--api" style="margin-top:6px">Integrators: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code> · <a href="/docs/api/security" style="color:var(--gold)">API docs</a></p>
-        <div class="sec-scan-form">
-          <div class="sec-scan-field">
-            <label for="sec-scan-url">Website URL</label>
-            <input id="sec-scan-url" type="url" inputmode="url" placeholder="https://api.example.com" autocomplete="off" />
+      <div class="tcx-wrap sec-scan-wrap">
+        <header class="sec-scan-hero el-reveal">
+          <p class="sec-scan-lead">Submit a URL you own or are explicitly authorized to assess. Results include readiness scores, HTTP security headers, and prioritized recommendations.</p>
+          <p class="sec-scan-api-hint">Integrators: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code> · <a href="/docs/api/security">API docs</a></p>
+        </header>
+
+        <section class="tcx-panel sec-scan-input-panel el-reveal" aria-labelledby="sec-scan-input-title">
+          <div class="tcx-panel-head">
+            <div>
+              <p class="tcx-panel-kicker">Target</p>
+              <h3 class="tcx-panel-title" id="sec-scan-input-title">Website audit</h3>
+            </div>
           </div>
-          <div class="sec-scan-actions">
-            <button type="button" class="sec-scan-btn" id="sec-scan-scope-btn">Check scope (free)</button>
-            <button type="button" class="sec-scan-btn" id="sec-scan-self-btn">Scan Concierge (free)</button>
-            <button type="button" class="sec-scan-btn sec-scan-btn--primary" id="sec-scan-run-btn">Run scan ($0.10)</button>
+          <div class="sec-scan-form">
+            <div class="sec-scan-field">
+              <label for="sec-scan-url">Website URL</label>
+              <input id="sec-scan-url" type="url" inputmode="url" placeholder="https://api.example.com" autocomplete="off" />
+            </div>
+            <div class="sec-scan-actions">
+              <button type="button" class="tcx-btn" id="sec-scan-scope-btn">Check scope (free)</button>
+              <button type="button" class="tcx-btn tcx-btn--gold" id="sec-scan-self-btn">Scan Concierge (free)</button>
+              <button type="button" class="tcx-btn tcx-btn--primary" id="sec-scan-run-btn">Run scan ($0.10)</button>
+            </div>
           </div>
-        </div>
+        </section>
+
         <p class="sec-scan-scope-status" id="sec-scan-scope-status" hidden></p>
 
         <div id="sec-scan-results" hidden>
-          <section class="sec-scan-panel" aria-labelledby="sec-scan-summary-title">
-            <p class="sec-scan-panel-kicker">Breakdown</p>
-            <h3 class="sec-scan-panel-title" id="sec-scan-summary-title">Overall posture</h3>
+          <section class="tcx-panel el-reveal" aria-labelledby="sec-scan-summary-title">
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Breakdown</p>
+                <h3 class="tcx-panel-title" id="sec-scan-summary-title">Overall posture</h3>
+              </div>
+            </div>
             <div id="sec-scan-summary"></div>
           </section>
-          <div class="tcx-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-            <section class="sec-scan-panel">
-              <p class="sec-scan-panel-kicker">Readiness</p>
-              <h3 class="sec-scan-panel-title">API dimensions</h3>
+
+          <div class="tcx-grid-2">
+            <section class="tcx-panel el-reveal">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Readiness</p>
+                  <h3 class="tcx-panel-title">API dimensions</h3>
+                </div>
+              </div>
               <div id="sec-scan-dimensions"></div>
             </section>
-            <section class="sec-scan-panel">
-              <p class="sec-scan-panel-kicker">Headers</p>
-              <h3 class="sec-scan-panel-title">HTTP security</h3>
+            <section class="tcx-panel el-reveal">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Headers</p>
+                  <h3 class="tcx-panel-title">HTTP security</h3>
+                </div>
+              </div>
               <div id="sec-scan-headers"></div>
             </section>
           </div>
-          <section class="sec-scan-panel" id="sec-scan-recs-panel" hidden>
-            <p class="sec-scan-panel-kicker">Actions</p>
-            <h3 class="sec-scan-panel-title">Recommendations</h3>
+
+          <section class="tcx-panel el-reveal" id="sec-scan-recs-panel" hidden>
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Actions</p>
+                <h3 class="tcx-panel-title">Recommendations</h3>
+              </div>
+            </div>
             <ul class="sec-scan-recs" id="sec-scan-recs"></ul>
           </section>
-          <p class="sec-scan-note">Passive assessment only — no active exploitation. Full integration details in the <a href="/docs/api/security" style="color:var(--gold)">Security Desk documentation</a>.</p>
+
+          <p class="sec-scan-footnote">Passive assessment only — no active exploitation. Full integration details in the <a href="/docs/api/security">Security Desk documentation</a>.</p>
         </div>
       </div>
     </section>
