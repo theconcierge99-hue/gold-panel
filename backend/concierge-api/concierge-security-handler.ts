@@ -199,7 +199,8 @@ export async function handleConciergeSecurityRoute(
     }
   }
 
-  const selfAuditFree = kind === "security-scan" && preBody && isSelfAuditRequest(preBody);
+  const selfAuditFree =
+    kind === "security-scan" && preBody != null && isSelfAuditRequest(preBody);
 
   let payGate: {
     payer?: string;
@@ -249,19 +250,18 @@ export async function handleConciergeSecurityRoute(
       return jsonResponse(request, { ...scope, error: "Target outside declared allowlist", code: "allowlist_mismatch" }, 400);
     }
 
-    let payload =
-      kind === "security-readiness"
-        ? await runSecurityReadinessAudit(body.target, auditOpts)
-        : kind === "security-headers"
-          ? await runSecurityHeadersAudit(body.target, auditOpts)
-          : await runSecurityScanAudit(body.target, auditOpts);
-
+    let payload: unknown;
     if (kind === "security-scan") {
+      const scan = await runSecurityScanAudit(body.target, auditOpts);
       const accessTier = await resolveScanAccessTier(request, payGate.payer, {
         selfAudit: selfAuditFree,
         devBypass: payGate.payer === "dev-bypass",
       });
-      payload = applyScanTierFilter(payload, accessTier);
+      payload = applyScanTierFilter(scan, accessTier);
+    } else if (kind === "security-readiness") {
+      payload = await runSecurityReadinessAudit(body.target, auditOpts);
+    } else {
+      payload = await runSecurityHeadersAudit(body.target, auditOpts);
     }
 
     const extraHeaders: Record<string, string> = {};
