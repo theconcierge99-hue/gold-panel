@@ -65,7 +65,7 @@ export const X402_OPERATION_TAGS: Record<
 export const X402_SERVICE_NAME = "Concierge Agent";
 
 export const X402_SERVICE_TAGLINE =
-  "Market intelligence as a service — pay-per-call Concierge AI, macro & wire research, DeFi intel APIs, and Lounge RWA signals. USDC on Solana or Base via x402 (MPP-compatible discovery).";
+  "Market intelligence + Security Desk as a service — 21 pay-per-call routes: Concierge AI, macro & wire research, DeFi intel, Lounge RWA signals, and passive security scans. USDC on Solana or Base via x402 (MPP-compatible discovery).";
 
 export function x402ServiceListingMeta(origin: string): {
   serviceName: string;

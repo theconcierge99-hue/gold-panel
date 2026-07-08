@@ -119,12 +119,16 @@ Passive posture audits for **authorized** targets — see [concierge-security.md
 | POST | Price | Purpose |
 |------|-------|---------|
 | `/api/concierge-security-scope` | Free | Scope validation (no fetch) |
-| `/api/concierge-security-scan` | $0.10 | Unified breakdown — grade, readiness, headers, recommendations |
+| `/api/concierge-security-scan` | $0.10 | Unified breakdown — grade, readiness, headers, **Concierge Surface Review**, recommendations |
 | `/api/concierge-security-scan` + `selfAudit: true` on `conc-exe.xyz` | Free | Canonical public self-audit |
 | `/api/concierge-security-readiness` | $0.02 | Scout — API readiness |
 | `/api/concierge-security-headers` | $0.02 | Scout — HTTP security headers |
 
-Agent marketplaces: [Poncho](https://conc-exe.xyz/docs/integration/poncho) discovers routes via x402scan — no Concierge API key.
+**`security-scan` response (summary):** `summary.overallGrade`, `summary.surfaceGrade`, `summary.surfaceBySeverity`, `breakdown.surface.findings[]`, `deskModules[]`, `deskPhases[]`, `access.tier` / `access.liveCeiling` / `access.tcxLaunched`.
+
+**Pre-launch:** Guest depth only (grade + surface severity counts). **Post-TCX:** Deluxe → Executive depth by holder tier; President extended modules stay **Soon** until worker rollout. Env: `SOON_TOKEN_MINT` or `SECURITY_DESK_LIVE_MAX_TIER`.
+
+Agent marketplaces: [Poncho](https://conc-exe.xyz/docs/integration/poncho) discovers routes via x402scan — no Concierge API key. MCP: `security_scan`, `security_readiness`, `security_headers`.
 
 ## Paid endpoints
 

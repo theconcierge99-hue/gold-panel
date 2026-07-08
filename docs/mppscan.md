@@ -33,10 +33,12 @@ Fix OpenAPI until the CLI reports no errors, then:
 pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
 pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-verdict \
   -d '{"message":"Solana DeFi outlook","includeInsider":true}'
+pay --sandbox curl https://conc-exe.xyz/api/concierge-security-headers \
+  -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'
 pay skills search "market intelligence"
 ```
 
-See [paysh.md](paysh.md) · web [/docs/payment/paysh](https://conc-exe.xyz/docs/payment/paysh).
+See [paysh.md](paysh.md) · [concierge-security.md](concierge-security.md) · web [/docs/payment/paysh](https://conc-exe.xyz/docs/payment/paysh).
 
 ### AgentCash / MPPscan
 

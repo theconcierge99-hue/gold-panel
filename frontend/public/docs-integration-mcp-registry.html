@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>MCP Registry — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Intel listed on the Official MCP Registry — xyz.conc-exe/concierge-intel v1.0.1, streamable HTTP at /api/mcp." />
+<meta name="description" content="Concierge Intel + Security Desk on the Official MCP Registry — xyz.conc-exe/concierge-intel, streamable HTTP at /api/mcp with security_scan tools." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/integration/mcp-registry" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -22,14 +22,14 @@
       <h1 class="docs-title">Official MCP Registry</h1>
       <p class="docs-lead">
         <a class="ext" href="https://registry.modelcontextprotocol.io/" target="_blank" rel="noopener">MCP Registry</a> indexes streamable HTTP MCP servers for Claude, Cursor, and other agent runtimes.
-        Concierge Intel is published as <code>xyz.conc-exe/concierge-intel</code> — discovery and paid intel tools at <code>/api/mcp</code>, x402 USDC settlement, no API keys.
+        Concierge is published as <code>xyz.conc-exe/concierge-intel</code> — discovery, paid intel tools, and <strong>Security Desk</strong> tools (<code>security_scan</code>, <code>security_readiness</code>, <code>security_headers</code>) at <code>/api/mcp</code>, x402 USDC settlement, no API keys.
       </p>
 
       <div class="card">
         <p><strong>Status:</strong> <span class="gold-link">Published</span> — v1.0.1</p>
         <p><strong>Listing:</strong> <a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> ↗</a></p>
         <p><strong>Remote URL:</strong> <code>https://conc-exe.xyz/api/mcp</code></p>
-        <p><strong>Agent skill:</strong> <a href="/agent/skills">Agent Skills UI</a> · <a href="/skills/concierge-intel/SKILL.md"><code>/skills/concierge-intel/SKILL.md</code></a> (raw)</p>
+        <p><strong>Agent skills:</strong> <a href="/agent/skills">Agent Skills UI</a> · <a href="/skills/concierge-intel/SKILL.md"><code>concierge-intel</code></a> · <a href="/skills/concierge-security/SKILL.md"><code>concierge-security</code></a></p>
         <p><strong>Source repo:</strong> Not advertised — integrators use conc-exe.xyz discovery only.</p>
       </div>
 
@@ -53,7 +53,9 @@
             <tr><td><code>GET /api/mcp</code></td><td>MCP discovery · JSON-RPC <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code></td></tr>
             <tr><td><code>GET /openapi.json</code></td><td>OpenAPI 3.1 + x402 payment metadata</td></tr>
             <tr><td><code>GET /.well-known/api-catalog</code></td><td>RFC 9727 linkset — links to registry listing</td></tr>
-            <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Agent Skills pattern for sessions</td></tr>
+            <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Intel skill for agent sessions</td></tr>
+            <tr><td><code>GET /skills/concierge-security/SKILL.md</code></td><td>Security Desk skill — scan / scout tools</td></tr>
+            <tr><td>MCP <code>security_scan</code> / <code>security_readiness</code> / <code>security_headers</code></td><td>Passive security tools on the same <code>/api/mcp</code> server</td></tr>
           </tbody>
         </table>
       </div>
@@ -72,6 +74,7 @@ npm run agent-readiness:audit</code></pre>
       <div class="card">
         <ul>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> — structured JSON routes behind MCP tools</li>
+          <li><a href="/docs/api/security" class="gold-link">Security Desk</a> — <code>security_*</code> MCP tools · passive authorized scans</li>
           <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — x402 resource fan-out</li>
           <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — CLI + MCP for paid calls</li>
           <li><a href="/docs/api/agent-readiness" class="gold-link">Agent readiness</a> — audit posture + distribution</li>

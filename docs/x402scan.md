@@ -16,12 +16,18 @@ Implementation: `api/lib/x402-discovery.ts`, handlers `api/well-known-x402.ts`, 
 
 ## Registered resources
 
+Canonical discovery lists **21 paid routes** (intel desks, Concierge chat, Lounge signals, **Security Desk**). Primary examples:
+
 | Name | URL | Price |
 |------|-----|-------|
 | Open news article | `POST /api/news-open` | $0.10 |
 | Concierge AI message | `POST /api/concierge` | $0.10 |
 | Publish creator signal | `POST /api/lounge-signal-publish` | $1.00 |
 | Unlock creator signal | `POST /api/lounge-signal-open` | $0.10 |
+| Security scan (unified) | `POST /api/concierge-security-scan` | $0.10 |
+| Security scout (headers) | `POST /api/concierge-security-headers` | $0.02 |
+
+Full catalog: `/openapi.json` · `/agent/endpoints` · [concierge-security.md](concierge-security.md).
 
 Each 402 response includes:
 

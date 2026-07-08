@@ -22,16 +22,16 @@
       <p class="docs-lead">Tiered pay-per-query. No subscriptions. No API keys.</p>
 
       <div class="card">
-        <p><strong>18 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
+        <p><strong>21 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
         <table>
           <thead><tr><th>Tier</th><th>USDC</th><th>Routes</th></tr></thead>
           <tbody>
-            <tr><td><strong>Raw</strong></td><td>0.02</td><td>TVL, macro, wire, whales</td></tr>
-            <tr><td><strong>Signal</strong></td><td>0.10</td><td>Concierge, yields, Meteora, wallet, verdict, alpha desks, scalp, news, signal unlock</td></tr>
+            <tr><td><strong>Raw</strong></td><td>0.02</td><td>TVL, macro, wire, whales · security readiness · security headers</td></tr>
+            <tr><td><strong>Signal</strong></td><td>0.10</td><td>Concierge, yields, Meteora, wallet, verdict, alpha desks, scalp, news, signal unlock · <strong>security-scan</strong></td></tr>
             <tr><td><strong>Bundle</strong></td><td>0.25</td><td>Desk brief, A2A pipeline (macro + Meteora + verdict + handoff)</td></tr>
           </tbody>
         </table>
-        <p class="note">Post-launch: pay with <strong>TCX</strong> at a holder discount, or use <code>X-Soon-Holder-Wallet</code> for free raw-tier calls (see <a href="/docs/launch" class="gold-link">Launch playbook</a>).</p>
+        <p class="note">Post-launch: pay with <strong>TCX</strong> at a holder discount, or use <code>X-Soon-Holder-Wallet</code> for free raw-tier / security scout calls (see <a href="/docs/launch" class="gold-link">Launch playbook</a>). Security Desk tiers: <a href="/docs/api/security" class="gold-link">/docs/api/security</a>.</p>
       </div>
 
       <h2 class="docs-h2">Raw tier — $0.02</h2>
@@ -43,6 +43,8 @@
             <tr><td><code>POST /api/concierge-intel-macro</code></td><td>0.02</td><td><code>20000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-wire</code></td><td>0.02</td><td><code>20000</code></td></tr>
             <tr><td><code>POST /api/concierge-intel-whales</code></td><td>0.02</td><td><code>20000</code></td></tr>
+            <tr><td><code>POST /api/concierge-security-readiness</code></td><td>0.02</td><td><code>20000</code></td></tr>
+            <tr><td><code>POST /api/concierge-security-headers</code></td><td>0.02</td><td><code>20000</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -63,6 +65,7 @@
             <tr><td><code>POST /api/concierge-intel-scalp</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/news-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
             <tr><td><code>POST /api/lounge-signal-open</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/concierge-security-scan</code></td><td>0.10</td><td><code>100000</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -93,11 +96,14 @@
       <div class="card">
         <ul>
           <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
+          <li><code>POST /api/concierge-security-scope</code> — Security Desk scope check (no fetch)</li>
+          <li><code>POST /api/concierge-security-scan</code> + <code>selfAudit: true</code> — free <code>conc-exe.xyz</code> self-audit</li>
           <li><code>GET /api/concierge-intel-accuracy</code> — verdict accuracy leaderboard</li>
           <li><code>GET /api/agent-a2a-mesh</code> — A2A pipelines and registered peer agents</li>
-          <li><code>GET /api/mcp</code> · <code>POST /api/mcp</code> — MCP tools/list, tools/call</li>
+          <li><code>GET /api/mcp</code> · <code>POST /api/mcp</code> — MCP tools/list, tools/call (incl. <code>security_*</code>)</li>
           <li><code>POST /api/agent-identity</code> · <code>GET /api/agent-identity</code></li>
         </ul>
+        <p class="note"><a href="/docs/api/security" class="gold-link">Security Desk guide</a> · Lounge <a href="/lounge#security-scan" class="gold-link">/lounge#security-scan</a></p>
       </div>
 
       <h2 class="docs-h2">Token Pay (native SPL)</h2>
@@ -109,6 +115,7 @@
       <div class="cta-row">
         <a class="btn gold" href="/agent/endpoints">Endpoint catalog</a>
         <a class="btn" href="/docs/api/intel">Intel APIs</a>
+        <a class="btn" href="/docs/api/security">Security Desk</a>
         <a class="btn" href="/docs/payment/x402">x402 Protocol</a>
         <a class="btn" href="/docs/quickstart">Quickstart</a>
       </div>

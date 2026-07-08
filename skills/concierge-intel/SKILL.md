@@ -73,6 +73,7 @@ Register `agt_…` and send `X-Agent-Id` header — see `/docs/api/agent-identit
 ## Docs
 
 - Intel APIs (A2A): `/docs/api/intel#a2a`
+- Security Desk (passive scan): `/docs/api/security` · skill `/skills/concierge-security/SKILL.md`
 - Agent card (A2A): `/docs/integration/agent-card`
 - Agent readiness audit: `/docs/api/agent-readiness`
 - Builders: `/docs/builders`

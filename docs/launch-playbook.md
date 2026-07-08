@@ -179,9 +179,11 @@ curl.exe -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl `
 
 | Tier | Min hold | Live now (post env) | Phased |
 |------|----------|---------------------|--------|
-| **Deluxe** | 50,000 | SOON checkout ~−30% · 5 free raw/day · public accuracy + MCP | Concierge credits · profile badge (2026 · Q4) |
-| **Executive** | 250,000 | Inherits Deluxe | Discover badge · signal credits · transparency early access (2027 · Q1) |
-| **President** | 1,000,000 | — | Webhook beta · rate headroom · **advisory governance vote** (2027 · Q2+) |
+| **Deluxe** | 50,000 | SOON checkout ~−30% · 5 free raw/day · **3 free security scout/day** · public accuracy + MCP | Concierge credits · profile badge (2026 · Q4) · Security Desk Deluxe depth |
+| **Executive** | 250,000 | Inherits Deluxe · Security Desk Executive depth (post-launch) | Discover badge · signal credits · transparency early access (2027 · Q1) |
+| **President** | 1,000,000 | — | Webhook beta · rate headroom · **advisory governance vote** (2027 · Q2+) · extended Security Desk modules (Soon until worker) |
+
+**Security Desk unlock:** set `SOON_TOKEN_MINT` (or `SECURITY_DESK_LIVE_MAX_TIER=executive`). Pre-launch all external scans are **Guest** depth. Scout free allowance: `SOON_SECURITY_SCOUT_FREE_PER_DAY` via `X-Soon-Holder-Wallet`. See [concierge-security.md](concierge-security.md).
 
 Governance is snapshot-weighted and **non-binding** — quarterly signal on treasury grants, intel roadmap priority, and buyback/LP emphasis within published policy.
 
@@ -211,6 +213,8 @@ Governance is snapshot-weighted and **non-binding** — quarterly signal on trea
 | `SOON_USDC_RATE` | optional | **set fallback** |
 | `TOKEN_PAY_SOON_COMING_SOON` | coming-soon message | empty |
 | `TOKEN_PAY_DEFAULT_MERCHANT` | `soon` | `soon` |
+| `SECURITY_DESK_LIVE_MAX_TIER` | unset (Guest ceiling) | optional `executive` to max Hobby desk depth |
+| `SOON_SECURITY_SCOUT_FREE_PER_DAY` | unset / default | 3 free scout audits/day for Deluxe+ |
 
 Full list: [configuration.md](configuration.md#soon-token--token-pay).
 

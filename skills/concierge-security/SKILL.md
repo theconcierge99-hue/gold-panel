@@ -63,11 +63,31 @@ Scout routes only — 3 free/day on `security-readiness` / `security-headers` wi
 | Tool / path | Price | Output |
 |-------------|-------|--------|
 | `POST /api/concierge-security-scope` | Free | Platform guard + allowlist match |
-| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, recommendations |
+| `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, Surface Review, `deskModules[]` |
 | `POST /api/concierge-security-scan` + `selfAudit: true` | Free | `conc-exe.xyz` self-audit only |
 | `POST /api/concierge-security-readiness` | $0.02 | OpenAPI, discovery, headers, MCP scores |
 | `POST /api/concierge-security-headers` | $0.02 | Security header checklist + grade |
 
+## Tiered desk (breakdown depth)
+
+| Tier | Depth | When |
+|------|-------|------|
+| **Guest** | Grade + surface severity counts | **Live now** (pre-TCX ceiling) |
+| **Deluxe** | + readiness scores, header checklist, finding titles | After TCX launch |
+| **Executive** | + full evidence, path probes, remediation | Hobby ceiling after launch |
+| **President** | Executive + extended modules | Extended modules remain **Soon** |
+
+Response: `access.tier`, `access.liveCeiling`, `access.tcxLaunched`, `deskModules[]`, `deskPhases[]`. Env unlock: `SOON_TOKEN_MINT` or `SECURITY_DESK_LIVE_MAX_TIER`.
+
+## Concierge Surface Review
+
+Passive exposure findings on `security-scan`: `summary.surfaceGrade`, `summary.surfaceBySeverity`, `breakdown.surface.findings[]`. Probes include `/.env`, `/.git/HEAD`, `security.txt`, swagger/docs paths — no exploit payloads.
+
 ## MCP
 
 `POST /api/mcp` — tools `security_scan`, `security_readiness`, `security_headers` (underscore names).
+
+## Related
+
+- Intel desks: `/skills/concierge-intel/SKILL.md`
+- Docs: `https://conc-exe.xyz/docs/api/security`

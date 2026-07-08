@@ -2,8 +2,9 @@
 
 Integrate **Executive Lounge Concierge** from any bot, backend, or workflow using only **HTTPS + x402 USDC**. No repository access is required.
 
-**Web guide:** `https://conc-exe.xyz/docs/agents`  
-**Base URL:** `https://conc-exe.xyz`
+**Web guide:** `https://conc-exe.xyz/docs/builders` (preferred) · legacy `/docs/agents`  
+**Base URL:** `https://conc-exe.xyz`  
+**Endpoint catalog:** `https://conc-exe.xyz/agent/endpoints` · **OpenAPI:** `/openapi.json`
 
 ## Agent identity (A2A)
 
@@ -11,7 +12,7 @@ Each agent can register **`agt_…`** with Solana/Base wallets for discovery and
 
 ## Concierge Intel APIs
 
-Structured JSON per desk function (no full chat) — **0.1 USDC** each:
+Structured JSON per desk function (no full chat) — raw **$0.02** / signal **$0.10** / bundle **$0.25**:
 
 | Endpoint | Data |
 |----------|------|
@@ -24,14 +25,28 @@ Structured JSON per desk function (no full chat) — **0.1 USDC** each:
 | `POST /api/concierge-intel-listing` | Listing candidates (same body as airdrop) |
 | `POST /api/concierge-intel-momentum` | Momentum / large-move candidates (same body) |
 
-**Web:** `https://conc-exe.xyz/docs/intel` · [concierge-intel.md](concierge-intel.md)
+**Web:** `https://conc-exe.xyz/docs/api/intel` · [concierge-intel.md](concierge-intel.md)
+
+## Security Desk
+
+Passive authorized website audits — **no exploitation**. Full guide: [concierge-security.md](concierge-security.md) · web `/docs/api/security`.
+
+| Endpoint | Price | Purpose |
+|----------|-------|---------|
+| `POST /api/concierge-security-scope` | Free | Scope + allowlist (no fetch) |
+| `POST /api/concierge-security-scan` | $0.10 | Unified breakdown (grade, headers, Surface Review) |
+| `POST /api/concierge-security-scan` + `selfAudit: true` | Free | `conc-exe.xyz` self-audit only |
+| `POST /api/concierge-security-readiness` | $0.02 | Scout — readiness |
+| `POST /api/concierge-security-headers` | $0.02 | Scout — headers |
+
+MCP: `security_scan`, `security_readiness`, `security_headers`. Skill: `/skills/concierge-security/SKILL.md`.
 
 ## Quick reference
 
 | Item | Value |
 |------|--------|
-| Endpoint | `POST /api/concierge` (or Intel routes above) |
-| Price | 0.1 USDC per request |
+| Endpoints | Chat `/api/concierge` · Intel `/api/concierge-intel-*` · Security `/api/concierge-security-*` (**21 paid** + free scope/self-audit) |
+| Price | $0.02–$0.25 per paid call (security scout $0.02 · scan $0.10) |
 | Auth | x402 payment (`PAYMENT-SIGNATURE` header) |
 | Discovery | `GET /openapi.json`, `GET /.well-known/x402`, `GET /api/x402-config` |
 
@@ -81,5 +96,8 @@ Server-side agents: no CORS. Browser apps on other domains: host must list origi
 ## Related
 
 - [concierge-ai.md](concierge-ai.md) — modes, prompts, language  
+- [concierge-security.md](concierge-security.md) — Security Desk  
+- [concierge-intel.md](concierge-intel.md) — Intel desks  
 - [x402-payments.md](x402-payments.md) — facilitator, networks  
 - [api-reference.md](api-reference.md) — all routes  
+- [builders](https://conc-exe.xyz/docs/builders) — public integrator hub  

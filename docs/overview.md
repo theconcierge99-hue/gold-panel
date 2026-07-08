@@ -14,6 +14,8 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/docs/agents` | Concierge API for agents & integrators (x402) |
 | `https://your-domain.com/docs/agent-identity` | Agent identity (`agt_…`), wallets, agent cards |
 | `https://your-domain.com/docs/intel` | Concierge Intel APIs (macro, wire, TVL, yields, whales, wallet, verdict, alpha) |
+| `https://your-domain.com/docs/api/security` | Security Desk — passive website scan, scout routes, self-audit |
+| `https://your-domain.com/lounge#security-scan` | Executive Lounge Security Scan UI |
 | `https://your-domain.com/deploy-version.txt` | Deployed git commit (verify production build) |
 | `https://your-domain.com/api/market` | Free headline + signal feed (JSON) |
 | `https://your-domain.com/api/x402-config` | Public payment + RWA readiness flags |
@@ -22,7 +24,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/docs/builders` | Builder integration guide — x402, OpenAPI, code examples |
 | `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, 21-route structure |
 | `https://your-domain.com/docs/payment/paysh` | pay.sh CLI catalog — `pay curl`, Claude/Codex MCP, pay-skills listing |
-| `https://your-domain.com/docs/integration/poncho` | Poncho marketplace — macro, wire, intel via x402 (no API key) |
+| `https://your-domain.com/docs/integration/poncho` | Poncho marketplace — macro, wire, intel, Security Desk via x402 (no API key) |
 
 ## Core features
 

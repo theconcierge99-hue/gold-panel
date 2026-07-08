@@ -31,6 +31,8 @@
       <li><a href="#self-audit">Concierge self-audit</a></li>
       <li><a href="#scope">Scope validation</a></li>
       <li><a href="#scan">Website scan</a></li>
+      <li><a href="#surface">Concierge Surface Review</a></li>
+      <li><a href="#desk">Desk tiers &amp; modules</a></li>
       <li><a href="#scout">Scout routes</a></li>
       <li><a href="#guard">Platform guard</a></li>
       <li><a href="#mcp">MCP</a></li>
@@ -44,7 +46,7 @@
         <thead><tr><th>Endpoint</th><th>Price</th><th>Purpose</th></tr></thead>
         <tbody>
           <tr><td><code>POST /api/concierge-security-scope</code></td><td>Free</td><td>Validate target + allowlist (no fetch)</td></tr>
-          <tr><td><code>POST /api/concierge-security-scan</code></td><td>$0.10</td><td>Unified breakdown — grade, readiness, headers, recommendations</td></tr>
+          <tr><td><code>POST /api/concierge-security-scan</code></td><td>$0.10</td><td>Unified breakdown — grade, readiness, headers, <strong>Concierge Surface Review</strong>, recommendations</td></tr>
           <tr><td><code>POST /api/concierge-security-scan</code> + <code>selfAudit: true</code></td><td>Free</td><td>Canonical <code>conc-exe.xyz</code> self-audit only</td></tr>
           <tr><td><code>POST /api/concierge-security-readiness</code></td><td>$0.02</td><td>Passive agent-readiness subset</td></tr>
           <tr><td><code>POST /api/concierge-security-headers</code></td><td>$0.02</td><td>Security header checklist</td></tr>
@@ -87,9 +89,53 @@
   <section id="scan">
     <h2>Website scan — <code>POST /api/concierge-security-scan</code></h2>
     <div class="card">
-      <p>Returns <code>summary.overallGrade</code>, Guest surface summary, and <code>deskModules[]</code> (Deeper TCX tiers marked <strong>Soon</strong> until token launch). Pay-per-call — holder depth switches on after TCX launch.</p>
+      <p>Returns <code>summary.overallGrade</code>, readiness, headers, Surface Review, <code>deskModules[]</code> / <code>deskPhases[]</code>, and <code>access.*</code> (tier, live ceiling, TCX launched). Pre-launch: <strong>Guest</strong> depth only — deeper TCX tiers marked <strong>Soon</strong> until mint / <code>SECURITY_DESK_LIVE_MAX_TIER</code>.</p>
 <pre><code>pay curl https://conc-exe.xyz/api/concierge-security-scan \
   -d '{"target":"https://api.example.com","allowlist":["*.example.com"],"authorized":true}'</code></pre>
+      <p class="note">Body: <code>target</code> (https), <code>allowlist</code>, <code>authorized: true</code>. Optional <code>selfAudit: true</code> for free <code>conc-exe.xyz</code> only.</p>
+    </div>
+  </section>
+
+  <section id="surface">
+    <h2>Concierge Surface Review</h2>
+    <div class="card">
+      <p>Passive exposure breakdown (no exploit payloads): transport, cookies, CORS, disclosure headers, common sensitive paths.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>summary.surfaceGrade</code></td><td><code>minimal</code> · <code>clear</code> · <code>moderate</code> · <code>watch</code> · <code>elevated</code></td></tr>
+          <tr><td><code>summary.surfaceFindings</code></td><td>Total passive findings</td></tr>
+          <tr><td><code>breakdown.surface.findings[]</code></td><td><code>severity</code>, <code>title</code>, <code>detail</code>, <code>remediation</code></td></tr>
+        </tbody>
+      </table>
+      <p class="note">Probes (Hobby-safe, parallel): <code>/.env</code>, <code>/.git/HEAD</code>, <code>security.txt</code>, <code>robots.txt</code>, swagger/docs paths, homepage headers.</p>
+    </div>
+  </section>
+
+  <section id="desk">
+    <h2>Desk tiers &amp; modules</h2>
+    <div class="card">
+      <p>Full module map in response as <code>deskModules[]</code> and <code>deskPhases[]</code> (Concierge-branded only).</p>
+      <h3 class="docs-h3">Pre-launch (TCX not live)</h3>
+      <table>
+        <thead><tr><th>Live now</th><th>Waitlisted as Soon</th></tr></thead>
+        <tbody>
+          <tr><td>Guest breakdown (grade + surface severity counts)</td><td>Deluxe / Executive / President depth</td></tr>
+          <tr><td>Scope + attestation</td><td>Extended recon, client-side, playbooks, PDF/report export</td></tr>
+        </tbody>
+      </table>
+      <h3 class="docs-h3">Post-launch ceilings</h3>
+      <table>
+        <thead><tr><th>Tier</th><th>Breakdown depth</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Guest</strong></td><td>Grade + surface severity counts</td><td>Live</td></tr>
+          <tr><td><strong>Deluxe</strong></td><td>+ readiness scores, header checklist, finding titles</td><td>After TCX launch</td></tr>
+          <tr><td><strong>Executive</strong></td><td>+ full evidence, path probes, remediation</td><td>Hobby ceiling after launch</td></tr>
+          <tr><td><strong>President</strong></td><td>Executive + extended desk modules</td><td>Extended remain Soon until worker</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Unlock richer depth: set <code>SOON_TOKEN_MINT</code> or <code>SECURITY_DESK_LIVE_MAX_TIER=executive</code>. Response: <code>access.tier</code>, <code>access.liveCeiling</code>, <code>access.tcxLaunched</code>, <code>access.legalNotice</code>.</p>
+      <p><strong>Legal:</strong> Passive recon only — caller attests authorization (<code>authorized: true</code>).</p>
     </div>
   </section>
 
