@@ -18,6 +18,7 @@ Built as static HTML under `public/` with shared layout (`public/css/docs-site.c
 | [getting-started.md](getting-started.md) | Local dev setup |
 | [overview.md](overview.md) | Product overview |
 | [concierge-ai.md](concierge-ai.md) | Concierge modes and prompts |
+| [integration-hyre.md](integration-hyre.md) | HYRE LLM Gateway partner integration |
 | [concierge-intel.md](concierge-intel.md) | Intel API (markdown mirror) |
 | [agent-identity.md](agent-identity.md) | Agent registry |
 | [agents.md](agents.md) | Integrator guide (markdown mirror) |

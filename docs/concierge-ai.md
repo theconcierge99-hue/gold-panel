@@ -124,7 +124,7 @@ Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 - `gemini-2.5-flash-lite`
 - `gemini-2.0-flash`
 
-GLM adapter: `backend/concierge-api/concierge-glm.ts` · HYRE adapter: `concierge-hyre.ts` · registry: `concierge-llm-models.ts`
+GLM adapter: `backend/concierge-api/concierge-glm.ts` · HYRE adapter: `concierge-hyre.ts` · registry: `concierge-llm-models.ts` · integration guide: [/docs/integration/hyre](https://conc-exe.xyz/docs/integration/hyre) (`docs/integration-hyre.md`)
 
 ## External integration (agents)
 

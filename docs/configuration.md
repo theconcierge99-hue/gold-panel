@@ -14,7 +14,7 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 |----------|-------------|
 | `GLM_API_KEY` | Z.ai API key for optional `agentModel: "glm-4.7-flash"` on `POST /api/concierge` chat. Alias: `ZAI_API_KEY`. Falls back to Gemini if unset. |
 | `GLM_API_BASE_URL` | Default `https://api.z.ai/api/paas/v4` — override only if Z.ai changes endpoint. |
-| `HYRE_GATEWAY_KEY` | HYRE LLM Gateway partner key (`hyre_gw_*`) for `agentModel: "hyre-deepseek-v4-flash"` or `"hyre-glm-4.7-flash"`. Alias: `HYRE_GATEWAY_API_KEY`. Request access at [docs.hyreagent.fun/gateway/get-access](https://docs.hyreagent.fun/gateway/get-access). Falls back to Gemini if unset. |
+| `HYRE_GATEWAY_KEY` | HYRE LLM Gateway partner key (`hyre_gw_*`) for `agentModel: "hyre-deepseek-v4-flash"` or `"hyre-glm-4.7-flash"`. Alias: `HYRE_GATEWAY_API_KEY`. Request access at [docs.hyreagent.fun/gateway/get-access](https://docs.hyreagent.fun/gateway/get-access). Integration guide: [conc-exe.xyz/docs/integration/hyre](https://conc-exe.xyz/docs/integration/hyre). Falls back to Gemini if unset. |
 | `HYRE_GATEWAY_BASE_URL` | Default `https://gw.hyreagent.fun/api/inference/v1`. |
 
 ## x402 payments

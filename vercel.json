@@ -201,6 +201,10 @@
       "destination": "/docs-integration-poncho.html"
     },
     {
+      "source": "/docs/integration/hyre",
+      "destination": "/docs-integration-hyre.html"
+    },
+    {
       "source": "/docs/integration/zauth",
       "destination": "/docs-integration-zauth.html"
     },

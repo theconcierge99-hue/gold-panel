@@ -24,6 +24,7 @@ const STACK_PARTNERS = [
   { name: "x402", logo: "/images/integrations/x402.svg", href: "/docs/payment/x402", external: false },
   { name: "Metaplex", logo: "/images/integrations/openapi.svg", href: "/docs/integration/metaplex", external: false },
   { name: "Privy", logo: "/images/integrations/privy.svg", href: "/docs/integration/privy", external: false },
+  { name: "HYRE", logo: "https://docs.hyreagent.fun/favicon.ico", href: "/docs/integration/hyre", external: false },
   { name: "Poncho", logo: "/images/integrations/poncho.png", href: "/docs/integration/poncho", external: false },
 ];
 

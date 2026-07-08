@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
+<title>HYRE Gateway — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent × HYRE LLM Gateway — DeepSeek V4 Flash and GLM 4.7 Flash for pay-per-call chat via OpenAI-compatible inference." />
+<meta property="og:image" content="https://conc-exe.xyz/images/the-concierge-logo.png" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/hyre" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body class="el-premium">
+<div class="docs-layout" data-docs-page="integration-hyre">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <div class="docs-integration-brand">
+        <img class="int-partner-logo--round" src="https://docs.hyreagent.fun/favicon.ico" alt="HYRE" width="52" height="52" />
+        <h1 class="docs-title">HYRE Gateway</h1>
+      </div>
+      <p class="docs-lead">
+        <a class="ext" href="https://docs.hyreagent.fun/gateway/get-access" target="_blank" rel="noopener">HYRE LLM Gateway</a> routes Concierge chat through OpenAI-compatible inference — <strong>DeepSeek V4 Flash</strong> and <strong>GLM 4.7 Flash</strong> on the same x402 pay-per-call stack. Pick a model in <a href="/lounge" class="gold-link">Executive Lounge</a> or pass <code>agentModel</code> on <code>POST /api/concierge</code>.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live on <code>conc-exe.xyz</code> · Executive Lounge model picker + API</p>
+        <p><strong>Gateway base:</strong> <code>https://gw.hyreagent.fun/api/inference/v1</code></p>
+        <p><strong>Partner access:</strong> <a class="ext" href="https://docs.hyreagent.fun/gateway/get-access" target="_blank" rel="noopener">docs.hyreagent.fun/gateway/get-access ↗</a></p>
+        <p><strong>Concierge adapter:</strong> <code>backend/concierge-api/concierge-hyre.ts</code></p>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="card">
+        <ol>
+          <li>Operator sets <code>HYRE_GATEWAY_KEY</code> (<code>hyre_gw_*</code>) on the Concierge deployment.</li>
+          <li>Client selects <code>hyre-deepseek-v4-flash</code> or <code>hyre-glm-4.7-flash</code> in Lounge, or sends <code>agentModel</code> in the chat body.</li>
+          <li>Concierge maps the id to HYRE catalog models and calls <code>POST /chat/completions</code> on the gateway.</li>
+          <li>x402 USDC (or Token Pay) settles the Concierge route — consumers do <strong>not</strong> need a separate HYRE key when calling production.</li>
+          <li>On gateway error or missing operator key, Concierge falls back to Gemini (<code>modelFallback: true</code>).</li>
+        </ol>
+        <p class="note">Image, enhance, and trading-plan modes always use Gemini. HYRE models apply to <code>mode: "chat"</code> only.</p>
+      </div>
+
+      <h2 class="docs-h2">Model map</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th><code>agentModel</code></th><th>HYRE catalog id</th><th>Lounge label</th></tr></thead>
+          <tbody>
+            <tr><td><code>hyre-deepseek-v4-flash</code></td><td><code>deepseek-ai/DeepSeek-V4-Flash</code></td><td>DeepSeek V4 Flash</td></tr>
+            <tr><td><code>hyre-glm-4.7-flash</code></td><td><code>zai-org/GLM-4.7-Flash</code></td><td>GLM 4.7 Flash</td></tr>
+          </tbody>
+        </table>
+        <p>Aliases accepted in the API: <code>hyre-deepseek</code>, <code>deepseek-v4-flash</code>, <code>hyre-glm</code>. Registry: <code>concierge-llm-models.ts</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Configuration (operators)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>HYRE_GATEWAY_KEY</code></td><td>Partner gateway key (<code>hyre_gw_*</code>) — required for HYRE models on your deploy</td></tr>
+            <tr><td><code>HYRE_GATEWAY_API_KEY</code></td><td>Alias for <code>HYRE_GATEWAY_KEY</code></td></tr>
+            <tr><td><code>HYRE_GATEWAY_BASE_URL</code></td><td>Override gateway URL (default <code>https://gw.hyreagent.fun/api/inference/v1</code>)</td></tr>
+          </tbody>
+        </table>
+        <p>See repo <code>docs/configuration.md</code> and <code>.env.example</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Example API call</h2>
+      <div class="card">
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "chat",
+    "message": "Summarize BTC vs ETH momentum this week.",
+    "history": [],
+    "agentModel": "hyre-deepseek-v4-flash"
+  }'</code></pre>
+        <p>Swap <code>agentModel</code> to <code>hyre-glm-4.7-flash</code> for GLM via HYRE. Expect HTML in <code>reply</code> and <code>modelUsed</code> reflecting the upstream model when HYRE succeeds.</p>
+      </div>
+
+      <h2 class="docs-h2">Limits</h2>
+      <div class="card">
+        <ul>
+          <li>HYRE/GLM chat paths use a tighter LLM timeout so intel prefetch + x402 fit Vercel Edge ~30s.</li>
+          <li>For structured JSON desks (macro, wire, DeFi intel), use dedicated <a href="/docs/api/intel" class="gold-link">Intel APIs</a> — faster and model-agnostic.</li>
+          <li>Default remains <code>gemini</code> when <code>agentModel</code> is omitted.</li>
+        </ul>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/concierge" class="gold-link">Concierge Chat API</a> — <code>agentModel</code> and response shape</li>
+          <li><a href="/docs/integration/poncho" class="gold-link">Poncho</a> — marketplace consumers can request HYRE models on chat route</li>
+          <li><a href="/docs/payment/x402" class="gold-link">x402 Protocol</a></li>
+          <li><a class="ext" href="https://docs.hyreagent.fun/gateway/get-access" target="_blank" rel="noopener">HYRE Gateway access ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/lounge">Open Executive Lounge</a>
+        <a class="btn" href="https://docs.hyreagent.fun/gateway/get-access" target="_blank" rel="noopener">HYRE Gateway ↗</a>
+        <a class="btn" href="/docs/api/concierge">Chat API</a>
+      </div>
+      <p class="docs-foot">Concierge Agent × HYRE Gateway · <a href="https://hyreagent.fun/" class="ext" target="_blank" rel="noopener">hyreagent.fun</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

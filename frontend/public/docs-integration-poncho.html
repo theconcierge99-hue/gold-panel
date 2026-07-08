@@ -54,7 +54,7 @@
           <tbody>
             <tr><td><code>POST /api/concierge-intel-macro</code></td><td>SPX, VIX, DXY, gold, BTC/ETH, Fear &amp; Greed, Treasury yields, central-bank calendar</td></tr>
             <tr><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest — live RSS + Lounge memory; optional <code>category</code> / <code>message</code></td></tr>
-            <tr><td><code>POST /api/concierge</code></td><td>Natural-language research chat (Gemini or GLM-4.7 Flash)</td></tr>
+            <tr><td><code>POST /api/concierge</code></td><td>Natural-language research chat (Gemini, GLM-4.7 Flash, or HYRE Gateway models)</td></tr>
             <tr><td><code>POST /api/news-open</code></td><td>Unlock full article URL from the wire</td></tr>
           </tbody>
         </table>
@@ -85,6 +85,7 @@ curl -s https://conc-exe.xyz/openapi.json | jq '.paths | keys | length'</code></
       <div class="card">
         <ul>
           <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — discovery registry Poncho uses</li>
+          <li><a href="/docs/integration/hyre" class="gold-link">HYRE Gateway</a> — optional chat models on <code>/api/concierge</code></li>
           <li><a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></li>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a></li>
           <li><a href="/docs/builders" class="gold-link">For Builders</a></li>
