@@ -822,7 +822,8 @@
   #view-security-scan .sec-scan-table td.bad{color:#e85d4a}
   #view-security-scan .sec-scan-recs{margin:0;padding-left:18px;font-size:12px;color:var(--text-secondary)}
   #view-security-scan .sec-scan-recs li{margin-bottom:6px}
-  #view-security-scan .sec-scan-note{font-size:11px;color:var(--text-muted);margin:12px 0 0}
+  #view-security-scan .sec-scan-note{font-size:11px;color:var(--text-muted);margin:12px 0 0;line-height:1.55}
+  #view-security-scan .sec-scan-note--api{font-size:10px;letter-spacing:.02em}
   @media(max-width:900px){
     #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
@@ -1123,10 +1124,11 @@
     <section class="view" id="view-security-scan">
       <div class="section-h" style="margin-bottom:20px">
         <h2>Security Scan</h2>
-        <div class="meta">Passive desk · x402 $0.10</div>
+        <div class="meta">Authorized external targets · x402 $0.10</div>
       </div>
       <div class="sec-scan-wrap">
-        <p class="sec-scan-note" style="margin-top:0">Enter a website you own or have permission to test. Concierge infrastructure cannot be scanned. Developers: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code>.</p>
+        <p class="sec-scan-note" style="margin-top:0">Submit a URL you own or are explicitly authorized to assess. Results include readiness scores, HTTP security headers, and prioritized recommendations.</p>
+        <p class="sec-scan-note sec-scan-note--api" style="margin-top:6px">Integrators: <code>POST /api/concierge-security-scan</code> · MCP <code>security_scan</code> · <a href="/docs/api/security" style="color:var(--gold)">API docs</a></p>
         <div class="sec-scan-form">
           <div class="sec-scan-field">
             <label for="sec-scan-url">Website URL</label>
@@ -1162,7 +1164,7 @@
             <h3 class="sec-scan-panel-title">Recommendations</h3>
             <ul class="sec-scan-recs" id="sec-scan-recs"></ul>
           </section>
-          <p class="sec-scan-note">Passive audit only — no exploitation. For integrators: <a href="/docs/api/security" style="color:var(--gold)">Security Desk docs →</a></p>
+          <p class="sec-scan-note">Passive assessment only — no active exploitation. Full integration details in the <a href="/docs/api/security" style="color:var(--gold)">Security Desk documentation</a>.</p>
         </div>
       </div>
     </section>

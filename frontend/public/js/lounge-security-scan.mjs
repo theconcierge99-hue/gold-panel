@@ -131,7 +131,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
       });
       const data = await res.json();
       if (res.status === 403) {
-        setScopeStatus("Target blocked — Concierge infrastructure cannot be scanned", "bad");
+        setScopeStatus("This URL is not in an authorized audit scope", "bad");
         return false;
       }
       if (!res.ok || !data.ok) {
