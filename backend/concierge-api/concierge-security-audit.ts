@@ -9,12 +9,19 @@ import {
   validateScopeAllowlist,
   type NormalizedSecurityTarget,
   type SecurityAccessTier,
+  type SecurityScopeOptions,
 } from "./concierge-security-scope";
 
 const FETCH_TIMEOUT_MS = 8_000;
 const MAX_REDIRECTS = 3;
 
-async function safeFetchProbe(pathOrUrl: string, baseOrigin?: string): Promise<FetchProbe> {
+type SecurityAuditOptions = SecurityScopeOptions;
+
+async function safeFetchProbe(
+  pathOrUrl: string,
+  baseOrigin?: string,
+  options?: SecurityAuditOptions,
+): Promise<FetchProbe> {
   let current = pathOrUrl.startsWith("http")
     ? pathOrUrl
     : new URL(pathOrUrl, baseOrigin ?? "https://invalid.invalid").toString();
@@ -22,7 +29,7 @@ async function safeFetchProbe(pathOrUrl: string, baseOrigin?: string): Promise<F
   try {
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
       const target = normalizeSecurityTarget(current);
-      assertOutOfPlatformScope(target);
+      assertOutOfPlatformScope(target, undefined, options);
 
       const res = await fetch(current, {
         redirect: "manual",
@@ -119,6 +126,10 @@ async function fetchProbe(url: string, init?: RequestInit): Promise<FetchProbe> 
     }
   }
   return safeFetchProbe(url);
+}
+
+function auditOptionsFromSelf(selfAudit?: boolean): SecurityAuditOptions | undefined {
+  return selfAudit ? { selfAudit: true } : undefined;
 }
 
 function collectOperations(openapi: Record<string, unknown> | null) {
@@ -220,9 +231,12 @@ export type SecurityReadinessReport = {
   disclaimer: string;
 };
 
-export async function runSecurityReadinessAudit(targetRaw: string): Promise<SecurityReadinessReport> {
+export async function runSecurityReadinessAudit(
+  targetRaw: string,
+  options?: SecurityAuditOptions,
+): Promise<SecurityReadinessReport> {
   const target = normalizeSecurityTarget(targetRaw);
-  assertOutOfPlatformScope(target);
+  assertOutOfPlatformScope(target, undefined, options);
 
   const origin = target.origin;
   const probes: Record<string, unknown> = { origin };
@@ -232,13 +246,13 @@ export async function runSecurityReadinessAudit(targetRaw: string): Promise<Secu
 
   const [openApiProbe, x402Probe, agentCardProbe, llmsProbe, catalogProbe, homeProbe, mcpProbe] =
     await Promise.all([
-      safeFetchProbe(`${origin}/openapi.json`),
-      safeFetchProbe("/.well-known/x402", origin),
-      safeFetchProbe("/.well-known/agent-card.json", origin),
-      safeFetchProbe("/llms.txt", origin),
-      safeFetchProbe("/.well-known/api-catalog", origin),
-      safeFetchProbe("/", origin),
-      safeFetchProbe("/api/mcp", origin),
+      safeFetchProbe(`${origin}/openapi.json`, undefined, options),
+      safeFetchProbe("/.well-known/x402", origin, options),
+      safeFetchProbe("/.well-known/agent-card.json", origin, options),
+      safeFetchProbe("/llms.txt", origin, options),
+      safeFetchProbe("/.well-known/api-catalog", origin, options),
+      safeFetchProbe("/", origin, options),
+      safeFetchProbe("/api/mcp", origin, options),
     ]);
 
   openApiStatus = openApiProbe.status;
@@ -332,13 +346,16 @@ export type SecurityHeadersReport = {
   disclaimer: string;
 };
 
-export async function runSecurityHeadersAudit(targetRaw: string): Promise<SecurityHeadersReport> {
+export async function runSecurityHeadersAudit(
+  targetRaw: string,
+  options?: SecurityAuditOptions,
+): Promise<SecurityHeadersReport> {
   const target = normalizeSecurityTarget(targetRaw);
-  assertOutOfPlatformScope(target);
+  assertOutOfPlatformScope(target, undefined, options);
 
   const [home, apiSample] = await Promise.all([
-    safeFetchProbe("/", target.origin),
-    safeFetchProbe("/api/openapi", target.origin),
+    safeFetchProbe("/", target.origin, options),
+    safeFetchProbe("/api/openapi", target.origin, options),
   ]);
 
   const mergedHeaders = { ...home.headers };
@@ -423,10 +440,13 @@ export type SecurityScanReport = {
 };
 
 /** Unified passive website security breakdown — readiness + headers in one call. */
-export async function runSecurityScanAudit(targetRaw: string): Promise<SecurityScanReport> {
+export async function runSecurityScanAudit(
+  targetRaw: string,
+  options?: SecurityAuditOptions,
+): Promise<SecurityScanReport> {
   const [readiness, headers] = await Promise.all([
-    runSecurityReadinessAudit(targetRaw),
-    runSecurityHeadersAudit(targetRaw),
+    runSecurityReadinessAudit(targetRaw, options),
+    runSecurityHeadersAudit(targetRaw, options),
   ]);
 
   const discovery = readiness.probes.discovery as Record<string, boolean> | undefined;
@@ -454,7 +474,9 @@ export async function runSecurityScanAudit(targetRaw: string): Promise<SecurityS
     breakdown: { readiness, headers },
     recommendations: buildScanRecommendations(readiness, headers),
     disclaimer:
-      "Passive security breakdown only — no exploitation or vulnerability scanning. Target must be authorized. Concierge platform hosts are always blocked.",
+      options?.selfAudit
+        ? "Passive self-audit on the canonical Concierge public site — no exploitation."
+        : "Passive security breakdown only — no exploitation or vulnerability scanning. Target must be authorized.",
   };
 }
 
@@ -474,10 +496,11 @@ export function runSecurityScopeValidation(
   targetRaw: string,
   allowlist: unknown,
   request?: Request,
-  options?: { requireEntries?: boolean },
+  options?: { requireEntries?: boolean; selfAudit?: boolean },
 ): SecurityScopeReport {
+  const scopeOpts = auditOptionsFromSelf(options?.selfAudit);
   const target = normalizeSecurityTarget(targetRaw);
-  assertOutOfPlatformScope(target, request);
+  assertOutOfPlatformScope(target, request, scopeOpts);
   const allow = validateScopeAllowlist(target, allowlist, options);
 
   return {
@@ -489,7 +512,8 @@ export function runSecurityScopeValidation(
     allowlistMatched: allow.matched,
     notes: allow.notes,
     tier: SECURITY_ROUTE_TIERS["security-scope"],
-    disclaimer:
-      "Scope validation only - no active testing. Probing Concierge infrastructure (conc-exe.xyz, project Vercel hosts) is forbidden.",
+    disclaimer: options?.selfAudit
+      ? "Self-audit scope validation for the canonical Concierge public site."
+      : "Scope validation only - no active testing.",
   };
 }

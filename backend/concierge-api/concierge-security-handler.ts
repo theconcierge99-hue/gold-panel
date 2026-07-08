@@ -10,6 +10,7 @@ import {
 import {
   PlatformScopeForbiddenError,
   SecurityTargetInvalidError,
+  isSelfAuditRequest,
   securityRequireAllowlist,
 } from "./concierge-security-scope";
 import { SecurityTierDeniedError, assertSoonSecurityTierAccess } from "./soon-security-tier";
@@ -38,12 +39,14 @@ export const SECURITY_ROUTE_PATH: Record<X402SecurityKind, string> = {
 const PAID_SECURITY_KINDS = Object.keys(SECURITY_ROUTE_PATH) as X402SecurityKind[];
 
 export type SecurityRequestBody = {
-  /** Required — external https origin to audit (never Concierge platform hosts). */
+  /** Required — https origin to audit. */
   target?: string;
   /** Optional hostname allowlist (*.example.com, api.example.com). */
   allowlist?: string[];
   /** Caller attests they have authorization to probe the target. */
   authorized?: boolean;
+  /** When true with conc-exe.xyz target — canonical public self-audit (free on security-scan). */
+  selfAudit?: boolean;
 };
 
 export function resolveSecurityKindFromRequest(request: Request): X402SecurityKind | null {
@@ -170,6 +173,7 @@ export async function handleSecurityScopeRoute(request: Request): Promise<Respon
 
     const payload = runSecurityScopeValidation(body.target, body.allowlist, request, {
       requireEntries: false,
+      selfAudit: body.selfAudit === true,
     });
     return jsonResponse(request, payload, payload.ok ? 200 : 400, securityRateLimitHeaders(rate, "security-scope"));
   } catch (e) {
@@ -182,11 +186,31 @@ export async function handleConciergeSecurityRoute(
   request: Request,
   kind: X402SecurityKind,
 ): Promise<Response> {
-  const routed = await guardPaidX402Api(request, kind);
-  if ("response" in routed) return routed.response;
-  const { gate: payGate } = routed.continue;
-
   const startedAt = Date.now();
+  let preBody: SecurityRequestBody | null = null;
+
+  if (request.method === "POST") {
+    try {
+      const raw = await readBodyWithLimit(request);
+      preBody = validateSecurityRequest(raw);
+    } catch {
+      preBody = null;
+    }
+  }
+
+  const selfAuditFree = kind === "security-scan" && preBody && isSelfAuditRequest(preBody);
+
+  let payGate: {
+    payer?: string;
+    transaction?: string;
+    paymentResponseHeader?: string | null;
+  } = { payer: "self-audit", transaction: "platform-self-audit" };
+
+  if (!selfAuditFree) {
+    const routed = await guardPaidX402Api(request, kind);
+    if ("response" in routed) return routed.response;
+    payGate = routed.continue.gate;
+  }
 
   try {
     assertAllowedOrigin(request);
@@ -195,13 +219,13 @@ export async function handleConciergeSecurityRoute(
     if (!rate.allowed) return rateLimitedSecurityResponse(request, rate, "security-audit");
 
     const settlementOk =
+      selfAuditFree ||
       payGate.payer === "dev-bypass" ||
       payGate.transaction === "soon-holder-free-tier" ||
       Boolean(payGate.transaction && payGate.payer && payGate.payer !== "dev-bypass");
     await assertSecurityTierAccess(request, kind, settlementOk);
 
-    const raw = await readBodyWithLimit(request);
-    const body = validateSecurityRequest(raw);
+    const body = preBody ?? validateSecurityRequest(await readBodyWithLimit(request));
 
     if (!body.target?.trim()) {
       throw new SecurityTargetInvalidError("target_required", "target URL is required");
@@ -214,8 +238,11 @@ export async function handleConciergeSecurityRoute(
       );
     }
 
+    const auditOpts = body.selfAudit === true ? { selfAudit: true as const } : undefined;
+
     const scope = runSecurityScopeValidation(body.target, body.allowlist, request, {
-      requireEntries: securityRequireAllowlist(),
+      requireEntries: securityRequireAllowlist() && !selfAuditFree,
+      selfAudit: body.selfAudit === true,
     });
     if (!scope.ok) {
       return jsonResponse(request, { ...scope, error: "Target outside declared allowlist", code: "allowlist_mismatch" }, 400);
@@ -223,21 +250,23 @@ export async function handleConciergeSecurityRoute(
 
     const payload =
       kind === "security-readiness"
-        ? await runSecurityReadinessAudit(body.target)
+        ? await runSecurityReadinessAudit(body.target, auditOpts)
         : kind === "security-headers"
-          ? await runSecurityHeadersAudit(body.target)
-          : await runSecurityScanAudit(body.target);
+          ? await runSecurityHeadersAudit(body.target, auditOpts)
+          : await runSecurityScanAudit(body.target, auditOpts);
 
     const extraHeaders: Record<string, string> = {};
     if (payGate.paymentResponseHeader) {
       extraHeaders["PAYMENT-RESPONSE"] = payGate.paymentResponseHeader;
     }
 
-    reportPaidRouteToZauth(request, kind, 200, payload, startedAt, {
-      payer: payGate.payer,
-      transaction: payGate.transaction,
-      paymentResponseHeader: payGate.paymentResponseHeader,
-    });
+    if (!selfAuditFree) {
+      reportPaidRouteToZauth(request, kind, 200, payload, startedAt, {
+        payer: payGate.payer,
+        transaction: payGate.transaction,
+        paymentResponseHeader: payGate.paymentResponseHeader,
+      });
+    }
 
     return jsonResponse(request, payload, 200, {
       ...extraHeaders,

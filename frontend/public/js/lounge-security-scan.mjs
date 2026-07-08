@@ -1,5 +1,17 @@
 const $ = (id) => document.getElementById(id);
 
+const SELF_AUDIT_TARGET = "https://conc-exe.xyz";
+const SELF_AUDIT_ALLOWLIST = ["*.conc-exe.xyz", "conc-exe.xyz", "www.conc-exe.xyz"];
+
+function selfAuditBody(target) {
+  return {
+    target,
+    allowlist: SELF_AUDIT_ALLOWLIST,
+    authorized: true,
+    selfAudit: true,
+  };
+}
+
 function normalizeTargetInput(raw) {
   const t = String(raw ?? "").trim();
   if (!t) return null;
@@ -100,10 +112,12 @@ function setScopeStatus(msg, kind) {
 
 function setLoading(on) {
   const btn = $("sec-scan-run-btn");
+  const self = $("sec-scan-self-btn");
   if (btn) {
     btn.disabled = on;
     btn.textContent = on ? "Scanning…" : "Run scan ($0.10)";
   }
+  if (self) self.disabled = on;
 }
 
 export async function initLoungeSecurityScan(ctx = {}) {
@@ -111,6 +125,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
   const toast = ctx.toast ?? ((m) => console.log(m));
   const input = $("sec-scan-url");
   const scopeBtn = $("sec-scan-scope-btn");
+  const selfBtn = $("sec-scan-self-btn");
   const runBtn = $("sec-scan-run-btn");
   const results = $("sec-scan-results");
 
@@ -147,6 +162,35 @@ export async function initLoungeSecurityScan(ctx = {}) {
   }
 
   scopeBtn?.addEventListener("click", () => void checkScope());
+
+  selfBtn?.addEventListener("click", async () => {
+    input.value = SELF_AUDIT_TARGET;
+    setLoading(true);
+    if (results) results.hidden = true;
+    try {
+      const res = await fetch("/api/concierge-security-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(selfAuditBody(SELF_AUDIT_TARGET)),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error ?? "Self-audit failed");
+        return;
+      }
+      setScopeStatus("Self-audit — conc-exe.xyz", "ok");
+      renderSummary(data);
+      renderDimensions(data.breakdown?.readiness);
+      renderHeaders(data.breakdown?.headers);
+      renderRecommendations(data.recommendations);
+      if (results) results.hidden = false;
+      toast("Concierge self-audit complete");
+    } catch (e) {
+      toast(e?.message ?? "Self-audit failed");
+    } finally {
+      setLoading(false);
+    }
+  });
 
   runBtn.addEventListener("click", async () => {
     const raw = input.value.trim();

@@ -32,6 +32,32 @@ export class SecurityTargetInvalidError extends Error {
   }
 }
 
+/** Canonical public site — passive self-audit allowed when selfAudit: true. */
+const SELF_AUDIT_HOSTS = new Set(["conc-exe.xyz", "www.conc-exe.xyz"]);
+
+export type SecurityScopeOptions = {
+  selfAudit?: boolean;
+};
+
+export function isPlatformSelfAuditHost(hostname: string): boolean {
+  return SELF_AUDIT_HOSTS.has(hostname.toLowerCase().replace(/\.$/, ""));
+}
+
+/** Request targets conc-exe.xyz with explicit self-audit attestation. */
+export function isSelfAuditRequest(body: {
+  target?: string;
+  selfAudit?: boolean;
+  authorized?: boolean;
+}): boolean {
+  if (body.selfAudit !== true || body.authorized !== true) return false;
+  try {
+    const target = normalizeSecurityTarget(String(body.target ?? ""));
+    return isPlatformSelfAuditHost(target.hostname);
+  } catch {
+    return false;
+  }
+}
+
 const PLATFORM_HOST_PATTERNS: RegExp[] = [
   /^conc-exe\.xyz$/i,
   /^(.+\.)?conc-exe\.xyz$/i,
@@ -220,12 +246,15 @@ export function normalizeSecurityTarget(raw: string): NormalizedSecurityTarget {
 export function assertOutOfPlatformScope(
   target: NormalizedSecurityTarget,
   request?: Request,
+  options?: SecurityScopeOptions,
 ): void {
-  if (isPlatformRelatedHost(target.hostname)) {
+  const selfAudit = options?.selfAudit && isPlatformSelfAuditHost(target.hostname);
+
+  if (!selfAudit && isPlatformRelatedHost(target.hostname)) {
     throw new PlatformScopeForbiddenError();
   }
 
-  if (request) {
+  if (!selfAudit && request) {
     const reqHost = request.headers.get("host")?.split(":")[0]?.toLowerCase();
     if (reqHost && reqHost === target.hostname) {
       throw new PlatformScopeForbiddenError();
@@ -245,7 +274,8 @@ function sanitizeAllowlistEntry(entry: string): string | null {
   const t = entry.trim().toLowerCase().replace(/\.$/, "");
   if (!t || t.length > 253) return null;
   if (t.includes("*") && !t.startsWith("*.")) return null;
-  if (isPlatformRelatedHost(t.replace(/^\*\./, ""))) return null;
+  const bare = t.replace(/^\*\./, "");
+  if (isPlatformRelatedHost(bare) && !isPlatformSelfAuditHost(bare)) return null;
   return t;
 }
 
