@@ -1,6 +1,5 @@
 import { corsHeadersFor } from "../concierge-security";
-import { getSolanaRpcUrlForServer } from "../x402-config";
-import { solanaRpcCall } from "../x402-solana-rpc";
+import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
 
 /** Read-only RPC forwarded to Helius — blocks transaction submission from browser */
 const BLOCKED_METHODS = new Set([
@@ -39,14 +38,13 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const rpc = getSolanaRpcUrlForServer();
-  const result = await solanaRpcCall<unknown>(rpc, method, body.params ?? []);
-  if (result === null) {
+  const out = await solanaRpcCallWithFallback<unknown>(method, body.params ?? [], 20_000);
+  if (!out.ok) {
     return new Response(
       JSON.stringify({
         jsonrpc: "2.0",
         id: body.id ?? 1,
-        error: { code: -32000, message: "Solana RPC request failed" },
+        error: { code: -32000, message: out.error },
       }),
       {
         status: 200,
@@ -59,7 +57,7 @@ export default async function handler(request: Request): Promise<Response> {
     JSON.stringify({
       jsonrpc: "2.0",
       id: body.id ?? 1,
-      result,
+      result: out.result,
     }),
     {
       status: 200,

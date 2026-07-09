@@ -3,6 +3,13 @@
 /** USDC mint (mainnet) — inlined to avoid circular import with x402-config */
 const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
+const PUBLIC_SOL_RPC_FALLBACKS = [
+  "https://solana-rpc.publicnode.com",
+] as const;
+
+const RETRYABLE_RPC_ERROR =
+  /^(RPC HTTP (404|403|405|429|502|503|520|522)|RPC request failed|fetch failed|timeout|aborted|network)/i;
+
 /** Normalize Helius / custom RPC URLs from Vercel (quotes, trailing slash) */
 export function normalizeSolanaRpcUrl(raw: string | undefined | null): string | null {
   const s = (raw ?? "").trim().replace(/^['"`]+|['"`]+$/g, "").trim();
@@ -14,6 +21,50 @@ export function normalizeSolanaRpcUrl(raw: string | undefined | null): string | 
   } catch {
     return null;
   }
+}
+
+/** dRPC/Ankr free tiers and non-JSON-RPC Helius REST URLs break settlement. */
+export function isBlockedSolRpcUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const h = u.hostname.toLowerCase();
+    if (h.includes("drpc.org")) return true;
+    if (h === "rpc.ankr.com" || h.endsWith(".ankr.com")) return true;
+    if (h === "api.helius.xyz") return true;
+    if (h.includes("helius") && u.pathname.startsWith("/v0/")) return true;
+  } catch {
+    return true;
+  }
+  return false;
+}
+
+/** Ordered RPC candidates: env (if valid) then public fallbacks. */
+export function listSolanaRpcUrls(): string[] {
+  const env = normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL);
+  const out: string[] = [];
+  if (env && !isBlockedSolRpcUrl(env)) out.push(env);
+  for (const fb of PUBLIC_SOL_RPC_FALLBACKS) {
+    if (!out.includes(fb)) out.push(fb);
+  }
+  return out.length ? out : [...PUBLIC_SOL_RPC_FALLBACKS];
+}
+
+export async function solanaRpcCallWithFallback<T>(
+  method: string,
+  params: unknown[],
+  timeoutMs = 15_000,
+): Promise<{ ok: true; result: T; rpcUrl: string } | { ok: false; error: string }> {
+  const urls = listSolanaRpcUrls();
+  let last = "All Solana RPC endpoints failed";
+  for (const url of urls) {
+    const out = await solanaRpcCallEx<T>(url, method, params, timeoutMs);
+    if (out.ok) return { ok: true, result: out.result, rpcUrl: url };
+    last = out.error;
+    if (!RETRYABLE_RPC_ERROR.test(out.error)) {
+      return { ok: false, error: out.error };
+    }
+  }
+  return { ok: false, error: last };
 }
 
 function rpcErrorMessage(err: unknown): string {
@@ -95,7 +146,7 @@ export async function merchantHasTokenAccount(
   mint: string,
   rpcUrl?: string,
 ): Promise<boolean | null> {
-  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? "https://solana-rpc.publicnode.com";
+  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? listSolanaRpcUrls()[0];
   const result = await solanaRpcCall<{ value?: unknown[] }>(url, "getTokenAccountsByOwner", [
     ownerAddress,
     { mint },
@@ -124,7 +175,7 @@ export async function merchantHasUsdcTokenAccount(
   ownerAddress: string,
   rpcUrl?: string,
 ): Promise<boolean | null> {
-  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? "https://solana-rpc.publicnode.com";
+  const url = normalizeSolanaRpcUrl(rpcUrl) ?? rpcUrl?.trim() ?? listSolanaRpcUrls()[0];
   const result = await solanaRpcCall<{ value?: unknown[] }>(url, "getTokenAccountsByOwner", [
     ownerAddress,
     { mint: USDC_MINT_MAINNET },

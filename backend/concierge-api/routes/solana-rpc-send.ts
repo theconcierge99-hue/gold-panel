@@ -1,6 +1,5 @@
 import { corsHeadersFor } from "../concierge-security";
-import { getSolanaRpcUrlForServer } from "../x402-config";
-import { solanaRpcCallEx } from "../x402-solana-rpc";
+import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
 
 /** Edge — forward Solana JSON-RPC for client NFT mint (creator signs in Phantom) */
 const BLOCKED = new Set(["requestAirdrop"]);
@@ -43,9 +42,8 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const rpc = getSolanaRpcUrlForServer();
   const timeoutMs = SLOW_METHODS.has(method) ? 55_000 : 20_000;
-  const out = await solanaRpcCallEx<unknown>(rpc, method, body.params ?? [], timeoutMs);
+  const out = await solanaRpcCallWithFallback<unknown>(method, body.params ?? [], timeoutMs);
 
   return new Response(
     JSON.stringify(

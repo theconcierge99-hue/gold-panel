@@ -6,7 +6,7 @@ import {
   normalizeEvmPayTo,
   normalizeSolPayTo,
 } from "./x402-address";
-import { merchantHasTokenAccount, merchantHasUsdcTokenAccount, normalizeSolanaRpcUrl } from "./x402-solana-rpc";
+import { normalizeSolanaRpcUrl, listSolanaRpcUrls } from "./x402-solana-rpc";
 import {
   formatTokenPayUiFromAtomic,
   getDefaultTokenPayMerchant,
@@ -289,22 +289,8 @@ export function getPublicX402Config() {
   };
 }
 
-/** dRPC/Ankr free endpoints block getLatestBlockhash from server/browser — avoid for mint + x402 */
-function isUnreliablePublicSolRpc(url: string): boolean {
-  try {
-    const h = new URL(url).hostname.toLowerCase();
-    if (h.includes("drpc.org")) return true;
-    if (h === "rpc.ankr.com" || h.endsWith(".ankr.com")) return true;
-  } catch {
-    return false;
-  }
-  return false;
-}
-
 export function getSolanaRpcUrlForServer(): string {
-  const fromEnv = normalizeSolanaRpcUrl(process.env.SOLANA_RPC_URL);
-  if (fromEnv && !isUnreliablePublicSolRpc(fromEnv)) return fromEnv;
-  return "https://solana-rpc.publicnode.com";
+  return listSolanaRpcUrls()[0];
 }
 
 /** Async public config — includes merchant USDC ATA readiness check */

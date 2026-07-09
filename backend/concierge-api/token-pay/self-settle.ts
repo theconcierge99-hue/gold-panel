@@ -1,9 +1,7 @@
 /**
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  */
-import { getSolanaRpcUrlForServer } from "../x402-config";
-import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
-import { solanaRpcCallEx } from "../x402-solana-rpc";
+import { solanaRpcCallEx, solanaRpcCallWithFallback } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { tokenPayAtomicForResourceAsync } from "./x402";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
@@ -68,12 +66,12 @@ function merchantMintDelta(
   return postAmt - preAmt;
 }
 
-async function waitForConfirmation(rpc: string, signature: string, attempts = 25): Promise<boolean> {
+async function waitForConfirmation(signature: string, attempts = 20): Promise<boolean> {
   for (let i = 0; i < attempts; i++) {
-    const status = await solanaRpcCallEx<{ value?: { confirmationStatus?: string; err?: unknown }[] }>(
-      rpc,
+    const status = await solanaRpcCallWithFallback<{ value?: { confirmationStatus?: string; err?: unknown }[] }>(
       "getSignatureStatuses",
       [[signature], { searchTransactionHistory: true }],
+      12_000,
     );
     const entry = status.ok ? status.result.value?.[0] : null;
     if (entry?.err) return false;
@@ -127,7 +125,6 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "Missing signed transaction in payment payload");
   }
 
-  const rpc = getSolanaRpcUrlForServer();
   const requiredAmount = BigInt(matched.amount);
 
   const usdcList = priceUsdcForResource(resourceKind as X402ResourceKind);
@@ -140,25 +137,35 @@ async function verifyAndSettleTokenPaySelfInner(
   }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: true } as const;
-  let sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [
-    txB64,
-    simOpts,
-  ]);
+  let sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
+    "simulateTransaction",
+    [txB64, simOpts],
+    55_000,
+  );
   if (!sim.ok || sim.result?.value?.err) {
-    sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [
-      txB64,
-      { ...simOpts, sigVerify: false },
-    ]);
+    sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
+      "simulateTransaction",
+      [txB64, { ...simOpts, sigVerify: false }],
+      55_000,
+    );
   }
-  if (!sim.ok) throw tokenPayError(symbol, sim.error || "simulation failed");
+  if (!sim.ok) {
+    throw tokenPayError(
+      symbol,
+      sim.error.startsWith("RPC HTTP")
+        ? "Solana RPC misconfigured — set SOLANA_RPC_URL to https://mainnet.helius-rpc.com/?api-key=KEY or remove it for publicnode fallback"
+        : sim.error || "simulation failed",
+    );
+  }
   if (sim.result?.value?.err) {
     throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
   }
 
-  const send = await solanaRpcCallEx<string>(rpc, "sendRawTransaction", [
-    txB64,
-    { encoding: "base64", skipPreflight: true, maxRetries: 3 },
-  ]);
+  const send = await solanaRpcCallWithFallback<string>(
+    "sendRawTransaction",
+    [txB64, { encoding: "base64", skipPreflight: true, maxRetries: 3 }],
+    55_000,
+  );
   if (!send.ok) {
     throw tokenPayError(symbol, send.error || "failed to broadcast transaction");
   }
@@ -167,15 +174,16 @@ async function verifyAndSettleTokenPaySelfInner(
   }
 
   const signature = send.result;
-  const confirmed = await waitForConfirmation(rpc, signature);
+  const confirmed = await waitForConfirmation(signature);
   if (!confirmed) {
     throw tokenPayError(symbol, "broadcast but not confirmed — retry or check explorer");
   }
 
-  const tx = await solanaRpcCallEx<GetTxDetail>(rpc, "getTransaction", [
-    signature,
-    { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 },
-  ]);
+  const tx = await solanaRpcCallWithFallback<GetTxDetail>(
+    "getTransaction",
+    [signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }],
+    20_000,
+  );
   if (!tx.ok || !tx.result) {
     throw tokenPayError(symbol, "could not verify transaction on-chain");
   }
