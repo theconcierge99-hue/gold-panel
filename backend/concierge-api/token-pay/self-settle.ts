@@ -33,6 +33,10 @@ function tokenSymbolFromExtra(extra?: Record<string, unknown>): string {
   return typeof name === "string" && name ? name : "token";
 }
 
+function tokenPayError(symbol: string, message: string): Error {
+  return new Error(`${symbol} payment: ${message}`);
+}
+
 function feePayerFromTxDetail(tx: GetTxDetail): string | null {
   const keys = tx.transaction?.message?.accountKeys;
   if (!keys?.length) return null;
@@ -90,25 +94,54 @@ export async function verifyAndSettleTokenPaySelf(
 ): Promise<{ payer: string; transaction: string; network: string }> {
   const merchant = assertTokenPaySelfSettleAuthorized(matched, resourceKind);
   const symbol = merchant.symbol || tokenSymbolFromExtra(matched.extra);
+  try {
+    return await verifyAndSettleTokenPaySelfInner(
+      paymentPayload,
+      matched,
+      resourceKind,
+      merchant,
+      symbol,
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (new RegExp(`${symbol} payment:`, "i").test(msg)) throw e;
+    throw tokenPayError(symbol, msg);
+  }
+}
+
+async function verifyAndSettleTokenPaySelfInner(
+  paymentPayload: TokenPayPaymentPayload,
+  matched: TokenPaySelfSettleRequirement,
+  resourceKind: string,
+  merchant: Awaited<ReturnType<typeof assertTokenPaySelfSettleAuthorized>>,
+  symbol: string,
+): Promise<{ payer: string; transaction: string; network: string }> {
   const payload = paymentPayload.payload;
   const txB64 =
     payload && typeof payload === "object" && "transaction" in payload
       ? (payload as { transaction?: string }).transaction
       : undefined;
   if (!txB64 || typeof txB64 !== "string") {
-    throw new Error("Missing signed transaction in payment payload");
+    throw tokenPayError(symbol, "Missing signed transaction in payment payload");
   }
 
   const rpc = getSolanaRpcUrlForServer();
   const requiredAmount = BigInt(matched.amount);
 
-  const sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [
+  const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: true } as const;
+  let sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [
     txB64,
-    { encoding: "base64", commitment: "confirmed", sigVerify: true },
+    simOpts,
   ]);
-  if (!sim.ok) throw new Error(sim.error || `${symbol} payment simulation failed`);
-  if (sim.result.value?.err) {
-    throw new Error(`${symbol} payment simulation failed — check balance and SOL for fees`);
+  if (!sim.ok || sim.result?.value?.err) {
+    sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [
+      txB64,
+      { ...simOpts, sigVerify: false },
+    ]);
+  }
+  if (!sim.ok) throw tokenPayError(symbol, sim.error || "simulation failed");
+  if (sim.result?.value?.err) {
+    throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
   }
 
   const send = await solanaRpcCallEx<string>(rpc, "sendRawTransaction", [
@@ -116,16 +149,16 @@ export async function verifyAndSettleTokenPaySelf(
     { encoding: "base64", skipPreflight: true, maxRetries: 3 },
   ]);
   if (!send.ok) {
-    throw new Error(send.error || `Failed to broadcast ${symbol} payment`);
+    throw tokenPayError(symbol, send.error || "failed to broadcast transaction");
   }
   if (!send.result) {
-    throw new Error(`Failed to broadcast ${symbol} payment`);
+    throw tokenPayError(symbol, "failed to broadcast transaction");
   }
 
   const signature = send.result;
   const confirmed = await waitForConfirmation(rpc, signature);
   if (!confirmed) {
-    throw new Error(`${symbol} payment broadcast but not confirmed — retry or check explorer`);
+    throw tokenPayError(symbol, "broadcast but not confirmed — retry or check explorer");
   }
 
   const tx = await solanaRpcCallEx<GetTxDetail>(rpc, "getTransaction", [
@@ -133,10 +166,10 @@ export async function verifyAndSettleTokenPaySelf(
     { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 },
   ]);
   if (!tx.ok || !tx.result) {
-    throw new Error(`Could not verify ${symbol} payment on-chain`);
+    throw tokenPayError(symbol, "could not verify transaction on-chain");
   }
   if (tx.result.meta?.err) {
-    throw new Error(`${symbol} payment transaction failed on-chain`);
+    throw tokenPayError(symbol, "transaction failed on-chain");
   }
 
   const delta = merchantMintDelta(
@@ -146,12 +179,12 @@ export async function verifyAndSettleTokenPaySelf(
     matched.asset,
   );
   if (delta < requiredAmount) {
-    throw new Error(`${symbol} payment amount does not match requirement`);
+    throw tokenPayError(symbol, "amount does not match requirement");
   }
 
   const payer = feePayerFromTxDetail(tx.result);
   if (!payer) {
-    throw new Error("Could not read fee payer from confirmed transaction");
+    throw tokenPayError(symbol, "could not read fee payer from confirmed transaction");
   }
 
   const merchantId =

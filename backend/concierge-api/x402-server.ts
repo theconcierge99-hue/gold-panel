@@ -677,7 +677,9 @@ export async function requireX402Payment(
   } catch (e) {
     if (
       e instanceof Error &&
-      (/Payment verification failed|Payment settlement failed|TCX payment/i.test(e.message))
+      (/Payment verification failed|Payment settlement failed|(?:TCX|SOON|token) payment:/i.test(
+        e.message,
+      ))
     ) {
       return {
         ok: false,
