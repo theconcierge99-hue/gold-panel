@@ -1,6 +1,16 @@
 import { renderAgentSiteFooter, renderAgentTopNav } from "./agent-nav.mjs";
 import { CONCIERGE_AGENT_ORIGIN, countBySegment } from "./concierge-agent-endpoints.mjs";
-import { initAgentTerminalDemo } from "./agent-home-fx.mjs";
+import {
+  animateCount,
+  animatePercent,
+  getPillarIconHtml,
+  initAgentAmbientParallax,
+  initAgentTerminalDemo,
+  initConciergeLogoParticles,
+  initCtaGlow,
+  initMetricsBandFx,
+  initStaggerReveal,
+} from "./agent-home-fx.mjs";
 import { initConciergeFx } from "./concierge-fx.mjs";
 
 renderAgentTopNav("home", { variant: "home" });
@@ -9,9 +19,22 @@ renderAgentSiteFooter();
 const total = countBySegment().total;
 const origin = CONCIERGE_AGENT_ORIGIN.replace(/\/$/, "");
 
-for (const id of ["agent-endpoint-count", "agent-proof-routes"]) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = String(total);
+const endpointEl = document.getElementById("agent-endpoint-count");
+const routesEl = document.getElementById("agent-proof-routes");
+const metricStops = [];
+
+if (endpointEl) {
+  metricStops.push(animateCount(endpointEl, total, { duration: 1400, delay: 400 }));
+}
+if (routesEl) {
+  routesEl.classList.add("is-counting");
+  metricStops.push(
+    animateCount(routesEl, total, {
+      duration: 1600,
+      delay: 600,
+    }),
+  );
+  window.setTimeout(() => routesEl.classList.remove("is-counting"), 2400);
 }
 
 const STACK_PARTNERS = [
@@ -49,18 +72,22 @@ renderStackMarquee();
 
 const ABOUT = [
   {
+    icon: "intel",
     title: "Intel routes",
     desc: "Macro briefs, wire digest, desk verdict, and Meteora yields — tiered pay-per-call research APIs.",
   },
   {
+    icon: "security",
     title: "Security Desk",
     desc: "Passive website breakdown — Surface Review, scout readiness and headers, tiered desk modules. Authorized targets only.",
   },
   {
+    icon: "x402",
     title: "x402 settlement",
     desc: "HTTP 402 micropayments on Solana and Base. Payment is the only gate — no API keys or subscriptions.",
   },
   {
+    icon: "mesh",
     title: "Agent mesh",
     desc: "Discover x402 resources, agent cards, MCP skills, and register agt_ identities for autonomous workflows.",
   },
@@ -69,7 +96,11 @@ const ABOUT = [
 const aboutGrid = document.getElementById("agent-about-grid");
 if (aboutGrid) {
   aboutGrid.innerHTML = ABOUT.map(
-    (a) => `<article class="agent-about-card"><h3>${a.title}</h3><p>${a.desc}</p></article>`,
+    (a) => `<article class="agent-about-card el-reveal-item">
+      ${getPillarIconHtml(a.icon)}
+      <h3>${a.title}</h3>
+      <p>${a.desc}</p>
+    </article>`,
   ).join("");
 }
 
@@ -121,7 +152,7 @@ const MODULES = [
 const grid = document.getElementById("agent-modules-grid");
 if (grid) {
   grid.innerHTML = MODULES.map(
-    (m) => `<a class="agent-eco-card" href="${m.href}">
+    (m) => `<a class="agent-eco-card el-reveal-item" href="${m.href}">
       <span class="agent-eco-tag">${m.tag}</span>
       <h3>${m.title}</h3>
       <p>${m.desc}</p>
@@ -140,8 +171,11 @@ async function loadAccuracy() {
     if (!res.ok) throw new Error("accuracy unavailable");
     const data = await res.json();
     const pct = data?.evaluated?.hitRatePct;
-    if (pct != null) el.textContent = `${pct}%`;
-    else el.textContent = "Live";
+    if (pct != null) {
+      el.classList.add("is-counting");
+      metricStops.push(animatePercent(el, pct, { duration: 1200, delay: 200 }));
+      window.setTimeout(() => el.classList.remove("is-counting"), 1600);
+    } else el.textContent = "Live";
   } catch {
     el.textContent = "Live";
   }
@@ -149,14 +183,31 @@ async function loadAccuracy() {
 
 loadAccuracy();
 
+const staggerStops = [
+  initStaggerReveal(aboutGrid, { baseDelay: 110 }),
+  initStaggerReveal(document.getElementById("agent-metrics-grid"), { baseDelay: 90 }),
+  initStaggerReveal(grid, { baseDelay: 100 }),
+];
+const stopMetricsFx = initMetricsBandFx(document.querySelector(".agent-metrics"));
+const stopCtaGlow = initCtaGlow(document.getElementById("agent-cta-band-inner"));
+
 const stopFx = initConciergeFx();
+const stopAmbient = initAgentAmbientParallax();
+const stopLogo = initConciergeLogoParticles(document.getElementById("agent-demo-logo-canvas"));
 const stopTerminal = initAgentTerminalDemo(
   document.getElementById("agent-typewriter"),
   document.getElementById("agent-terminal-status"),
   origin,
+  document.getElementById("agent-demo-panel"),
 );
 
 window.addEventListener("pagehide", () => {
   stopFx();
+  stopAmbient();
+  stopLogo();
   stopTerminal();
+  stopMetricsFx();
+  stopCtaGlow();
+  staggerStops.forEach((s) => s?.());
+  metricStops.forEach((s) => s?.());
 });

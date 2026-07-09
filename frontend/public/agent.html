@@ -19,6 +19,7 @@
     <div class="agent-orb agent-orb--gold"></div>
     <div class="agent-orb agent-orb--blue"></div>
     <div class="agent-grid"></div>
+    <span class="agent-grid-signal" aria-hidden="true"></span>
   </div>
 
   <header class="pg-topnav agent-nav-v2" id="agent-topnav"></header>
@@ -42,7 +43,10 @@
         </div>
       </div>
 
-      <div class="agent-demo-panel" aria-live="polite">
+      <div class="agent-demo-panel" id="agent-demo-panel" aria-live="polite">
+        <div class="agent-demo-fx" aria-hidden="true">
+          <canvas id="agent-demo-logo-canvas" class="agent-demo-logo-canvas"></canvas>
+        </div>
         <div class="agent-demo-chrome">
           <span></span><span></span><span></span>
           <span class="agent-demo-label">concierge · x402</span>
@@ -76,23 +80,23 @@
     <section class="agent-metrics el-reveal" aria-label="Protocol metrics">
       <p class="agent-kicker">Proof metrics</p>
       <h2 class="agent-section-title">Traction with <em>operational consistency</em></h2>
-      <div class="agent-metrics-grid">
-        <article class="agent-metric">
+      <div class="agent-metrics-grid" id="agent-metrics-grid">
+        <article class="agent-metric el-reveal-item">
           <span class="agent-metric-idx">Metric 01</span>
           <span class="agent-metric-val" id="agent-proof-routes">21</span>
           <span class="agent-metric-label">Live routes</span>
         </article>
-        <article class="agent-metric">
+        <article class="agent-metric el-reveal-item">
           <span class="agent-metric-idx">Metric 02</span>
-          <span class="agent-metric-val">$0.02–0.25</span>
+          <span class="agent-metric-val agent-metric-val--shimmer" id="agent-metric-price">$0.02–0.25</span>
           <span class="agent-metric-label">Per call</span>
         </article>
-        <article class="agent-metric">
+        <article class="agent-metric el-reveal-item">
           <span class="agent-metric-idx">Metric 03</span>
-          <span class="agent-metric-val">0</span>
+          <span class="agent-metric-val" id="agent-metric-keys">0</span>
           <span class="agent-metric-label">API keys</span>
         </article>
-        <article class="agent-metric">
+        <article class="agent-metric el-reveal-item">
           <span class="agent-metric-idx">Metric 04</span>
           <span class="agent-metric-val" id="agent-proof-accuracy">—</span>
           <span class="agent-metric-label">Desk hit rate</span>
@@ -107,7 +111,7 @@
     </section>
 
     <section class="agent-cta-band el-reveal">
-      <div class="agent-cta-band-inner">
+      <div class="agent-cta-band-inner" id="agent-cta-band-inner">
         <div>
           <p class="agent-kicker">Launch window open</p>
           <h2 class="agent-cta-band-title">Explore the Concierge ecosystem from one surface</h2>

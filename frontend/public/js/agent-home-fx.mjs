@@ -1,8 +1,10 @@
 /**
  * Hero particle field — Concierge logo pixels assemble into a living dot-matrix icon.
  */
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export function initConciergeLogoParticles(canvas) {
-  if (!canvas) return () => {};
+  if (!canvas || reduced) return () => {};
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
@@ -36,8 +38,15 @@ export function initConciergeLogoParticles(canvas) {
     return `rgba(210,218,230,${0.4 + 0.48 * pulse})`;
   }
 
-  /** Fit assembled logo circle fully above the text block. */
+  /** Fit logo — panel watermark vs legacy tall hero canvas. */
   function logoMetrics(w, h) {
+    const inPanel = canvas.classList.contains("agent-demo-logo-canvas");
+    if (inPanel) {
+      const pad = 20;
+      const maxDiam = Math.min(w - pad * 2, h - pad * 2, 280);
+      const scale = maxDiam / LOGO_SRC;
+      return { cx: w / 2, cy: h * 0.46, scale, maxDiam };
+    }
     const padX = 36;
     const padTop = 44;
     const textBlock = Math.min(300, h * 0.36);
@@ -102,8 +111,9 @@ export function initConciergeLogoParticles(canvas) {
     const elapsed = (now - t0) / 1000;
     const assemble = Math.min(1, elapsed / 2.4);
     const ease = 1 - (1 - assemble) ** 3;
+    const inPanel = canvas.classList.contains("agent-demo-logo-canvas");
 
-    if (isLightTheme()) {
+    if (!inPanel && isLightTheme()) {
       const glowR = (maxDiam / 2) * 1.08;
       const g = ctx.createRadialGradient(cx, cy, glowR * 0.15, cx, cy, glowR);
       g.addColorStop(0, "rgba(255,255,255,0.92)");
@@ -152,9 +162,123 @@ export function initConciergeLogoParticles(canvas) {
   };
 }
 
+/** Mouse parallax on agent landing ambient layer. */
+export function initAgentAmbientParallax(root = document.querySelector(".agent-ambient")) {
+  if (!root || reduced) return () => {};
+
+  let raf = 0;
+  let tx = 0;
+  let ty = 0;
+
+  const onMove = (e) => {
+    tx = (e.clientX / window.innerWidth - 0.5) * 28;
+    ty = (e.clientY / window.innerHeight - 0.5) * 18;
+    if (!raf) {
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        root.style.setProperty("--el-px", `${tx}px`);
+        root.style.setProperty("--el-py", `${ty}px`);
+        root.style.setProperty("--el-orb-gx", `${tx * 0.6}px`);
+        root.style.setProperty("--el-orb-gy", `${ty * 0.5}px`);
+        root.style.setProperty("--el-orb-bx", `${-tx * 0.4}px`);
+        root.style.setProperty("--el-orb-by", `${-ty * 0.35}px`);
+      });
+    }
+  };
+
+  window.addEventListener("mousemove", onMove, { passive: true });
+  return () => {
+    window.removeEventListener("mousemove", onMove);
+    if (raf) cancelAnimationFrame(raf);
+    for (const key of ["--el-px", "--el-py", "--el-orb-gx", "--el-orb-gy", "--el-orb-bx", "--el-orb-by"]) {
+      root.style.removeProperty(key);
+    }
+  };
+}
+
+/** Count-up number for live metrics. */
+export function animateCount(el, target, { duration = 1200, delay = 0 } = {}) {
+  if (!el) return () => {};
+  const end = Number(target);
+  if (!Number.isFinite(end)) {
+    el.textContent = String(target);
+    return () => {};
+  }
+  if (reduced) {
+    el.textContent = String(end);
+    return () => {};
+  }
+
+  let raf = 0;
+  let timer = 0;
+  const start = performance.now() + delay;
+
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    if (t < 0) {
+      raf = requestAnimationFrame(tick);
+      return;
+    }
+    const eased = 1 - (1 - t) ** 3;
+    el.textContent = String(Math.round(end * eased));
+    if (t < 1) raf = requestAnimationFrame(tick);
+    else el.textContent = String(end);
+  };
+
+  el.textContent = "0";
+  timer = window.setTimeout(() => {
+    raf = requestAnimationFrame(tick);
+  }, delay);
+
+  return () => {
+    clearTimeout(timer);
+    cancelAnimationFrame(raf);
+  };
+}
+
+/** Count-up percentage text (e.g. 87 → "87%"). */
+export function animatePercent(el, pct, { duration = 1000, delay = 0 } = {}) {
+  if (!el) return () => {};
+  const end = Number(pct);
+  if (!Number.isFinite(end)) {
+    el.textContent = String(pct);
+    return () => {};
+  }
+  if (reduced) {
+    el.textContent = `${end}%`;
+    return () => {};
+  }
+
+  let raf = 0;
+  let timer = 0;
+  const start = performance.now() + delay;
+
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    if (t < 0) {
+      raf = requestAnimationFrame(tick);
+      return;
+    }
+    const eased = 1 - (1 - t) ** 3;
+    el.textContent = `${Math.round(end * eased)}%`;
+    if (t < 1) raf = requestAnimationFrame(tick);
+    else el.textContent = `${end}%`;
+  };
+
+  el.textContent = "0%";
+  timer = window.setTimeout(() => {
+    raf = requestAnimationFrame(tick);
+  }, delay);
+
+  return () => {
+    clearTimeout(timer);
+    cancelAnimationFrame(raf);
+  };
+}
+
 /** Matrix-style code rain (gold-tinted). */
 export function initMatrixRain(canvas) {
-  if (!canvas) return () => {};
+  if (!canvas || reduced) return () => {};
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
@@ -241,9 +365,10 @@ export function initTypewriter(el, phrases, intervalMs = 4200) {
 }
 
 /** Payment-flow terminal demo — command then x402 settlement status. */
-export function initAgentTerminalDemo(cmdEl, statusEl, origin = "") {
+export function initAgentTerminalDemo(cmdEl, statusEl, origin = "", panelEl = null) {
   if (!cmdEl) return () => {};
 
+  const panel = panelEl || cmdEl.closest(".agent-demo-panel");
   const host = origin.replace(/\/$/, "") || "https://conc-exe.xyz";
   const scenarios = [
     {
@@ -272,11 +397,31 @@ export function initAgentTerminalDemo(cmdEl, statusEl, origin = "") {
   let phase = "type";
   let ci = 0;
   let timer = 0;
+  let settleTimer = 0;
+  let payTimer = 0;
+
+  function clearPanelFx() {
+    panel?.classList.remove("is-paying", "is-settled");
+    clearTimeout(settleTimer);
+    clearTimeout(payTimer);
+  }
 
   function setStatus(text, ok = false) {
     if (!statusEl) return;
     statusEl.textContent = text;
     statusEl.classList.toggle("ok", ok);
+    if (!panel || reduced) return;
+    if (ok) {
+      panel.classList.remove("is-paying");
+      panel.classList.add("is-settled");
+      settleTimer = window.setTimeout(() => panel.classList.remove("is-settled"), 1400);
+      return;
+    }
+    if (text.includes("402")) {
+      panel.classList.remove("is-settled");
+      panel.classList.add("is-paying");
+      payTimer = window.setTimeout(() => panel.classList.remove("is-paying"), 2000);
+    }
   }
 
   function tick() {
@@ -308,5 +453,144 @@ export function initAgentTerminalDemo(cmdEl, statusEl, origin = "") {
   }
 
   tick();
-  return () => clearTimeout(timer);
+  return () => {
+    clearTimeout(timer);
+    clearPanelFx();
+  };
+}
+
+/** Inline micro-icon markup for about pillar cards. */
+export function getPillarIconHtml(type) {
+  switch (type) {
+    case "intel":
+      return `<span class="agent-pillar-icon agent-pillar-icon--intel" aria-hidden="true">
+        <svg viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline class="agent-pillar-spark" points="2,22 11,13 19,17 27,7 36,11 44,3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>`;
+    case "security":
+      return `<span class="agent-pillar-icon agent-pillar-icon--security" aria-hidden="true">
+        <span class="agent-pillar-scan-frame"></span>
+        <span class="agent-pillar-scan-line"></span>
+      </span>`;
+    case "x402":
+      return `<span class="agent-pillar-icon agent-pillar-icon--x402" aria-hidden="true">
+        <span class="agent-pillar-flip">
+          <span class="agent-pillar-flip-face agent-pillar-flip-face--a">402</span>
+          <span class="agent-pillar-flip-face agent-pillar-flip-face--b">200</span>
+        </span>
+      </span>`;
+    case "mesh":
+      return `<span class="agent-pillar-icon agent-pillar-icon--mesh" aria-hidden="true">
+        <svg viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line class="agent-mesh-link agent-mesh-link--ab" x1="10" y1="16" x2="24" y2="9" stroke="currentColor" stroke-width="1.5"/>
+          <line class="agent-mesh-link agent-mesh-link--bc" x1="24" y1="9" x2="38" y2="18" stroke="currentColor" stroke-width="1.5"/>
+          <line class="agent-mesh-link agent-mesh-link--ac" x1="10" y1="16" x2="38" y2="18" stroke="currentColor" stroke-width="1.5"/>
+          <circle class="agent-mesh-node" cx="10" cy="16" r="3.5" fill="currentColor"/>
+          <circle class="agent-mesh-node agent-mesh-node--b" cx="24" cy="9" r="3.5" fill="currentColor"/>
+          <circle class="agent-mesh-node agent-mesh-node--c" cx="38" cy="18" r="3.5" fill="currentColor"/>
+        </svg>
+      </span>`;
+    default:
+      return "";
+  }
+}
+
+/** Staggered fade-up for card grids when they enter the viewport. */
+export function initStaggerReveal(containerEl, { itemSelector = ".el-reveal-item", baseDelay = 80 } = {}) {
+  if (!containerEl) return () => {};
+
+  const items = [...containerEl.querySelectorAll(itemSelector)];
+  if (!items.length) return () => {};
+
+  if (reduced) {
+    items.forEach((el) => el.classList.add("is-visible"));
+    return () => {};
+  }
+
+  const timers = [];
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        items.forEach((el, i) => {
+          timers.push(
+            window.setTimeout(() => el.classList.add("is-visible"), i * baseDelay),
+          );
+        });
+        io.disconnect();
+      }
+    },
+    { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+  );
+
+  io.observe(containerEl);
+  return () => {
+    io.disconnect();
+    timers.forEach((t) => clearTimeout(t));
+  };
+}
+
+/** Metrics band accents — price shimmer + API keys emphasis flash. */
+export function initMetricsBandFx(sectionEl) {
+  if (!sectionEl) return () => {};
+
+  const priceEl = sectionEl.querySelector("#agent-metric-price");
+  const keysEl = sectionEl.querySelector("#agent-metric-keys");
+  let fired = false;
+
+  const run = () => {
+    if (fired) return;
+    fired = true;
+    priceEl?.classList.add("is-active");
+    if (keysEl && !reduced) {
+      window.setTimeout(() => {
+        keysEl.classList.add("is-keys-flash");
+        window.setTimeout(() => keysEl.classList.remove("is-keys-flash"), 2200);
+      }, 800);
+    }
+  };
+
+  if (reduced) {
+    priceEl?.classList.add("is-active");
+    return () => {};
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        run();
+        io.disconnect();
+      }
+    },
+    { threshold: 0.2, rootMargin: "0px 0px -30px 0px" },
+  );
+
+  io.observe(sectionEl);
+  return () => io.disconnect();
+}
+
+/** Subtle border glow on CTA band when scrolled into view. */
+export function initCtaGlow(el) {
+  if (!el) return () => {};
+
+  if (reduced) {
+    el.classList.add("is-glowing");
+    return () => {};
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        el.classList.add("is-glowing");
+        io.disconnect();
+      }
+    },
+    { threshold: 0.35 },
+  );
+
+  io.observe(el);
+  return () => io.disconnect();
 }
