@@ -95,12 +95,6 @@ a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:tran
   border:1px solid var(--tok-border);color:var(--tok-muted);border-radius:4px;
 }
 
-.tok-disclaimer{
-  font-size:11px;color:var(--tok-dim);line-height:1.6;padding:14px 16px;
-  border:1px solid var(--tok-border);border-radius:6px;background:rgba(10,14,20,.4);
-}
-html[data-theme="light"] .tok-disclaimer{background:rgba(250,248,244,.8)}
-
 .tok-foot{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px;padding-top:24px;border-top:1px solid var(--tok-border)}
 .tok-btn{
   font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
