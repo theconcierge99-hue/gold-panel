@@ -1,7 +1,8 @@
 /**
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  */
-import { solanaRpcCallEx, solanaRpcCallWithFallback } from "../x402-solana-rpc";
+import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
+import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { tokenPayAtomicForResourceAsync } from "./x402";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
