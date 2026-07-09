@@ -153,7 +153,7 @@ async function verifyAndSettleTokenPaySelfInner(
   if (!sim.ok) {
     throw tokenPayError(
       symbol,
-      sim.error.startsWith("RPC HTTP")
+      sim.error.startsWith("RPC HTTP") || /method not found/i.test(sim.error)
         ? "Solana RPC misconfigured — set SOLANA_RPC_URL to https://mainnet.helius-rpc.com/?api-key=KEY or remove it for publicnode fallback"
         : sim.error || "simulation failed",
     );
@@ -162,11 +162,19 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
   }
 
-  const send = await solanaRpcCallWithFallback<string>(
+  const sendOpts = { encoding: "base64", skipPreflight: true, maxRetries: 3 };
+  let send = await solanaRpcCallWithFallback<string>(
     "sendRawTransaction",
-    [txB64, { encoding: "base64", skipPreflight: true, maxRetries: 3 }],
+    [txB64, sendOpts],
     55_000,
   );
+  if (!send.ok && /method not found/i.test(send.error)) {
+    send = await solanaRpcCallWithFallback<string>(
+      "sendTransaction",
+      [txB64, sendOpts],
+      55_000,
+    );
+  }
   if (!send.ok) {
     throw tokenPayError(symbol, send.error || "failed to broadcast transaction");
   }

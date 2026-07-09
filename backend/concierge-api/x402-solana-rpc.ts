@@ -5,10 +5,12 @@ const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 const PUBLIC_SOL_RPC_FALLBACKS = [
   "https://solana-rpc.publicnode.com",
+  "https://api.mainnet-beta.solana.com",
 ] as const;
 
+/** HTTP + JSON-RPC endpoint mismatch — try next candidate (e.g. Helius REST URL, wrong cluster). */
 const RETRYABLE_RPC_ERROR =
-  /^(RPC HTTP (404|403|405|429|502|503|520|522)|RPC request failed|fetch failed|timeout|aborted|network)/i;
+  /^(RPC HTTP (404|403|405|429|502|503|520|522)|RPC request failed|fetch failed|timeout|aborted|network|method not found|invalid method|unauthorized|forbidden|internal server error|bad gateway)/i;
 
 /** Normalize Helius / custom RPC URLs from Vercel (quotes, trailing slash) */
 export function normalizeSolanaRpcUrl(raw: string | undefined | null): string | null {
