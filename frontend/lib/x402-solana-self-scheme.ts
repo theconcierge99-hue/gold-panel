@@ -3,11 +3,8 @@
  */
 import type { PaymentRequirements } from "@x402/core/types";
 import type { SchemeNetworkClient } from "@x402/core/types";
-import {
-  createTransferCheckedInstruction,
-  getAssociatedTokenAddressSync,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { createTransferCheckedInstruction } from "@solana/spl-token";
+import { associatedTokenAddress, resolveTokenProgramId } from "./solana-token-program";
 import {
   ComputeBudgetProgram,
   Connection,
@@ -77,8 +74,9 @@ export class SolanaSelfSettleScheme implements SchemeNetworkClient {
       throw new Error("Merchant address matches your wallet — fix X402_SOL_PAY_TO on server");
     }
 
-    const userAta = getAssociatedTokenAddressSync(mint, user, false, TOKEN_PROGRAM_ID);
-    const merchantAta = getAssociatedTokenAddressSync(mint, merchant, false, TOKEN_PROGRAM_ID);
+    const tokenProgramId = await resolveTokenProgramId(connection, mint);
+    const userAta = associatedTokenAddress(mint, user, tokenProgramId);
+    const merchantAta = associatedTokenAddress(mint, merchant, tokenProgramId);
 
     const [userAtaInfo, merchantAtaInfo] = await Promise.all([
       connection.getAccountInfo(userAta),
@@ -114,7 +112,7 @@ export class SolanaSelfSettleScheme implements SchemeNetworkClient {
         amount,
         decimals,
         [],
-        TOKEN_PROGRAM_ID,
+        tokenProgramId,
       ),
     ];
 
