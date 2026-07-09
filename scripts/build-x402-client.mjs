@@ -1,6 +1,6 @@
 import * as esbuild from "esbuild";
 import { createRequire } from "module";
-import { writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -26,4 +26,16 @@ await esbuild.build({
 
 const buildId = Date.now().toString(36);
 writeFileSync(join(root, "frontend/public/js/x402-build-id.txt"), buildId);
+
+const loungeHtml = join(root, "frontend/public/executive-lounge.html");
+let lounge = readFileSync(loungeHtml, "utf8");
+const nextLounge = lounge.replace(
+  /\/js\/x402-pay\.mjs\?v=[^"']+/g,
+  `/js/x402-pay.mjs?v=${buildId}`,
+);
+if (nextLounge !== lounge) {
+  writeFileSync(loungeHtml, nextLounge);
+  console.log(`Updated executive-lounge.html x402 cache buster → ${buildId}`);
+}
+
 console.log(`Built public/js/x402-pay.mjs (build ${buildId})`);
