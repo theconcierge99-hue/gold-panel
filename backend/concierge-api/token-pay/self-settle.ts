@@ -1,8 +1,7 @@
 /**
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
+ * No @solana/web3.js — Edge runtime blocks Node http/https from that package.
  */
-import { VersionedTransaction } from "@solana/web3.js";
-import bs58 from "bs58";
 import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
 import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
@@ -15,6 +14,7 @@ export { isTokenPaySelfSettleRequirement } from "./security";
 const SETTLE_RPC_MS = 12_000;
 const TX_POLL_MS = 300;
 const TX_POLL_MAX = 22;
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 type TokenBalanceRow = {
   owner?: string;
@@ -48,34 +48,82 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function base58Encode(bytes: Uint8Array): string {
+  let zeros = 0;
+  while (zeros < bytes.length && bytes[zeros] === 0) zeros++;
+  const input = Array.from(bytes);
+  const encoded: number[] = [];
+  let startAt = zeros;
+  while (startAt < input.length) {
+    let carry = 0;
+    for (let i = startAt; i < input.length; i++) {
+      const n = input[i] + carry * 256;
+      input[i] = Math.floor(n / 58);
+      carry = n % 58;
+    }
+    encoded.push(carry);
+    while (startAt < input.length && input[startAt] === 0) startAt++;
+  }
+  let str = "";
+  for (let i = 0; i < zeros; i++) str += "1";
+  for (let i = encoded.length - 1; i >= 0; i--) str += BASE58_ALPHABET[encoded[i]!];
+  return str;
+}
+
+function readCompactU16(wire: Uint8Array, start: number): { value: number; next: number } | null {
+  let value = 0;
+  let size = 0;
+  let offset = start;
+  while (size < 4) {
+    if (offset >= wire.length) return null;
+    const byte = wire[offset++]!;
+    value |= (byte & 0x7f) << (size * 7);
+    size++;
+    if ((byte & 0x80) === 0) return { value, next: offset };
+  }
+  return null;
+}
+
+function decodeSignedTxWire(txB64: string): { signature: string | null; feePayer: string | null } {
+  try {
+    const wire = Uint8Array.from(atob(txB64), (c) => c.charCodeAt(0));
+    const sigHeader = readCompactU16(wire, 0);
+    if (!sigHeader || sigHeader.value < 1) return { signature: null, feePayer: null };
+    const sigStart = sigHeader.next;
+    if (wire.length < sigStart + 64) return { signature: null, feePayer: null };
+    const signature = base58Encode(wire.slice(sigStart, sigStart + 64));
+
+    let offset = sigStart + sigHeader.value * 64;
+    if (offset >= wire.length) return { signature, feePayer: null };
+
+    // Versioned v0 message starts with 0x80; legacy starts with numRequiredSignatures.
+    if (wire[offset] === 0x80) {
+      offset += 1 + 3; // version byte + message header
+      const keysHeader = readCompactU16(wire, offset);
+      if (!keysHeader || keysHeader.value < 1) return { signature, feePayer: null };
+      const keyStart = keysHeader.next;
+      if (wire.length < keyStart + 32) return { signature, feePayer: null };
+      return { signature, feePayer: base58Encode(wire.slice(keyStart, keyStart + 32)) };
+    }
+
+    // Legacy: first byte is numRequiredSignatures, next 3 header bytes, then account keys.
+    offset += 1 + 3;
+    const keysHeader = readCompactU16(wire, offset);
+    if (!keysHeader || keysHeader.value < 1) return { signature, feePayer: null };
+    const keyStart = keysHeader.next;
+    if (wire.length < keyStart + 32) return { signature, feePayer: null };
+    return { signature, feePayer: base58Encode(wire.slice(keyStart, keyStart + 32)) };
+  } catch {
+    return { signature: null, feePayer: null };
+  }
+}
+
 function feePayerFromTxDetail(tx: GetTxDetail): string | null {
   const keys = tx.transaction?.message?.accountKeys;
   if (!keys?.length) return null;
   const first = keys[0];
   if (typeof first === "string") return first;
   return first.pubkey ?? null;
-}
-
-function feePayerFromSignedTxBase64(txB64: string): string | null {
-  try {
-    const wire = Uint8Array.from(atob(txB64), (c) => c.charCodeAt(0));
-    const tx = VersionedTransaction.deserialize(wire);
-    return tx.message.staticAccountKeys[0]?.toBase58() ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function signatureFromSignedTxBase64(txB64: string): string | null {
-  try {
-    const wire = Uint8Array.from(atob(txB64), (c) => c.charCodeAt(0));
-    const tx = VersionedTransaction.deserialize(wire);
-    const sig = tx.signatures[0];
-    if (!sig || sig.every((b) => b === 0)) return null;
-    return bs58.encode(sig);
-  } catch {
-    return null;
-  }
 }
 
 function merchantMintDelta(
@@ -168,8 +216,9 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "Missing signed transaction in payment payload");
   }
 
+  const decoded = decodeSignedTxWire(txB64);
   const requiredAmount = BigInt(matched.amount);
-  const payerFallback = feePayerFromSignedTxBase64(txB64);
+  const payerFallback = decoded.feePayer;
 
   const usdcList = priceUsdcForResource(resourceKind as X402ResourceKind);
   const freshMin = await tokenPayAtomicForResourceAsync(usdcList, merchant);
@@ -207,10 +256,11 @@ async function verifyAndSettleTokenPaySelfInner(
   if (send.ok && send.result) {
     signature = send.result;
   } else if (
+    !send.ok &&
     send.error &&
     /already been processed|already processed|duplicate/i.test(send.error)
   ) {
-    signature = signatureFromSignedTxBase64(txB64);
+    signature = decoded.signature;
   } else if (!send.ok) {
     throw tokenPayError(
       symbol,
@@ -220,9 +270,7 @@ async function verifyAndSettleTokenPaySelfInner(
     );
   }
 
-  if (!signature) {
-    signature = signatureFromSignedTxBase64(txB64);
-  }
+  if (!signature) signature = decoded.signature;
   if (!signature) {
     throw tokenPayError(symbol, "failed to broadcast transaction");
   }
