@@ -1007,7 +1007,7 @@
   }
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
-<script type="module" src="/js/x402-pay.mjs?v=mrdn5etp"></script>
+<script type="module" src="/js/x402-pay.mjs?v=mrdnfkqf"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -2914,6 +2914,7 @@
       if(/Payment cancelled/i.test(m)) return m;
       if(/Insufficient TCX|No TCX token account|Merchant TCX account|Insufficient SOON|No SOON token account|Merchant SOON account/i.test(m)) return m;
       if(/TCX payment:|SOON payment:/i.test(m)) return m.replace(/^[^:]+:\s*/i, 'TCX payment failed — ');
+      if(/does not match accepted requirements|quoted amount expired/i.test(m)) return 'TCX price moved — close pay modal, hard refresh (Ctrl+Shift+R), and pay again within a few seconds.';
       if(/temporarily unavailable/i.test(m)) return 'TCX payment server busy — wait 10s, hard refresh (Ctrl+Shift+R), then retry. Keep ~0.01 SOL for fees.';
       if(/SOL for fees/i.test(m)) return m;
     }

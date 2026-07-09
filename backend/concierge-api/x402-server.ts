@@ -26,6 +26,7 @@ import {
 } from "./token-pay";
 import {
   isTokenPaySelfSettleRequirement,
+  resolveTokenPayMatchedAccept,
   verifyAndSettleTokenPaySelf,
   type TokenPayPaymentPayload,
 } from "./token-pay";
@@ -351,18 +352,28 @@ function findMatchingRequirement(
 ): X402AcceptRequirement | null {
   const accepted = payload.accepted;
   if (!accepted) return null;
-  return (
-    accepts.find((req) => {
-      if (req.scheme !== accepted.scheme) return false;
-      if (normalizeSolanaNetwork(req.network) !== normalizeSolanaNetwork(accepted.network)) {
-        return false;
-      }
-      if (req.amount !== accepted.amount) return false;
-      if (req.asset !== accepted.asset) return false;
-      if (normalizePayTo(req.payTo) !== normalizePayTo(accepted.payTo)) return false;
-      return true;
-    }) ?? null
-  );
+
+  const exact = accepts.find((req) => {
+    if (req.scheme !== accepted.scheme) return false;
+    if (normalizeSolanaNetwork(req.network) !== normalizeSolanaNetwork(accepted.network)) {
+      return false;
+    }
+    if (req.amount !== accepted.amount) return false;
+    if (req.asset !== accepted.asset) return false;
+    if (normalizePayTo(req.payTo) !== normalizePayTo(accepted.payTo)) return false;
+    return true;
+  });
+  if (exact) return exact;
+
+  if (isTokenPaySelfSettleRequirement(accepted)) {
+    const tokenAccepts = accepts.filter(isTokenPaySelfSettleRequirement);
+    return resolveTokenPayMatchedAccept(
+      tokenAccepts,
+      accepted as import("./token-pay/types").TokenPaySelfSettleRequirement,
+    );
+  }
+
+  return null;
 }
 
 /** PayAI only — optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). Dexter needs no auth. */

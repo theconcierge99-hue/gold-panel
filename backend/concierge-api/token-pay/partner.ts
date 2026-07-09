@@ -10,6 +10,7 @@ import {
   isTokenPayMerchantLive,
   merchantSupportsResource,
 } from "./registry";
+import { tokenPaySelfSettleRailMatches } from "./security";
 import { verifyAndSettleTokenPaySelf } from "./self-settle";
 import type { TokenPayMerchant, TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
 
@@ -136,13 +137,17 @@ export async function verifyTokenPayPartnerPayment(input: {
   });
 
   const accepted = input.paymentPayload.accepted as TokenPaySelfSettleRequirement | undefined;
-  if (!accepted || !tokenPayAcceptMatches(accepted, expected.accept)) {
+  if (
+    !accepted ||
+    !tokenPaySelfSettleRailMatches(expected.accept, accepted) ||
+    !accepted.amount
+  ) {
     throw new Error("Payment does not match accepted requirements");
   }
 
   return verifyAndSettleTokenPaySelf(
     input.paymentPayload,
-    accepted,
+    { ...expected.accept, amount: accepted.amount },
     TOKEN_PAY_EXTERNAL_RESOURCE_KIND,
   );
 }

@@ -2,8 +2,10 @@
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  */
 import { getSolanaRpcUrlForServer } from "../x402-config";
+import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
 import { solanaRpcCallEx } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
+import { tokenPayAtomicForResourceAsync } from "./x402";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
 import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
 
@@ -127,6 +129,15 @@ async function verifyAndSettleTokenPaySelfInner(
 
   const rpc = getSolanaRpcUrlForServer();
   const requiredAmount = BigInt(matched.amount);
+
+  const usdcList = priceUsdcForResource(resourceKind as X402ResourceKind);
+  const freshMin = await tokenPayAtomicForResourceAsync(usdcList, merchant);
+  if (freshMin) {
+    const floor = (BigInt(freshMin) * 85n) / 100n;
+    if (requiredAmount < floor) {
+      throw tokenPayError(symbol, "quoted amount expired — hard refresh and pay again");
+    }
+  }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: true } as const;
   let sim = await solanaRpcCallEx<{ value?: { err?: unknown } }>(rpc, "simulateTransaction", [

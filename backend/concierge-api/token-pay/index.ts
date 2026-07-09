@@ -35,7 +35,11 @@ export {
   tokenAtomicForUsdcSync,
   tokenAtomicForUsdcWithRate,
 } from "./amount";
-export { assertTokenPaySelfSettleAuthorized, isTokenPaySelfSettleRequirement } from "./security";
+export {
+  assertTokenPaySelfSettleAuthorized,
+  isTokenPaySelfSettleRequirement,
+  resolveTokenPayMatchedAccept,
+} from "./security";
 export { verifyAndSettleTokenPaySelf } from "./self-settle";
 export {
   buildTokenPayAcceptExtra,

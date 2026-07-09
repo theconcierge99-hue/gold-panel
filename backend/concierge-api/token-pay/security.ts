@@ -18,6 +18,53 @@ export function isTokenPaySelfSettleRequirement(req: { extra?: Record<string, un
   return req.extra?.settlement === "self";
 }
 
+function normalizeSolanaNetwork(network: string): string {
+  if (!network.startsWith("solana:")) return network;
+  const ref = network.slice(7);
+  if (ref.length > 32) return `solana:${ref.slice(0, 32)}`;
+  return network;
+}
+
+/** Match self-settle rail (mint, payTo, network) — amount may drift with oracle between 402 and sign. */
+export function tokenPaySelfSettleRailMatches(
+  serverAccept: TokenPaySelfSettleRequirement,
+  signedAccept: TokenPaySelfSettleRequirement,
+): boolean {
+  if (!isTokenPaySelfSettleRequirement(serverAccept) || !isTokenPaySelfSettleRequirement(signedAccept)) {
+    return false;
+  }
+  if (serverAccept.scheme !== signedAccept.scheme) return false;
+  if (normalizeSolanaNetwork(serverAccept.network) !== normalizeSolanaNetwork(signedAccept.network)) {
+    return false;
+  }
+  if (serverAccept.asset !== signedAccept.asset) return false;
+  if (normalizePayTo(serverAccept.payTo) !== normalizePayTo(signedAccept.payTo)) return false;
+  const sMid = serverAccept.extra?.merchantId;
+  const aMid = signedAccept.extra?.merchantId;
+  if (typeof sMid === "string" && typeof aMid === "string" && sMid !== aMid) return false;
+  return true;
+}
+
+/**
+ * Resolve x402 accept for verify: exact match first, else self-settle rail + signed amount.
+ */
+export function resolveTokenPayMatchedAccept(
+  serverAccepts: TokenPaySelfSettleRequirement[],
+  signedAccept: TokenPaySelfSettleRequirement | undefined,
+): TokenPaySelfSettleRequirement | null {
+  if (!signedAccept) return null;
+
+  const exact = serverAccepts.find(
+    (req) => tokenPaySelfSettleRailMatches(req, signedAccept) && req.amount === signedAccept.amount,
+  );
+  if (exact) return exact;
+
+  if (!isTokenPaySelfSettleRequirement(signedAccept) || !signedAccept.amount) return null;
+  const rail = serverAccepts.find((req) => tokenPaySelfSettleRailMatches(req, signedAccept));
+  if (!rail) return null;
+  return { ...rail, amount: signedAccept.amount };
+}
+
 export function assertTokenPaySelfSettleAuthorized(
   matched: TokenPaySelfSettleRequirement,
   resourceKind: string,
