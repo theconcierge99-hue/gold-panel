@@ -11,6 +11,7 @@
 <link rel="canonical" href="/token" />
 <link rel="stylesheet" href="/css/brand-logo.css" />
 <link rel="stylesheet" href="/css/token.css" />
+<script src="/js/tcx-ca.js"></script>
 </head>
 <body class="tok-page tok-v2 el-premium">
 <div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
@@ -24,20 +25,29 @@
   </div>
 
   <header class="tok-hero">
-    <p class="tok-eyebrow">Utility token</p>
+    <p class="tok-eyebrow">Utility token · live</p>
     <div class="tok-title-row">
       <h1 class="tok-name">TCX</h1>
       <span class="tok-symbol">TCX</span>
-      <span class="tok-soon-badge">Coming soon</span>
+      <span class="tok-live-badge">Live</span>
+    </div>
+    <div class="tok-ca-block">
+      <span class="tok-ca-label">Contract address (Solana)</span>
+      <code class="tok-ca" id="tcx-ca">F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>
+      <div class="tok-ca-actions">
+        <button type="button" class="tok-btn" onclick="copyTcxCa(this)">Copy CA</button>
+        <a class="tok-btn" href="https://solscan.io/token/F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump" target="_blank" rel="noopener noreferrer">Solscan</a>
+        <a class="tok-btn gold" href="https://pump.fun/coin/F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump" target="_blank" rel="noopener noreferrer">Pump.fun</a>
+        <a class="tok-btn" href="https://dexscreener.com/solana/F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump" target="_blank" rel="noopener noreferrer">DexScreener</a>
+      </div>
     </div>
     <p class="tok-draft-note">
       <strong>Fair launch on Pump.fun</strong> — no presale, no ICO, no launchpad allocation.
-      Contract address and curve link publish at <strong>T0</strong>.
-      Policy below describes how protocol <em>revenue</em> and <em>treasury holdings</em> are used after launch — not a guaranteed genesis cap table.
+      Bonding curve completed; TCX checkout is live on Concierge pay-per-call routes.
     </p>
     <p class="tok-lead">
-      <strong>TCX</strong> ties the agent economy to the Concierge desk: pay-per-call x402 in USDC today;
-      after T0, holders pay in TCX on Token Pay (price from DexScreener once the pair is live).
+      <strong>TCX</strong> ties the agent economy to the Concierge desk: pay-per-call x402 in USDC or TCX.
+      Holders pay in TCX on Token Pay (price from DexScreener).
       <em>Revenue-linked</em> USDC buyback plus on-chain burns when users pay in TCX.
     </p>
     <div class="tok-pills">
@@ -113,7 +123,7 @@
       <span>20% treasury</span>
     </div>
     <p><strong>~30% discount</strong> vs USDC list price when checkout uses TCX (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>).
-      Token amount is priced from <strong>DexScreener</strong> after the pair exists; until then checkout stays disabled (Coming soon).</p>
+      Token amount is priced from <strong>DexScreener</strong> on the live pair.</p>
   </section>
 
   <section class="tok-section" aria-labelledby="utility-h">
@@ -155,7 +165,7 @@
         <tbody>
           <tr class="tok-matrix-group"><td colspan="4">Payment &amp; intel (x402)</td></tr>
           <tr>
-            <td>TCX checkout — all 21 paid routes <span class="tok-status live">Live at T0</span></td>
+            <td>TCX checkout — all 21 paid routes <span class="tok-status live">Live</span></td>
             <td class="tok-yes">✓</td><td class="tok-yes">✓</td><td class="tok-yes">✓</td>
           </tr>
           <tr>
@@ -167,11 +177,11 @@
             <td>5 / day</td><td>5 / day <span class="tok-status phased">→ 10 · Q1</span></td><td>5 / day <span class="tok-status phased">→ 15 · Q2+</span></td>
           </tr>
           <tr>
-            <td>Security Desk scout free — readiness/headers <span class="tok-status live">Live at T0</span></td>
+            <td>Security Desk scout free — readiness/headers <span class="tok-status live">Live</span></td>
             <td>3 / day</td><td>3 / day</td><td>3 / day</td>
           </tr>
           <tr>
-            <td>Security Desk breakdown depth (pay-per-call scan) <span class="tok-status live">Guest now · Depth at T0</span></td>
+            <td>Security Desk breakdown depth (pay-per-call scan) <span class="tok-status live">Live</span></td>
             <td>Deluxe</td><td>Executive</td><td>President <span class="tok-status phased">extended · Soon</span></td>
           </tr>
           <tr>
@@ -263,9 +273,9 @@
         <tbody>
           <tr><td>Raw intel — tvl, macro, wire, whales</td><td>$0.02</td><td>Deluxe+ free allowance · TCX pay</td></tr>
           <tr><td>Security scout — readiness, headers</td><td>$0.02</td><td>Deluxe+ 3 free/day · TCX pay</td></tr>
-          <tr><td>Security scan — unified breakdown</td><td>$0.10</td><td>Tiered depth after T0 · TCX pay</td></tr>
+          <tr><td>Security scan — unified breakdown</td><td>$0.10</td><td>Tiered depth · TCX pay</td></tr>
           <tr><td>Signal intel — verdict, meteora, yields, wallet, …</td><td>$0.10</td><td>TCX pay ~−30%</td></tr>
-          <tr><td>Bundle — desk-brief, a2a-pipeline</td><td>$0.25</td><td>TCX pay at T0 · President pricing · Q2+</td></tr>
+          <tr><td>Bundle — desk-brief, a2a-pipeline</td><td>$0.25</td><td>TCX pay · President pricing · Q2+</td></tr>
           <tr><td>Concierge chat</td><td>$0.10</td><td>Deluxe credits · Q4 · TCX pay</td></tr>
           <tr><td>News / wire unlock</td><td>$0.10</td><td>TCX pay · credits roadmap</td></tr>
           <tr><td>Signal open</td><td>$0.10</td><td>Executive credits · 50% to creator</td></tr>
@@ -288,9 +298,9 @@
           <tr><th>Phase</th><th>What happens</th></tr>
         </thead>
         <tbody>
-          <tr><td>Bonding curve (T0)</td><td>Public buys only on Pump.fun until the migrate threshold is met</td></tr>
+          <tr><td>Bonding curve</td><td>Public fair launch on Pump.fun — completed</td></tr>
           <tr><td>Raydium migrate</td><td>Standard Pump.fun mechanics — circulating supply from curve buyers; LP seeded from the migrate pool</td></tr>
-          <tr><td>Concierge utility</td><td>After mint is set in env + DexScreener indexes the pair → TCX checkout, holder tiers, and oracle pricing go live</td></tr>
+          <tr><td>Concierge utility</td><td>TCX checkout, holder tiers, and DexScreener oracle pricing — <span class="tok-status live">Live</span></td></tr>
           <tr><td>Protocol treasury TCX</td><td><strong>Not pre-allocated at genesis.</strong> Accumulates from USDC revenue buybacks, 20% of TCX payments, and optional open-market purchases</td></tr>
           <tr><td>Team &amp; community</td><td>Same curve as everyone else if participating; any grants or vesting are <em>policy commitments</em> funded from treasury over time — not a reserved mint % at T0</td></tr>
         </tbody>
@@ -303,9 +313,9 @@
     <div class="tok-grid">
       <a class="tok-card tok-card--stake" href="/token/stake">
         <h3>Staking &amp; rewards <span class="tok-soon-badge">Soon</span></h3>
-        <p>Lock TCX post-T0 to earn a share of protocol revenue — complements buyback, burn, and holder tiers. Full preview →</p>
+        <p>Lock TCX to earn a share of protocol revenue — complements buyback, burn, and holder tiers. Full preview →</p>
       </a>
-      <div class="tok-card"><h3>2026 · Q3 · T0</h3><p>Pump.fun fair launch → curve → migrate → Raydium LP. Publish mint (CA). Enable TCX on Concierge pay rail once DexScreener lists the pair. Transparency page opens for weekly reports.</p></div>
+      <div class="tok-card tok-card--gold"><h3>2026 · Q3 · <span class="tok-status live">Launched</span></h3><p>Pump.fun fair launch → bonding curve → migrate → Raydium LP. CA published. TCX live on Concierge pay rail. Transparency page open for weekly reports.</p></div>
       <div class="tok-card"><h3>2026 · Q4</h3><p>Holder snapshot, Concierge credits for Deluxe tier, first buyback window if net revenue threshold is met.</p></div>
       <div class="tok-card"><h3>2027 · Q1</h3><p>Executive tier perks — Discover badge, signal credits, weekly transparency report cadence.</p></div>
       <div class="tok-card"><h3>2027 · Q2+</h3><p>President governance polls · macro webhook beta · higher raw allowances · milestone burns as revenue scales.</p></div>
@@ -319,7 +329,7 @@
     <a class="tok-btn" href="/agent">Concierge Agent</a>
     <a class="tok-btn" href="/lounge">Executive Lounge</a>
     <a class="tok-btn" href="/docs/payment/token-pay">Token Pay</a>
-    <span class="tok-btn disabled" aria-disabled="true">Pump.fun · at T0</span>
+    <a class="tok-btn gold" href="https://pump.fun/coin/F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump" target="_blank" rel="noopener noreferrer">Pump.fun</a>
   </footer>
 </div>
 <script type="module" src="/js/concierge-boot.mjs"></script>

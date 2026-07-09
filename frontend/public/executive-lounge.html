@@ -1007,7 +1007,8 @@
   }
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
-<script type="module" src="/js/x402-pay.mjs?v=mrdq36hy"></script>
+<script src="/js/tcx-ca.js"></script>
+<script type="module" src="/js/x402-pay.mjs?v=mrdrme73"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -1056,7 +1057,7 @@
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
       <a class="nav-i" href="/token/stake">Stake <span class="badge">SOON</span></a>
-      <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">SOON</span></div>
+      <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">TCX</span></div>
       <div class="nav-i" data-nav="security-scan" onclick="showView('security-scan')">Security Scan <span class="badge">API</span></div>
     </div>
     <div class="nav-group">
@@ -1215,13 +1216,22 @@
     <!-- TOKEN (utility — full page at /token) -->
     <section class="view" id="view-token">
       <div class="tok-wrap">
-        <p class="tok-eyebrow">Utility token · coming soon</p>
+        <p class="tok-eyebrow">Utility token · live</p>
         <div class="tok-title-row">
           <h1 class="tok-name">TCX</h1>
           <span class="tok-symbol">TCX</span>
-          <span class="tok-soon-badge">Coming soon</span>
+          <span class="tok-live-badge">Live</span>
         </div>
-        <p class="tok-draft-note"><strong>TCX</strong> — CA at T0. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a> · <a href="/token/stake" style="color:var(--gold);text-decoration:underline">Stake · Soon</a></p>
+        <div class="tok-ca-block">
+          <span class="tok-ca-label">Contract address</span>
+          <code class="tok-ca">F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>
+          <div class="tok-ca-actions">
+            <button type="button" class="tok-btn" onclick="copyTcxCa(this)">Copy CA</button>
+            <a class="tok-btn gold" href="https://pump.fun/coin/F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump" target="_blank" rel="noopener noreferrer">Pump.fun</a>
+            <a class="tok-btn" href="/token">Full tokenomics →</a>
+          </div>
+        </div>
+        <p class="tok-draft-note"><strong>TCX</strong> — pay Concierge per call with TCX or USDC. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a> · <a href="/docs/payment/token-pay" style="color:var(--gold);text-decoration:underline">Token Pay for devs</a></p>
         <p class="tok-lead">55% ops · 25% to token (buyback + LP) · 20% treasury. Pay in TCX → 80% burn per tx.</p>
         <div class="tok-pills" style="margin-bottom:28px">
           <span class="tok-pill">Deluxe 50k · Executive 250k · President 1M+</span>
@@ -1233,7 +1243,7 @@
           <div class="tok-card"><h3>Executive</h3><p>Discover badge · signal credits · transparency early access.</p></div>
           <div class="tok-card"><h3>President</h3><p>Integration headroom · governance vote · webhook beta.</p></div>
           <div class="tok-card"><h3>Buyback</h3><p>15% net USDC → 60% burn / 40% LP weekly.</p></div>
-          <a class="tok-card" href="/token/stake" style="text-decoration:none;color:inherit"><h3>Stake <span class="tok-soon-badge" style="font-size:8px;padding:2px 6px">Soon</span></h3><p>Lock TCX post-T0 for protocol revenue share — preview →</p></a>
+          <a class="tok-card" href="/token/stake" style="text-decoration:none;color:inherit"><h3>Stake <span class="tok-soon-badge" style="font-size:8px;padding:2px 6px">Soon</span></h3><p>Lock TCX for protocol revenue share — preview →</p></a>
         </div>
       </div>
     </section>
@@ -1242,7 +1252,7 @@
     <section class="view" id="view-token-research">
       <div class="section-h" style="margin-bottom:20px">
         <h2>Token Research</h2>
-        <div class="meta">Holder desk · SOON</div>
+        <div class="meta">Holder desk · TCX</div>
       </div>
       <div class="tcx-wrap lounge-tcx">
         <header class="tcx-hero">
@@ -2492,7 +2502,7 @@
         toast('Choose payment chain ($0.02 publish fee)…');
         chain=await showPaymentConfirm({
           title:'Publish signal',
-          subtitle:'Minimum settlement fee · USDC or TCX (coming soon)',
+          subtitle:'Minimum settlement fee · USDC or TCX',
           story:title,
           confirmLabel:'Pay & publish',
           amountUsdc:cfg.signalPublishUsdc||0.02,

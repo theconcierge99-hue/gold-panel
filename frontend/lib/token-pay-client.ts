@@ -5,7 +5,7 @@ export const TOKEN_PAY_DEFAULT_SYMBOL = "TCX";
 export const TOKEN_PAY_DEFAULT_NAME = "TCX";
 
 export const TOKEN_PAY_COMING_SOON_DEFAULT =
-  "TCX — coming soon. Fair launch on Pump.fun at T0.";
+  "TCX pay unavailable — SOON_TOKEN_MINT not configured on server.";
 
 export type TokenPayServerSlice = {
   defaultMerchantId?: string;

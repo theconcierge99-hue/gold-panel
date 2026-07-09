@@ -26,6 +26,23 @@ body.tok-page .tok-wrap{padding:40px 24px 72px}
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
   padding:4px 10px;border:1px solid var(--tok-gold-dim);color:var(--tok-gold);border-radius:4px;
 }
+.tok-live-badge{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  padding:4px 10px;border:1px solid rgba(125,206,160,.45);color:#7dcea0;border-radius:4px;
+}
+.tok-ca-block{
+  margin:18px 0 20px;padding:14px 16px;border:1px solid var(--tok-border);border-radius:8px;
+  background:var(--tok-panel, rgba(255,255,255,.03));
+}
+.tok-ca-label{
+  display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--tok-muted);margin-bottom:8px;
+}
+.tok-ca{
+  display:block;font-family:'DM Mono',monospace;font-size:11px;line-height:1.5;word-break:break-all;
+  color:var(--tok-text);margin-bottom:12px;
+}
+.tok-ca-actions{display:flex;flex-wrap:wrap;gap:8px}
 .tok-draft-note{
   font-size:13px;color:var(--tok-muted);max-width:640px;line-height:1.6;margin-bottom:16px;
 }

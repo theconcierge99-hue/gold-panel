@@ -39,7 +39,7 @@
           <li><strong>Base</strong> — USDC (configure <code>X402_EVM_PAY_TO</code>)</li>
           <li><strong>Solana</strong> — USDC via PayAI/Dexter (optional <code>X402_SOL_PAY_TO</code>)</li>
           <li><strong>Solana</strong> — native project tokens via <a href="/docs/payment/token-pay">Token Pay self-settle</a> (one accept per live merchant; <code>extra.settlement: "self"</code>)</li>
-          <li><strong>TCX</strong> — Concierge default merchant; appears when <code>SOON_TOKEN_MINT</code> is set (UI: coming soon until launch)</li>
+          <li><strong>TCX</strong> — Concierge default merchant; live when <code>SOON_TOKEN_MINT</code> is set (mint <code>F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>)</li>
         </ul>
         <p>Check <code>accepts</code> in the 402 body or <code>GET /api/x402-config</code> / <code>GET /api/token-pay</code> for enabled merchants. Beta partners register via <a href="/docs/payment/token-pay">Token Pay onboarding</a>.</p>
       </div>

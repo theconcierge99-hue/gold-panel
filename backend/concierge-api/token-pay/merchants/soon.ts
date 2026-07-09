@@ -70,6 +70,6 @@ export function buildSoonMerchantFromEnv(solPayTo: string | null): TokenPayMerch
     resourceKinds: parseSoonResourceKinds(),
     comingSoonMessage:
       process.env.TOKEN_PAY_SOON_COMING_SOON?.trim() ||
-      "TCX — coming soon. Fair launch on Pump.fun at T0.",
+      "TCX pay unavailable — set SOON_TOKEN_MINT on server.",
   };
 }

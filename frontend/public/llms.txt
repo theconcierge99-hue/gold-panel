@@ -29,9 +29,9 @@
 - [API Playground](https://conc-exe.xyz/agent/playground): Probe x402 402 challenges live.
 - [Discover](https://conc-exe.xyz/agent/discover): x402 + MPP fan-out, OpenAPI, MCP Registry, agent cards. List on [MPPscan](https://www.mppscan.com/register).
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
-- [TCX Token](https://conc-exe.xyz/token): Tokenomics — 55/20/15/10 split, TCX pay burns, holder tiers.
-- [TCX Transparency](https://conc-exe.xyz/token/transparency): Weekly buyback and burn reports (post-T0).
-- [TCX Stake](https://conc-exe.xyz/token/stake): Staking & protocol rewards preview — ships after T0 fair launch (coming soon).
+- [TCX Token](https://conc-exe.xyz/token): Tokenomics — live on Pump.fun · CA F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump · pay-per-call utility.
+- [TCX Transparency](https://conc-exe.xyz/token/transparency): Weekly buyback and burn reports.
+- [TCX Stake](https://conc-exe.xyz/token/stake): Staking & protocol rewards preview — ships after first buyback window (coming soon).
 - [Security Desk](https://conc-exe.xyz/lounge#security-scan): Passive website scan with LLM security verdict for Concierge AI context.
 
 ## OpenAPI
