@@ -2,10 +2,8 @@
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  * No @solana/web3.js — Edge runtime blocks Node http/https from that package.
  */
-import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
 import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
-import { tokenPayAtomicForResourceAsync } from "./x402";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
 import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
 
@@ -219,15 +217,6 @@ async function verifyAndSettleTokenPaySelfInner(
   const decoded = decodeSignedTxWire(txB64);
   const requiredAmount = BigInt(matched.amount);
   const payerFallback = decoded.feePayer;
-
-  const usdcList = priceUsdcForResource(resourceKind as X402ResourceKind);
-  const freshMin = await tokenPayAtomicForResourceAsync(usdcList, merchant);
-  if (freshMin) {
-    const floor = (BigInt(freshMin) * 85n) / 100n;
-    if (requiredAmount < floor) {
-      throw tokenPayError(symbol, "quoted amount expired — hard refresh and pay again");
-    }
-  }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: false } as const;
   const sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
