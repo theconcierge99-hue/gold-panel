@@ -746,6 +746,13 @@ const DEFI_INTEL_RESPONSE = `DEFI / YIELD / WHALE / VERDICT QUESTIONS (when DEFI
 - For "verdict" on a token/protocol: combine VERDICT, funding/positioning, and any INSIDER creator signals.
 - End yield-focused replies with: <code>Verdict|signal=[snipe|watch|follow|avoid|rebalance]|confidence=[low|medium|high]</code> (not A2A|asset=UNKNOWN).`;
 
+const SECURITY_INTEL_RESPONSE = `SECURITY SCAN / POSTURE / HEADERS / OWASP QUESTIONS (when SECURITY DESK INTELLIGENCE is in the prompt):
+- Lead with SECURITY VERDICT signal + confidence, then cite grade, readiness, headers, and surface severity counts from the block.
+- Name specific findings and missing headers from SURFACE / HEADERS sections — do not invent CVEs, exploits, or paths not listed.
+- Distinguish passive desk research from active penetration testing; recommend authorized remediation only.
+- If the user asks about agent/API production readiness, tie verdict to discoverability (MCP, agent-card, security.txt) when present in the block.
+- End security-focused replies with: <code>SecurityVerdict|signal=[acceptable|watch|harden|remediate|critical]|confidence=[low|medium|high]</code>.`;
+
 const RESPONSE_STRUCTURE = `RESPONSE STRUCTURE (standard market Q&A — no full trading plan):
 1. <p>Direct answer — addresses the user's exact question first (3–5 sentences). For liquidation cluster questions: state which side is crowded, where clusters likely sit (% bands from mark), and what trigger would activate them.</p>
 2. <p>Evidence — cite live data (prices, funding, OI, Fear & Greed, L/S ratios, indices, headlines, DEFI DESK block if present).</p>
@@ -930,6 +937,7 @@ CORE COMPETENCIES (all 11 Executive Lounge categories + trading desk skills):
 ${requireTradingPlan ? TRADING_PLAN_RESPONSE_STRUCTURE : requireScalpingPlan ? SCALPING_PLAN_RESPONSE_STRUCTURE : requireTradeIdeas ? "Follow TRADE IDEAS framework above — complete all blocks, name specific tickers." : RESPONSE_STRUCTURE}
 
 ${DEFI_INTEL_RESPONSE}
+${SECURITY_INTEL_RESPONSE}
 ${tradeIdeasBlock}
 
 LOUNGE MEMORY (when provided below):

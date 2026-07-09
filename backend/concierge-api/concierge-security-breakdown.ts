@@ -6,6 +6,7 @@
  * or rely on isSoonLaunched() + default post-launch ceiling.
  */
 import type { SecurityScanReport } from "./concierge-security-audit";
+import { buildSecurityVerdict, type SecurityVerdict } from "./concierge-security-intel";
 import {
   getSoonBalanceAtomic,
   getSoonDecimals,
@@ -85,6 +86,7 @@ export type ScanAccessMeta = {
 };
 
 export type SecurityScanReportTiered = SecurityScanReport & {
+  verdict: SecurityVerdict;
   access: ScanAccessMeta;
   deskModules: ConciergeDeskModule[];
   deskPhases: DeskPhaseGroup[];
@@ -342,6 +344,7 @@ export function applyScanTierFilter(
 
   return {
     ...report,
+    verdict: buildSecurityVerdict(report),
     summary: filterSummary(report, effective),
     breakdown: {
       readiness: filterReadiness(report, effective),

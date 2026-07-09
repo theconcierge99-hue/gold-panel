@@ -97,6 +97,10 @@
       "destination": "/token-transparency.html"
     },
     {
+      "source": "/token/stake",
+      "destination": "/token-stake.html"
+    },
+    {
       "source": "/token/health",
       "destination": "/lounge#token-research"
     },

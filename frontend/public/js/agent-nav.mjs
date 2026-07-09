@@ -81,21 +81,26 @@ const MORE_LINKS = [
   { id: "demo", href: "/demo", label: "Demo" },
 ];
 
+const STAKE_LINK = { id: "stake", href: "/token/stake", label: "Stake", soon: true };
+
 const HUB_LINKS = [
   { id: "endpoints", href: "/agent/endpoints", label: "Endpoints" },
   { id: "playground", href: "/agent/playground", label: "Playground" },
   { id: "discover", href: "/agent/discover", label: "Discover" },
   { id: "docs", href: "/docs", label: "Docs" },
+  STAKE_LINK,
 ];
 
 const HOME_LINKS = [
   { id: "discover", href: "/agent/discover", label: "Discover" },
   { id: "docs", href: "/docs", label: "Docs" },
+  STAKE_LINK,
 ];
 
 function navLink(l, activeId) {
   const cls = l.id === activeId ? " active" : "";
-  return `<a href="${l.href}" class="${cls.trim()}">${l.label}</a>`;
+  const soon = l.soon ? ` <span class="pg-nav-soon">Soon</span>` : "";
+  return `<a href="${l.href}" class="${cls.trim()}">${l.label}${soon}</a>`;
 }
 
 function moreMenu(activeId) {

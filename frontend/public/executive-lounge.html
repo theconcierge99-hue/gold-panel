@@ -976,6 +976,27 @@
   #view-security-scan .sec-scan-footnote{
     font-size:11px;line-height:1.55;color:var(--text-secondary);margin:8px 0 0;opacity:.85;
   }
+  #view-security-scan .sec-scan-verdict-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  #view-security-scan .sec-scan-verdict-signal{
+    min-width:148px;padding:14px 16px;border-radius:10px;border:1px solid var(--border);
+    background:rgba(255,255,255,.02);display:flex;flex-direction:column;gap:4px;
+  }
+  #view-security-scan .sec-scan-verdict-signal--ok{border-color:rgba(125,206,160,.4);background:linear-gradient(145deg,rgba(125,206,160,.1),rgba(125,206,160,.02))}
+  #view-security-scan .sec-scan-verdict-signal--mid{border-color:rgba(201,168,76,.45)}
+  #view-security-scan .sec-scan-verdict-signal--warn{border-color:rgba(240,168,90,.4);background:linear-gradient(145deg,rgba(240,168,90,.1),rgba(240,168,90,.02))}
+  #view-security-scan .sec-scan-verdict-signal--bad{border-color:rgba(232,93,74,.35);background:linear-gradient(145deg,rgba(232,93,74,.1),rgba(232,93,74,.02))}
+  #view-security-scan .sec-scan-verdict-kicker{
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-secondary);
+  }
+  #view-security-scan .sec-scan-verdict-signal strong{font-size:22px;letter-spacing:.06em}
+  #view-security-scan .sec-scan-verdict-signal--ok strong{color:var(--signal-green,#7dcea0)}
+  #view-security-scan .sec-scan-verdict-signal--bad strong{color:#f0a89a}
+  #view-security-scan .sec-scan-verdict-confidence{font-size:11px;color:var(--text-secondary)}
+  #view-security-scan .sec-scan-verdict-copy{flex:1;min-width:220px}
+  #view-security-scan .sec-scan-verdict-headline{font-size:14px;line-height:1.55;color:var(--text-primary);margin:0 0 10px}
+  #view-security-scan .sec-scan-verdict-rationale{margin:0;padding-left:18px;font-size:12px;line-height:1.55;color:var(--text-secondary)}
+  #view-security-scan .sec-scan-verdict-rationale li{margin-bottom:6px}
+  #view-security-scan #sec-scan-verdict-panel .tcx-panel-head{align-items:center}
   @media(max-width:900px){
     #view-security-scan .sec-scan-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     #view-security-scan .sec-scan-stat-grid--5{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1034,6 +1055,7 @@
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
+      <a class="nav-i" href="/token/stake">Stake <span class="badge">SOON</span></a>
       <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">SOON</span></div>
       <div class="nav-i" data-nav="security-scan" onclick="showView('security-scan')">Security Scan <span class="badge">API</span></div>
     </div>
@@ -1199,7 +1221,7 @@
           <span class="tok-symbol">TCX</span>
           <span class="tok-soon-badge">Coming soon</span>
         </div>
-        <p class="tok-draft-note"><strong>TCX</strong> — CA at T0. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a></p>
+        <p class="tok-draft-note"><strong>TCX</strong> — CA at T0. <a href="/token" style="color:var(--gold);text-decoration:underline">Tokenomics</a> · <a href="/token/transparency" style="color:var(--gold);text-decoration:underline">Transparency</a> · <a href="/token/stake" style="color:var(--gold);text-decoration:underline">Stake · Soon</a></p>
         <p class="tok-lead">55% ops · 25% to token (buyback + LP) · 20% treasury. Pay in TCX → 80% burn per tx.</p>
         <div class="tok-pills" style="margin-bottom:28px">
           <span class="tok-pill">Deluxe 50k · Executive 250k · President 1M+</span>
@@ -1211,6 +1233,7 @@
           <div class="tok-card"><h3>Executive</h3><p>Discover badge · signal credits · transparency early access.</p></div>
           <div class="tok-card"><h3>President</h3><p>Integration headroom · governance vote · webhook beta.</p></div>
           <div class="tok-card"><h3>Buyback</h3><p>15% net USDC → 60% burn / 40% LP weekly.</p></div>
+          <a class="tok-card" href="/token/stake" style="text-decoration:none;color:inherit"><h3>Stake <span class="tok-soon-badge" style="font-size:8px;padding:2px 6px">Soon</span></h3><p>Lock TCX post-T0 for protocol revenue share — preview →</p></a>
         </div>
         <p class="tok-disclaimer" style="margin:0">Not financial advice. Experimental — high risk of total loss. <a href="/token" style="color:var(--gold)">Full policy →</a></p>
       </div>
@@ -1307,6 +1330,17 @@
 
         <div id="sec-scan-results" hidden>
           <div class="sec-scan-access" id="sec-scan-access" hidden></div>
+
+          <section class="tcx-panel el-reveal" id="sec-scan-verdict-panel" hidden>
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Concierge AI</p>
+                <h3 class="tcx-panel-title">Security verdict</h3>
+              </div>
+              <button type="button" class="tcx-btn tcx-btn--gold" id="sec-scan-ask-concierge" hidden>Ask Concierge AI</button>
+            </div>
+            <div id="sec-scan-verdict"></div>
+          </section>
 
           <section class="tcx-panel el-reveal" aria-labelledby="sec-scan-summary-title">
             <div class="tcx-panel-head">
@@ -3837,7 +3871,8 @@
     return `<p><strong>Noted.</strong> Cross-referencing onchain flow, vol surface, and current narrative weight. The honest read: the tape is constructive but unhurried — there is no urgent trade tonight, only positioning to refine.</p><p>If you want depth on a specific theme — macro regime, DeFi narratives, AI flows, or a fresh signal — name it and I will brief properly.</p>`;
   }
   function conciergePayload(message, mode){
-    return {
+    const securityScan = typeof window.__getLastSecurityScan === 'function' ? window.__getLastSecurityScan() : null;
+    const payload = {
       mode: mode || 'chat',
       message,
       history: window._chatHistory,
@@ -3845,7 +3880,19 @@
       liveSnapshot: _loungeMarketSnapshot,
       agentModel: getConciergeAgentModel(),
     };
+    if (securityScan) payload.securityScan = securityScan;
+    return payload;
   }
+
+  window.askConciergeFromSecurityScan = function(message){
+    showView('concierge');
+    const inp = document.getElementById('chatInput');
+    if (inp) {
+      inp.value = message || '';
+      inp.focus();
+      if (typeof autoResizeChatInput === 'function') autoResizeChatInput();
+    }
+  };
 
   async function sendMessage(forceMode){
     const inp=document.getElementById('chatInput');const v=inp.value.trim();if(!v)return;

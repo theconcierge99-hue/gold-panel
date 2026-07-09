@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id);
 
 const SELF_AUDIT_TARGET = "https://conc-exe.xyz";
 const SELF_AUDIT_ALLOWLIST = ["*.conc-exe.xyz", "conc-exe.xyz", "www.conc-exe.xyz"];
+const SCAN_STORAGE_KEY = "el-security-scan-last";
 
 function selfAuditBody(target) {
   return {
@@ -45,6 +46,63 @@ function gradeClass(grade) {
   if (g === "B" || g === "moderate") return "mid";
   if (g === "C" || g === "D" || g === "weak") return "warn";
   return "bad";
+}
+
+function verdictClass(signal) {
+  const s = String(signal ?? "").toLowerCase();
+  if (s === "acceptable") return "ok";
+  if (s === "watch") return "mid";
+  if (s === "harden") return "warn";
+  if (s === "remediate") return "warn";
+  if (s === "critical") return "bad";
+  return "mid";
+}
+
+function compactScanForConcierge(data) {
+  if (!data?.target?.hostname || !data?.summary) return null;
+  if (data.verdict && !data.breakdown) return data;
+  return {
+    target: data.target,
+    auditedAt: data.auditedAt,
+    summary: data.summary,
+    recommendations: (data.recommendations ?? []).slice(0, 12),
+    verdict: data.verdict,
+    topFindings: (data.breakdown?.surface?.findings ?? []).slice(0, 8).map((f) => ({
+      severity: f.severity,
+      title: f.title,
+      category: f.category,
+    })),
+    readinessHighlights: (data.breakdown?.readiness?.dimensions ?? []).slice(0, 8).map((d) => ({
+      name: d.name,
+      label: d.label,
+      score: d.score,
+    })),
+    missingHeaders: (data.breakdown?.headers?.checks ?? [])
+      .filter((c) => !c.present)
+      .map((c) => c.header)
+      .slice(0, 12),
+  };
+}
+
+export function getLastSecurityScan() {
+  if (typeof window !== "undefined" && window.__lastSecurityScan) return window.__lastSecurityScan;
+  try {
+    const raw = sessionStorage.getItem(SCAN_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistScan(data) {
+  const compact = compactScanForConcierge(data);
+  if (!compact) return;
+  window.__lastSecurityScan = compact;
+  try {
+    sessionStorage.setItem(SCAN_STORAGE_KEY, JSON.stringify(compact));
+  } catch {
+    /* quota */
+  }
 }
 
 function revealResultsPanels() {
@@ -239,6 +297,57 @@ function renderRecommendations(recs) {
   el.innerHTML = recs.map((r) => `<li>${escapeHtml(r)}</li>`).join("");
 }
 
+function renderSecurityVerdict(data) {
+  const panel = $("sec-scan-verdict-panel");
+  const el = $("sec-scan-verdict");
+  const askBtn = $("sec-scan-ask-concierge");
+  const v = data?.verdict;
+  if (!panel || !el) return;
+  if (!v?.signal) {
+    panel.hidden = true;
+    if (askBtn) askBtn.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  if (askBtn) askBtn.hidden = false;
+  const rationale = (v.rationale ?? [])
+    .slice(0, 5)
+    .map((r) => `<li>${escapeHtml(r)}</li>`)
+    .join("");
+  el.innerHTML = `
+    <div class="sec-scan-verdict-row">
+      <div class="sec-scan-verdict-signal sec-scan-verdict-signal--${verdictClass(v.signal)}" aria-label="Security verdict ${escapeHtml(v.signal)}">
+        <span class="sec-scan-verdict-kicker">LLM verdict</span>
+        <strong>${escapeHtml(String(v.signal).toUpperCase())}</strong>
+        <span class="sec-scan-verdict-confidence">${escapeHtml(v.confidence)} confidence</span>
+      </div>
+      <div class="sec-scan-verdict-copy">
+        <p class="sec-scan-verdict-headline">${escapeHtml(v.headline)}</p>
+        ${rationale ? `<ul class="sec-scan-verdict-rationale">${rationale}</ul>` : ""}
+      </div>
+    </div>`;
+}
+
+function askConciergeAboutScan(data) {
+  const host = data?.target?.hostname ?? "this site";
+  const grade = data?.summary?.overallGrade ?? "—";
+  const signal = data?.verdict?.signal ?? "watch";
+  const prompt = `Explain the Security Scan verdict for ${host} (grade ${grade}, signal ${signal}). Summarize the biggest risks, priority fixes, and whether this posture is acceptable for production agents/APIs.`;
+  persistScan(data);
+  if (typeof window.askConciergeFromSecurityScan === "function") {
+    window.askConciergeFromSecurityScan(prompt);
+    return;
+  }
+  if (typeof window.showView === "function") {
+    window.showView("concierge");
+    const inp = document.getElementById("chatInput");
+    if (inp) {
+      inp.value = prompt;
+      inp.focus();
+    }
+  }
+}
+
 function setScopeStatus(msg, kind) {
   const el = $("sec-scan-scope-status");
   if (!el) return;
@@ -267,9 +376,11 @@ function scanHeaders(getSoonHolderWallet) {
 }
 
 function renderScanResults(data) {
+  persistScan(data);
   renderAccess(data);
   renderDeskModules(data);
   renderSummary(data);
+  renderSecurityVerdict(data);
   renderDimensions(data.breakdown?.readiness, data.access);
   renderHeaders(data.breakdown?.headers, data.access);
   renderSurface(data.breakdown?.surface, data.access);
@@ -325,6 +436,16 @@ export async function initLoungeSecurityScan(ctx = {}) {
   }
 
   scopeBtn?.addEventListener("click", () => void checkScope());
+
+  const askBtn = $("sec-scan-ask-concierge");
+  askBtn?.addEventListener("click", () => {
+    const scan = window.__lastSecurityScan ?? getLastSecurityScan();
+    if (!scan) {
+      toast("Run a scan first");
+      return;
+    }
+    askConciergeAboutScan(scan);
+  });
 
   selfBtn?.addEventListener("click", async () => {
     input.value = SELF_AUDIT_TARGET;
@@ -401,4 +522,5 @@ export async function initLoungeSecurityScan(ctx = {}) {
 
 if (typeof window !== "undefined") {
   window.__initLoungeSecurityScan = initLoungeSecurityScan;
+  window.__getLastSecurityScan = getLastSecurityScan;
 }

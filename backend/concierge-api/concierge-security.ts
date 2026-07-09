@@ -3,6 +3,10 @@ import type { MarketTick } from "./concierge-brain";
 import type { ConciergeAgentModelId } from "./concierge-llm-models";
 import { parseConciergeAgentModel } from "./concierge-llm-models";
 import { parseClientLiveSnapshot, type LiveMarketSnapshot } from "./market-data";
+import {
+  parseClientSecurityScan,
+  type ClientSecurityScanContext,
+} from "./concierge-security-intel";
 
 /** Vercel Hobby–safe limits (cost + abuse protection) */
 export const LIMITS = {
@@ -22,6 +26,7 @@ export type ConciergeRequest = {
   market: MarketTick[];
   liveSnapshot?: LiveMarketSnapshot | null;
   agentModel: ConciergeAgentModelId;
+  securityScan?: ClientSecurityScanContext | null;
 };
 
 export function isProduction(): boolean {
@@ -165,6 +170,7 @@ export function validateConciergeRequest(raw: unknown): ConciergeRequest {
   }
 
   const liveSnapshot = parseClientLiveSnapshot(body.liveSnapshot);
+  const securityScan = parseClientSecurityScan(body.securityScan);
 
   return {
     mode,
@@ -174,6 +180,7 @@ export function validateConciergeRequest(raw: unknown): ConciergeRequest {
     market,
     liveSnapshot,
     agentModel: parseConciergeAgentModel(body.agentModel),
+    securityScan,
   };
 }
 

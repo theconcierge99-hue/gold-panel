@@ -26,6 +26,10 @@ import {
   wantsDeFiYieldQuestion,
 } from "./concierge-defi-intel";
 import {
+  formatSecurityIntelForPrompt,
+  type ClientSecurityScanContext,
+} from "./concierge-security-intel";
+import {
   formatLoungeMemoryForPrompt,
   ingestWireHeadlinesAsync,
   selectRelevantLoungeMemory,
@@ -286,6 +290,7 @@ async function resolveIntelligenceContext(
   responseMode: ConciergeResponseMode = "standard",
   deFiYieldQuestion = false,
   fastAltChat = false,
+  securityScan?: ClientSecurityScanContext | null,
 ): Promise<{
   intelBlock: string;
   ticks: MarketTick[];
@@ -425,6 +430,15 @@ async function resolveIntelligenceContext(
   let defiIntelBlock = "";
   if (defiIntel) defiIntelBlock = deFiQueryNote + formatDeFiIntelForPrompt(defiIntel);
 
+  let securityIntelBlock = "";
+  if (
+    securityScan &&
+    responseMode !== "trading_plan" &&
+    responseMode !== "scalping_plan"
+  ) {
+    securityIntelBlock = formatSecurityIntelForPrompt(securityScan);
+  }
+
   let scalpBlock = "";
   if (scalp) scalpBlock = formatScalpIntelForPrompt(scalp);
 
@@ -436,6 +450,7 @@ async function resolveIntelligenceContext(
     scalpBlock,
     formatGeneralKnowledgeForPrompt(general),
     defiIntelBlock,
+    securityIntelBlock,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -539,6 +554,7 @@ export async function runConciergeGemini(options: {
   market?: MarketTick[];
   liveSnapshot?: LiveMarketSnapshot | null;
   agentModel?: ConciergeAgentModelId;
+  securityScan?: ClientSecurityScanContext | null;
   /** Wall-clock deadline (ms since epoch) for entire Edge handler incl. x402. */
   deadlineAt?: number;
 }): Promise<ConciergeChatResult | { title: string; summary: string; implication: string }> {
@@ -558,6 +574,7 @@ export async function runConciergeGemini(options: {
     responseMode,
     deFiYieldQuestion,
     fastAltChat,
+    options.securityScan,
   );
   const promptContext = { loungeMemoryBlock };
   const meta = { marketLive: ticks, dataAsOf: snapshot.fetchedAt };

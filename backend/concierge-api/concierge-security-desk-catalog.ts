@@ -178,6 +178,15 @@ export const CONCIERGE_DESK_MODULE_DEFS: ConciergeDeskModuleDef[] = [
 
   // ── Intelligence data layer (OMOP intel files) ─────────────────────────────
   {
+    id: "llm-security-verdict",
+    phase: "intelligence",
+    title: "LLM security verdict",
+    subtitle: "Concierge AI verdict from passive scan research",
+    minTier: "guest",
+    hobbyStatus: "live",
+    implementation: "readiness",
+  },
+  {
     id: "attack-chains",
     phase: "intelligence",
     title: "Attack chains",

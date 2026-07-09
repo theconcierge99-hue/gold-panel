@@ -31,6 +31,8 @@
 - [Architecture](https://conc-exe.xyz/docs/architecture): Edge APIs, data sources, configuration.
 - [TCX Token](https://conc-exe.xyz/token): Tokenomics — 55/20/15/10 split, TCX pay burns, holder tiers.
 - [TCX Transparency](https://conc-exe.xyz/token/transparency): Weekly buyback and burn reports (post-T0).
+- [TCX Stake](https://conc-exe.xyz/token/stake): Staking & protocol rewards preview — ships after T0 fair launch (coming soon).
+- [Security Desk](https://conc-exe.xyz/lounge#security-scan): Passive website scan with LLM security verdict for Concierge AI context.
 
 ## OpenAPI
 

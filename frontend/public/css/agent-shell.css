@@ -31,6 +31,14 @@ body.agent-v2 .pg-nav a{
 }
 body.agent-v2 .pg-nav a:hover{color:var(--pg-text);background:rgba(255,255,255,.04)}
 body.agent-v2 .pg-nav a.active{color:var(--pg-text);background:rgba(212,179,86,.12)}
+body.agent-v2 .pg-nav .pg-nav-soon{
+  display:inline-block;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 6px;margin-left:5px;border-radius:999px;vertical-align:middle;line-height:1.2;
+  border:1px solid rgba(212,179,86,.35);color:var(--pg-accent);
+}
+html[data-theme="light"] body.agent-v2 .pg-nav .pg-nav-soon{
+  border-color:rgba(180,140,40,.4);color:#9a7a28;
+}
 
 body.agent-v2 .pg-nav-more-btn{
   font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;

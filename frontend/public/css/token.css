@@ -72,6 +72,13 @@ a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:tran
 }
 .tok-tier-head{font-size:12px;color:var(--tok-muted);line-height:1.55;margin:0}
 .tok-card--gold{border-color:var(--tok-gold-dim);background:linear-gradient(145deg,var(--tok-panel),rgba(201,168,76,.06))}
+.tok-card--stake{
+  border-color:var(--tok-gold-dim);
+  background:linear-gradient(145deg,var(--tok-panel),rgba(201,168,76,.08));
+  text-decoration:none;color:inherit;
+}
+.tok-card--stake h3{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.tok-card--stake:hover{border-color:var(--tok-gold);box-shadow:0 8px 32px rgba(201,168,76,.12)}
 .tok-governance h3{margin-bottom:8px}
 .tok-governance p{font-size:12px;color:var(--tok-muted);line-height:1.6;margin:0}
 

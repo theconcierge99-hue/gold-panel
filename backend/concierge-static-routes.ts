@@ -8,6 +8,7 @@ export const CONCIERGE_STATIC_REWRITES: Record<string, string> = {
   "/integrations": "/integrations.html",
   "/token": "/token.html",
   "/token/transparency": "/token-transparency.html",
+  "/token/stake": "/token-stake.html",
   "/agent": "/agent.html",
   "/agent/identity": "/agent-identity.html",
   "/agent/endpoints": "/agent-endpoints.html",

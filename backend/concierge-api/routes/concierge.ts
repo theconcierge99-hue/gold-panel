@@ -46,7 +46,7 @@ export default async function handler(request: Request): Promise<Response> {
     assertAllowedOrigin(request);
 
     const raw = await readBodyWithLimit(request);
-    const { mode, message, history, signal, market, liveSnapshot, agentModel } =
+    const { mode, message, history, signal, market, liveSnapshot, agentModel, securityScan } =
       validateConciergeRequest(raw);
 
     const result = await runConciergeGemini({
@@ -58,6 +58,7 @@ export default async function handler(request: Request): Promise<Response> {
       market,
       liveSnapshot,
       agentModel,
+      securityScan,
       deadlineAt: requestStartedAt + EDGE_HANDLER_BUDGET_MS,
     });
 
