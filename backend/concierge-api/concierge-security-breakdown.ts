@@ -86,7 +86,7 @@ export type ScanAccessMeta = {
 };
 
 export type SecurityScanReportTiered = SecurityScanReport & {
-  verdict: SecurityVerdict;
+  verdict?: SecurityVerdict | null;
   access: ScanAccessMeta;
   deskModules: ConciergeDeskModule[];
   deskPhases: DeskPhaseGroup[];
@@ -344,7 +344,7 @@ export function applyScanTierFilter(
 
   return {
     ...report,
-    verdict: buildSecurityVerdict(report),
+    verdict: tierMeets(effective, "deluxe") ? buildSecurityVerdict(report) : null,
     summary: filterSummary(report, effective),
     breakdown: {
       readiness: filterReadiness(report, effective),

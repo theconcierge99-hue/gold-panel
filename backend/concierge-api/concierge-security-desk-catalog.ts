@@ -180,9 +180,9 @@ export const CONCIERGE_DESK_MODULE_DEFS: ConciergeDeskModuleDef[] = [
   {
     id: "llm-security-verdict",
     phase: "intelligence",
-    title: "LLM security verdict",
-    subtitle: "Concierge AI verdict from passive scan research",
-    minTier: "guest",
+    title: "Security verdict",
+    subtitle: "Desk signal from passive scan — Concierge AI context",
+    minTier: "deluxe",
     hobbyStatus: "live",
     implementation: "readiness",
   },

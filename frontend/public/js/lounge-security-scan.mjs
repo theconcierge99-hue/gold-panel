@@ -58,9 +58,19 @@ function verdictClass(signal) {
   return "mid";
 }
 
+function tierMeetsDeluxe(tier) {
+  return tier === "deluxe" || tier === "executive" || tier === "president";
+}
+
 function compactScanForConcierge(data) {
   if (!data?.target?.hostname || !data?.summary) return null;
-  if (data.verdict && !data.breakdown) return data;
+  if (data.verdict && !data.breakdown) {
+    if (!data.verdict?.signal) return null;
+    if (data.access?.tier && !tierMeetsDeluxe(data.access.tier)) return null;
+    return data;
+  }
+  const tier = data.access?.tier ?? "guest";
+  if (!tierMeetsDeluxe(tier) || !data.verdict?.signal) return null;
   return {
     target: data.target,
     auditedAt: data.auditedAt,
@@ -96,7 +106,15 @@ export function getLastSecurityScan() {
 
 function persistScan(data) {
   const compact = compactScanForConcierge(data);
-  if (!compact) return;
+  if (!compact) {
+    delete window.__lastSecurityScan;
+    try {
+      sessionStorage.removeItem(SCAN_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    return;
+  }
   window.__lastSecurityScan = compact;
   try {
     sessionStorage.setItem(SCAN_STORAGE_KEY, JSON.stringify(compact));
@@ -301,34 +319,44 @@ function renderSecurityVerdict(data) {
   const panel = $("sec-scan-verdict-panel");
   const el = $("sec-scan-verdict");
   const askBtn = $("sec-scan-ask-concierge");
-  const v = data?.verdict;
   if (!panel || !el) return;
-  if (!v?.signal) {
-    panel.hidden = true;
+
+  panel.hidden = false;
+  const tier = data?.access?.tier ?? "guest";
+
+  if (!tierMeetsDeluxe(tier)) {
     if (askBtn) askBtn.hidden = true;
+    el.innerHTML = lockedPanelHtml("Security verdict requires Deluxe tier (50k+ TCX) or higher.");
     return;
   }
-  panel.hidden = false;
+
+  const v = data?.verdict;
+  if (!v?.signal) {
+    if (askBtn) askBtn.hidden = true;
+    el.innerHTML = lockedPanelHtml("Verdict unavailable for this scan.");
+    return;
+  }
+
   if (askBtn) askBtn.hidden = false;
-  const rationale = (v.rationale ?? [])
-    .slice(0, 5)
-    .map((r) => `<li>${escapeHtml(r)}</li>`)
-    .join("");
+  const summary = v.summary || v.headline;
   el.innerHTML = `
     <div class="sec-scan-verdict-row">
       <div class="sec-scan-verdict-signal sec-scan-verdict-signal--${verdictClass(v.signal)}" aria-label="Security verdict ${escapeHtml(v.signal)}">
-        <span class="sec-scan-verdict-kicker">LLM verdict</span>
+        <span class="sec-scan-verdict-kicker">Desk signal</span>
         <strong>${escapeHtml(String(v.signal).toUpperCase())}</strong>
-        <span class="sec-scan-verdict-confidence">${escapeHtml(v.confidence)} confidence</span>
       </div>
       <div class="sec-scan-verdict-copy">
-        <p class="sec-scan-verdict-headline">${escapeHtml(v.headline)}</p>
-        ${rationale ? `<ul class="sec-scan-verdict-rationale">${rationale}</ul>` : ""}
+        <p class="sec-scan-verdict-headline">${escapeHtml(summary)}</p>
       </div>
     </div>`;
 }
 
 function askConciergeAboutScan(data) {
+  const tier = data?.access?.tier ?? "guest";
+  if (!tierMeetsDeluxe(tier) || !data?.verdict?.signal) {
+    toast("Security verdict requires Deluxe tier or higher");
+    return;
+  }
   const host = data?.target?.hostname ?? "this site";
   const grade = data?.summary?.overallGrade ?? "—";
   const signal = data?.verdict?.signal ?? "watch";

@@ -8,7 +8,10 @@ export type SecurityVerdictSignal = "acceptable" | "watch" | "harden" | "remedia
 export type SecurityVerdict = {
   signal: SecurityVerdictSignal;
   confidence: "low" | "medium" | "high";
+  /** LLM / Concierge prompt — may include desk-internal detail. */
   headline: string;
+  /** Short copy for Lounge UI — no readiness scores or severity counts. */
+  summary: string;
   rationale: string[];
 };
 
@@ -132,7 +135,33 @@ export function buildSecurityVerdict(
             ? `${host} — remediate high-priority findings before trusting this endpoint.`
             : `${host} — critical exposure signals — do not route production agents until fixed.`;
 
-  return { signal, confidence, headline, rationale: rationale.slice(0, 8) };
+  const summary = buildVerdictUiSummary(signal, grade, sev);
+
+  return { signal, confidence, headline, summary, rationale: rationale.slice(0, 8) };
+}
+
+function buildVerdictUiSummary(
+  signal: SecurityVerdictSignal,
+  grade: string,
+  sev: { high: number; medium: number; low: number; info: number },
+): string {
+  const g = grade || "—";
+  if (signal === "acceptable") {
+    return `Grade ${g} — strong baseline. Suitable for production with normal monitoring.`;
+  }
+  if (signal === "watch") {
+    if (sev.medium > 0) {
+      return `Grade ${g} — mostly solid. Fix open medium issues before you scale traffic.`;
+    }
+    return `Grade ${g} — stable posture. Keep monitoring as you ship changes.`;
+  }
+  if (signal === "harden") {
+    return `Grade ${g} — gaps remain. Close header and surface issues before production.`;
+  }
+  if (signal === "remediate") {
+    return `Grade ${g} — high-priority findings. Remediate before trusting this endpoint.`;
+  }
+  return `Grade ${g} — serious exposure signals. Not recommended for production yet.`;
 }
 
 export function parseClientSecurityScan(raw: unknown): ClientSecurityScanContext | null {
@@ -147,7 +176,7 @@ export function parseClientSecurityScan(raw: unknown): ClientSecurityScanContext
 
   const summaryRaw = body.summary;
   if (!summaryRaw || typeof summaryRaw !== "object") return null;
-  const summary = summaryRaw as SecurityScanReport["summary"];
+  const scanSummary = summaryRaw as SecurityScanReport["summary"];
 
   const verdictRaw = body.verdict;
   if (!verdictRaw || typeof verdictRaw !== "object") return null;
@@ -155,6 +184,7 @@ export function parseClientSecurityScan(raw: unknown): ClientSecurityScanContext
   const signal = String(v.signal ?? "").trim() as SecurityVerdictSignal;
   const confidence = String(v.confidence ?? "").trim() as SecurityVerdict["confidence"];
   const headline = String(v.headline ?? "").trim().slice(0, 400);
+  const verdictSummary = String(v.summary ?? headline).trim().slice(0, 280);
   if (!headline || !["acceptable", "watch", "harden", "remediate", "critical"].includes(signal)) {
     return null;
   }
@@ -215,9 +245,9 @@ export function parseClientSecurityScan(raw: unknown): ClientSecurityScanContext
   return {
     target: { origin, hostname },
     auditedAt: String(body.auditedAt ?? "").trim().slice(0, 40) || new Date().toISOString(),
-    summary,
+    summary: scanSummary,
     recommendations,
-    verdict: { signal, confidence: confidence || "medium", headline, rationale },
+    verdict: { signal, confidence: confidence || "medium", headline, summary: verdictSummary, rationale },
     topFindings: topFindings.length ? topFindings : undefined,
     readinessHighlights: readinessHighlights.length ? readinessHighlights : undefined,
     missingHeaders: missingHeaders.length ? missingHeaders : undefined,
@@ -233,7 +263,7 @@ export function formatSecurityIntelForPrompt(scan: ClientSecurityScanContext): s
     "Rules: Use ONLY this block for security posture, headers, surface findings, and SECURITY VERDICT. Do not invent CVEs, exploits, or findings outside this research. Passive audit only — not a penetration test.",
     "",
     `[SECURITY VERDICT — ${scan.verdict.confidence} confidence]`,
-    `Signal: ${scan.verdict.signal.toUpperCase()} — ${scan.verdict.headline}`,
+    `Signal: ${scan.verdict.signal.toUpperCase()} — ${scan.verdict.summary || scan.verdict.headline}`,
     ...scan.verdict.rationale.map((r) => `- ${r}`),
     "",
     "[SCAN SUMMARY]",
