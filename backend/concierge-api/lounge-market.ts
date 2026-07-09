@@ -1,10 +1,15 @@
 import { buildTrendingNarratives, enrichHeadlinesForUi } from "./headline-ui";
+import { withEdgeCache } from "./edge-response-cache";
 import { fetchDevCreatorHeadlines } from "./dev-creator-sync";
 import { ingestWireHeadlinesAsync } from "./lounge-memory";
 import { fetchLiveMarketSnapshot, ticksForUi } from "./market-data";
 import { listCreatorHeadlinesForUi } from "./signal-ui";
 
 export async function buildLoungeMarketPayload() {
+  return withEdgeCache("lounge-market", "default", 55_000, buildLoungeMarketPayloadFresh);
+}
+
+async function buildLoungeMarketPayloadFresh() {
   const snapshot = await fetchLiveMarketSnapshot();
   ingestWireHeadlinesAsync(snapshot.headlines);
   const wire = enrichHeadlinesForUi(snapshot.headlines);

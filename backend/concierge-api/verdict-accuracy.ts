@@ -6,6 +6,14 @@ import type { DeskVerdict } from "./concierge-defi-intel";
 const SNAPSHOTS_KEY = "intel:verdict:snapshots";
 const MAX_SNAPSHOTS = 120;
 const EVAL_AFTER_MS = 24 * 60 * 60 * 1000;
+const LEADERBOARD_CACHE_MS = 120_000;
+const EVAL_MIN_INTERVAL_MS = 10 * 60 * 1000;
+
+let leaderboardCache: {
+  at: number;
+  payload: Awaited<ReturnType<typeof buildLeaderboardPayload>>;
+} | null = null;
+let lastEvalAt = 0;
 
 export type VerdictSnapshot = {
   id: string;
@@ -94,6 +102,7 @@ export async function recordVerdictSnapshot(input: {
       btcUsd: input.btcUsd,
     });
     await writeSnapshots(rows);
+    leaderboardCache = null;
   } catch {
     /* non-blocking */
   }
@@ -138,7 +147,36 @@ export async function getVerdictAccuracyLeaderboard(): Promise<{
   bySignal: Record<string, { total: number; hits: number; hitRatePct: number | null }>;
   recent: VerdictSnapshot[];
 }> {
-  const rows = await evaluatePending(await readSnapshots());
+  const now = Date.now();
+  if (leaderboardCache && now - leaderboardCache.at < LEADERBOARD_CACHE_MS) {
+    return leaderboardCache.payload;
+  }
+
+  let rows = await readSnapshots();
+  if (now - lastEvalAt >= EVAL_MIN_INTERVAL_MS) {
+    lastEvalAt = now;
+    rows = await evaluatePending(rows);
+  }
+
+  const payload = buildLeaderboardPayload(rows);
+  leaderboardCache = { at: now, payload };
+  return payload;
+}
+
+function buildLeaderboardPayload(rows: VerdictSnapshot[]): {
+  ok: true;
+  dataAsOf: string;
+  methodology: string;
+  evaluated: {
+    total: number;
+    hits: number;
+    misses: number;
+    inconclusive: number;
+    hitRatePct: number | null;
+  };
+  bySignal: Record<string, { total: number; hits: number; hitRatePct: number | null }>;
+  recent: VerdictSnapshot[];
+} {
   const evaluated = rows.filter((r) => r.evaluatedAt && r.hit !== null && r.hit !== undefined);
 
   let hits = 0;

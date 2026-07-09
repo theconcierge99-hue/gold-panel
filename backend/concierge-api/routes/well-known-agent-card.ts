@@ -1,5 +1,6 @@
 import { buildLoungeServiceCard, resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor } from "../concierge-security";
+import { withEdgeCache } from "../edge-response-cache";
 
 /** Service-level agent registry card (ERC-8004-style discovery). */
 export default async function handler(request: Request): Promise<Response> {
@@ -12,7 +13,10 @@ export default async function handler(request: Request): Promise<Response> {
     return new Response(null, { status: 204, headers: cors });
   }
 
-  const card = buildLoungeServiceCard(resolveOrigin(request));
+  const origin = resolveOrigin(request);
+  const card = await withEdgeCache("well-known-agent-card", origin, 600_000, async () =>
+    buildLoungeServiceCard(origin),
+  );
   return new Response(JSON.stringify(card, null, 2), {
     status: 200,
     headers: {

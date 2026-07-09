@@ -6,6 +6,7 @@ import { buildA2aMeshDocument } from "../a2a-mesh";
 import { listAgents } from "../agent-identity-store";
 import { resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor } from "../concierge-security";
+import { withEdgeCache } from "../edge-response-cache";
 
 export default async function handleAgentA2aMesh(request: Request): Promise<Response> {
   const cors = {
@@ -26,20 +27,22 @@ export default async function handleAgentA2aMesh(request: Request): Promise<Resp
 
   const origin = resolveOrigin(request);
   const limit = Math.min(48, Math.max(1, Number(new URL(request.url).searchParams.get("limit") || "24")));
-  const agents = await listAgents(limit);
-  const mesh = buildA2aMeshDocument(
-    origin,
-    agents.map((a) => ({
-      id: a.id,
-      name: a.name,
-      description: a.description,
-      solAddress: a.solAddress,
-      evmAddress: a.evmAddress,
-      createdAt: a.createdAt,
-      cardUrl: `${origin.replace(/\/$/, "")}/api/agent-identity-card?id=${encodeURIComponent(a.id)}`,
-      profileUrl: `${origin.replace(/\/$/, "")}/api/agent-identity?id=${encodeURIComponent(a.id)}`,
-    })),
-  );
+  const mesh = await withEdgeCache("agent-a2a-mesh", `${origin}:${limit}`, 120_000, async () => {
+    const agents = await listAgents(limit);
+    return buildA2aMeshDocument(
+      origin,
+      agents.map((a) => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        solAddress: a.solAddress,
+        evmAddress: a.evmAddress,
+        createdAt: a.createdAt,
+        cardUrl: `${origin.replace(/\/$/, "")}/api/agent-identity-card?id=${encodeURIComponent(a.id)}`,
+        profileUrl: `${origin.replace(/\/$/, "")}/api/agent-identity?id=${encodeURIComponent(a.id)}`,
+      })),
+    );
+  });
 
   return new Response(JSON.stringify({ ok: true, ...mesh }), {
     status: 200,

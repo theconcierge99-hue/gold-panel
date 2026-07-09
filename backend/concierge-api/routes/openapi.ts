@@ -3,6 +3,7 @@ import {
   discoveryCorsHeaders,
   resolveX402SiteOrigin,
 } from "../x402-discovery";
+import { withEdgeCache } from "../edge-response-cache";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = discoveryCorsHeaders();
@@ -19,7 +20,9 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const origin = resolveX402SiteOrigin(request);
-  const doc = buildOpenApiDocument(origin);
+  const doc = await withEdgeCache("openapi", origin, 300_000, async () =>
+    buildOpenApiDocument(origin),
+  );
 
   return new Response(JSON.stringify(doc), {
     status: 200,

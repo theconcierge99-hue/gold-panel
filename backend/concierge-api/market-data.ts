@@ -623,7 +623,21 @@ export async function fetchConciergeMarketSnapshot(options?: {
 }
 
 /** Multi-source live intelligence — exchange, macro, DeFi, sentiment, institutional headlines */
+const LIVE_SNAPSHOT_CACHE_MS = 55_000;
+let liveSnapshotCache: { at: number; snapshot: LiveMarketSnapshot } | null = null;
+
 export async function fetchLiveMarketSnapshot(): Promise<LiveMarketSnapshot> {
+  const now = Date.now();
+  if (liveSnapshotCache && now - liveSnapshotCache.at < LIVE_SNAPSHOT_CACHE_MS) {
+    return liveSnapshotCache.snapshot;
+  }
+
+  const snapshot = await fetchLiveMarketSnapshotUncached();
+  liveSnapshotCache = { at: now, snapshot };
+  return snapshot;
+}
+
+async function fetchLiveMarketSnapshotUncached(): Promise<LiveMarketSnapshot> {
   const [
     spot,
     derivs,

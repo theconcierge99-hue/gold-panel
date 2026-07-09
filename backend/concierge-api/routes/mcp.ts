@@ -13,6 +13,7 @@ import {
 } from "../x402-pricing";
 import { resolveIntelKindFromRequest, handleConciergeIntelRoute } from "../concierge-intel-handler";
 import { handleConciergeSecurityRoute } from "../concierge-security-handler";
+import { withEdgeCache } from "../edge-response-cache";
 
 const MCP_VERSION = "2024-11-05";
 const SERVER_NAME = "concierge-intel";
@@ -99,17 +100,19 @@ export default async function handleMcp(request: Request): Promise<Response> {
   }
 
   if (request.method === "GET" || request.method === "HEAD") {
-    const tools = buildTools(origin);
-    const body = {
-      name: SERVER_NAME,
-      version: SERVER_VERSION,
-      protocolVersion: MCP_VERSION,
-      transport: "http",
-      endpoint: `${origin}/api/mcp`,
-      tools: tools.length,
-      note: "POST JSON-RPC 2.0 with methods initialize | tools/list | tools/call. Pass paymentSignature after x402 pay.",
-      payShExample: `pay curl ${origin}/api/concierge-intel-tvl -d '{}'`,
-    };
+    const body = await withEdgeCache("mcp-discovery", origin, 300_000, async () => {
+      const tools = buildTools(origin);
+      return {
+        name: SERVER_NAME,
+        version: SERVER_VERSION,
+        protocolVersion: MCP_VERSION,
+        transport: "http",
+        endpoint: `${origin}/api/mcp`,
+        tools: tools.length,
+        note: "POST JSON-RPC 2.0 with methods initialize | tools/list | tools/call. Pass paymentSignature after x402 pay.",
+        payShExample: `pay curl ${origin}/api/concierge-intel-tvl -d '{}'`,
+      };
+    });
     return new Response(JSON.stringify(body), {
       status: 200,
       headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },

@@ -3,6 +3,7 @@ import {
   discoveryCorsHeaders,
   resolveX402SiteOrigin,
 } from "../x402-discovery";
+import { withEdgeCache } from "../edge-response-cache";
 
 export default async function handler(request: Request): Promise<Response> {
   const cors = discoveryCorsHeaders();
@@ -19,7 +20,9 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const origin = resolveX402SiteOrigin(request);
-  const body = buildWellKnownX402Document(origin);
+  const body = await withEdgeCache("well-known-x402", origin, 300_000, async () =>
+    buildWellKnownX402Document(origin),
+  );
 
   return new Response(JSON.stringify(body, null, 2), {
     status: 200,

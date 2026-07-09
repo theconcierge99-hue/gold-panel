@@ -1,5 +1,6 @@
 import { siteOriginFromRequest } from "../agent-readiness";
 import { corsHeadersFor } from "../concierge-security";
+import { withEdgeCache } from "../edge-response-cache";
 import { buildTcxHealthPayload } from "../tcx-health-core";
 
 export default async function handler(request: Request): Promise<Response> {
@@ -16,7 +17,9 @@ export default async function handler(request: Request): Promise<Response> {
 
   try {
     const origin = siteOriginFromRequest(request);
-    const body = await buildTcxHealthPayload(origin);
+    const body = await withEdgeCache("tcx-health", origin, 60_000, async () =>
+      buildTcxHealthPayload(origin),
+    );
     return new Response(JSON.stringify(body), {
       status: 200,
       headers: {

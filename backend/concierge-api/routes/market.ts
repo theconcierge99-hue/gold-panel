@@ -23,7 +23,7 @@ export default async function handler(request: Request): Promise<Response> {
     const headers: Record<string, string> = {
       ...cors,
       "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=30",
+      "Cache-Control": "public, max-age=55, stale-while-revalidate=30",
     };
 
     return new Response(JSON.stringify(payload), { status: 200, headers });
