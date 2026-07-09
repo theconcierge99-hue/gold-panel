@@ -40,6 +40,16 @@ function allowlistFromTarget(raw) {
   }
 }
 
+function formatSeverityBrief(sev) {
+  if (!sev) return "0";
+  const parts = [];
+  if (sev.high) parts.push(`${sev.high} high`);
+  if (sev.medium) parts.push(`${sev.medium} med`);
+  if (sev.low) parts.push(`${sev.low} low`);
+  if (sev.info) parts.push(`${sev.info} info`);
+  return parts.length ? parts.join(" · ") : "0";
+}
+
 function gradeClass(grade) {
   const g = String(grade ?? "").toUpperCase();
   if (g === "A" || g === "strong") return "ok";
@@ -196,7 +206,7 @@ function renderSummary(data) {
         ${deluxe ? `<div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal}</strong></div>` : ""}
         <div class="sec-scan-stat"><span>Surface</span><strong>${escapeHtml(s.surfaceGrade ?? "—")} · ${s.surfaceFindings ?? 0}</strong></div>
         ${deluxe ? `<div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles}</strong></div>` : ""}
-        ${deluxe ? `<div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>` : `<div class="sec-scan-stat"><span>Signals</span><strong>${s.surfaceFindings ?? 0}</strong></div>`}
+        ${deluxe ? `<div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>` : `<div class="sec-scan-stat"><span>Severity</span><strong>${escapeHtml(formatSeverityBrief(s.surfaceBySeverity))}</strong></div>`}
       </div>
     </div>`;
 }

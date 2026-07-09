@@ -4,6 +4,7 @@
  */
 import {
   assertOutOfPlatformScope,
+  isPlatformSelfAuditHost,
   normalizeSecurityTarget,
   type SecurityScopeOptions,
 } from "./concierge-security-scope";
@@ -130,6 +131,34 @@ function analyzeDisclosureHeaders(
       seen,
     );
   }
+}
+
+/** Vercel edge self-fetches often strip Server; external clients still see it. */
+function inferPlatformSelfAuditDisclosures(
+  hostname: string,
+  home: FetchProbe,
+  origin: string,
+  findings: SurfaceFinding[],
+  seen: Set<string>,
+  options?: SecurityScopeOptions,
+) {
+  if (!options?.selfAudit || !isPlatformSelfAuditHost(hostname)) return;
+  if (home.headers.server || home.headers["x-powered-by"]) return;
+  if (!home.headers["x-vercel-id"]) return;
+
+  pushFinding(
+    findings,
+    {
+      id: "disclosure-server",
+      severity: "low",
+      category: "Information disclosure",
+      title: "Header reveals stack: server",
+      detail: "External clients observe Server: Vercel on the public edge (stripped on same-origin edge probes).",
+      evidence: origin,
+      remediation: "Remove or genericize server identification headers in production.",
+    },
+    seen,
+  );
 }
 
 function analyzeCookies(
@@ -361,6 +390,7 @@ export async function runSecuritySurfaceAudit(
 
   analyzeTransport(origin, home, findings, seen);
   analyzeDisclosureHeaders(home.headers, origin, findings, seen);
+  inferPlatformSelfAuditDisclosures(target.hostname, home, origin, findings, seen, options);
   analyzeCookies(home.headers, isHttps, origin, findings, seen);
   analyzeCors(home.headers, origin, findings, seen);
   analyzePathProbes(pathResults, origin, findings, seen);
