@@ -37,7 +37,7 @@ function freeCallsPerDay(): number {
 function minHoldUi(): number {
   const env = Number(process.env.SOON_HOLDER_MIN_TOKENS ?? "");
   if (Number.isFinite(env) && env > 0) return env;
-  return SOON_TIERS[0]?.minHold ?? 50_000;
+  return SOON_TIERS[0]?.minHold ?? 1_000_000;
 }
 
 function todayUtc(): string {

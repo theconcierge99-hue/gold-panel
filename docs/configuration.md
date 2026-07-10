@@ -84,7 +84,7 @@ SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_
 | `SOON_TOKEN_DISCOUNT_PERCENT` | Holder discount when paying in SOON (0–90). Post-launch snapshot: `30` (= pay 70% of USDC equivalent in token). |
 | `SOON_HOLDER_FREE_TIER_ENABLED` | `false` to disable SOON holder free raw-tier calls (default enabled when mint live). |
 | `SOON_HOLDER_FREE_RAW_PER_DAY` | Free raw-tier calls per wallet per UTC day (default `5`). |
-| `SOON_HOLDER_MIN_TOKENS` | Min SOON balance (UI units) for free tier (default `50000` = Deluxe tier). |
+| `SOON_HOLDER_MIN_TOKENS` | Min SOON balance (UI units) for free tier (default `1000000` = Deluxe tier, 0.1% of 1B supply). |
 
 **Launch snapshots:** [launch-playbook.md](launch-playbook.md) · `config/launch/pre-launch.env.snapshot` · `config/launch/post-launch.env.snapshot` · `npm run launch:verify -- --phase=pre|post`
 

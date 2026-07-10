@@ -6,6 +6,9 @@
 import { getSolanaRpcUrlForServer } from "./x402-config";
 import { solanaRpcCall } from "./x402-solana-rpc";
 
+/** Pump.fun fair launch — fixed 1B UI supply. Tier gates are % of this float. */
+export const SOON_TOTAL_SUPPLY_UI = 1_000_000_000;
+
 export type SoonTierId = "deluxe" | "executive" | "president";
 
 export type SoonBenefitStatus = "live" | "phased";
@@ -32,7 +35,7 @@ export const SOON_TIERS: SoonTier[] = [
   {
     id: "deluxe",
     label: "Deluxe",
-    minHold: 50_000,
+    minHold: 1_000_000,
     headline: "Entry holder · raw intel allowance",
     benefits: [
       {
@@ -78,7 +81,7 @@ export const SOON_TIERS: SoonTier[] = [
   {
     id: "executive",
     label: "Executive",
-    minHold: 250_000,
+    minHold: 5_000_000,
     headline: "Builder holder · agents & signals",
     benefits: [
       {
@@ -127,7 +130,7 @@ export const SOON_TIERS: SoonTier[] = [
   {
     id: "president",
     label: "President",
-    minHold: 1_000_000,
+    minHold: 25_000_000,
     headline: "Top holder · integrations & governance",
     benefits: [
       {

@@ -9,6 +9,7 @@ import {
   isSoonLaunched,
   publicSoonHolderTiers,
   resolveSoonTier,
+  SOON_TIERS,
   type SoonTier,
 } from "./soon-token";
 import { getSolanaRpcUrlForServer } from "./x402-config";
@@ -33,18 +34,65 @@ export type TcxHolderSnapshot = {
   };
 };
 
+function tierMinHold(id: "deluxe" | "executive" | "president"): number {
+  return SOON_TIERS.find((t) => t.id === id)?.minHold ?? 0;
+}
+
+function formatBandAmount(n: number): string {
+  if (n >= 1_000_000) {
+    const m = n / 1_000_000;
+    return Number.isInteger(m) ? `${m}M` : `${m.toFixed(1)}M`;
+  }
+  if (n >= 1_000) {
+    const k = n / 1_000;
+    return Number.isInteger(k) ? `${k}K` : `${k.toFixed(0)}K`;
+  }
+  return n.toLocaleString();
+}
+
+export function defaultTcxDistributionBands(): TcxDistributionBand[] {
+  const deluxe = tierMinHold("deluxe");
+  const executive = tierMinHold("executive");
+  const president = tierMinHold("president");
+  const crabMin = Math.round(deluxe / 10);
+  return [
+    { id: "shrimp", label: "Shrimp", range: `< ${formatBandAmount(crabMin)} TCX`, pct: 42, conciergeTier: null },
+    {
+      id: "crab",
+      label: "Crab",
+      range: `${formatBandAmount(crabMin)} – ${formatBandAmount(deluxe)}`,
+      pct: 28,
+      conciergeTier: null,
+    },
+    {
+      id: "fish",
+      label: "Fish · Deluxe",
+      range: `${formatBandAmount(deluxe)} – ${formatBandAmount(executive)}`,
+      pct: 18,
+      conciergeTier: "deluxe",
+    },
+    {
+      id: "dolphin",
+      label: "Dolphin · Executive",
+      range: `${formatBandAmount(executive)} – ${formatBandAmount(president)}`,
+      pct: 8,
+      conciergeTier: "executive",
+    },
+    {
+      id: "whale",
+      label: "Whale · President",
+      range: `≥ ${formatBandAmount(president)} TCX`,
+      pct: 4,
+      conciergeTier: "president",
+    },
+  ];
+}
+
 export const DEFAULT_TCX_SNAPSHOT: TcxHolderSnapshot = {
   snapshotDate: "2026-07-07",
   phase: "pre-t0",
-  note:
-    "",
-  bands: [
-    { id: "shrimp", label: "Shrimp", range: "< 10K TCX", pct: 42, conciergeTier: null },
-    { id: "crab", label: "Crab", range: "10K – 50K", pct: 28, conciergeTier: null },
-    { id: "fish", label: "Fish · Deluxe", range: "50K – 250K", pct: 18, conciergeTier: "deluxe" },
-    { id: "dolphin", label: "Dolphin · Executive", range: "250K – 1M", pct: 8, conciergeTier: "executive" },
-    { id: "whale", label: "Whale · President", range: "≥ 1M TCX", pct: 4, conciergeTier: "president" },
-  ],
+  note: "",
+  bands: defaultTcxDistributionBands(),
   stats: { totalHolders: null, circulatingSupply: null },
 };
 
@@ -61,11 +109,7 @@ export function normalizeSolanaWallet(raw: string | null | undefined): string | 
   return null;
 }
 
-const SOON_TIER_LADDER = [
-  { id: "deluxe", label: "Deluxe", minHold: 50_000 },
-  { id: "executive", label: "Executive", minHold: 250_000 },
-  { id: "president", label: "President", minHold: 1_000_000 },
-] as const;
+const SOON_TIER_LADDER = SOON_TIERS.map((t) => ({ id: t.id, label: t.label, minHold: t.minHold }));
 
 export async function loadTcxHolderSnapshot(origin: string): Promise<TcxHolderSnapshot> {
   const base = origin.replace(/\/$/, "");
@@ -152,10 +196,14 @@ function balanceUiFromAtomic(balanceAtomic: bigint, decimals: number): number {
 }
 
 function bandForBalance(balanceUi: number, bands: TcxDistributionBand[]): TcxDistributionBand | null {
-  if (balanceUi >= 1_000_000) return bands.find((b) => b.id === "whale") ?? null;
-  if (balanceUi >= 250_000) return bands.find((b) => b.id === "dolphin") ?? null;
-  if (balanceUi >= 50_000) return bands.find((b) => b.id === "fish") ?? null;
-  if (balanceUi >= 10_000) return bands.find((b) => b.id === "crab") ?? null;
+  const president = tierMinHold("president");
+  const executive = tierMinHold("executive");
+  const deluxe = tierMinHold("deluxe");
+  const crabMin = Math.round(deluxe / 10);
+  if (balanceUi >= president) return bands.find((b) => b.id === "whale") ?? null;
+  if (balanceUi >= executive) return bands.find((b) => b.id === "dolphin") ?? null;
+  if (balanceUi >= deluxe) return bands.find((b) => b.id === "fish") ?? null;
+  if (balanceUi >= crabMin) return bands.find((b) => b.id === "crab") ?? null;
   return bands.find((b) => b.id === "shrimp") ?? null;
 }
 
@@ -215,7 +263,7 @@ export async function buildTcxHolderPayload(origin: string, walletRaw: string) {
     benefits: tier?.benefits ?? [],
     message: tier
       ? `${tier.label} tier active at current balance.`
-      : `Below Deluxe minimum (50,000 TCX). Need ${Math.max(0, 50_000 - balanceUi).toLocaleString()} more TCX for entry perks.`,
+      : `Below Deluxe minimum (${tierMinHold("deluxe").toLocaleString()} TCX). Need ${Math.max(0, tierMinHold("deluxe") - balanceUi).toLocaleString()} more TCX for entry perks.`,
   };
 }
 

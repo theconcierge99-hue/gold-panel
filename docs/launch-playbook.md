@@ -173,15 +173,15 @@ curl.exe -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl `
 | MCP server | `GET/POST /api/mcp` (JSON-RPC: `tools/list`, `tools/call`) |
 | Accuracy leaderboard | `GET /api/concierge-intel-accuracy` (free) |
 | SOON holder free tier | Raw routes + `X-Soon-Holder-Wallet` header — `SOON_HOLDER_*` env |
-| Holder tier matrix | Deluxe 50k · Executive 250k · President 1M+ — `soon-token.ts` + `/token` + `x402-config.soonHolderTiers` |
+| Holder tier matrix | Deluxe 1M · Executive 5M · President 25M+ — `soon-token.ts` + `/token` + `x402-config.soonHolderTiers` |
 
 ### Holder tiers (summary)
 
 | Tier | Min hold | Live now (post env) | Phased |
 |------|----------|---------------------|--------|
-| **Deluxe** | 50,000 | SOON checkout ~−30% · 5 free raw/day · **3 free security scout/day** · public accuracy + MCP | Concierge credits · profile badge (2026 · Q4) · Security Desk Deluxe depth |
-| **Executive** | 250,000 | Inherits Deluxe · Security Desk Executive depth (post-launch) | Discover badge · signal credits · transparency early access (2027 · Q1) |
-| **President** | 1,000,000 | — | Webhook beta · rate headroom · **advisory governance vote** (2027 · Q2+) · extended Security Desk modules (Soon until worker) |
+| **Deluxe** | 1,000,000 (0.1%) | SOON checkout ~−30% · 5 free raw/day · **3 free security scout/day** · public accuracy + MCP | Concierge credits · profile badge (2026 · Q4) · Security Desk Deluxe depth |
+| **Executive** | 5,000,000 (0.5%) | Inherits Deluxe · Security Desk Executive depth (post-launch) | Discover badge · signal credits · transparency early access (2027 · Q1) |
+| **President** | 25,000,000 (2.5%) | — | Webhook beta · rate headroom · **advisory governance vote** (2027 · Q2+) · extended Security Desk modules (Soon until worker) |
 
 **Security Desk unlock:** set `SOON_TOKEN_MINT` (or `SECURITY_DESK_LIVE_MAX_TIER=executive`). Pre-launch all external scans are **Guest** depth. Scout free allowance: `SOON_SECURITY_SCOUT_FREE_PER_DAY` via `X-Soon-Holder-Wallet`. See [concierge-security.md](concierge-security.md).
 

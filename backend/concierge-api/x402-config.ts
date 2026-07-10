@@ -46,7 +46,7 @@ import {
 } from "./signal-revenue";
 import { getSolanaFeePayer, getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
 import { dexterDiscoveryLinks } from "./dexter-links";
-import { isSoonLaunched, publicSoonHolderTiers } from "./soon-token";
+import { isSoonLaunched, publicSoonHolderTiers, SOON_TIERS } from "./soon-token";
 
 export const X402_PRICE_USDC = X402_READ_PRICE_USDC;
 export const X402_PRICE_LABEL = "$0.02–$0.25";
@@ -236,7 +236,7 @@ export function getPublicX402Config() {
       enabled: process.env.SOON_HOLDER_FREE_TIER_ENABLED !== "false" && isSoonLaunched(),
       walletHeader: "X-Soon-Holder-Wallet",
       freeRawPerDay: Number(process.env.SOON_HOLDER_FREE_RAW_PER_DAY ?? "5") || 5,
-      minHoldUi: Number(process.env.SOON_HOLDER_MIN_TOKENS ?? "50000") || 50000,
+      minHoldUi: Number(process.env.SOON_HOLDER_MIN_TOKENS ?? String(SOON_TIERS[0]?.minHold ?? 1_000_000)) || SOON_TIERS[0]?.minHold || 1_000_000,
       note: "POST raw-tier intel with X-Soon-Holder-Wallet when TCX mint is live — no x402 if Deluxe tier+ balance.",
     },
     soonHolderTiers: publicSoonHolderTiers(),

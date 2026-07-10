@@ -56,7 +56,7 @@ pay curl https://conc-exe.xyz/api/concierge-security-headers \
 
 ## SOON holder (post-launch)
 
-Scout routes only — 3 free/day on `security-readiness` / `security-headers` with `X-Soon-Holder-Wallet` (Deluxe 50k+ SOON).
+Scout routes only — 3 free/day on `security-readiness` / `security-headers` with `X-Soon-Holder-Wallet` (Deluxe 1M+ SOON).
 
 ## Routes
 

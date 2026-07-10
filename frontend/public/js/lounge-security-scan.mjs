@@ -336,7 +336,7 @@ function renderSecurityVerdict(data) {
 
   if (!tierMeetsDeluxe(tier)) {
     if (askBtn) askBtn.hidden = true;
-    el.innerHTML = lockedPanelHtml("Security verdict requires Deluxe tier (50k+ TCX) or higher.");
+    el.innerHTML = lockedPanelHtml("Security verdict requires Deluxe tier (1M+ TCX) or higher.");
     return;
   }
 
