@@ -136,8 +136,8 @@ function alphaKindMeta(kind: AlphaIntelKind, momentumTheme: MomentumTheme | null
 }
 
 /** Paid intel routes share Edge ~30s with x402 settle — keep Gemini budget tight. */
-const GEMINI_MS = 14_000;
-const TEXT_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
+const GEMINI_MS = 9_000;
+const TEXT_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
 function clampLimit(raw: unknown): number {
   const n = typeof raw === "number" ? raw : Number(raw);
@@ -535,7 +535,7 @@ export async function runAlphaIntel(
     includeInsider ? withTimeout(listRecentCreatorSignals(10), 3_000, []) : Promise.resolve([]),
     withTimeout(
       fetchConciergeMarketSnapshot({ mode: "trading", message: query }),
-      6_000,
+      4_000,
       {
         fetchedAt,
         ticks: [],
@@ -591,7 +591,13 @@ export async function runAlphaIntel(
   });
 
   const synthesized =
-    (await synthesizeAlphaWithGemini(kind, contextBlock, message, limit, momentumTheme)) ??
+    momentumTheme === "robinhood" && kind === "intel-momentum"
+      ? null
+      : ((await synthesizeAlphaWithGemini(kind, contextBlock, message, limit, momentumTheme)) ??
+        null);
+
+  const desk =
+    synthesized ??
     fallbackCandidates(
       kind,
       insiderItems,
@@ -608,7 +614,9 @@ export async function runAlphaIntel(
     ...(yields.length ? ["DeFi Llama yields"] : []),
     ...(snapshot.headlines.length ? ["Market wire headlines"] : []),
     ...(general.sources.length ? ["General knowledge (news/wiki)"] : []),
-    ...(process.env.GEMINI_API_KEY ? ["Concierge Alpha synthesis (Gemini)"] : ["Rule-based desk fallback"]),
+    ...(synthesized && process.env.GEMINI_API_KEY
+      ? ["Concierge Alpha synthesis (Gemini)"]
+      : ["Rule-based desk fallback (Robinhood seeds + live overlays)"]),
   ];
 
   return {
@@ -630,8 +638,8 @@ export async function runAlphaIntel(
       disclaimer:
         "This information is a summary from live desk data and public sources compiled to the best of our ability. Trading carries significant risk. Use this as part of your research & Do Your Own Research. Not Financial Advice. Lounge insider signals are creator content; verify independently.",
     },
-    summary: synthesized.summary,
-    candidates: synthesized.candidates,
+    summary: desk.summary,
+    candidates: desk.candidates,
     supporting: {
       insiderCount: insiderItems.length,
       fearGreed: sentiment,

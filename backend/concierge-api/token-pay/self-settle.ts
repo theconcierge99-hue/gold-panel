@@ -10,8 +10,8 @@ import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./ty
 
 export { isTokenPaySelfSettleRequirement } from "./security";
 
-const SIM_RPC_MS = 5_000;
-const SEND_RPC_MS = 7_000;
+const SIM_RPC_MS = 3_500;
+const SEND_RPC_MS = 4_500;
 const POLL_RPC_MS = 4_000;
 const POLL_INTERVAL_MS = 250;
 const VERIFY_BUDGET_MS = 5_500;
@@ -395,6 +395,17 @@ async function verifyAndSettleTokenPaySelfInner(
   if (!signature) signature = decoded.signature;
   if (!signature) {
     throw tokenPayError(symbol, "failed to broadcast transaction");
+  }
+
+  if (sendSucceeded && !simFailed && payerFallback) {
+    return finalizeSettlement({
+      signature,
+      payer: payerFallback,
+      matched,
+      resourceKind,
+      merchantId,
+      merchant,
+    });
   }
 
   const replayAfterSend = await tryAcceptCachedOrConfirmed(

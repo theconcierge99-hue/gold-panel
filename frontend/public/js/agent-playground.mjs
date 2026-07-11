@@ -371,9 +371,8 @@ async function executePaid() {
       }
     } else if (res.status === 504) {
       log("");
-      log("Gateway timeout — payment may have landed; wait ~15s then Pay again once.", "warn");
-      log("Check Phantom Activity for TCX/USDC outflow before retrying.", "dim");
-      log("USDC · Solana often avoids long TCX verify on Edge.", "dim");
+      log("Gateway timeout — same payment auto-retries (check Phantom before Pay again).", "warn");
+      log("USDC · Solana is the most reliable rail in Playground.", "dim");
     }
 
     logResponse(res, text);

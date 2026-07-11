@@ -811,28 +811,34 @@ export async function createX402PaidFetch(
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
       let res = await payingFetch(input, init);
 
-      if (
-        preferred === "soon" &&
-        res.status === 402 &&
-        lastPaymentSignature &&
-        typeof init?.body === "string"
-      ) {
-        const firstText = await res.text();
-        if (/could not verify transaction on-chain/i.test(firstText)) {
+      if (lastPaymentSignature && typeof init?.body === "string") {
+        const retryable =
+          res.status === 504 ||
+          (res.status === 402 &&
+            /could not verify transaction on-chain/i.test(await res.clone().text()));
+        if (retryable) {
+          const firstText = await res.text();
+          const waitMs = res.status === 504 ? 3_000 : 8_000;
           for (let attempt = 0; attempt < 3; attempt++) {
-            await new Promise((r) => setTimeout(r, 8_000));
+            await new Promise((r) => setTimeout(r, waitMs));
             const retryHeaders = new Headers(init.headers);
             retryHeaders.set("PAYMENT-SIGNATURE", lastPaymentSignature);
             res = await fetch(url, { ...init, headers: retryHeaders });
-            if (res.ok || res.status !== 402) break;
+            if (res.ok) return res;
+            if (res.status !== 402 && res.status !== 504) return res;
             const retryText = await res.text();
-            if (!/could not verify transaction on-chain/i.test(retryText)) {
+            if (
+              res.status === 402 &&
+              !/could not verify transaction on-chain/i.test(retryText)
+            ) {
+              return new Response(retryText, { status: 402, headers: res.headers });
+            }
+            if (attempt === 2) {
               return new Response(retryText, { status: res.status, headers: res.headers });
             }
           }
-          return new Response(firstText, { status: 402, headers: res.headers });
+          return new Response(firstText, { status: res.status, headers: res.headers });
         }
-        return new Response(firstText, { status: 402, headers: res.headers });
       }
 
       return res;
