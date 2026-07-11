@@ -30,6 +30,8 @@ export type TcxTransparencyWeek = {
   tcxBurned: number;
   lpUsd: number;
   txCount: number;
+  burnTx?: string;
+  lpTx?: string;
   links: TcxTransparencyLink[];
 };
 
@@ -142,23 +144,16 @@ function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
 
-function buildWeekLinks(
-  origin: string,
-  merchantId: string,
-  recent: TokenPaySettlementRecord[],
-  periodStart: string,
-  periodEnd: string,
-): TcxTransparencyLink[] {
-  const links: TcxTransparencyLink[] = [
-    {
-      label: "Analytics",
-      url: `${origin}/api/token-pay-analytics?merchant=${encodeURIComponent(merchantId)}&days=30`,
-    },
-  ];
-  const txs = recent.filter((r) => dateInRange(utcDateStr(r.at), periodStart, periodEnd));
-  if (txs[0]) {
-    links.push({ label: "Latest tx", url: `https://solscan.io/tx/${txs[0].tx}` });
-  }
+function weekTxLinksFromEnv(): { burnTx: string | null; lpTx: string | null } {
+  const burnTx = (process.env.TCX_TRANSPARENCY_BURN_TX ?? "").trim() || null;
+  const lpTx = (process.env.TCX_TRANSPARENCY_LP_TX ?? "").trim() || null;
+  return { burnTx, lpTx };
+}
+
+function buildWeekLinks(burnTx: string | null, lpTx: string | null): TcxTransparencyLink[] {
+  const links: TcxTransparencyLink[] = [];
+  if (burnTx) links.push({ label: "burned", url: `https://solscan.io/tx/${burnTx}` });
+  if (lpTx) links.push({ label: "add lp", url: `https://solscan.io/tx/${lpTx}` });
   return links;
 }
 
@@ -236,6 +231,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const weeks: TcxTransparencyWeek[] = [];
   let periodStart = launchDate;
   const today = utcDateStr(nowMs);
+  const envTx = weekTxLinksFromEnv();
 
   while (parseUtcDate(periodStart) <= nowMs) {
     const periodEnd = addUtcDays(periodStart, WEEK_DAYS - 1);
@@ -263,7 +259,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
       tcxBurned: period.tcxReceived * TCX_BURN_PCT,
       lpUsd: 0,
       txCount: period.txCount,
-      links: buildWeekLinks(origin, merchantId, recent, periodStart, periodEnd),
+      links: buildWeekLinks(envTx.burnTx, envTx.lpTx),
     });
 
     periodStart = addUtcDays(periodStart, WEEK_DAYS);

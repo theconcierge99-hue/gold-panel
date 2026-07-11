@@ -36,16 +36,7 @@
       "tcxBurned": 115844.745094,
       "lpUsd": 0,
       "txCount": 15,
-      "links": [
-        {
-          "label": "Analytics",
-          "url": "https://conc-exe.xyz/api/token-pay-analytics?merchant=soon&days=14"
-        },
-        {
-          "label": "Latest tx",
-          "url": "https://solscan.io/tx/4jttY5WhqqHMvFwDjBJEw2JJphaXTzn8UDTxoRcQ49UrfUNALUhmTZE5mEz2ggXjVf2uh4c6TKEjnZ3rgWduTPZg"
-        }
-      ]
+      "links": []
     }
   ]
 }
