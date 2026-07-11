@@ -10,8 +10,10 @@ import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./ty
 export { isTokenPaySelfSettleRequirement } from "./security";
 
 const SETTLE_RPC_MS = 12_000;
-const TX_POLL_MS = 300;
-const TX_POLL_MAX = 22;
+const TX_POLL_MS = 400;
+const TX_POLL_MAX = 40;
+const SIG_FINALIZE_MS = 16_000;
+const SIG_FINALIZE_STEP_MS = 450;
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 type TokenBalanceRow = {
@@ -163,6 +165,15 @@ async function fetchConfirmedTransaction(signature: string): Promise<GetTxDetail
   return null;
 }
 
+async function waitForSignatureFinalized(signature: string): Promise<boolean> {
+  const deadline = Date.now() + SIG_FINALIZE_MS;
+  while (Date.now() < deadline) {
+    if (await signatureLooksFinalized(signature)) return true;
+    await sleep(SIG_FINALIZE_STEP_MS);
+  }
+  return false;
+}
+
 async function signatureLooksFinalized(signature: string): Promise<boolean> {
   const status = await solanaRpcCallWithFallback<{
     value?: { confirmationStatus?: string; err?: unknown }[];
@@ -266,7 +277,7 @@ async function verifyAndSettleTokenPaySelfInner(
 
   const tx = await fetchConfirmedTransaction(signature);
   if (!tx) {
-    const finalized = await signatureLooksFinalized(signature);
+    const finalized = await waitForSignatureFinalized(signature);
     if (finalized && payerFallback) {
       scheduleTokenPaySettlementRecord({
         merchantId:
@@ -301,7 +312,7 @@ async function verifyAndSettleTokenPaySelfInner(
   if (delta > 0n && delta < requiredAmount) {
     throw tokenPayError(symbol, "amount does not match requirement");
   }
-  if (delta <= 0n && !(await signatureLooksFinalized(signature))) {
+  if (delta <= 0n && !(await waitForSignatureFinalized(signature))) {
     throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
   }
 

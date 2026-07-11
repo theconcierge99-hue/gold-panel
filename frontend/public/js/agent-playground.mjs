@@ -363,7 +363,12 @@ async function executePaid() {
       log("Paid call succeeded.", "ok");
     } else if (res.status === 402) {
       log("");
-      log("Still 402 — check balance (USDC or TCX) and SOL for gas.", "warn");
+      if (/could not verify transaction on-chain/i.test(text)) {
+        log("TCX tx broadcast — Solana RPC slow to confirm. Wait ~10s, then Pay again once.", "warn");
+        log("Or switch Pay as → USDC · Solana (facilitator, usually faster).", "dim");
+      } else {
+        log("Still 402 — check balance (USDC or TCX) and SOL for gas.", "warn");
+      }
     }
 
     logResponse(res, text);
