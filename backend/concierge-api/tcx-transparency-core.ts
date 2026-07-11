@@ -270,8 +270,8 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
 
   const activeWeek = weeks.find((w) => w.status === "in_progress");
   const snapshotNote = activeWeek
-    ? `Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC). Full recap ${activeWeek.recapPublish} (Mon UTC). Auto-refreshes hourly.`
-    : "Auto-refreshes hourly from Token Pay analytics.";
+    ? `Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC).`
+    : "";
 
   const base: TcxTransparencyPayload = {
     version: 1,

@@ -67,34 +67,33 @@
 
   <section class="tok-section" aria-labelledby="revenue-h">
     <h2 id="revenue-h">Revenue <em>since launch</em></h2>
-    <p id="tok-revenue-lead">Loading live data…</p>
     <div class="tok-stat-grid">
       <div class="tok-stat">
         <span class="tok-stat-label">Total revenue (USDC equiv.)</span>
         <span class="tok-stat-value" id="tok-revenue-total">—</span>
-        <span class="tok-stat-sub" id="tok-revenue-total-sub">TCX checkout at ~30% discount vs list</span>
+        <span class="tok-stat-sub">~30% less TCX vs USDC list</span>
       </div>
       <div class="tok-stat">
         <span class="tok-stat-label">TCX received</span>
         <span class="tok-stat-value" id="tok-revenue-tcx">—</span>
-        <span class="tok-stat-sub" id="tok-revenue-tcx-sub">Token Pay settlements</span>
+        <span class="tok-stat-sub">Settled on-chain</span>
       </div>
       <div class="tok-stat">
         <span class="tok-stat-label">Payments</span>
         <span class="tok-stat-value" id="tok-revenue-tx">—</span>
-        <span class="tok-stat-sub" id="tok-revenue-tx-sub">x402 · TCX only so far</span>
+        <span class="tok-stat-sub">x402 paid calls</span>
       </div>
       <div class="tok-stat">
         <span class="tok-stat-label">TCX burned (80%)</span>
         <span class="tok-stat-value" id="tok-revenue-burn">—</span>
-        <span class="tok-stat-sub">Per payment policy · verify on Solscan</span>
+        <span class="tok-stat-sub">Per published policy</span>
       </div>
     </div>
   </section>
 
   <section class="tok-section" aria-labelledby="reports-h">
     <h2 id="reports-h">Weekly <em>ledger</em></h2>
-    <p>Each row: net USDC in the period, buyback executed, TCX burned (buyback + direct TCX payments), and LP added. Week 1 runs <strong>9–15 Jul 2026 (UTC)</strong>; first full recap <strong>16 Jul (UTC)</strong>.</p>
+    <p>Each row: net USDC in the period, buyback executed, TCX burned, and LP added.</p>
     <div class="tok-table-wrap">
       <table class="tok-table tok-table--reports">
         <thead>
@@ -114,7 +113,6 @@
         </tbody>
       </table>
     </div>
-    <p class="tok-report-note" id="tok-report-note">Loading snapshot…</p>
   </section>
 
   <section class="tok-section" aria-labelledby="how-h">
@@ -155,14 +153,9 @@
 
   var body = document.getElementById("tok-report-body");
   var cumulativeEl = document.getElementById("tok-cumulative");
-  var noteEl = document.getElementById("tok-report-note");
-  var revenueLead = document.getElementById("tok-revenue-lead");
   var revenueTotal = document.getElementById("tok-revenue-total");
-  var revenueTotalSub = document.getElementById("tok-revenue-total-sub");
   var revenueTcx = document.getElementById("tok-revenue-tcx");
-  var revenueTcxSub = document.getElementById("tok-revenue-tcx-sub");
   var revenueTx = document.getElementById("tok-revenue-tx");
-  var revenueTxSub = document.getElementById("tok-revenue-tx-sub");
   var revenueBurn = document.getElementById("tok-revenue-burn");
 
   function fmtUsd(n) {
@@ -182,7 +175,6 @@
   }
 
   function showPlaceholder(msg) {
-    if (revenueLead) revenueLead.textContent = msg;
     if (body) {
       body.innerHTML = '<tr class="tok-report-placeholder"><td colspan="6">' + msg + "</td></tr>";
     }
@@ -191,32 +183,10 @@
   function renderSnapshot(snap) {
     var weeks = snap.weeks || [];
     var totals = snap.totals || {};
-    var refreshSec = (snap.cadence && snap.cadence.refreshSeconds) || 3600;
-    var sourceLabel = snap.source === "override" ? "manual override" : "live API";
 
-    if (revenueLead) {
-      revenueLead.textContent =
-        (snap.snapshotNote || "Transparency data") +
-        " · " +
-        sourceLabel +
-        " · refreshes every " +
-        Math.round(refreshSec / 60) +
-        " min";
-    }
     if (revenueTotal) revenueTotal.textContent = fmtUsd(totals.revenueUsdcEquivalent);
-    if (revenueTotalSub) {
-      revenueTotalSub.textContent =
-        totals.revenueListUsdc != null
-          ? "List price equivalent " + fmtUsd(totals.revenueListUsdc)
-          : "TCX checkout at ~30% discount vs list";
-    }
     if (revenueTcx) revenueTcx.textContent = fmtTcx(totals.tcxReceived);
-    if (revenueTcxSub) revenueTcxSub.textContent = (totals.tcxTxCount || 0) + " Token Pay tx";
     if (revenueTx) revenueTx.textContent = String(totals.txCount || 0);
-    if (revenueTxSub) {
-      revenueTxSub.textContent =
-        (totals.usdcTxCount || 0) + " USDC · " + (totals.tcxTxCount || 0) + " TCX";
-    }
     if (revenueBurn) revenueBurn.textContent = fmtTcx(totals.tcxBurned);
 
     if (!weeks.length) {
@@ -231,17 +201,10 @@
       if (row.status === "in_progress") {
         weekLabel += ' <span class="tok-pill" style="font-size:9px;margin-left:6px">in progress</span>';
       }
-      var buyback =
-        "$" +
-        Number(row.buybackUsd || 0).toFixed(2) +
-        (row.buybackNote ? '<br><span style="color:var(--tok-dim);font-size:10px">' + row.buybackNote + "</span>" : "");
+      var buyback = "$" + Number(row.buybackUsd || 0).toFixed(2);
       tr.innerHTML =
         "<td>" + weekLabel + "</td>" +
-        "<td>" + fmtUsd(row.netUsd) +
-        (row.revenueUsdcEquivalent
-          ? '<br><span style="color:var(--tok-dim);font-size:10px">+' + fmtUsd(row.revenueUsdcEquivalent) + " TCX equiv.</span>"
-          : "") +
-        "</td>" +
+        "<td>" + fmtUsd(row.netUsd) + "</td>" +
         "<td>" + buyback + "</td>" +
         "<td>" + Number(row.tcxBurned || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + "</td>" +
         "<td>" + fmtUsd(row.lpUsd) + "</td>" +
@@ -250,15 +213,6 @@
     });
 
     if (cumulativeEl) cumulativeEl.textContent = fmtUsd(totals.usdcNet != null ? totals.usdcNet : 0);
-    if (noteEl) {
-      noteEl.textContent =
-        "Updated " +
-        (snap.snapshotAt ? snap.snapshotAt.replace("T", " ").replace(/\.\d+Z$/, " UTC") : "—") +
-        " · launch " +
-        (snap.launchDate || "—") +
-        " · CA " +
-        (snap.mint || "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump");
-    }
   }
 
   function loadData(live) {
@@ -278,9 +232,7 @@
           .then(renderSnapshot);
       })
       .catch(function () {
-        showPlaceholder(
-          'Transparency data unavailable. CA: <code style="font-size:11px">F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>'
-        );
+        showPlaceholder("Transparency data unavailable.");
       });
   }
 
