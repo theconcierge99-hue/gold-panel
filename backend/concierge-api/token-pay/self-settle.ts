@@ -9,11 +9,13 @@ import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./ty
 
 export { isTokenPaySelfSettleRequirement } from "./security";
 
-const SETTLE_RPC_MS = 12_000;
-const TX_POLL_MS = 400;
-const TX_POLL_MAX = 40;
-const SIG_FINALIZE_MS = 16_000;
-const SIG_FINALIZE_STEP_MS = 450;
+/** Keep total self-settle under ~8s — Edge handler also runs Gemini after payment (~30s cap). */
+const SIM_RPC_MS = 5_000;
+const SEND_RPC_MS = 7_000;
+const POLL_RPC_MS = 2_500;
+const POLL_INTERVAL_MS = 280;
+const VERIFY_BUDGET_MS = 6_500;
+const TX_DETAIL_RPC_MS = 4_000;
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 type TokenBalanceRow = {
@@ -147,37 +149,33 @@ function merchantMintDelta(
   return postAmt - preAmt;
 }
 
-async function fetchConfirmedTransaction(signature: string): Promise<GetTxDetail | null> {
+async function fetchConfirmedTransactionOnce(signature: string): Promise<GetTxDetail | null> {
   const opts = {
     encoding: "jsonParsed",
     maxSupportedTransactionVersion: 1,
     commitment: "confirmed",
   };
-  for (let i = 0; i < TX_POLL_MAX; i++) {
-    const tx = await solanaRpcCallWithFallback<GetTxDetail | null>(
-      "getTransaction",
-      [signature, opts],
-      SETTLE_RPC_MS,
-    );
-    if (tx.ok && tx.result) return tx.result;
-    await sleep(TX_POLL_MS);
-  }
-  return null;
+  const tx = await solanaRpcCallWithFallback<GetTxDetail | null>(
+    "getTransaction",
+    [signature, opts],
+    TX_DETAIL_RPC_MS,
+  );
+  return tx.ok && tx.result ? tx.result : null;
 }
 
-async function waitForSignatureFinalized(signature: string): Promise<boolean> {
-  const deadline = Date.now() + SIG_FINALIZE_MS;
+async function waitForSignatureConfirmed(signature: string): Promise<boolean> {
+  const deadline = Date.now() + VERIFY_BUDGET_MS;
   while (Date.now() < deadline) {
-    if (await signatureLooksFinalized(signature)) return true;
-    await sleep(SIG_FINALIZE_STEP_MS);
+    if (await signatureLooksConfirmed(signature)) return true;
+    await sleep(POLL_INTERVAL_MS);
   }
   return false;
 }
 
-async function signatureLooksFinalized(signature: string): Promise<boolean> {
+async function signatureLooksConfirmed(signature: string): Promise<boolean> {
   const status = await solanaRpcCallWithFallback<{
     value?: { confirmationStatus?: string; err?: unknown }[];
-  }>("getSignatureStatuses", [[signature], { searchTransactionHistory: true }], SETTLE_RPC_MS);
+  }>("getSignatureStatuses", [[signature], { searchTransactionHistory: true }], POLL_RPC_MS);
   const entry = status.ok ? status.result.value?.[0] : null;
   if (entry?.err) return false;
   return (
@@ -233,7 +231,7 @@ async function verifyAndSettleTokenPaySelfInner(
   const sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
     "simulateTransaction",
     [txB64, simOpts],
-    10_000,
+    SIM_RPC_MS,
   );
   if (sim.ok && sim.result?.value?.err) {
     throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
@@ -244,13 +242,13 @@ async function verifyAndSettleTokenPaySelfInner(
   let send = await solanaRpcCallWithFallback<string>(
     "sendRawTransaction",
     [txB64, sendOpts],
-    SETTLE_RPC_MS,
+    SEND_RPC_MS,
   );
   if (!send.ok && /method not found/i.test(send.error)) {
     send = await solanaRpcCallWithFallback<string>(
       "sendTransaction",
       [txB64, sendOpts],
-      SETTLE_RPC_MS,
+      SEND_RPC_MS,
     );
   }
   if (send.ok && send.result) {
@@ -275,10 +273,10 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "failed to broadcast transaction");
   }
 
-  const tx = await fetchConfirmedTransaction(signature);
+  const confirmed = await waitForSignatureConfirmed(signature);
+  const tx = confirmed ? await fetchConfirmedTransactionOnce(signature) : null;
   if (!tx) {
-    const finalized = await waitForSignatureFinalized(signature);
-    if (finalized && payerFallback) {
+    if (confirmed && payerFallback) {
       scheduleTokenPaySettlementRecord({
         merchantId:
           typeof matched.extra?.merchantId === "string"
@@ -312,7 +310,7 @@ async function verifyAndSettleTokenPaySelfInner(
   if (delta > 0n && delta < requiredAmount) {
     throw tokenPayError(symbol, "amount does not match requirement");
   }
-  if (delta <= 0n && !(await waitForSignatureFinalized(signature))) {
+  if (delta <= 0n && !(await signatureLooksConfirmed(signature))) {
     throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
   }
 

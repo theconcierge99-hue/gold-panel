@@ -135,7 +135,8 @@ function alphaKindMeta(kind: AlphaIntelKind, momentumTheme: MomentumTheme | null
   };
 }
 
-const GEMINI_MS = 20_000;
+/** Paid intel routes share Edge ~30s with x402 settle — keep Gemini budget tight. */
+const GEMINI_MS = 14_000;
 const TEXT_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function clampLimit(raw: unknown): number {
