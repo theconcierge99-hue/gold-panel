@@ -84,6 +84,8 @@ export type IntelRequestBody = {
   includeInsider?: boolean;
   /** Alpha desks: max candidates (1–8, default 5) */
   limit?: number;
+  /** Momentum desk: robinhood = Robinhood Chain meme rotation overlay (auto-detected from message) */
+  theme?: "robinhood" | "general";
   /** Wire desk: category filter (Macro, Geopolitics, Crypto, …) */
   category?: string;
   /** Scalp desk: 5m | 15m (default both) */

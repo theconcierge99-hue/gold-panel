@@ -199,6 +199,19 @@
 }</code></pre>
       <p><strong>Response:</strong> <code>summary</code>, <code>candidates[]</code> (each with <code>insiderSignals</code>, <code>institutional</code>, <code>onchain</code>, <code>narrative</code>, <code>kol</code>, <code>riskFlags</code>, <code>actionable</code>). Momentum includes <code>direction</code>: <code>up</code> | <code>down</code> | <code>watch</code>.</p>
     </div>
+    <div class="card" style="margin-top:1rem">
+      <h3>Robinhood Chain momentum (<code>theme: robinhood</code>)</h3>
+      <p>When Robinhood Chain meme meta is active (CASHCAT, Pump.fun cross-chain trades in SOL), set <code>theme: "robinhood"</code> on <code>intel-momentum</code> — or mention <code>robinhood</code> / <code>cashcat</code> in <code>message</code> for auto-detection.</p>
+<pre><code>{
+  "theme": "robinhood",
+  "message": "Robinhood Chain meme rotation — CASHCAT and Pump.fun cross-chain",
+  "limit": 5,
+  "includeInsider": true
+}</code></pre>
+      <p>Pay in <strong>TCX</strong> for ~30% discount (80% burn per payment). See <a href="/token" class="gold-link">/token</a> · <code>GET /api/x402-config</code>.</p>
+<pre><code>pay curl https://conc-exe.xyz/api/concierge-intel-momentum \
+  -d '{"theme":"robinhood","message":"RH L2 rotation","limit":5}'</code></pre>
+    </div>
   </section>
 
   <section id="verdict">

@@ -36,6 +36,12 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
   "intel-desk-brief": { message: "morning desk brief", includeInsider: true },
   "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
   "intel-scalp": { symbols: ["BTC", "SOL"], intervals: ["5m", "15m"] },
+  "intel-momentum": {
+    theme: "robinhood",
+    message: "Robinhood Chain meme rotation — CASHCAT and Pump.fun cross-chain",
+    limit: 5,
+    includeInsider: true,
+  },
   "security-readiness": {
     target: "https://api.example.com",
     allowlist: ["*.example.com"],

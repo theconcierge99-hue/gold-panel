@@ -30,7 +30,11 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
 pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-yields \
   -d '{"chain":"solana","project":"meteora"}'
 
-# Alpha desk
+# Alpha desk — Robinhood Chain meme rotation
+pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-momentum \
+  -d '{"theme":"robinhood","message":"CASHCAT and RH L2 rotation","limit":5,"includeInsider":true}'
+
+# Alpha desk (general)
 pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-momentum \
   -d '{"message":"BTC altcoin volatility","limit":5,"includeInsider":true}'
 

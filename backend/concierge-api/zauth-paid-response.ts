@@ -15,7 +15,7 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "intel-verdict": "JSON with verdict signal, confidence, rationale, optional insider[]",
   "intel-airdrop": "JSON with summary and candidates[] (insider-first airdrop desk)",
   "intel-listing": "JSON with summary and candidates[] (listing catalyst desk)",
-  "intel-momentum": "JSON with summary and candidates[] (large-move up/down desk)",
+  "intel-momentum": "JSON with summary and candidates[] (large-move desk; theme:robinhood for RH Chain meme rotation)",
   "intel-scalp": "JSON with 5m/15m TA for BTC/ETH/BNB/SOL USDT (RSI, EMA, levels, perp overlay)",
   "intel-macro": "JSON with marks[], sentiment, macro yields/events/headlines",
   "intel-wire": "JSON with headlines[] from live RSS and Lounge wire memory",

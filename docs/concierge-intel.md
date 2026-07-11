@@ -30,9 +30,24 @@ SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Ho
 | POST | `/api/concierge-intel-desk-brief` | $0.25 | Macro + Meteora + verdict bundle |
 | POST | `/api/concierge-intel-airdrop` | $0.10 | Airdrop candidates |
 | POST | `/api/concierge-intel-listing` | $0.10 | Listing candidates |
-| POST | `/api/concierge-intel-momentum` | $0.10 | Large-move candidates |
+| POST | `/api/concierge-intel-momentum` | $0.10 | Large-move candidates (`theme: "robinhood"` for RH Chain meme desk) |
 | POST | `/api/concierge-intel-scalp` | $0.10 | BTC/ETH/BNB/SOL scalp desk |
 | GET | `/api/concierge-intel-accuracy` | free | Verdict accuracy leaderboard |
+
+### Momentum — Robinhood Chain desk
+
+`POST /api/concierge-intel-momentum` accepts optional `theme: "robinhood"` (also auto-detected when the message mentions Robinhood Chain, CASHCAT, or Pump.fun cross-chain). Returns meme rotation candidates with Solana routing context.
+
+```json
+{
+  "theme": "robinhood",
+  "message": "Robinhood Chain meme rotation — CASHCAT and Pump.fun cross-chain",
+  "limit": 5,
+  "includeInsider": true
+}
+```
+
+Pay in TCX (30% discount, 80% burn): add Token Pay header after building accept via `/api/token-pay-build-accept`.
 
 ### Meteora (`intel-meteora`)
 

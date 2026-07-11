@@ -108,7 +108,8 @@ const RESOURCE_META: Record<
   },
   "intel-momentum": {
     name: "Concierge Intel — Momentum",
-    description: "Tokens with large move potential (up or down) — insider, positioning, narrative synthesis",
+    description:
+      "Large-move candidates (up or down). Optional theme:robinhood for Robinhood Chain meme rotation via Pump.fun SOL routing.",
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "alpha"],
   },

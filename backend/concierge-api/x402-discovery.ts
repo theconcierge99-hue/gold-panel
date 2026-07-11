@@ -168,7 +168,8 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     method: "POST",
     path: "/api/concierge-intel-momentum",
     name: "Concierge Intel — Momentum",
-    description: "Large-move candidates (up or down) — insider, derivatives positioning, narrative synthesis.",
+    description:
+      "Large-move candidates (up or down). Set theme:robinhood for Robinhood Chain meme desk (Pump.fun cross-chain in SOL).",
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["intel-momentum"]],
   },

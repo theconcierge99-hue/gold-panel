@@ -42,8 +42,19 @@ pay curl https://conc-exe.xyz/api/concierge-intel-a2a-pipeline \
 | Tier | USDC | Examples |
 |------|------|----------|
 | Raw | $0.02 | macro, wire, tvl, whales |
-| Signal | $0.10 | verdict, meteora, yields, concierge chat |
+| Signal | $0.10 | verdict, meteora, yields, concierge chat, **intel-momentum** |
 | Bundle | $0.25 | desk-brief, **a2a-pipeline** |
+
+## Robinhood Chain momentum desk
+
+When Robinhood Chain meme meta is hot (CASHCAT, Pump.fun cross-chain in SOL), use **`intel-momentum`** with `theme: "robinhood"`. Auto-detects from message keywords (`robinhood`, `cashcat`, `pump.fun robinhood`, etc.).
+
+```bash
+pay curl https://conc-exe.xyz/api/concierge-intel-momentum \
+  -d '{"theme":"robinhood","message":"RH L2 meme rotation","limit":5,"includeInsider":true}'
+```
+
+**TCX checkout:** holders pay ~30% less in TCX; 80% of each TCX payment burns. See `/token` and `GET /api/x402-config`.
 
 ## A2A orchestration
 
