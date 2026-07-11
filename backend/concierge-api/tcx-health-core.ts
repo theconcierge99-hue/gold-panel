@@ -183,6 +183,7 @@ export async function buildTcxHealthPayload(origin: string) {
     links: {
       tokenomics: "/token",
       transparency: "/token/transparency",
+      transparencyApi: "/api/tcx-transparency",
       health: "/lounge#token-research",
       holderApi: "/api/tcx-holder?wallet=",
       healthApi: "/api/tcx-health",

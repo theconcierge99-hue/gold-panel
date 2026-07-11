@@ -5,6 +5,8 @@
 import { solanaRpcCallWithFallback, solanaRpcParallelRace } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
+import { effectiveUsdcForTokenPay } from "./x402";
+import { priceUsdcForResource, type X402ResourceKind } from "../x402-pricing";
 import { getTokenPaySettleReceipt, putTokenPaySettleReceipt } from "./settle-receipt-cache";
 import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
 
@@ -213,6 +215,18 @@ async function signatureLooksConfirmed(signature: string): Promise<boolean> {
   );
 }
 
+function usdcMicroForResourceKind(resourceKind: string, merchant: { id: string }): {
+  listUsdcMicro: number;
+  effectiveUsdcMicro: number;
+} {
+  const list = priceUsdcForResource(resourceKind as X402ResourceKind);
+  const effective = effectiveUsdcForTokenPay(list, merchant as Parameters<typeof effectiveUsdcForTokenPay>[1]);
+  return {
+    listUsdcMicro: Math.round(list * 1_000_000),
+    effectiveUsdcMicro: Math.round(effective * 1_000_000),
+  };
+}
+
 function finalizeSettlement(input: {
   signature: string;
   payer: string;
@@ -221,6 +235,7 @@ function finalizeSettlement(input: {
   merchantId: string;
   merchant: Awaited<ReturnType<typeof assertTokenPaySelfSettleAuthorized>>;
 }): { payer: string; transaction: string; network: string } {
+  const revenue = usdcMicroForResourceKind(input.resourceKind, input.merchant);
   scheduleTokenPaySettlementRecord({
     merchantId: input.merchantId,
     mint: input.matched.asset,
@@ -228,6 +243,8 @@ function finalizeSettlement(input: {
     resourceKind: input.resourceKind,
     payer: input.payer,
     tx: input.signature,
+    listUsdcMicro: revenue.listUsdcMicro,
+    effectiveUsdcMicro: revenue.effectiveUsdcMicro,
   });
   void putTokenPaySettleReceipt({
     signature: input.signature,

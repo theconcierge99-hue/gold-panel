@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "launchDate": "2026-07-07",
+  "mint": "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump",
+  "cadence": {
+    "weekLengthDays": 7,
+    "anchor": "launch",
+    "publishDay": "monday",
+    "timezone": "UTC",
+    "note": "Each 7-day period starts on launch day. Full recap publishes the following Monday (UTC)."
+  },
+  "snapshotAt": "2026-07-11T09:30:00Z",
+  "snapshotNote": "Week 1 in progress (Jul 7–13 UTC). First full recap due 2026-07-14 (Mon UTC).",
+  "totals": {
+    "revenueUsdcEquivalent": 1.05,
+    "revenueListUsdc": 1.5,
+    "usdcNet": 0,
+    "tcxReceived": 144805.931368,
+    "tcxBurned": 115844.745094,
+    "txCount": 15,
+    "usdcTxCount": 0,
+    "tcxTxCount": 15
+  },
+  "weeks": [
+    {
+      "weekEnd": "2026-07-13",
+      "periodStart": "2026-07-07",
+      "periodEnd": "2026-07-13",
+      "status": "in_progress",
+      "recapPublish": "2026-07-14",
+      "netUsd": 0,
+      "revenueUsdcEquivalent": 1.05,
+      "buybackUsd": 0,
+      "buybackNote": "Below $40 weekly threshold — rolls forward",
+      "tcxReceived": 144805.931368,
+      "tcxBurned": 115844.745094,
+      "lpUsd": 0,
+      "txCount": 15,
+      "links": [
+        {
+          "label": "Analytics",
+          "url": "https://conc-exe.xyz/api/token-pay-analytics?merchant=soon&days=14"
+        },
+        {
+          "label": "Latest tx",
+          "url": "https://solscan.io/tx/4jttY5WhqqHMvFwDjBJEw2JJphaXTzn8UDTxoRcQ49UrfUNALUhmTZE5mEz2ggXjVf2uh4c6TKEjnZ3rgWduTPZg"
+        }
+      ]
+    }
+  ]
+}

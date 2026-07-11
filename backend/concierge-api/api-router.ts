@@ -42,6 +42,7 @@ import handleTokenPayConfig from "./routes/token-pay-config";
 import handleTokenPayPreview from "./routes/token-pay-preview";
 import handleTcxHealth from "./routes/tcx-health";
 import handleTcxHolder from "./routes/tcx-holder";
+import handleTcxTransparency from "./routes/tcx-transparency";
 import handleTokenPayVerify from "./routes/token-pay-verify";
 import handleSolanaRpc from "./routes/solana-rpc";
 import handleSolanaRpcSend from "./routes/solana-rpc-send";
@@ -106,6 +107,7 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/token-pay-preview": handleTokenPayPreview,
   "/api/tcx-health": handleTcxHealth,
   "/api/tcx-holder": handleTcxHolder,
+  "/api/tcx-transparency": handleTcxTransparency,
   "/api/token-pay-verify": handleTokenPayVerify,
   "/api/solana-rpc": handleSolanaRpc,
   "/api/solana-rpc-send": handleSolanaRpcSend,

@@ -27,9 +27,9 @@
     <p class="tok-eyebrow">Transparency</p>
     <h1 class="tok-name" style="margin-bottom:12px">Weekly <em style="font-style:italic;color:var(--tok-gold)">reports</em></h1>
     <p class="tok-lead">
-      Buyback and burn activity tied to real x402 USDC revenue after our <strong>Pump.fun fair launch</strong> (no presale).
-      Reports publish every <strong>Monday (UTC)</strong> once there is on-chain activity to report,
-      with Solscan links for swaps and burns.
+      Buyback and burn activity tied to real x402 revenue after our <strong>Pump.fun fair launch</strong> on
+      <strong>7 Jul 2026</strong> (no presale). Each <strong>7-day period</strong> from launch gets a recap on the
+      following <strong>Monday (UTC)</strong>, with Solscan links for payments, swaps, and burns.
     </p>
     <div class="tok-pills">
       <span class="tok-pill">Min buyback $40 / week</span>
@@ -57,7 +57,7 @@
         <span class="tok-stat-sub">20% treasury · ~30% TCX checkout discount</span>
       </div>
       <div class="tok-stat">
-        <span class="tok-stat-label">Cumulative net</span>
+        <span class="tok-stat-label">Cumulative net (USDC)</span>
         <span class="tok-stat-value" id="tok-cumulative">—</span>
         <span class="tok-stat-sub">Milestone burns at $25k · $100k</span>
       </div>
@@ -65,9 +65,36 @@
     <p style="margin-top:16px">Full policy: <a href="/token" class="tok-inline-link">/token</a></p>
   </section>
 
+  <section class="tok-section" aria-labelledby="revenue-h">
+    <h2 id="revenue-h">Revenue <em>since launch</em></h2>
+    <p id="tok-revenue-lead">Loading live data…</p>
+    <div class="tok-stat-grid">
+      <div class="tok-stat">
+        <span class="tok-stat-label">Total revenue (USDC equiv.)</span>
+        <span class="tok-stat-value" id="tok-revenue-total">—</span>
+        <span class="tok-stat-sub" id="tok-revenue-total-sub">TCX checkout at ~30% discount vs list</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">TCX received</span>
+        <span class="tok-stat-value" id="tok-revenue-tcx">—</span>
+        <span class="tok-stat-sub" id="tok-revenue-tcx-sub">Token Pay settlements</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">Payments</span>
+        <span class="tok-stat-value" id="tok-revenue-tx">—</span>
+        <span class="tok-stat-sub" id="tok-revenue-tx-sub">x402 · TCX only so far</span>
+      </div>
+      <div class="tok-stat">
+        <span class="tok-stat-label">TCX burned (80%)</span>
+        <span class="tok-stat-value" id="tok-revenue-burn">—</span>
+        <span class="tok-stat-sub">Per payment policy · verify on Solscan</span>
+      </div>
+    </div>
+  </section>
+
   <section class="tok-section" aria-labelledby="reports-h">
     <h2 id="reports-h">Weekly <em>ledger</em></h2>
-    <p>Each row: net USDC in the period, buyback executed, TCX burned (buyback + direct TCX payments), and LP added.</p>
+    <p>Each row: net USDC in the period, buyback executed, TCX burned (buyback + direct TCX payments), and LP added. Week 1 runs <strong>7–13 Jul 2026 (UTC)</strong>; first full recap <strong>14 Jul (Mon UTC)</strong>.</p>
     <div class="tok-table-wrap">
       <table class="tok-table tok-table--reports">
         <thead>
@@ -82,12 +109,12 @@
         </thead>
         <tbody id="tok-report-body">
           <tr class="tok-report-placeholder">
-            <td colspan="6">First weekly report publishes when net x402 revenue and buyback activity begin. CA: <code style="font-size:11px">F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code></td>
+            <td colspan="6">Loading weekly ledger…</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="tok-report-note" id="tok-report-note">Last updated: post-launch · CA F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</p>
+    <p class="tok-report-note" id="tok-report-note">Loading snapshot…</p>
   </section>
 
   <section class="tok-section" aria-labelledby="how-h">
@@ -122,37 +149,145 @@
 </div>
 <script>
 (function () {
-  /** Post-launch: replace REPORTS array and set cumulative. Until T0, table shows placeholder. */
-  var REPORTS = [];
+  var API_URL = "/api/tcx-transparency";
+  var FALLBACK_URL = "/data/tcx-transparency.snapshot.json";
+  var REFRESH_MS = 60 * 60 * 1000;
 
   var body = document.getElementById("tok-report-body");
   var cumulativeEl = document.getElementById("tok-cumulative");
   var noteEl = document.getElementById("tok-report-note");
+  var revenueLead = document.getElementById("tok-revenue-lead");
+  var revenueTotal = document.getElementById("tok-revenue-total");
+  var revenueTotalSub = document.getElementById("tok-revenue-total-sub");
+  var revenueTcx = document.getElementById("tok-revenue-tcx");
+  var revenueTcxSub = document.getElementById("tok-revenue-tcx-sub");
+  var revenueTx = document.getElementById("tok-revenue-tx");
+  var revenueTxSub = document.getElementById("tok-revenue-tx-sub");
+  var revenueBurn = document.getElementById("tok-revenue-burn");
 
-  if (!REPORTS.length) return;
+  function fmtUsd(n) {
+    return "$" + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
-  var cumulative = 0;
-  body.innerHTML = "";
-  REPORTS.forEach(function (row) {
-    cumulative += row.netUsd || 0;
-    var tr = document.createElement("tr");
-    var links = (row.links || [])
+  function fmtTcx(n) {
+    return Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + " TCX";
+  }
+
+  function renderLinks(links) {
+    return (links || [])
       .map(function (l) {
         return '<a class="tok-inline-link" href="' + l.url + '" target="_blank" rel="noopener noreferrer">' + l.label + "</a>";
       })
       .join(" · ");
-    tr.innerHTML =
-      "<td>" + row.weekEnd + "</td>" +
-      "<td>$" + row.netUsd.toFixed(2) + "</td>" +
-      "<td>$" + row.buybackUsd.toFixed(2) + "</td>" +
-      "<td>" + row.soonBurned.toLocaleString() + "</td>" +
-      "<td>$" + row.lpUsd.toFixed(2) + "</td>" +
-      "<td>" + (links || "—") + "</td>";
-    body.appendChild(tr);
-  });
+  }
 
-  if (cumulativeEl) cumulativeEl.textContent = "$" + cumulative.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  if (noteEl) noteEl.textContent = "Last updated: " + REPORTS[0].weekEnd + " UTC";
+  function showPlaceholder(msg) {
+    if (revenueLead) revenueLead.textContent = msg;
+    if (body) {
+      body.innerHTML = '<tr class="tok-report-placeholder"><td colspan="6">' + msg + "</td></tr>";
+    }
+  }
+
+  function renderSnapshot(snap) {
+    var weeks = snap.weeks || [];
+    var totals = snap.totals || {};
+    var refreshSec = (snap.cadence && snap.cadence.refreshSeconds) || 3600;
+    var sourceLabel = snap.source === "override" ? "manual override" : "live API";
+
+    if (revenueLead) {
+      revenueLead.textContent =
+        (snap.snapshotNote || "Transparency data") +
+        " · " +
+        sourceLabel +
+        " · refreshes every " +
+        Math.round(refreshSec / 60) +
+        " min";
+    }
+    if (revenueTotal) revenueTotal.textContent = fmtUsd(totals.revenueUsdcEquivalent);
+    if (revenueTotalSub) {
+      revenueTotalSub.textContent =
+        totals.revenueListUsdc != null
+          ? "List price equivalent " + fmtUsd(totals.revenueListUsdc)
+          : "TCX checkout at ~30% discount vs list";
+    }
+    if (revenueTcx) revenueTcx.textContent = fmtTcx(totals.tcxReceived);
+    if (revenueTcxSub) revenueTcxSub.textContent = (totals.tcxTxCount || 0) + " Token Pay tx";
+    if (revenueTx) revenueTx.textContent = String(totals.txCount || 0);
+    if (revenueTxSub) {
+      revenueTxSub.textContent =
+        (totals.usdcTxCount || 0) + " USDC · " + (totals.tcxTxCount || 0) + " TCX";
+    }
+    if (revenueBurn) revenueBurn.textContent = fmtTcx(totals.tcxBurned);
+
+    if (!weeks.length) {
+      showPlaceholder("No weekly periods yet.");
+      return;
+    }
+
+    body.innerHTML = "";
+    weeks.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var weekLabel = row.weekEnd;
+      if (row.status === "in_progress") {
+        weekLabel += ' <span class="tok-pill" style="font-size:9px;margin-left:6px">in progress</span>';
+      }
+      var buyback =
+        "$" +
+        Number(row.buybackUsd || 0).toFixed(2) +
+        (row.buybackNote ? '<br><span style="color:var(--tok-dim);font-size:10px">' + row.buybackNote + "</span>" : "");
+      tr.innerHTML =
+        "<td>" + weekLabel + "</td>" +
+        "<td>" + fmtUsd(row.netUsd) +
+        (row.revenueUsdcEquivalent
+          ? '<br><span style="color:var(--tok-dim);font-size:10px">+' + fmtUsd(row.revenueUsdcEquivalent) + " TCX equiv.</span>"
+          : "") +
+        "</td>" +
+        "<td>" + buyback + "</td>" +
+        "<td>" + Number(row.tcxBurned || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + "</td>" +
+        "<td>" + fmtUsd(row.lpUsd) + "</td>" +
+        "<td>" + (renderLinks(row.links) || "—") + "</td>";
+      body.appendChild(tr);
+    });
+
+    if (cumulativeEl) cumulativeEl.textContent = fmtUsd(totals.usdcNet != null ? totals.usdcNet : 0);
+    if (noteEl) {
+      noteEl.textContent =
+        "Updated " +
+        (snap.snapshotAt ? snap.snapshotAt.replace("T", " ").replace(/\.\d+Z$/, " UTC") : "—") +
+        " · launch " +
+        (snap.launchDate || "—") +
+        " · CA " +
+        (snap.mint || "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump");
+    }
+  }
+
+  function loadData(live) {
+    var url = live ? API_URL + "?live=1&_=" + Date.now() : API_URL;
+    return fetch(url, { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("api");
+        return res.json();
+      })
+      .then(renderSnapshot)
+      .catch(function () {
+        return fetch(FALLBACK_URL, { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("fallback");
+            return res.json();
+          })
+          .then(renderSnapshot);
+      })
+      .catch(function () {
+        showPlaceholder(
+          'Transparency data unavailable. CA: <code style="font-size:11px">F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>'
+        );
+      });
+  }
+
+  loadData(false);
+  setInterval(function () {
+    loadData(true);
+  }, REFRESH_MS);
 })();
 </script>
 <script type="module" src="/js/concierge-boot.mjs"></script>

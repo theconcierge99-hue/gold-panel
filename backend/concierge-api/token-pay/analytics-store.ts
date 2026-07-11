@@ -16,12 +16,18 @@ export type TokenPaySettlementRecord = {
   resourceKind: string;
   payer: string;
   at: number;
+  /** USDC list price × 1e6 at settlement (optional — backfilled from route tier if absent). */
+  listUsdcMicro?: number;
+  /** Effective USDC after TCX discount × 1e6 (optional). */
+  effectiveUsdcMicro?: number;
 };
 
 export type TokenPayDailyRollup = {
   date: string;
   txCount: number;
   volumeAtomic: string;
+  listUsdcMicro?: string;
+  effectiveUsdcMicro?: string;
 };
 
 export type TokenPayMerchantAnalytics = {
@@ -31,6 +37,8 @@ export type TokenPayMerchantAnalytics = {
   txCount: number;
   volumeAtomic: string;
   volumeLabel: string;
+  listUsdcMicro: string;
+  effectiveUsdcMicro: string;
   lastTxAt: number | null;
   lastTx: string | null;
   daily: TokenPayDailyRollup[];
@@ -41,6 +49,8 @@ export type TokenPayMerchantAnalytics = {
 type MerchantTotals = {
   txCount: number;
   volumeAtomic: bigint;
+  listUsdcMicro: bigint;
+  effectiveUsdcMicro: bigint;
   lastTxAt: number | null;
   lastTx: string | null;
 };
@@ -94,6 +104,8 @@ export function scheduleTokenPaySettlementRecord(input: {
   resourceKind: string;
   payer: string;
   tx: string;
+  listUsdcMicro?: number;
+  effectiveUsdcMicro?: number;
 }): void {
   void recordTokenPaySettlement(input).catch((e) => {
     console.error("[token-pay analytics]", e instanceof Error ? e.message : e);
@@ -107,11 +119,17 @@ export async function recordTokenPaySettlement(input: {
   resourceKind: string;
   payer: string;
   tx: string;
+  listUsdcMicro?: number;
+  effectiveUsdcMicro?: number;
 }): Promise<void> {
   const merchant = getTokenPayMerchant(input.merchantId);
   const at = Date.now();
   const date = utcDateKey(at);
   const amount = BigInt(input.amountAtomic);
+  const listMicro = BigInt(Math.max(0, Math.round(input.listUsdcMicro ?? 0)));
+  const effectiveMicro = BigInt(
+    Math.max(0, Math.round(input.effectiveUsdcMicro ?? input.listUsdcMicro ?? 0)),
+  );
 
   const event: TokenPaySettlementRecord = {
     tx: input.tx,
@@ -122,6 +140,8 @@ export async function recordTokenPaySettlement(input: {
     resourceKind: input.resourceKind,
     payer: input.payer,
     at,
+    ...(listMicro > 0n ? { listUsdcMicro: Number(listMicro) } : {}),
+    ...(effectiveMicro > 0n ? { effectiveUsdcMicro: Number(effectiveMicro) } : {}),
   };
 
   if (hasRedis()) {
@@ -130,6 +150,8 @@ export async function recordTokenPaySettlement(input: {
       (await kv.get<MerchantTotals>(totalsKey(input.merchantId))) ?? {
         txCount: 0,
         volumeAtomic: 0n,
+        listUsdcMicro: 0n,
+        effectiveUsdcMicro: 0n,
         lastTxAt: null,
         lastTx: null,
       };
@@ -137,26 +159,47 @@ export async function recordTokenPaySettlement(input: {
       typeof totals.volumeAtomic === "bigint"
         ? totals.volumeAtomic
         : BigInt(String(totals.volumeAtomic ?? 0));
+    const prevList =
+      typeof totals.listUsdcMicro === "bigint"
+        ? totals.listUsdcMicro
+        : BigInt(String((totals as { listUsdcMicro?: string }).listUsdcMicro ?? 0));
+    const prevEff =
+      typeof totals.effectiveUsdcMicro === "bigint"
+        ? totals.effectiveUsdcMicro
+        : BigInt(String((totals as { effectiveUsdcMicro?: string }).effectiveUsdcMicro ?? 0));
     const nextTotals: MerchantTotals = {
       txCount: totals.txCount + 1,
       volumeAtomic: prevVol + amount,
+      listUsdcMicro: prevList + listMicro,
+      effectiveUsdcMicro: prevEff + effectiveMicro,
       lastTxAt: at,
       lastTx: input.tx,
     };
     await kv.set(totalsKey(input.merchantId), {
       ...nextTotals,
       volumeAtomic: nextTotals.volumeAtomic.toString(),
+      listUsdcMicro: nextTotals.listUsdcMicro.toString(),
+      effectiveUsdcMicro: nextTotals.effectiveUsdcMicro.toString(),
     });
 
     const dayKey = dailyKey(input.merchantId, date);
     const day =
-      (await kv.get<{ txCount: number; volumeAtomic: string }>(dayKey)) ?? {
+      (await kv.get<{
+        txCount: number;
+        volumeAtomic: string;
+        listUsdcMicro?: string;
+        effectiveUsdcMicro?: string;
+      }>(dayKey)) ?? {
         txCount: 0,
         volumeAtomic: "0",
+        listUsdcMicro: "0",
+        effectiveUsdcMicro: "0",
       };
     await kv.set(dayKey, {
       txCount: day.txCount + 1,
       volumeAtomic: (BigInt(day.volumeAtomic) + amount).toString(),
+      listUsdcMicro: (BigInt(day.listUsdcMicro ?? "0") + listMicro).toString(),
+      effectiveUsdcMicro: (BigInt(day.effectiveUsdcMicro ?? "0") + effectiveMicro).toString(),
     });
 
     await kv.lpush(recentKey(input.merchantId), event);
@@ -168,22 +211,34 @@ export async function recordTokenPaySettlement(input: {
     devTotals.get(input.merchantId) ?? {
       txCount: 0,
       volumeAtomic: 0n,
+      listUsdcMicro: 0n,
+      effectiveUsdcMicro: 0n,
       lastTxAt: null,
       lastTx: null,
     };
   devTotals.set(input.merchantId, {
     txCount: t.txCount + 1,
     volumeAtomic: t.volumeAtomic + amount,
+    listUsdcMicro: t.listUsdcMicro + listMicro,
+    effectiveUsdcMicro: t.effectiveUsdcMicro + effectiveMicro,
     lastTxAt: at,
     lastTx: input.tx,
   });
 
   const dk = `${input.merchantId}:${date}`;
-  const d = devDaily.get(dk) ?? { date, txCount: 0, volumeAtomic: "0" };
+  const d = devDaily.get(dk) ?? {
+    date,
+    txCount: 0,
+    volumeAtomic: "0",
+    listUsdcMicro: "0",
+    effectiveUsdcMicro: "0",
+  };
   devDaily.set(dk, {
     date,
     txCount: d.txCount + 1,
     volumeAtomic: (BigInt(d.volumeAtomic) + amount).toString(),
+    listUsdcMicro: (BigInt(d.listUsdcMicro ?? "0") + listMicro).toString(),
+    effectiveUsdcMicro: (BigInt(d.effectiveUsdcMicro ?? "0") + effectiveMicro).toString(),
   });
 
   const rec = devRecent.get(input.merchantId) ?? [];
@@ -203,6 +258,8 @@ export async function getTokenPayMerchantAnalytics(
   let totals: MerchantTotals = {
     txCount: 0,
     volumeAtomic: 0n,
+    listUsdcMicro: 0n,
+    effectiveUsdcMicro: 0n,
     lastTxAt: null,
     lastTx: null,
   };
@@ -212,6 +269,8 @@ export async function getTokenPayMerchantAnalytics(
     const raw = await kv.get<{
       txCount: number;
       volumeAtomic: string;
+      listUsdcMicro?: string;
+      effectiveUsdcMicro?: string;
       lastTxAt: number | null;
       lastTx: string | null;
     }>(totalsKey(merchantId));
@@ -219,6 +278,8 @@ export async function getTokenPayMerchantAnalytics(
       totals = {
         txCount: raw.txCount,
         volumeAtomic: BigInt(raw.volumeAtomic || "0"),
+        listUsdcMicro: BigInt(raw.listUsdcMicro ?? "0"),
+        effectiveUsdcMicro: BigInt(raw.effectiveUsdcMicro ?? "0"),
         lastTxAt: raw.lastTxAt,
         lastTx: raw.lastTx,
       };
@@ -228,11 +289,18 @@ export async function getTokenPayMerchantAnalytics(
     const now = Date.now();
     for (let i = span - 1; i >= 0; i--) {
       const d = utcDateKey(now - i * 86_400_000);
-      const row = await kv.get<{ txCount: number; volumeAtomic: string }>(dailyKey(merchantId, d));
+      const row = await kv.get<{
+        txCount: number;
+        volumeAtomic: string;
+        listUsdcMicro?: string;
+        effectiveUsdcMicro?: string;
+      }>(dailyKey(merchantId, d));
       daily.push({
         date: d,
         txCount: row?.txCount ?? 0,
         volumeAtomic: row?.volumeAtomic ?? "0",
+        listUsdcMicro: row?.listUsdcMicro,
+        effectiveUsdcMicro: row?.effectiveUsdcMicro,
       });
     }
   } else {
@@ -242,7 +310,15 @@ export async function getTokenPayMerchantAnalytics(
     for (let i = span - 1; i >= 0; i--) {
       const d = utcDateKey(now - i * 86_400_000);
       const row = devDaily.get(`${merchantId}:${d}`);
-      daily.push(row ?? { date: d, txCount: 0, volumeAtomic: "0" });
+      daily.push(
+        row ?? {
+          date: d,
+          txCount: 0,
+          volumeAtomic: "0",
+          listUsdcMicro: "0",
+          effectiveUsdcMicro: "0",
+        },
+      );
     }
   }
 
@@ -253,6 +329,8 @@ export async function getTokenPayMerchantAnalytics(
     txCount: totals.txCount,
     volumeAtomic: totals.volumeAtomic.toString(),
     volumeLabel: formatVolume(totals.volumeAtomic, merchant),
+    listUsdcMicro: totals.listUsdcMicro.toString(),
+    effectiveUsdcMicro: totals.effectiveUsdcMicro.toString(),
     lastTxAt: totals.lastTxAt,
     lastTx: totals.lastTx,
     daily,
