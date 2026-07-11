@@ -128,7 +128,12 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     description: "Large-move candidates (up or down) — insider + positioning + narrative.",
     priceUsd: "0.10",
     tier: "signal",
-    sampleBody: { message: "Altcoins volatility catalysts", limit: 5, includeInsider: true },
+    sampleBody: {
+      theme: "robinhood",
+      message: "Robinhood Chain meme rotation",
+      limit: 5,
+      includeInsider: true,
+    },
   },
   {
     id: "intel-scalp",

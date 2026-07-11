@@ -54,6 +54,27 @@
             Copy curl
           </button>
         </div>
+        <div class="pg-wallet-block" id="pg-wallet-block">
+          <div class="pg-detail-row pg-wallet-row">
+            <span class="pg-detail-label">Wallet</span>
+            <div class="pg-wallet-line">
+              <span class="pg-wallet-status" id="pg-wallet-status">Not connected</span>
+              <button type="button" class="pg-wallet-btn" id="pg-wallet-connect">Connect</button>
+            </div>
+          </div>
+          <div class="pg-detail-row">
+            <span class="pg-detail-label">Pay as</span>
+            <select class="pg-pay-rail" id="pg-pay-rail" aria-label="Payment rail">
+              <option value="auto">Auto (best balance)</option>
+              <option value="sol">USDC · Solana</option>
+              <option value="tcx">TCX · Token Pay</option>
+              <option value="evm">USDC · Base</option>
+            </select>
+          </div>
+          <button type="button" class="pg-pay-btn" id="play-pay-wallet" disabled>
+            Pay with wallet
+          </button>
+        </div>
       </section>
     </aside>
 
@@ -77,9 +98,8 @@
           </div>
           <div class="pg-placeholder" id="pg-placeholder">
             <p class="pg-ph-logo">CONCIERGE</p>
-            <p>Select an endpoint and click Execute.</p>
-            <p>Paid endpoints return HTTP <strong>402</strong> with an x402 payment challenge (USDC on Solana/Base, or native SPL via <a href="/docs/payment/token-pay">Token Pay</a> when configured).</p>
-            <p>Agents typically pay USDC via <code>pay curl</code> or AgentCash. Token Pay uses self-settle on Solana — see the beta guide for <code>extra.merchantId</code> accept selection.</p>
+            <p>Select an endpoint and click Execute for a <strong>402</strong> probe, or connect wallet and <strong>Pay with wallet</strong> for a live response.</p>
+            <p>Paid endpoints: USDC on Solana/Base, or TCX via Token Pay (80% burn). Agents use <code>pay curl</code> or AgentCash.</p>
           </div>
           <div class="pg-log" id="pg-log"></div>
         </div>
@@ -92,6 +112,8 @@
   </div>
 </div>
 <script type="module" src="/js/concierge-boot.mjs"></script>
+<script type="module" src="/js/privy-bridge.mjs"></script>
+<script type="module" src="/js/x402-pay.mjs"></script>
 <script type="module" src="/js/agent-playground.mjs"></script>
 </body>
 </html>
