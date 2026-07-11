@@ -1,7 +1,7 @@
 /**
  * Live TCX transparency payload — aggregates Token Pay analytics into weekly ledger rows.
  */
-import { getTokenPayMerchantAnalytics, type TokenPaySettlementRecord } from "./token-pay/analytics-store";
+import { getTokenPayMerchantAnalytics, type TokenPayDailyRollup, type TokenPaySettlementRecord } from "./token-pay/analytics-store";
 import { SOON_MERCHANT_ID } from "./token-pay/merchants/soon";
 import { effectiveUsdcForTokenPay } from "./token-pay/x402";
 import { getDefaultTokenPayMerchant } from "./token-pay/registry";
@@ -163,7 +163,7 @@ function buildWeekLinks(
 }
 
 function aggregatePeriod(
-  daily: Awaited<ReturnType<typeof getTokenPayMerchantAnalytics>>["daily"],
+  daily: TokenPayDailyRollup[],
   recent: TokenPaySettlementRecord[],
   periodStart: string,
   periodEnd: string,

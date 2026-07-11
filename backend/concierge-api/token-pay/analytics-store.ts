@@ -147,26 +147,24 @@ export async function recordTokenPaySettlement(input: {
   if (hasRedis()) {
     const kv = await kvClient();
     const totals =
-      (await kv.get<MerchantTotals>(totalsKey(input.merchantId))) ?? {
+      (await kv.get<{
+        txCount: number;
+        volumeAtomic: string;
+        listUsdcMicro?: string;
+        effectiveUsdcMicro?: string;
+        lastTxAt: number | null;
+        lastTx: string | null;
+      }>(totalsKey(input.merchantId))) ?? {
         txCount: 0,
-        volumeAtomic: 0n,
-        listUsdcMicro: 0n,
-        effectiveUsdcMicro: 0n,
+        volumeAtomic: "0",
+        listUsdcMicro: "0",
+        effectiveUsdcMicro: "0",
         lastTxAt: null,
         lastTx: null,
       };
-    const prevVol =
-      typeof totals.volumeAtomic === "bigint"
-        ? totals.volumeAtomic
-        : BigInt(String(totals.volumeAtomic ?? 0));
-    const prevList =
-      typeof totals.listUsdcMicro === "bigint"
-        ? totals.listUsdcMicro
-        : BigInt(String((totals as { listUsdcMicro?: string }).listUsdcMicro ?? 0));
-    const prevEff =
-      typeof totals.effectiveUsdcMicro === "bigint"
-        ? totals.effectiveUsdcMicro
-        : BigInt(String((totals as { effectiveUsdcMicro?: string }).effectiveUsdcMicro ?? 0));
+    const prevVol = BigInt(totals.volumeAtomic || "0");
+    const prevList = BigInt(totals.listUsdcMicro ?? "0");
+    const prevEff = BigInt(totals.effectiveUsdcMicro ?? "0");
     const nextTotals: MerchantTotals = {
       txCount: totals.txCount + 1,
       volumeAtomic: prevVol + amount,
