@@ -312,6 +312,8 @@ html[data-theme="light"] .agent-stack-chip{
 }
 html[data-theme="light"] .agent-stack-chip:hover{color:#0a1018;border-color:rgba(154,122,50,.4)}
 .agent-stack-chip img{width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0}
+.agent-stack-chip img[src*="metaplex"]{filter:brightness(0) invert(1)}
+html[data-theme="light"] .agent-stack-chip img[src*="metaplex"]{filter:none}
 
 @keyframes agent-stack-marquee{
   from{transform:translate3d(-50%,0,0)}

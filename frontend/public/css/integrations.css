@@ -51,6 +51,8 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-partner-logo--zai{border-radius:6px}
 .int-partner-logo--poncho{border-radius:6px}
 .int-partner-logo--card{width:28px;height:28px}
+.int-partner-logo--metaplex{filter:brightness(0) invert(1)}
+html[data-theme="light"] .int-partner-logo--metaplex{filter:none}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
 
 .int-card-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
