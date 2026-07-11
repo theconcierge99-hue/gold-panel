@@ -51,6 +51,30 @@ export function listSolanaRpcUrls(): string[] {
   return out.length ? out : [...PUBLIC_SOL_RPC_FALLBACKS];
 }
 
+/** Race all RPC URLs in parallel — fastest successful response wins. */
+export async function solanaRpcParallelRace<T>(
+  method: string,
+  params: unknown[],
+  timeoutMs = 15_000,
+): Promise<{ ok: true; result: T; rpcUrl: string } | { ok: false; error: string }> {
+  const urls = listSolanaRpcUrls();
+  if (!urls.length) return { ok: false, error: "No Solana RPC endpoints configured" };
+
+  const outcomes = await Promise.all(
+    urls.map(async (url) => {
+      const out = await solanaRpcCallEx<T>(url, method, params, timeoutMs);
+      return { url, out };
+    }),
+  );
+
+  for (const { url, out } of outcomes) {
+    if (out.ok) return { ok: true, result: out.result, rpcUrl: url };
+  }
+
+  const last = outcomes.find(({ out }) => !out.ok)?.out;
+  return { ok: false, error: last && !last.ok ? last.error : "All Solana RPC endpoints failed" };
+}
+
 export async function solanaRpcCallWithFallback<T>(
   method: string,
   params: unknown[],

@@ -2,20 +2,20 @@
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  * No @solana/web3.js — Edge runtime blocks Node http/https from that package.
  */
-import { solanaRpcCallWithFallback } from "../x402-solana-rpc";
+import { solanaRpcCallWithFallback, solanaRpcParallelRace } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
+import { getTokenPaySettleReceipt, putTokenPaySettleReceipt } from "./settle-receipt-cache";
 import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
 
 export { isTokenPaySelfSettleRequirement } from "./security";
 
-/** Keep total self-settle under ~8s — Edge handler also runs Gemini after payment (~30s cap). */
 const SIM_RPC_MS = 5_000;
 const SEND_RPC_MS = 7_000;
-const POLL_RPC_MS = 2_500;
-const POLL_INTERVAL_MS = 280;
-const VERIFY_BUDGET_MS = 6_500;
-const TX_DETAIL_RPC_MS = 4_000;
+const POLL_RPC_MS = 4_000;
+const POLL_INTERVAL_MS = 250;
+const VERIFY_BUDGET_MS = 5_500;
+const TX_DETAIL_RPC_MS = 4_500;
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 type TokenBalanceRow = {
@@ -35,6 +35,10 @@ type GetTxDetail = {
     preTokenBalances?: TokenBalanceRow[];
     postTokenBalances?: TokenBalanceRow[];
   };
+};
+
+type SignatureStatusResult = {
+  value?: { confirmationStatus?: string; err?: unknown }[];
 };
 
 function tokenSymbolFromExtra(extra?: Record<string, unknown>): string {
@@ -98,9 +102,8 @@ function decodeSignedTxWire(txB64: string): { signature: string | null; feePayer
     let offset = sigStart + sigHeader.value * 64;
     if (offset >= wire.length) return { signature, feePayer: null };
 
-    // Versioned v0 message starts with 0x80; legacy starts with numRequiredSignatures.
     if (wire[offset] === 0x80) {
-      offset += 1 + 3; // version byte + message header
+      offset += 1 + 3;
       const keysHeader = readCompactU16(wire, offset);
       if (!keysHeader || keysHeader.value < 1) return { signature, feePayer: null };
       const keyStart = keysHeader.next;
@@ -108,7 +111,6 @@ function decodeSignedTxWire(txB64: string): { signature: string | null; feePayer
       return { signature, feePayer: base58Encode(wire.slice(keyStart, keyStart + 32)) };
     }
 
-    // Legacy: first byte is numRequiredSignatures, next 3 header bytes, then account keys.
     offset += 1 + 3;
     const keysHeader = readCompactU16(wire, offset);
     if (!keysHeader || keysHeader.value < 1) return { signature, feePayer: null };
@@ -149,13 +151,37 @@ function merchantMintDelta(
   return postAmt - preAmt;
 }
 
+function merchantIdFromMatched(
+  matched: TokenPaySelfSettleRequirement,
+  merchant: Awaited<ReturnType<typeof assertTokenPaySelfSettleAuthorized>>,
+): string {
+  return typeof matched.extra?.merchantId === "string"
+    ? matched.extra.merchantId.trim()
+    : merchant.id;
+}
+
+function receiptMatchesRequirement(
+  receipt: Awaited<ReturnType<typeof getTokenPaySettleReceipt>>,
+  matched: TokenPaySelfSettleRequirement,
+  resourceKind: string,
+  merchantId: string,
+): boolean {
+  if (!receipt) return false;
+  if (receipt.resourceKind !== resourceKind) return false;
+  if (receipt.merchantId !== merchantId) return false;
+  if (receipt.mint !== matched.asset) return false;
+  const paid = BigInt(receipt.amountAtomic);
+  const required = BigInt(matched.amount);
+  return paid >= required;
+}
+
 async function fetchConfirmedTransactionOnce(signature: string): Promise<GetTxDetail | null> {
   const opts = {
     encoding: "jsonParsed",
     maxSupportedTransactionVersion: 1,
     commitment: "confirmed",
   };
-  const tx = await solanaRpcCallWithFallback<GetTxDetail | null>(
+  const tx = await solanaRpcParallelRace<GetTxDetail | null>(
     "getTransaction",
     [signature, opts],
     TX_DETAIL_RPC_MS,
@@ -173,9 +199,11 @@ async function waitForSignatureConfirmed(signature: string): Promise<boolean> {
 }
 
 async function signatureLooksConfirmed(signature: string): Promise<boolean> {
-  const status = await solanaRpcCallWithFallback<{
-    value?: { confirmationStatus?: string; err?: unknown }[];
-  }>("getSignatureStatuses", [[signature], { searchTransactionHistory: true }], POLL_RPC_MS);
+  const status = await solanaRpcParallelRace<SignatureStatusResult>(
+    "getSignatureStatuses",
+    [[signature], { searchTransactionHistory: true }],
+    POLL_RPC_MS,
+  );
   const entry = status.ok ? status.result.value?.[0] : null;
   if (entry?.err) return false;
   return (
@@ -183,6 +211,85 @@ async function signatureLooksConfirmed(signature: string): Promise<boolean> {
     entry?.confirmationStatus === "finalized" ||
     entry?.confirmationStatus === "processed"
   );
+}
+
+function finalizeSettlement(input: {
+  signature: string;
+  payer: string;
+  matched: TokenPaySelfSettleRequirement;
+  resourceKind: string;
+  merchantId: string;
+  merchant: Awaited<ReturnType<typeof assertTokenPaySelfSettleAuthorized>>;
+}): { payer: string; transaction: string; network: string } {
+  scheduleTokenPaySettlementRecord({
+    merchantId: input.merchantId,
+    mint: input.matched.asset,
+    amountAtomic: input.matched.amount,
+    resourceKind: input.resourceKind,
+    payer: input.payer,
+    tx: input.signature,
+  });
+  void putTokenPaySettleReceipt({
+    signature: input.signature,
+    payer: input.payer,
+    network: input.matched.network,
+    merchantId: input.merchantId,
+    mint: input.matched.asset,
+    amountAtomic: input.matched.amount,
+    resourceKind: input.resourceKind,
+    at: Date.now(),
+  });
+  return {
+    payer: input.payer,
+    transaction: input.signature,
+    network: input.matched.network,
+  };
+}
+
+async function tryAcceptCachedOrConfirmed(
+  signature: string,
+  matched: TokenPaySelfSettleRequirement,
+  resourceKind: string,
+  merchant: Awaited<ReturnType<typeof assertTokenPaySelfSettleAuthorized>>,
+  payerFallback: string | null,
+): Promise<{ payer: string; transaction: string; network: string } | null> {
+  const merchantId = merchantIdFromMatched(matched, merchant);
+  const cached = await getTokenPaySettleReceipt(signature);
+  if (receiptMatchesRequirement(cached, matched, resourceKind, merchantId) && cached) {
+    return {
+      payer: cached.payer,
+      transaction: cached.signature,
+      network: cached.network,
+    };
+  }
+
+  if (!(await signatureLooksConfirmed(signature))) return null;
+
+  const tx = await fetchConfirmedTransactionOnce(signature);
+  if (tx?.meta?.err) return null;
+
+  if (tx) {
+    const delta = merchantMintDelta(
+      tx.meta?.preTokenBalances,
+      tx.meta?.postTokenBalances,
+      matched.payTo,
+      matched.asset,
+    );
+    const requiredAmount = BigInt(matched.amount);
+    if (delta > 0n && delta < requiredAmount) return null;
+  }
+
+  const payer = (tx ? feePayerFromTxDetail(tx) : null) ?? payerFallback;
+  if (!payer) return null;
+
+  return finalizeSettlement({
+    signature,
+    payer,
+    matched,
+    resourceKind,
+    merchantId,
+    merchant,
+  });
 }
 
 export async function verifyAndSettleTokenPaySelf(
@@ -226,6 +333,19 @@ async function verifyAndSettleTokenPaySelfInner(
   const decoded = decodeSignedTxWire(txB64);
   const requiredAmount = BigInt(matched.amount);
   const payerFallback = decoded.feePayer;
+  const merchantId = merchantIdFromMatched(matched, merchant);
+
+  const previewSig = decoded.signature;
+  if (previewSig) {
+    const replay = await tryAcceptCachedOrConfirmed(
+      previewSig,
+      matched,
+      resourceKind,
+      merchant,
+      payerFallback,
+    );
+    if (replay) return replay;
+  }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: false } as const;
   const sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
@@ -233,12 +353,14 @@ async function verifyAndSettleTokenPaySelfInner(
     [txB64, simOpts],
     SIM_RPC_MS,
   );
-  if (sim.ok && sim.result?.value?.err) {
+  const simFailed = !!(sim.ok && sim.result?.value?.err);
+  if (simFailed) {
     throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
   }
 
   const sendOpts = { encoding: "base64", skipPreflight: true, maxRetries: 2 };
   let signature: string | null = null;
+  let sendSucceeded = false;
   let send = await solanaRpcCallWithFallback<string>(
     "sendRawTransaction",
     [txB64, sendOpts],
@@ -253,12 +375,14 @@ async function verifyAndSettleTokenPaySelfInner(
   }
   if (send.ok && send.result) {
     signature = send.result;
+    sendSucceeded = true;
   } else if (
     !send.ok &&
     send.error &&
     /already been processed|already processed|duplicate/i.test(send.error)
   ) {
     signature = decoded.signature;
+    sendSucceeded = true;
   } else if (!send.ok) {
     throw tokenPayError(
       symbol,
@@ -273,66 +397,55 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "failed to broadcast transaction");
   }
 
+  const replayAfterSend = await tryAcceptCachedOrConfirmed(
+    signature,
+    matched,
+    resourceKind,
+    merchant,
+    payerFallback,
+  );
+  if (replayAfterSend) return replayAfterSend;
+
   const confirmed = await waitForSignatureConfirmed(signature);
   const tx = confirmed ? await fetchConfirmedTransactionOnce(signature) : null;
-  if (!tx) {
-    if (confirmed && payerFallback) {
-      scheduleTokenPaySettlementRecord({
-        merchantId:
-          typeof matched.extra?.merchantId === "string"
-            ? matched.extra.merchantId.trim()
-            : merchant.id,
-        mint: matched.asset,
-        amountAtomic: matched.amount,
-        resourceKind,
-        payer: payerFallback,
-        tx: signature,
-      });
-      return {
-        payer: payerFallback,
-        transaction: signature,
-        network: matched.network,
-      };
-    }
-    throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
-  }
 
-  if (tx.meta?.err) {
+  if (tx?.meta?.err) {
     throw tokenPayError(symbol, "transaction failed on-chain");
   }
 
-  const delta = merchantMintDelta(
-    tx.meta?.preTokenBalances,
-    tx.meta?.postTokenBalances,
-    matched.payTo,
-    matched.asset,
-  );
-  if (delta > 0n && delta < requiredAmount) {
-    throw tokenPayError(symbol, "amount does not match requirement");
-  }
-  if (delta <= 0n && !(await signatureLooksConfirmed(signature))) {
-    throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
+  if (tx) {
+    const delta = merchantMintDelta(
+      tx.meta?.preTokenBalances,
+      tx.meta?.postTokenBalances,
+      matched.payTo,
+      matched.asset,
+    );
+    if (delta > 0n && delta < requiredAmount) {
+      throw tokenPayError(symbol, "amount does not match requirement");
+    }
+    const payer = feePayerFromTxDetail(tx) ?? payerFallback;
+    if (payer) {
+      return finalizeSettlement({
+        signature,
+        payer,
+        matched,
+        resourceKind,
+        merchantId,
+        merchant,
+      });
+    }
   }
 
-  const payer = feePayerFromTxDetail(tx) ?? payerFallback;
-  if (!payer) {
-    throw tokenPayError(symbol, "could not read fee payer from confirmed transaction");
+  if ((confirmed || sendSucceeded) && !simFailed && payerFallback) {
+    return finalizeSettlement({
+      signature,
+      payer: payerFallback,
+      matched,
+      resourceKind,
+      merchantId,
+      merchant,
+    });
   }
 
-  const merchantId =
-    typeof matched.extra?.merchantId === "string" ? matched.extra.merchantId.trim() : merchant.id;
-  scheduleTokenPaySettlementRecord({
-    merchantId,
-    mint: matched.asset,
-    amountAtomic: matched.amount,
-    resourceKind,
-    payer,
-    tx: signature,
-  });
-
-  return {
-    payer,
-    transaction: signature,
-    network: matched.network,
-  };
+  throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
 }

@@ -796,10 +796,46 @@ export async function createX402PaidFetch(
   const paidFetch = wrapFetchWithPayment(fetch, client);
   if (preferred !== "sol" && preferred !== "soon") return paidFetch;
 
-  return async (url, options) => {
+  return async (input, init) => {
     installSolanaRpcProxyFetch();
     try {
-      return await paidFetch(url, options);
+      let lastPaymentSignature: string | null = null;
+      const captureFetch: typeof fetch = async (url, options) => {
+        const headers = new Headers(options?.headers);
+        const sig = headers.get("PAYMENT-SIGNATURE") ?? headers.get("payment-signature");
+        if (sig) lastPaymentSignature = sig;
+        return fetch(url, options);
+      };
+      const payingFetch = wrapFetchWithPayment(captureFetch, client);
+
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      let res = await payingFetch(input, init);
+
+      if (
+        preferred === "soon" &&
+        res.status === 402 &&
+        lastPaymentSignature &&
+        typeof init?.body === "string"
+      ) {
+        const firstText = await res.text();
+        if (/could not verify transaction on-chain/i.test(firstText)) {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            await new Promise((r) => setTimeout(r, 8_000));
+            const retryHeaders = new Headers(init.headers);
+            retryHeaders.set("PAYMENT-SIGNATURE", lastPaymentSignature);
+            res = await fetch(url, { ...init, headers: retryHeaders });
+            if (res.ok || res.status !== 402) break;
+            const retryText = await res.text();
+            if (!/could not verify transaction on-chain/i.test(retryText)) {
+              return new Response(retryText, { status: res.status, headers: res.headers });
+            }
+          }
+          return new Response(firstText, { status: 402, headers: res.headers });
+        }
+        return new Response(firstText, { status: 402, headers: res.headers });
+      }
+
+      return res;
     } finally {
       uninstallSolanaRpcProxyFetch();
     }
