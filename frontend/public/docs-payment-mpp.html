@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>MPP &amp; AgentCash — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Agent on MPPscan — Machine Payments Protocol discovery, AgentCash install, 21 pay-per-call routes, x402 settlement." />
+<meta name="description" content="Concierge Agent on MPPscan — Machine Payments Protocol discovery, AgentCash install, 24 pay-per-call routes, x402 settlement." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/payment/mpp" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -26,7 +26,7 @@
 
       <div class="card">
         <p><strong>Origin:</strong> <code>https://conc-exe.xyz</code></p>
-        <p><strong>Service:</strong> Concierge Agent API · 21 pay-per-call routes</p>
+        <p><strong>Service:</strong> Concierge Agent API · 24 pay-per-call routes</p>
         <p><strong>Protocols advertised:</strong> <code>x402</code> + <code>mpp</code> in <code>/openapi.json</code></p>
         <p><strong>Live profile:</strong> <a class="ext" href="https://conc-exe.xyz/go/mppscan" target="_blank" rel="noopener">conc-exe.xyz/go/mppscan ↗</a> (redirects to your MPPscan server URL when <code>MPPSCAN_SERVER_URL</code> is set in Vercel)</p>
       </div>
@@ -51,7 +51,7 @@
 npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-intel-tvl</code></pre>
       </div>
 
-      <h2 class="docs-h2">MPP structure (21 paid routes)</h2>
+      <h2 class="docs-h2">MPP structure (24 paid routes)</h2>
       <div class="card">
         <p>All routes use <strong>POST</strong> with JSON after payment. Intel routes also advertise <strong>GET</strong> for marketplace probes (returns 402 until paid POST). Tiered pricing: raw <strong>$0.02</strong>, signal <strong>$0.10</strong>, bundle <strong>$0.25</strong>. Free: <code>POST /api/concierge-security-scope</code> · <code>security-scan</code> self-audit on <code>conc-exe.xyz</code> — see <a href="/docs/api/security" class="gold-link">Security Desk</a>.</p>
         <table>

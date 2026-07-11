@@ -22,11 +22,12 @@
       <p class="docs-lead">Tiered pay-per-query. No subscriptions. No API keys.</p>
 
       <div class="card">
-        <p><strong>21 paid routes</strong> via x402 USDC on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes).</p>
+        <p><strong>24 paid routes</strong> via x402 <strong>USDC or TCX</strong> on <strong>Base</strong> and <strong>Solana</strong>. Fixed per-route amounts (not dynamic quotes). Concierge Resources also accept <strong>TCX prepaid credits</strong> (<code>GET /api/tcx-credits</code>).</p>
         <table>
           <thead><tr><th>Tier</th><th>USDC</th><th>Routes</th></tr></thead>
           <tbody>
             <tr><td><strong>Raw</strong></td><td>0.02</td><td>TVL, macro, wire, whales · security readiness · security headers</td></tr>
+            <tr><td><strong>Creative</strong></td><td>0.05–0.10</td><td>Resources — chat ($0.05), image, HTML scaffold ($0.10 each)</td></tr>
             <tr><td><strong>Signal</strong></td><td>0.10</td><td>Concierge, yields, Meteora, wallet, verdict, alpha desks, scalp, news, signal unlock · <strong>security-scan</strong></td></tr>
             <tr><td><strong>Bundle</strong></td><td>0.25</td><td>Desk brief, A2A pipeline (macro + Meteora + verdict + handoff)</td></tr>
           </tbody>
@@ -70,6 +71,19 @@
         </table>
       </div>
 
+      <h2 class="docs-h2">Concierge Resources — $0.05–$0.10</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Route</th><th>USDC</th><th>Atomic</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /api/resource-chat</code></td><td>0.05</td><td><code>50000</code></td></tr>
+            <tr><td><code>POST /api/resource-image</code></td><td>0.10</td><td><code>100000</code></td></tr>
+            <tr><td><code>POST /api/resource-scaffold</code></td><td>0.10</td><td><code>100000</code></td></tr>
+          </tbody>
+        </table>
+        <p class="note">Settle USDC/TCX on x402, or spend <strong>TCX credits</strong> with header <code>x-tcx-credits-wallet</code>. Catalog: <code>GET /api/resources</code> · balance: <code>GET /api/tcx-credits?wallet=…</code></p>
+      </div>
+
       <h2 class="docs-h2">Bundle tier — $0.25</h2>
       <div class="card">
         <table>
@@ -95,6 +109,8 @@
       <h2 class="docs-h2">Free discovery &amp; tools</h2>
       <div class="card">
         <ul>
+          <li><code>GET /api/resources</code> — Concierge Resources catalog (chat, image, scaffold)</li>
+          <li><code>GET /api/tcx-credits?wallet=…</code> — prepaid credit balance for Resources</li>
           <li><code>GET /openapi.json</code> · <code>GET /.well-known/x402</code></li>
           <li><code>POST /api/concierge-security-scope</code> — Security Desk scope check (no fetch)</li>
           <li><code>POST /api/concierge-security-scan</code> + <code>selfAudit: true</code> — free <code>conc-exe.xyz</code> self-audit</li>
@@ -108,7 +124,7 @@
 
       <h2 class="docs-h2">Token Pay (native SPL)</h2>
       <div class="card">
-        <p>List prices peg to each route’s USDC amount. TCX holders get a configurable discount post-launch (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>).</p>
+        <p>List prices peg to each route’s USDC amount. TCX holders get a configurable discount post-launch (<code>SOON_TOKEN_DISCOUNT_PERCENT</code>). <strong>TCX credits</strong> (1 credit = $0.01) cover Concierge Resources when <code>TCX_CREDITS_ENABLED</code> is on.</p>
         <p><a href="/docs/payment/token-pay" class="gold-link">Token Pay beta guide</a> · <a href="/docs/launch" class="gold-link">TCX launch playbook</a></p>
       </div>
 

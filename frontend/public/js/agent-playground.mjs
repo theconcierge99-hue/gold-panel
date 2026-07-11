@@ -34,6 +34,8 @@ const walletStatusEl = document.getElementById("pg-wallet-status");
 const walletConnectBtn = document.getElementById("pg-wallet-connect");
 const payWalletBtn = document.getElementById("play-pay-wallet");
 const payRailEl = document.getElementById("pg-pay-rail");
+const tcxCreditsRow = document.getElementById("pg-tcx-credits-row");
+const tcxCreditsBadge = document.getElementById("pg-tcx-credits-badge");
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",
@@ -42,6 +44,7 @@ const SEGMENT_LABELS = {
   alpha: "Alpha Intel",
   security: "Security Desk",
   lounge: "Lounge",
+  creative: "Resources",
 };
 
 let selected = CONCIERGE_AGENT_ENDPOINTS[0];
@@ -72,6 +75,33 @@ function renderWalletUi() {
   }
 
   payWalletBtn.disabled = !isPaidEndpoint(selected) || (!hasSol && !hasEvm);
+  void refreshTcxCredits();
+}
+
+async function refreshTcxCredits() {
+  if (!tcxCreditsRow || !tcxCreditsBadge) return;
+  const wallet = getWalletSession().sol?.address;
+  if (!wallet) {
+    tcxCreditsRow.hidden = true;
+    return;
+  }
+  try {
+    const res = await fetch(`${origin}/api/tcx-credits?wallet=${encodeURIComponent(wallet)}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("credits unavailable");
+    const data = await res.json();
+    if (!data.enabled) {
+      tcxCreditsRow.hidden = true;
+      return;
+    }
+    tcxCreditsRow.hidden = false;
+    tcxCreditsBadge.textContent = `${data.balanceCredits} cr · $${data.balanceUsd}`;
+    tcxCreditsBadge.title =
+      "Prepaid credits for resource-chat, resource-image, resource-scaffold — send x-tcx-credits-wallet header";
+  } catch {
+    tcxCreditsRow.hidden = true;
+  }
 }
 
 async function loadX402Config() {
@@ -182,12 +212,12 @@ async function refreshPriceLabel(ep = selected) {
 }
 
 function renderPickList() {
-  const bySeg = { concierge: [], research: [], intel: [], alpha: [], security: [], lounge: [] };
+  const bySeg = { concierge: [], research: [], intel: [], alpha: [], security: [], lounge: [], creative: [] };
   for (const ep of CONCIERGE_AGENT_ENDPOINTS) {
     if (bySeg[ep.segment]) bySeg[ep.segment].push(ep);
   }
 
-  pickList.innerHTML = ["concierge", "research", "intel", "alpha", "security", "lounge"]
+  pickList.innerHTML = ["concierge", "research", "intel", "alpha", "security", "lounge", "creative"]
     .filter((seg) => bySeg[seg].length)
     .map(
       (seg) => `

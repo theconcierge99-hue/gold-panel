@@ -11,7 +11,7 @@ Concierge Agent already ships what pay.sh probes expect: **OpenAPI 3.1**, **402 
 | `GET /openapi.json` | Provider spec (committed snapshot in pay-skills PR) |
 | `402` + `PAYMENT-REQUIRED` | `pay curl` auto-settlement |
 | Solana USDC (PayAI) | Required for pay-skills CI probe |
-| 21 POST routes | Catalog endpoints (tiered $0.02 / $0.10 / $0.25 · $1.00 publish) |
+| 24 POST routes | Catalog endpoints (tiered $0.02 / $0.05–0.10 / $0.10 / $0.25 · $1.00 publish) |
 | `GET` intel probes | Marketplace probes (402 until paid POST) |
 
 **Not routed through pay.sh gateway** — agents call `https://conc-exe.xyz` directly (same as MPPscan / x402scan). pay.sh is **discovery + CLI payment**, not a proxy.
@@ -74,7 +74,7 @@ pay --sandbox claude   # Pay MCP tools attached
 pay codex
 ```
 
-## 21 paid routes (pay-per-call)
+## 24 paid routes (pay-per-call)
 
 Tiered USDC pricing. Security Desk included. Free: `POST /api/concierge-security-scope` · `security-scan` with `selfAudit: true` on `conc-exe.xyz`.
 
@@ -98,6 +98,9 @@ Tiered USDC pricing. Security Desk included. Free: `POST /api/concierge-security
 | `POST /api/concierge-security-scan` | $0.10 | Security Desk |
 | `POST /api/concierge-security-readiness` | $0.02 | Security scout |
 | `POST /api/concierge-security-headers` | $0.02 | Security scout |
+| `POST /api/resource-chat` | $0.05 | Resources |
+| `POST /api/resource-image` | $0.10 | Resources |
+| `POST /api/resource-scaffold` | $0.10 | Resources |
 | `POST /api/news-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-open` | $0.10 | Lounge |
 | `POST /api/lounge-signal-publish` | $1.00 | Lounge |

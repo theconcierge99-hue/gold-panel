@@ -74,7 +74,12 @@ const ABOUT = [
   {
     icon: "intel",
     title: "Intel routes",
-    desc: "Macro briefs, wire digest, desk verdict, and Meteora yields — tiered pay-per-call research APIs.",
+    desc: "Macro briefs, wire digest, desk verdict, and Meteora yields — tiered pay-per-call research APIs from $0.02.",
+  },
+  {
+    icon: "intel",
+    title: "Concierge Resources",
+    desc: "Agent chat ($0.05), image generation, and HTML scaffold — creative pay-per-call endpoints with TCX credits or USDC x402.",
   },
   {
     icon: "security",
@@ -84,7 +89,7 @@ const ABOUT = [
   {
     icon: "x402",
     title: "x402 settlement",
-    desc: "HTTP 402 micropayments on Solana and Base. Payment is the only gate — no API keys or subscriptions.",
+    desc: "HTTP 402 micropayments on Solana and Base. Settle USDC via facilitators or TCX via Token Pay and prepaid credits.",
   },
   {
     icon: "mesh",
@@ -127,16 +132,23 @@ const MODULES = [
     cta: "Open Security Scan",
   },
   {
+    tag: "Resources",
+    title: "Creative API",
+    desc: "Chat, image, and HTML scaffold — $0.05–$0.10 per call. Filter Resources on the endpoint catalog.",
+    href: "/agent/endpoints",
+    cta: "Browse Resources",
+  },
+  {
     tag: "Intel",
     title: "Research API",
-    desc: "Browse 21 x402 routes — macro, wire, verdict, yields, alpha desks, and more.",
+    desc: "Browse 24 x402 routes — macro, wire, verdict, yields, alpha desks, and Concierge Resources.",
     href: "/agent/endpoints",
     cta: "Browse catalog",
   },
   {
     tag: "Commerce",
     title: "x402 Playground",
-    desc: "Probe paid routes, settle USDC, or test Token Pay SPL merchants in one workspace.",
+    desc: "Probe paid routes, settle USDC or TCX, or test Token Pay SPL merchants in one workspace.",
     href: "/agent/playground",
     cta: "Open Playground",
   },

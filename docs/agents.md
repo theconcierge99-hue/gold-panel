@@ -45,7 +45,7 @@ MCP: `security_scan`, `security_readiness`, `security_headers`. Skill: `/skills/
 
 | Item | Value |
 |------|--------|
-| Endpoints | Chat `/api/concierge` · Intel `/api/concierge-intel-*` · Security `/api/concierge-security-*` (**21 paid** + free scope/self-audit) |
+| Endpoints | Chat `/api/concierge` · Intel `/api/concierge-intel-*` · Resources `/api/resource-*` · Security `/api/concierge-security-*` (**24 paid** + free scope/self-audit) |
 | Price | $0.02–$0.25 per paid call (security scout $0.02 · scan $0.10) |
 | Auth | x402 payment (`PAYMENT-SIGNATURE` header) |
 | Discovery | `GET /openapi.json`, `GET /.well-known/x402`, `GET /api/x402-config` |

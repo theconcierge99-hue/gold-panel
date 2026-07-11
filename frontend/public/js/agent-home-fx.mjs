@@ -372,24 +372,24 @@ export function initAgentTerminalDemo(cmdEl, statusEl, origin = "", panelEl = nu
   const host = origin.replace(/\/$/, "") || "https://conc-exe.xyz";
   const scenarios = [
     {
+      cmd: `pay curl ${host}/api/resource-chat -d '{"message":"BTC outlook"}'`,
+      status: "→ 402 Payment Required · USDC $0.05 or TCX · Solana",
+      ok: "✔ x402 settled · 200 · agent reply ready",
+    },
+    {
       cmd: `pay curl ${host}/api/concierge-intel-macro -d '{}'`,
       status: "→ 402 Payment Required · USDC $0.02 · Solana",
       ok: "✔ x402 settled · 200 · macro brief ready",
     },
     {
-      cmd: `pay curl ${host}/api/concierge-intel-verdict -d '{"asset":"BTC"}'`,
-      status: "→ 402 Payment Required · USDC $0.10 · Base",
-      ok: "✔ x402 settled · 200 · 48h desk verdict",
-    },
-    {
-      cmd: `curl -s ${host}/.well-known/x402 | jq '.resources | length'`,
-      status: "→ 200 · machine discovery fan-out",
-      ok: "✔ 21 paid routes indexed for agents",
+      cmd: `curl -s ${host}/api/resources`,
+      status: "→ 200 · Concierge Resources catalog",
+      ok: "✔ 24 pay-per-call routes · intel + creative",
     },
     {
       cmd: `npx agentcash add ${host}`,
       status: "→ AgentCash catalog · conc-exe/concierge-agent",
-      ok: "✔ Ready for pay-per-call intel probes",
+      ok: "✔ Ready for pay-per-call agent probes",
     },
   ];
 

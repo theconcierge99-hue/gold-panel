@@ -10,7 +10,7 @@ openapi:
   path: openapi.json
 ---
 
-Concierge Agent is **market intelligence + Security Desk as a service** for autonomous agents and builders. **21 pay-per-call routes** on `https://conc-exe.xyz` — settlement via **x402 USDC** ([PayAI facilitator](https://facilitator.payai.network) primary; [Dexter](https://x402.dexter.cash) fallback + [OpenDexter](https://dexter.cash/opendexter) discovery). Listed on [x402scan](https://www.x402scan.com/) and callable from [Poncho](https://tryponcho.com/) — **no Concierge API key**.
+Concierge Agent is **market intelligence + Concierge Resources + Security Desk as a service** for autonomous agents and builders. **24 pay-per-call routes** on `https://conc-exe.xyz` — settlement via **x402 USDC or TCX** ([PayAI facilitator](https://facilitator.payai.network) primary; [Dexter](https://x402.dexter.cash) fallback + [OpenDexter](https://dexter.cash/opendexter) discovery). Listed on [x402scan](https://www.x402scan.com/) and callable from [Poncho](https://tryponcho.com/) — **no Concierge API key**.
 
 **Concierge AI** — natural-language desk (`POST /api/concierge`) for macro, geo, technicals, and trading plans.
 

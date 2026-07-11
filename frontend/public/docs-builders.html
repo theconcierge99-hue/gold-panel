@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>For Builders — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, 21 paid routes, Security Desk, Poncho marketplace, no API keys." />
+<meta name="description" content="Integrate Concierge Agent into your app, agent, or pipeline — x402 pay-per-call, OpenAPI, AgentCash, 24 paid routes, Concierge Resources, Security Desk, Poncho marketplace, no API keys." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/builders" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -66,7 +66,7 @@
         <p style="margin-top:12px"><a href="/docs/payment/token-pay" class="gold-link">Full Token Pay (Beta) integration guide →</a></p>
       </div>
 
-      <h2 class="docs-h2">21 paid routes — pick by use case</h2>
+      <h2 class="docs-h2">24 paid routes — pick by use case</h2>
       <div class="card">
         <table>
           <thead><tr><th>Segment</th><th>Path</th><th>When to use</th></tr></thead>
@@ -91,6 +91,9 @@
             <tr><td>Security</td><td><code>POST /api/concierge-security-headers</code></td><td>Scout — HTTP security headers ($0.02)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/news-open</code></td><td>Unlock wire article URL</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-publish</code></td><td>Publish creator signal ($1)</td></tr>
+            <tr><td><strong>Resources</strong></td><td><code>POST /api/resource-chat</code></td><td>Agent-friendly one-turn chat ($0.05) — USDC, TCX, or credits</td></tr>
+            <tr><td><strong>Resources</strong></td><td><code>POST /api/resource-image</code></td><td>Image generation from prompt — base64 data URLs ($0.10)</td></tr>
+            <tr><td><strong>Resources</strong></td><td><code>POST /api/resource-scaffold</code></td><td>Single-file HTML scaffold from brief ($0.10)</td></tr>
             <tr><td>Lounge</td><td><code>POST /api/lounge-signal-open</code></td><td>Unlock creator signal summary</td></tr>
           </tbody>
         </table>
@@ -152,6 +155,8 @@ r = httpx.post(f"{ORIGIN}/api/concierge-intel-airdrop", json=payload)
             <tr><td><code>GET /skills/concierge-intel/SKILL.md</code></td><td>Agent Skills file for Claude/Cursor/Grok sessions</td></tr>
             <tr><td><code>GET /.well-known/api-catalog</code></td><td>RFC 9727 linkset — OpenAPI, MCP, x402, agent card</td></tr>
             <tr><td><code>GET /.well-known/x402</code></td><td>Resource fan-out for x402scan / registries</td></tr>
+            <tr><td><code>GET /api/resources</code></td><td>Concierge Resources catalog (chat, image, scaffold)</td></tr>
+            <tr><td><code>GET /api/tcx-credits</code></td><td>TCX prepaid credit balance for Resources</td></tr>
             <tr><td><code>GET /api/x402-config</code></td><td>Networks, pricing flags (no secrets)</td></tr>
             <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Concierge registry + <code>agt_</code> cards</td></tr>
           </tbody>

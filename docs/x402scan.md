@@ -16,7 +16,7 @@ Implementation: `api/lib/x402-discovery.ts`, handlers `api/well-known-x402.ts`, 
 
 ## Registered resources
 
-Canonical discovery lists **21 paid routes** (intel desks, Concierge chat, Lounge signals, **Security Desk**). Primary examples:
+Canonical discovery lists **24 paid routes** (intel desks, Concierge chat, Concierge Resources, Lounge signals, **Security Desk**). Primary examples:
 
 | Name | URL | Price |
 |------|-----|-------|

@@ -37,7 +37,7 @@ pay --sandbox curl https://conc-exe.xyz/api/concierge-intel-tvl -d '{}'
 
 Path: `.grok/skills/concierge-intel/SKILL.md`
 
-Covers **21 x402 routes** (intel, lounge, security desk), sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
+Covers **24 x402 routes** (intel, lounge, security desk, Concierge Resources), sandbox commands, and repo layout (`lib/concierge-api/`, Vercel function limits).
 
 ## Skill: `concierge-security`
 

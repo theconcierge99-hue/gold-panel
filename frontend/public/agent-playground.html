@@ -6,7 +6,7 @@
 <script>document.documentElement.classList.add('concierge-booting');</script>
 <title>Playground — Concierge Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Agent API Playground — execute x402 endpoints and inspect the 402 payment challenge." />
+<meta name="description" content="Concierge Agent API Playground — probe 24 x402 endpoints, pay USDC or TCX, and inspect 402 challenges." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/agent/playground" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -33,6 +33,10 @@
         <div class="pg-detail-row">
           <span class="pg-detail-label">Cost</span>
           <span class="pg-detail-val pg-accent" id="play-price">$0.10 USDC</span>
+        </div>
+        <div class="pg-detail-row pg-tcx-credits-row" id="pg-tcx-credits-row" hidden>
+          <span class="pg-detail-label">TCX credits</span>
+          <span class="pg-tcx-badge" id="pg-tcx-credits-badge" title="Prepaid credits for Concierge Resources">—</span>
         </div>
         <div class="pg-detail-row pg-detail-desc">
           <span class="pg-detail-label">Description</span>
@@ -99,13 +103,13 @@
           <div class="pg-placeholder" id="pg-placeholder">
             <p class="pg-ph-logo">CONCIERGE</p>
             <p>Select an endpoint and click Execute for a <strong>402</strong> probe, or connect wallet and <strong>Pay with wallet</strong> for a live response.</p>
-            <p>Paid endpoints: USDC on Solana/Base, or TCX via Token Pay (80% burn). Agents use <code>pay curl</code> or AgentCash.</p>
+            <p>Paid endpoints: USDC on Solana/Base, TCX via Token Pay, or <strong>TCX credits</strong> on Resources routes.</p>
           </div>
           <div class="pg-log" id="pg-log"></div>
         </div>
         <div class="pg-term-footer">
           <a class="pg-foot-origin" id="pg-foot-origin" href="/agent">conc-exe.xyz</a>
-          <span class="pg-foot-net">x402 · USDC · Token Pay</span>
+          <span class="pg-foot-net">x402 · USDC · TCX · credits</span>
         </div>
       </div>
     </main>
