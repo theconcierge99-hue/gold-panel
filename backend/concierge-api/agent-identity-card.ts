@@ -9,12 +9,12 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     schema: "concierge-agent-registry-v1",
     name: "Concierge Agent Registry",
     description:
-      "Register autonomous agent identities with Solana and/or Base wallets. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
+      "Register autonomous agent identities with Solana, Base, and Arbitrum wallets. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
     registerEndpoint: `${base}/api/agent-identity`,
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
     protocols: ["x402", "mpp", "SAP"],
-    networks: ["solana", "eip155:8453"],
+    networks: ["solana", "eip155:8453", "eip155:42161"],
     discovery: {
       x402: `${base}/.well-known/x402`,
       openapi: `${base}/openapi.json`,
@@ -38,7 +38,10 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
   const base = origin.replace(/\/$/, "");
   const accounts: { chain: string; address: string }[] = [];
   if (agent.solAddress) accounts.push({ chain: "solana", address: agent.solAddress });
-  if (agent.evmAddress) accounts.push({ chain: "eip155:8453", address: agent.evmAddress });
+  if (agent.evmAddress) {
+    accounts.push({ chain: "eip155:8453", address: agent.evmAddress });
+    accounts.push({ chain: "eip155:42161", address: agent.evmAddress });
+  }
   if (agent.sapWallet && agent.sapWallet !== agent.solAddress) {
     accounts.push({ chain: "sap", address: agent.sapWallet });
   }

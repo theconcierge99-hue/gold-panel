@@ -4,6 +4,7 @@
  */
 import {
   getMerchantAddresses,
+  getX402EvmAcceptNetworks,
   getX402NetworkProfile,
   getUsdcAssetForNetwork,
   isX402Enabled,
@@ -326,15 +327,17 @@ async function buildAcceptsAsync(
   const accepts: X402AcceptRequirement[] = [];
 
   if (evm) {
-    accepts.push({
-      scheme: "exact",
-      network: nets.evm,
-      amount,
-      asset: getUsdcAssetForNetwork(nets.evm),
-      payTo: evm,
-      maxTimeoutSeconds: 120,
-      extra: { name: "USDC", version: "2" },
-    });
+    for (const network of getX402EvmAcceptNetworks()) {
+      accepts.push({
+        scheme: "exact",
+        network,
+        amount,
+        asset: getUsdcAssetForNetwork(network),
+        payTo: evm,
+        maxTimeoutSeconds: 120,
+        extra: { name: "USDC", version: "2" },
+      });
+    }
   }
   if (sol) {
     const solBase = {
@@ -365,7 +368,7 @@ async function buildAcceptsAsync(
 
   if (!accepts.length) {
     throw new Error(
-      "x402 merchant addresses not configured or invalid — set X402_EVM_PAY_TO to your Base wallet (0x + 40 hex)",
+      "x402 merchant addresses not configured or invalid — set X402_EVM_PAY_TO to your EVM wallet (0x + 40 hex)",
     );
   }
 

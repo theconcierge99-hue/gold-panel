@@ -89,7 +89,7 @@ const ABOUT = [
   {
     icon: "x402",
     title: "x402 settlement",
-    desc: "HTTP 402 micropayments on Solana and Base. Settle USDC via facilitators or TCX via Token Pay and prepaid credits.",
+    desc: "HTTP 402 micropayments on Solana, Base, and Arbitrum. Settle USDC via facilitators or TCX via Token Pay and prepaid credits.",
   },
   {
     icon: "mesh",

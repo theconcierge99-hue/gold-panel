@@ -1008,7 +1008,7 @@
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script src="/js/tcx-ca.js"></script>
-<script type="module" src="/js/x402-pay.mjs?v=mrgnku5x"></script>
+<script type="module" src="/js/x402-pay.mjs?v=mrgq2spj"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -2894,6 +2894,8 @@
       : [];
     return {
       acceptsEvm: !!cfg.acceptsEvm,
+      acceptsArbitrum: !!cfg.acceptsArbitrum,
+      evmNetworks: cfg.evmNetworks,
       acceptsSol: !!cfg.acceptsSol,
       evmPayToReady: !!cfg.evmPayToReady,
       solPayToReady: !!cfg.solPayToReady,
@@ -3127,7 +3129,7 @@
     }
 
     const solReady = chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient);
-    const evmReady = chainOpts.find(o=>o.chain==='evm'&&o.available&&o.sufficient);
+    const evmReady = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient);
     const list = document.getElementById('payChainList');
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
@@ -3154,10 +3156,10 @@
       });
     });
 
-    const defaultOpt = chainOpts.find(o=>o.chain==='evm'&&o.available&&o.sufficient&&!o.balanceUnknown)
+    const defaultOpt = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.available&&o.sufficient&&!o.balanceUnknown)
-      || chainOpts.find(o=>o.chain==='evm'&&o.available&&o.sufficient)
+      || chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available)
@@ -3189,7 +3191,7 @@
     );
     const chainHint = preferredChain === 'soon'
       ? (payOpts?.preferredTokenMerchantId ? payOpts.preferredTokenMerchantId+' (Solana)' : 'native token (Solana)')
-      : preferredChain === 'sol' ? 'Solana' : preferredChain === 'evm' ? 'Base' : 'wallet';
+      : preferredChain === 'sol' ? 'Solana' : preferredChain === 'arbitrum' ? 'Arbitrum' : (preferredChain === 'base' || preferredChain === 'evm') ? 'Base' : 'wallet';
     const u = String(url);
     const agentId = typeof window.elGetStoredAgentId === 'function' ? window.elGetStoredAgentId() : null;
     const baseOpts = options || {};

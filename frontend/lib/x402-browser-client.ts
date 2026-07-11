@@ -1,5 +1,5 @@
 /**
- * Browser x402 client — EVM (Base) + Solana USDC via connected Phantom/OKX wallets.
+ * Browser x402 client — EVM (Base, Arbitrum) + Solana USDC via connected Phantom/OKX wallets.
  */
 import { x402Client } from "@x402/core/client";
 import type { PaymentRequirements } from "@x402/core/types";
@@ -20,7 +20,7 @@ import {
   publicActions,
   type EIP1193Provider,
 } from "viem";
-import { base, baseSepolia } from "viem/chains";
+import { base, baseSepolia, arbitrum, arbitrumSepolia } from "viem/chains";
 
 export const PRICE_ATOMIC = 100_000n;
 const PRICE_USDC = 0.1;
@@ -44,6 +44,8 @@ export type TokenPayMerchantConfig = {
 
 export type X402ServerPayConfig = {
   acceptsEvm?: boolean;
+  acceptsArbitrum?: boolean;
+  evmNetworks?: string[];
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
   solPayToReady?: boolean;
@@ -118,17 +120,40 @@ function anyTokenPayLive(serverConfig: X402ServerPayConfig): boolean {
 function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
   return !!(
     (serverConfig.acceptsEvm && serverConfig.evmPayToReady) ||
+    (serverConfig.acceptsArbitrum && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsSol && serverConfig.solPayToReady)
   );
 }
 
+type EvmRailConfig = {
+  asset: `0x${string}`;
+  network: `eip155:${number}`;
+  chainId: number;
+  chainName: string;
+  rpc: string;
+  explorer: string;
+};
+
 const USDC = {
   mainnet: {
-    evm: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as const,
-    evmNetwork: "eip155:8453" as const,
+    base: {
+      asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      network: "eip155:8453",
+      chainId: 8453,
+      chainName: "Base",
+      rpc: "https://mainnet.base.org",
+      explorer: "https://basescan.org",
+    },
+    arbitrum: {
+      asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      network: "eip155:42161",
+      chainId: 42161,
+      chainName: "Arbitrum One",
+      rpc: "https://arb1.arbitrum.io/rpc",
+      explorer: "https://arbiscan.io",
+    },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" as const,
-    /** Public RPC blocks browser POST (403) — use fallbacks first */
     solRpcFallbacks: [
       "https://solana-rpc.publicnode.com",
       "https://rpc.ankr.com/solana",
@@ -137,8 +162,22 @@ const USDC = {
     ],
   },
   testnet: {
-    evm: "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as const,
-    evmNetwork: "eip155:84532" as const,
+    base: {
+      asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      network: "eip155:84532",
+      chainId: 84532,
+      chainName: "Base Sepolia",
+      rpc: "https://sepolia.base.org",
+      explorer: "https://sepolia.basescan.org",
+    },
+    arbitrum: {
+      asset: "0x75faf114eafb1BDbe2F6496Ed7E7eD0Eb74e2Da",
+      network: "eip155:421614",
+      chainId: 421614,
+      chainName: "Arbitrum Sepolia",
+      rpc: "https://sepolia-rollup.arbitrum.io/rpc",
+      explorer: "https://sepolia.arbiscan.io",
+    },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const,
     solRpcFallbacks: [
@@ -147,7 +186,7 @@ const USDC = {
       "https://api.devnet.solana.com",
     ],
   },
-};
+} as const;
 
 const erc20BalanceAbi = [
   {
@@ -164,7 +203,27 @@ export type WalletSession = {
   sol?: { address: string; wallet: string } | null;
 };
 
-export type PayChain = "evm" | "sol" | "soon";
+export type PayChain = "base" | "arbitrum" | "sol" | "soon";
+/** @deprecated Use "base" — kept for older Lounge callers */
+export type LegacyPayChain = PayChain | "evm";
+
+function normalizePayChain(chain?: LegacyPayChain): PayChain | undefined {
+  if (!chain) return undefined;
+  if (chain === "evm") return "base";
+  return chain;
+}
+
+function evmRailConfig(
+  rail: "base" | "arbitrum",
+  networkMode: "mainnet" | "testnet",
+): EvmRailConfig {
+  return USDC[networkMode][rail];
+}
+
+function viemChainForRail(rail: "base" | "arbitrum", networkMode: "mainnet" | "testnet") {
+  if (rail === "arbitrum") return networkMode === "testnet" ? arbitrumSepolia : arbitrum;
+  return networkMode === "testnet" ? baseSepolia : base;
+}
 
 export type ChainPayOption = {
   chain: PayChain;
@@ -185,7 +244,7 @@ export type ChainPayOption = {
 };
 
 export type X402PaidFetchOptions = {
-  preferredChain?: PayChain;
+  preferredChain?: LegacyPayChain;
   preferredTokenMerchantId?: string;
 };
 
@@ -213,15 +272,55 @@ declare global {
       session: WalletSession,
       networkMode?: "mainnet" | "testnet",
       serverConfig?: X402ServerPayConfig,
-      chain?: PayChain,
+      chain?: LegacyPayChain,
     ) => Promise<boolean>;
   }
 }
 
-const BASE_HTTP_RPC = {
-  mainnet: "https://mainnet.base.org",
-  testnet: "https://sepolia.base.org",
-} as const;
+async function ensureWalletOnEvmRail(
+  provider: EIP1193Provider,
+  rail: "base" | "arbitrum",
+  networkMode: "mainnet" | "testnet",
+): Promise<void> {
+  const cfg = evmRailConfig(rail, networkMode);
+  const raw = await provider.request({ method: "eth_chainId" });
+  const current =
+    typeof raw === "string" ? parseInt(raw, 16) : typeof raw === "number" ? raw : 0;
+  if (current === cfg.chainId) return;
+
+  const chainHex = `0x${cfg.chainId.toString(16)}`;
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: chainHex }],
+    });
+    return;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!/4902|unrecognized chain/i.test(msg)) {
+      throw new Error(
+        `Switch your wallet to ${cfg.chainName} to pay (current chain id ${current}). ${msg}`,
+      );
+    }
+  }
+
+  await provider.request({
+    method: "wallet_addEthereumChain",
+    params: [
+      {
+        chainId: chainHex,
+        chainName: cfg.chainName,
+        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        rpcUrls: [cfg.rpc],
+        blockExplorerUrls: [cfg.explorer],
+      },
+    ],
+  });
+  await provider.request({
+    method: "wallet_switchEthereumChain",
+    params: [{ chainId: chainHex }],
+  });
+}
 
 function formatToken(atomic: bigint, symbol: string): string {
   const whole = atomic / 1_000_000n;
@@ -294,48 +393,6 @@ function uninstallSolanaRpcProxyFetch(): void {
   window.fetch = nativeFetch;
 }
 
-const BASE_MAINNET_CHAIN_ID = 8453;
-
-async function ensureWalletOnBase(provider: EIP1193Provider): Promise<void> {
-  const raw = await provider.request({ method: "eth_chainId" });
-  const current =
-    typeof raw === "string" ? parseInt(raw, 16) : typeof raw === "number" ? raw : 0;
-  if (current === BASE_MAINNET_CHAIN_ID) return;
-
-  const baseHex = "0x2105";
-  try {
-    await provider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: baseHex }],
-    });
-    return;
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    if (!/4902|unrecognized chain/i.test(msg)) {
-      throw new Error(
-        `Switch your wallet to Base network to pay (current chain id ${current}). ${msg}`,
-      );
-    }
-  }
-
-  await provider.request({
-    method: "wallet_addEthereumChain",
-    params: [
-      {
-        chainId: baseHex,
-        chainName: "Base",
-        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-        rpcUrls: ["https://mainnet.base.org"],
-        blockExplorerUrls: ["https://basescan.org"],
-      },
-    ],
-  });
-  await provider.request({
-    method: "wallet_switchEthereumChain",
-    params: [{ chainId: baseHex }],
-  });
-}
-
 type ElPrivyBridge = {
   getEvmProvider?: () => EIP1193Provider | null;
   getSolanaSigner?: () => PhantomSolanaProvider | null;
@@ -367,16 +424,17 @@ function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
 async function evmUsdcBalance(
   userAddress: `0x${string}`,
   networkMode: "mainnet" | "testnet",
+  rail: "base" | "arbitrum",
 ): Promise<bigint> {
-  const nets = USDC[networkMode];
-  const chain = networkMode === "testnet" ? baseSepolia : base;
+  const cfg = evmRailConfig(rail, networkMode);
+  const chain = viemChainForRail(rail, networkMode);
   const client = createPublicClient({
     chain,
-    transport: http(BASE_HTTP_RPC[networkMode]),
+    transport: http(cfg.rpc),
   });
   try {
     return await client.readContract({
-      address: nets.evm,
+      address: cfg.asset,
       abi: erc20BalanceAbi,
       functionName: "balanceOf",
       args: [userAddress],
@@ -462,31 +520,43 @@ export async function getPaymentChainOptions(
   const provider = evmProviderForSession(session);
   const options: ChainPayOption[] = [];
 
-  if (serverConfig.acceptsEvm && serverConfig.evmPayToReady) {
+  const evmRails: Array<{ rail: "base" | "arbitrum"; enabled: boolean; label: string }> = [
+    { rail: "base", enabled: !!(serverConfig.acceptsEvm && serverConfig.evmPayToReady), label: "Base" },
+    {
+      rail: "arbitrum",
+      enabled: !!(serverConfig.acceptsArbitrum && serverConfig.evmPayToReady),
+      label: "Arbitrum",
+    },
+  ];
+
+  for (const { rail, enabled, label } of evmRails) {
+    if (!enabled) continue;
     const hasWallet = !!session.evm?.address;
     let bal = 0n;
     let disabledReason: string | undefined;
     if (!hasWallet) {
-      disabledReason = "Connect EVM (Ethereum on Base) in your wallet";
+      disabledReason = `Connect EVM (${label}) in your wallet`;
     } else if (!provider) {
       disabledReason =
         session.evm?.wallet === "privy"
           ? "Privy EVM wallet not ready — reconnect Privy"
           : "EVM provider not found — reopen Phantom/OKX";
     } else {
-      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode);
+      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, rail);
     }
     const sufficient = bal >= PRICE_ATOMIC;
     options.push({
-      chain: "evm",
-      optionId: "evm",
-      label: "Base (EVM)",
+      chain: rail,
+      optionId: rail,
+      label,
       sublabel: hasWallet ? shortAddr(session.evm!.address, "evm") : "Not connected",
       balanceUsdc: hasWallet && provider ? formatUsdc(bal) : "—",
       balanceAtomic: bal,
       sufficient,
       available: hasWallet && !!provider,
-      disabledReason: disabledReason ?? (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on Base` : undefined),
+      disabledReason:
+        disabledReason ??
+        (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on ${label}` : undefined),
     });
   }
 
@@ -515,7 +585,7 @@ export async function getPaymentChainOptions(
       balanceUnknown = solBal.unknown;
       if (serverConfig.solMerchantUsdcAta === false) {
         disabledReason =
-          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base";
+          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base/Arbitrum";
       }
     }
     const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
@@ -662,21 +732,30 @@ function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: 
     }
     if (preferred === "sol" && usdcSol.length) return usdcSol[0];
     if (preferred === "sol" && sol.length) return sol[0];
-    if (preferred === "evm" && evm.length) return evm[0];
+    if (preferred === "base" && evm.length) {
+      const match = evm.find((a) => String(a.network).startsWith("eip155:8453"));
+      if (match) return match;
+    }
+    if (preferred === "arbitrum" && evm.length) {
+      const match = evm.find((a) => String(a.network).startsWith("eip155:42161"));
+      if (match) return match;
+    }
+    if ((preferred === "base" || preferred === "arbitrum") && evm.length) return evm[0];
     return accepts[0];
   };
 }
 
 function findPayOption(
   opts: ChainPayOption[],
-  chain?: PayChain,
+  chain?: LegacyPayChain,
   merchantId?: string,
 ): ChainPayOption | undefined {
+  const normalized = normalizePayChain(chain);
   if (merchantId) {
     const byMerchant = opts.find((o) => o.merchantId === merchantId);
     if (byMerchant) return byMerchant;
   }
-  if (chain) return opts.find((o) => o.chain === chain);
+  if (normalized) return opts.find((o) => o.chain === normalized);
   return undefined;
 }
 
@@ -684,18 +763,19 @@ async function resolvePaymentChain(
   session: WalletSession,
   networkMode: "mainnet" | "testnet",
   server: X402ServerPayConfig,
-  preferred?: PayChain,
+  preferred?: LegacyPayChain,
   provider?: EIP1193Provider,
   preferredMerchantId?: string,
 ): Promise<PayChain> {
-  if (preferred) {
+  const normalizedPreferred = normalizePayChain(preferred);
+  if (normalizedPreferred) {
     const opts = await getPaymentChainOptions(session, networkMode, server);
-    const pick = findPayOption(opts, preferred, preferredMerchantId);
+    const pick = findPayOption(opts, normalizedPreferred, preferredMerchantId);
     if (!pick?.available) throw new Error(pick?.disabledReason || "Selected chain is not available");
     if (!pick.sufficient && !pick.balanceUnknown) {
       throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
     }
-    return preferred;
+    return normalizedPreferred;
   }
 
   const opts = await getPaymentChainOptions(session, networkMode, server);
@@ -703,10 +783,12 @@ async function resolvePaymentChain(
   if (usable.length) {
     const soon = usable.find((o) => o.chain === "soon");
     const sol = usable.find((o) => o.chain === "sol");
-    const evm = usable.find((o) => o.chain === "evm");
-    if (soon?.sufficient && !sol?.sufficient && !evm?.sufficient) return "soon";
-    if (sol?.sufficient && !evm?.sufficient) return "sol";
-    if (evm?.sufficient && !sol?.sufficient) return "evm";
+    const arb = usable.find((o) => o.chain === "arbitrum");
+    const baseOpt = usable.find((o) => o.chain === "base");
+    const evmSufficient = !!(arb?.sufficient || baseOpt?.sufficient);
+    if (soon?.sufficient && !sol?.sufficient && !evmSufficient) return "soon";
+    if (sol?.sufficient && !evmSufficient) return "sol";
+    if (evmSufficient && !sol?.sufficient) return arb?.sufficient ? "arbitrum" : "base";
     return usable.sort((a, b) =>
       a.balanceAtomic >= b.balanceAtomic ? -1 : 1,
     )[0].chain;
@@ -714,7 +796,7 @@ async function resolvePaymentChain(
   const anyAvail = opts.find((o) => o.available);
   if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC");
   throw new Error(
-    "Connect Solana and/or EVM (Base) in your wallet, or configure merchant receive addresses on the server.",
+    "Connect Solana and/or EVM (Base/Arbitrum) in your wallet, or configure merchant receive addresses on the server.",
   );
 }
 
@@ -726,7 +808,6 @@ export async function createX402PaidFetch(
 ): Promise<typeof fetch> {
   const nets = USDC[networkMode];
   const provider = evmProviderForSession(session);
-  const chain = networkMode === "testnet" ? baseSepolia : base;
 
   const preferred = await resolvePaymentChain(
     session,
@@ -741,12 +822,12 @@ export async function createX402PaidFetch(
     paymentRequirementsSelector(preferred, options.preferredTokenMerchantId),
   );
 
-  if (preferred === "evm") {
-    if (!provider) throw new Error("EVM wallet not connected — connect Base (Ethereum) in your wallet");
-    if (networkMode === "mainnet") {
-      await ensureWalletOnBase(provider);
-    }
+  if (preferred === "base" || preferred === "arbitrum") {
+    if (!provider) throw new Error(`EVM wallet not connected — connect ${preferred === "arbitrum" ? "Arbitrum" : "Base"} in your wallet`);
+    await ensureWalletOnEvmRail(provider, preferred, networkMode);
     const userAddress = session.evm!.address as `0x${string}`;
+    const chain = viemChainForRail(preferred, networkMode);
+    const railCfg = evmRailConfig(preferred, networkMode);
     const walletClient = createWalletClient({
       account: userAddress,
       chain,
@@ -766,7 +847,7 @@ export async function createX402PaidFetch(
       readContract: (args) =>
         publicClient.readContract(args as Parameters<typeof publicClient.readContract>[0]),
     };
-    registerExactEvmScheme(client, { signer, networks: [nets.evmNetwork] });
+    registerExactEvmScheme(client, { signer, networks: [railCfg.network] });
   } else if (preferred === "soon") {
     const solProv = solanaProvider(session)!;
     client.register(
@@ -852,13 +933,14 @@ export async function isChainPaymentReady(
   session: WalletSession,
   networkMode: "mainnet" | "testnet" = "mainnet",
   serverConfig: X402ServerPayConfig = {},
-  chain?: PayChain,
+  chain?: LegacyPayChain,
 ): Promise<boolean> {
   const opts = await getPaymentChainOptions(session, networkMode, serverConfig);
-  if (!chain) {
+  const normalized = normalizePayChain(chain);
+  if (!normalized) {
     return opts.some((o) => o.available && (o.sufficient || o.balanceUnknown));
   }
-  const pick = opts.find((o) => o.chain === chain);
+  const pick = opts.find((o) => o.chain === normalized);
   return !!(pick?.available && (pick.sufficient || pick.balanceUnknown));
 }
 

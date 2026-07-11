@@ -67,6 +67,8 @@ export const SOLANA_DEVNET_CAIP2 = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
 const USDC_BY_NETWORK: Record<string, string> = {
   "eip155:8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   "eip155:84532": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "eip155:42161": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "eip155:421614": "0x75faf114eafb1BDbe2F6496Ed7E7eD0Eb74e2Da",
   [SOLANA_MAINNET_CAIP2]: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
   [SOLANA_DEVNET_CAIP2]: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 };
@@ -79,25 +81,42 @@ export function getUsdcAssetForNetwork(network: string): string {
 
 export type X402NetworkProfile = {
   evm: `eip155:${number}`;
+  arbitrum: `eip155:${number}`;
   sol: `solana:${string}`;
   label: string;
 };
 
 const MAINNET: X402NetworkProfile = {
   evm: "eip155:8453",
+  arbitrum: "eip155:42161",
   sol: SOLANA_MAINNET_CAIP2,
-  label: "Base + Solana mainnet",
+  label: "Base + Arbitrum + Solana mainnet",
 };
 
 const TESTNET: X402NetworkProfile = {
   evm: "eip155:84532",
+  arbitrum: "eip155:421614",
   sol: SOLANA_DEVNET_CAIP2,
-  label: "Base Sepolia + Solana devnet",
+  label: "Base Sepolia + Arbitrum Sepolia + Solana devnet",
 };
 
 export function getX402NetworkProfile(): X402NetworkProfile {
   const mode = (process.env.X402_NETWORK_MODE || "mainnet").toLowerCase();
   return mode === "testnet" ? TESTNET : MAINNET;
+}
+
+/** Arbitrum rail — on when EVM merchant is set unless explicitly disabled. */
+export function isArbitrumX402Enabled(): boolean {
+  if (process.env.X402_ARBITRUM_ENABLED === "false") return false;
+  return !!getMerchantAddresses().evm;
+}
+
+/** EVM networks advertised in 402 accepts (Base + optional Arbitrum). */
+export function getX402EvmAcceptNetworks(): Array<`eip155:${number}`> {
+  const profile = getX402NetworkProfile();
+  const nets: Array<`eip155:${number}`> = [profile.evm];
+  if (isArbitrumX402Enabled()) nets.push(profile.arbitrum);
+  return nets;
 }
 
 /** Vercel env names (also accepts common typo X402_*_PAY_ID) */
@@ -200,6 +219,8 @@ export function getPublicX402Config() {
     priceLabel: X402_PRICE_LABEL,
     networks: nets,
     acceptsEvm: !!evm,
+    acceptsArbitrum: isArbitrumX402Enabled() && !!evm,
+    evmNetworks: getX402EvmAcceptNetworks(),
     acceptsSol: !!sol,
     evmPayToReady: !!evm,
     solPayToReady: !!sol,

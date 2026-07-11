@@ -87,6 +87,8 @@ export function x402ServerPayConfigFromApi(cfg) {
     : [];
   return {
     acceptsEvm: !!cfg.acceptsEvm,
+    acceptsArbitrum: !!cfg.acceptsArbitrum,
+    evmNetworks: cfg.evmNetworks,
     acceptsSol: !!cfg.acceptsSol,
     evmPayToReady: !!cfg.evmPayToReady,
     solPayToReady: !!cfg.solPayToReady,
@@ -113,6 +115,7 @@ export function x402ServerPayConfigFromApi(cfg) {
 export function paidFetchOptionsForRail(rail) {
   if (rail === "sol") return { preferredChain: "sol" };
   if (rail === "tcx") return { preferredChain: "soon", preferredTokenMerchantId: "soon" };
-  if (rail === "evm") return { preferredChain: "evm" };
+  if (rail === "arbitrum") return { preferredChain: "arbitrum" };
+  if (rail === "evm" || rail === "base") return { preferredChain: "base" };
   return {};
 }

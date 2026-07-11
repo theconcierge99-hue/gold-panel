@@ -64,8 +64,10 @@ export function mppPaymentProtocols(): Record<string, unknown>[] {
   return [
     { x402: { network: "solana", facilitator: primary.url, role: "primary" } },
     { x402: { network: "base", facilitator: primary.url, role: "primary" } },
+    { x402: { network: "arbitrum", facilitator: primary.url, role: "primary" } },
     { x402: { network: "solana", facilitator: fallback.url, role: "fallback" } },
     { x402: { network: "base", facilitator: fallback.url, role: "fallback" } },
+    { x402: { network: "arbitrum", facilitator: fallback.url, role: "fallback" } },
     { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
   ];
 }
