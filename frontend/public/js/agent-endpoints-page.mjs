@@ -33,6 +33,7 @@ const SEGMENT_LABELS = {
   intel: "DeFi Intel",
   alpha: "Alpha Intel",
   security: "Security Desk",
+  creative: "Resources",
   lounge: "Lounge",
 };
 
@@ -53,6 +54,7 @@ function renderFilters() {
     { id: "intel", label: "DeFi Intel" },
     { id: "alpha", label: "Alpha Intel" },
     { id: "security", label: "Security Desk" },
+    { id: "creative", label: "Resources" },
     { id: "lounge", label: "Lounge" },
   ];
   filtersEl.innerHTML = segments

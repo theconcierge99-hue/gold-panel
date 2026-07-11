@@ -261,7 +261,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
   {
     kind: "resource-chat",
     method: "POST",
-    path: "/api/resource/chat",
+    path: "/api/resource-chat",
     name: "Concierge Resources — Chat",
     description: "Agent-friendly Concierge chat — one turn, JSON reply. TCX credits or x402.",
     priceUsd: "0.05",
@@ -270,7 +270,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
   {
     kind: "resource-image",
     method: "POST",
-    path: "/api/resource/image",
+    path: "/api/resource-image",
     name: "Concierge Resources — Image",
     description: "Generate one image from a text prompt. Returns base64 data URLs.",
     priceUsd: "0.10",
@@ -279,7 +279,7 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
   {
     kind: "resource-scaffold",
     method: "POST",
-    path: "/api/resource/scaffold",
+    path: "/api/resource-scaffold",
     name: "Concierge Resources — Scaffold",
     description: "Generate a single-file HTML page from a text brief — landing page or micro-site.",
     priceUsd: "0.10",

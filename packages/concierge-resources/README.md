@@ -11,7 +11,7 @@ Dev server: `npm run dev` → **http://localhost:8080**
 curl http://localhost:8080/api/resources
 
 # x402 probe (expect 402 when X402_SOL_PAY_TO / X402_EVM_PAY_TO are set)
-curl -s -X POST http://localhost:8080/api/resource/chat \
+curl -s -X POST http://localhost:8080/api/resource-chat \
   -H "Content-Type: application/json" \
   -d "{\"message\":\"BTC outlook\"}"
 
@@ -23,7 +23,7 @@ On Windows PowerShell, pass JSON from a file:
 
 ```powershell
 '{"message":"BTC outlook"}' | Set-Content -NoNewline .tmp-body.json
-curl.exe -s -X POST http://localhost:8080/api/resource/chat `
+curl.exe -s -X POST http://localhost:8080/api/resource-chat `
   -H "Content-Type: application/json" `
   --data-binary "@.tmp-body.json"
 ```
@@ -31,7 +31,7 @@ curl.exe -s -X POST http://localhost:8080/api/resource/chat `
 Production sandbox agent:
 
 ```bash
-pay --sandbox curl https://conc-exe.xyz/api/resource/chat \
+pay --sandbox curl https://conc-exe.xyz/api/resource-chat \
   -d '{"message":"Summarize Solana DeFi in 3 bullets"}'
 ```
 

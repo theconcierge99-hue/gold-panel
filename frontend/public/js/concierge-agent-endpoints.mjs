@@ -9,6 +9,7 @@ export const CONCIERGE_AGENT_SEGMENTS = [
   { id: "intel", label: "DeFi Intel" },
   { id: "alpha", label: "Alpha Intel" },
   { id: "security", label: "Security Desk" },
+  { id: "creative", label: "Resources" },
   { id: "lounge", label: "Lounge" },
 ];
 
@@ -288,10 +289,57 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     tier: "signal",
     sampleBody: { signalId: "sig_…" },
   },
+  {
+    id: "resource-chat",
+    segment: "creative",
+    method: "POST",
+    path: "/api/resource-chat",
+    name: "Resources — Chat",
+    description: "Agent-friendly Concierge chat — one turn, JSON reply. TCX credits or x402.",
+    priceUsd: "0.05",
+    tier: "raw",
+    sampleBody: { message: "Summarize Solana DeFi outlook in 3 bullets", history: [] },
+  },
+  {
+    id: "resource-image",
+    segment: "creative",
+    method: "POST",
+    path: "/api/resource-image",
+    name: "Resources — Image",
+    description: "Generate one image from a text prompt. Returns base64 data URLs.",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: { message: "Minimal dark dashboard hero — gold accents, abstract market chart" },
+  },
+  {
+    id: "resource-scaffold",
+    segment: "creative",
+    method: "POST",
+    path: "/api/resource-scaffold",
+    name: "Resources — Scaffold",
+    description: "Generate a single-file HTML page from a text brief — landing page or micro-site.",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: { message: "Landing page for a crypto intel newsletter — dark theme, hero, pricing, CTA" },
+  },
 ];
 
 /** Free companion routes (not in x402 paid catalog). */
 export const CONCIERGE_FREE_ROUTES = [
+  {
+    id: "resources-catalog",
+    method: "GET",
+    path: "/api/resources",
+    name: "Resources catalog",
+    description: "Free discovery — all 24 pay-per-call routes with pricing and TCX credit costs.",
+  },
+  {
+    id: "tcx-credits",
+    method: "GET",
+    path: "/api/tcx-credits",
+    name: "TCX credits balance",
+    description: "Prepaid credit ledger for resource-chat, resource-image, and resource-scaffold.",
+  },
   {
     id: "intel-accuracy",
     method: "GET",
@@ -327,5 +375,6 @@ export function countBySegment() {
   const concierge = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "concierge").length;
   const research = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "research").length;
   const security = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "security").length;
-  return { total, intel, alpha, lounge, concierge, research, security };
+  const creative = CONCIERGE_AGENT_ENDPOINTS.filter((e) => e.segment === "creative").length;
+  return { total, intel, alpha, lounge, concierge, research, security, creative };
 }

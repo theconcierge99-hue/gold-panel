@@ -26,9 +26,9 @@ export type ResourceCatalogEntry = {
 };
 
 export const MVP_RESOURCE_PATHS: Record<X402MvpResourceKind, string> = {
-  "resource-chat": "/api/resource/chat",
-  "resource-image": "/api/resource/image",
-  "resource-scaffold": "/api/resource/scaffold",
+  "resource-chat": "/api/resource-chat",
+  "resource-image": "/api/resource-image",
+  "resource-scaffold": "/api/resource-scaffold",
 };
 
 function categoryForKind(kind: X402ResourceKind): ResourceCatalogEntry["category"] {

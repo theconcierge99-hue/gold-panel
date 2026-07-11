@@ -288,11 +288,11 @@ function resourcePath(kind: X402ResourceKind): string {
     case "security-scan":
       return "/api/concierge-security-scan";
     case "resource-chat":
-      return "/api/resource/chat";
+      return "/api/resource-chat";
     case "resource-image":
-      return "/api/resource/image";
+      return "/api/resource-image";
     case "resource-scaffold":
-      return "/api/resource/scaffold";
+      return "/api/resource-scaffold";
     default:
       return `/api/${kind}`;
   }
