@@ -58,7 +58,7 @@ function renderStackMarquee() {
 
   const chip = (p) => {
     const attrs = p.external ? ' target="_blank" rel="noopener noreferrer"' : "";
-    return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="22" height="22" loading="lazy" /><span>${p.name}</span></a>`;
+    return `<a class="agent-stack-chip" href="${p.href}"${attrs}><img src="${p.logo}" alt="" width="28" height="28" loading="lazy" /><span>${p.name}</span></a>`;
   };
 
   const chips = STACK_PARTNERS.map(chip).join("");
