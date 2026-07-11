@@ -640,3 +640,51 @@ export async function runAlphaIntel(
     },
   };
 }
+
+/** Lounge Concierge chat — detect Robinhood Chain meme desk queries. */
+export function messageRequestsRobinhoodMomentumDesk(message: string): boolean {
+  return resolveMomentumTheme("intel-momentum", String(message ?? "").trim()) === "robinhood";
+}
+
+type RobinhoodChatCandidate = {
+  asset?: string;
+  chain?: string;
+  direction?: string;
+  thesis?: string;
+  conviction?: string;
+};
+
+/** Inject paid intel-momentum (theme=robinhood) into Concierge chat context. */
+export function formatRobinhoodMomentumForPrompt(payload: Record<string, unknown>): string {
+  const summary = String(payload.summary ?? "").trim();
+  const candidates = Array.isArray(payload.candidates)
+    ? (payload.candidates as RobinhoodChatCandidate[])
+    : [];
+  const lines = candidates.slice(0, 6).map((c) => {
+    const asset = c.asset ?? "WATCH";
+    const chain = c.chain ?? "multi";
+    const dir = c.direction ?? "watch";
+    const thesis = (c.thesis ?? "").slice(0, 280);
+    return `- **${asset}** (${chain}) · ${dir} · ${c.conviction ?? "?"} — ${thesis}`;
+  });
+  return [
+    "ROBINHOOD CHAIN MOMENTUM DESK (Concierge intel-momentum · theme=robinhood):",
+    "Robinhood Chain is an L2 (mainnet July 2026). Pump.fun trades RH memes in SOL without bridging. Do NOT claim Robinhood Chain does not exist or is only the US stock brokerage app.",
+    summary ? `Desk summary: ${summary}` : "",
+    lines.length ? `Candidates:\n${lines.join("\n")}` : "",
+    "Structured JSON: POST /api/concierge-intel-momentum with theme robinhood (Agent Playground → Pay with wallet).",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export async function fetchRobinhoodMomentumDeskForChat(
+  message: string,
+): Promise<Record<string, unknown>> {
+  return runAlphaIntel("intel-momentum", {
+    theme: "robinhood",
+    message: message.trim() || "Robinhood Chain meme rotation",
+    limit: 5,
+    includeInsider: true,
+  });
+}

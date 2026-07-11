@@ -15,6 +15,11 @@ import {
   messageRequestsScalpDesk,
 } from "./concierge-scalp-intel";
 import {
+  fetchRobinhoodMomentumDeskForChat,
+  formatRobinhoodMomentumForPrompt,
+  messageRequestsRobinhoodMomentumDesk,
+} from "./concierge-alpha-intel";
+import {
   fetchGeneralKnowledgeSnapshot,
   formatGeneralKnowledgeForPrompt,
 } from "./general-knowledge";
@@ -305,6 +310,7 @@ async function resolveIntelligenceContext(
   };
   const tradingPlan = responseMode === "trading_plan" || responseMode === "scalping_plan";
   const scalpDesk = responseMode === "scalping_plan" || messageRequestsScalpDesk(userMessage);
+  const robinhoodDesk = messageRequestsRobinhoodMomentumDesk(userMessage);
   const clientSnapshot = clientSnapshotIsFresh(liveSnapshot) ? liveSnapshot! : null;
   const marketTimeout = clientSnapshot
     ? 0
@@ -404,10 +410,11 @@ async function resolveIntelligenceContext(
           ? 5_000
           : 5_500;
   const scalpTimeout = clientSnapshot ? 3_500 : fastAltChat ? 2_500 : tradingPlan ? 4_500 : 4_000;
+  const robinhoodTimeout = 8_000;
   const skipDefiForTradingSnapshot = !!clientSnapshot && tradingPlan && !needDeFiIntel;
   const skipScalpForSnapshot = !!clientSnapshot && tradingPlan && !scalpDesk;
 
-  const [defiIntel, scalp] = await Promise.all([
+  const [defiIntel, scalp, robinhoodMomentum] = await Promise.all([
     needDeFiIntel && !skipDefiForTradingSnapshot
       ? withTimeout(
           fetchConciergeDeFiIntel({
@@ -424,6 +431,9 @@ async function resolveIntelligenceContext(
       : Promise.resolve(null),
     scalpDesk && !skipScalpForSnapshot
       ? withTimeout(fetchScalpDeskIntel({ message: userMessage }), scalpTimeout, null)
+      : Promise.resolve(null),
+    robinhoodDesk
+      ? withTimeout(fetchRobinhoodMomentumDeskForChat(userMessage), robinhoodTimeout, null)
       : Promise.resolve(null),
   ]);
 
@@ -442,11 +452,15 @@ async function resolveIntelligenceContext(
   let scalpBlock = "";
   if (scalp) scalpBlock = formatScalpIntelForPrompt(scalp);
 
+  let robinhoodBlock = "";
+  if (robinhoodMomentum) robinhoodBlock = formatRobinhoodMomentumForPrompt(robinhoodMomentum);
+
   ingestWireHeadlinesAsync(snapshot.headlines);
 
   const intelBlock = [
     formatMandatoryPriceAnchor(enrichedSnapshot),
     formatLiveMarketForPrompt(enrichedSnapshot),
+    robinhoodBlock,
     scalpBlock,
     formatGeneralKnowledgeForPrompt(general),
     defiIntelBlock,
