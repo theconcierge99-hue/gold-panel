@@ -258,6 +258,33 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     priceUsd: "0.10",
     tags: [...X402_OPERATION_TAGS["security-scan"]],
   },
+  {
+    kind: "resource-chat",
+    method: "POST",
+    path: "/api/resource/chat",
+    name: "Concierge Resources — Chat",
+    description: "Agent-friendly Concierge chat — one turn, JSON reply. TCX credits or x402.",
+    priceUsd: "0.05",
+    tags: [...X402_OPERATION_TAGS["resource-chat"]],
+  },
+  {
+    kind: "resource-image",
+    method: "POST",
+    path: "/api/resource/image",
+    name: "Concierge Resources — Image",
+    description: "Generate one image from a text prompt. Returns base64 data URLs.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["resource-image"]],
+  },
+  {
+    kind: "resource-scaffold",
+    method: "POST",
+    path: "/api/resource/scaffold",
+    name: "Concierge Resources — Scaffold",
+    description: "Generate a single-file HTML page from a text brief — landing page or micro-site.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["resource-scaffold"]],
+  },
 ];
 
 /** Canonical public origin for discovery URLs (production domain). */
@@ -313,7 +340,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — 21 pay-per-call routes (Concierge AI, macro & wire research, DeFi intel, Alpha desks, Lounge, Security Desk). x402 + MPP discovery; USDC settlement via PayAI (primary) with Dexter fallback on Solana/Base. OpenDexter auto-discovery on Dexter settlements; also on MPPscan, pay.sh CLI, x402scan. Security: /docs/api/security · MCP security_scan.",
+      "Concierge Agent — 24 pay-per-call routes (Concierge Resources: chat, image, scaffold; macro & wire research; DeFi intel; Alpha desks; Lounge; Security Desk). x402 + MPP discovery; USDC or TCX settlement via PayAI (primary) with Dexter fallback on Solana/Base. Credits: GET /api/tcx-credits · Catalog: GET /api/resources.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -463,7 +490,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.0.0",
       description:
-        "Market intelligence + Security Desk as a service — 21 pay-per-call endpoints. Concierge AI, macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans (security-scan, readiness, headers). No API keys. x402 + MPP discovery; USDC settlement on Solana and Base via PayAI (primary) with Dexter fallback.",
+        "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC or TCX on Solana and Base.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {

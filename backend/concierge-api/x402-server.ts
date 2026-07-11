@@ -32,6 +32,7 @@ import {
 } from "./token-pay";
 import { trySoonHolderFreeTier } from "./soon-holder-free-tier";
 import { trySoonSecurityFreeTier } from "./soon-security-tier";
+import { tryTcxCreditsSettlement } from "./tcx-credits-settle";
 import { verifyOobeSapSettlement } from "./oobe-sap-x402";
 
 export type { X402ResourceKind };
@@ -171,6 +172,24 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "security", "utility", "research"],
   },
+  "resource-chat": {
+    name: "Concierge Resources — Chat",
+    description: "Agent-friendly Concierge chat turn — lite context, structured JSON reply",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "resources", "utility"],
+  },
+  "resource-image": {
+    name: "Concierge Resources — Image",
+    description: "Generate one image from a text prompt (base64 data URLs)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "resources", "utility"],
+  },
+  "resource-scaffold": {
+    name: "Concierge Resources — Scaffold",
+    description: "Generate a single-file HTML page from a text brief",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "resources", "utility"],
+  },
 };
 
 export type X402AcceptRequirement = {
@@ -268,6 +287,12 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-security-headers";
     case "security-scan":
       return "/api/concierge-security-scan";
+    case "resource-chat":
+      return "/api/resource/chat";
+    case "resource-image":
+      return "/api/resource/image";
+    case "resource-scaffold":
+      return "/api/resource/scaffold";
     default:
       return `/api/${kind}`;
   }
@@ -614,6 +639,16 @@ export async function requireX402Payment(
           ok: true,
           payer: securityFree.wallet,
           transaction: "soon-holder-free-tier",
+          paymentResponseHeader: null,
+        };
+      }
+
+      const tcxCredits = await tryTcxCreditsSettlement(request, kind);
+      if (tcxCredits.ok) {
+        return {
+          ok: true,
+          payer: tcxCredits.wallet,
+          transaction: `tcx-credits:${tcxCredits.creditsSpent}`,
           paymentResponseHeader: null,
         };
       }

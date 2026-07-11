@@ -21,7 +21,14 @@ export type X402IntelKind =
 /** Passive security desk — scout ($0.02) + unified scan bundle ($0.10) */
 export type X402SecurityKind = "security-readiness" | "security-headers" | "security-scan";
 
-export type X402ResourceKind = X402CoreKind | X402IntelKind | X402SecurityKind;
+/** MVP Concierge Resources — agent-friendly creative endpoints */
+export type X402MvpResourceKind = "resource-chat" | "resource-image" | "resource-scaffold";
+
+export type X402ResourceKind =
+  | X402CoreKind
+  | X402IntelKind
+  | X402SecurityKind
+  | X402MvpResourceKind;
 
 export const X402_READ_PRICE_USDC = 0.1;
 export const X402_READ_PRICE_ATOMIC = "100000";
@@ -37,6 +44,23 @@ export const X402_SIGNAL_PRICE_ATOMIC = "100000";
 /** Composite morning brief */
 export const X402_BUNDLE_PRICE_USDC = 0.25;
 export const X402_BUNDLE_PRICE_ATOMIC = "250000";
+
+/** Concierge Resources — creative tier */
+export const X402_RESOURCE_CHAT_USDC = 0.05;
+export const X402_RESOURCE_CHAT_ATOMIC = "50000";
+
+export const X402_RESOURCE_CREATIVE_USDC = 0.1;
+export const X402_RESOURCE_CREATIVE_ATOMIC = "100000";
+
+export const MVP_RESOURCE_KINDS: readonly X402MvpResourceKind[] = [
+  "resource-chat",
+  "resource-image",
+  "resource-scaffold",
+] as const;
+
+export function isMvpResourceKind(kind: X402ResourceKind): kind is X402MvpResourceKind {
+  return (MVP_RESOURCE_KINDS as readonly string[]).includes(kind);
+}
 
 /** Minimum settlement fee — same as raw intel tier (covers x402 network cost). */
 export const X402_SIGNAL_PUBLISH_USDC = X402_RAW_PRICE_USDC;
@@ -77,6 +101,8 @@ export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
   if (kind === "security-scan") return X402_SIGNAL_PRICE_ATOMIC;
+  if (kind === "resource-chat") return X402_RESOURCE_CHAT_ATOMIC;
+  if (kind === "resource-image" || kind === "resource-scaffold") return X402_RESOURCE_CREATIVE_ATOMIC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_ATOMIC;
   return X402_SIGNAL_PRICE_ATOMIC;
 }
@@ -85,8 +111,15 @@ export function priceUsdcForResource(kind: X402ResourceKind): number {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_USDC;
   if (kind === "security-scan") return X402_SIGNAL_PRICE_USDC;
+  if (kind === "resource-chat") return X402_RESOURCE_CHAT_USDC;
+  if (kind === "resource-image" || kind === "resource-scaffold") return X402_RESOURCE_CREATIVE_USDC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_USDC;
   return X402_SIGNAL_PRICE_USDC;
+}
+
+/** 1 credit = $0.01 USDC peg for TCX prepaid ledger */
+export function creditsCostForResource(kind: X402ResourceKind): number {
+  return Math.max(1, Math.round(priceUsdcForResource(kind) * 100));
 }
 
 export function priceLabelForResource(kind: X402ResourceKind): string {
@@ -120,4 +153,7 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "security-readiness",
   "security-headers",
   "security-scan",
+  "resource-chat",
+  "resource-image",
+  "resource-scaffold",
 ] as const;

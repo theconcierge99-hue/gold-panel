@@ -14,6 +14,10 @@ import {
   resolveIntelKindFromRequest,
 } from "./concierge-intel-handler";
 import {
+  handleConciergeResourceRoute,
+  resolveMvpResourceKindFromRequest,
+} from "./concierge-resource-handler";
+import {
   handleConciergeSecurityRoute,
   handleSecurityScopeRoute,
   isSecurityScopeRoute,
@@ -31,6 +35,7 @@ import handleMppscanRedirect from "./routes/mppscan-redirect";
 import handleNewsOpen from "./routes/news-open";
 import handleOpenapi from "./routes/openapi";
 import handlePrivyConfig from "./routes/privy-config";
+import handleResources from "./routes/resources";
 import handleCreatorPoints from "./routes/creator-points";
 import handleRwaBadges from "./routes/rwa-badges";
 import handleRwaMetadata from "./routes/rwa-metadata";
@@ -41,6 +46,7 @@ import handleTokenPayBuildAccept from "./routes/token-pay-build-accept";
 import handleTokenPayConfig from "./routes/token-pay-config";
 import handleTokenPayPreview from "./routes/token-pay-preview";
 import handleTcxHealth from "./routes/tcx-health";
+import handleTcxCredits from "./routes/tcx-credits";
 import handleTcxHolder from "./routes/tcx-holder";
 import handleTcxTransparency from "./routes/tcx-transparency";
 import handleTokenPayVerify from "./routes/token-pay-verify";
@@ -105,6 +111,8 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/token-pay-analytics": handleTokenPayAnalytics,
   "/api/token-pay-build-accept": handleTokenPayBuildAccept,
   "/api/token-pay-preview": handleTokenPayPreview,
+  "/api/resources": handleResources,
+  "/api/tcx-credits": handleTcxCredits,
   "/api/tcx-health": handleTcxHealth,
   "/api/tcx-holder": handleTcxHolder,
   "/api/tcx-transparency": handleTcxTransparency,
@@ -125,6 +133,15 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
   const rateLimit = checkApiRateLimit(request);
   if (!rateLimit.allowed) {
     return rateLimitedJsonResponse(request, rateLimit);
+  }
+
+  const mvpKind = resolveMvpResourceKindFromRequest(request);
+  if (mvpKind) {
+    return dispatchHandler(
+      request,
+      (req) => handleConciergeResourceRoute(req, mvpKind),
+      rateLimit,
+    );
   }
 
   const intelKind = resolveIntelKindFromRequest(request);

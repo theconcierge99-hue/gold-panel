@@ -262,6 +262,31 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["target", "authorized"],
   ),
+  "resource-chat": jsonSchemaBody(
+    {
+      message: { type: "string", description: "User message (max 4000 chars)" },
+      history: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            role: { type: "string", enum: ["user", "model"] },
+            text: { type: "string" },
+          },
+          required: ["role", "text"],
+        },
+      },
+    },
+    ["message"],
+  ),
+  "resource-image": jsonSchemaBody(
+    { message: { type: "string", description: "Image prompt (max 4000 chars)" } },
+    ["message"],
+  ),
+  "resource-scaffold": jsonSchemaBody(
+    { message: { type: "string", description: "Site brief (max 4000 chars)" } },
+    ["message"],
+  ),
 };
 
 const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -594,6 +619,36 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "kind", "target", "summary"],
   ),
+  "resource-chat": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      slug: { type: "string" },
+      reply: { type: "string" },
+      topics: { type: "array", items: { type: "string" } },
+    },
+    ["ok", "kind", "reply"],
+  ),
+  "resource-image": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      prompt: { type: "string" },
+      images: { type: "array", items: { type: "string" } },
+      count: { type: "integer" },
+    },
+    ["ok", "kind", "images"],
+  ),
+  "resource-scaffold": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      slug: { type: "string" },
+      title: { type: "string" },
+      html: { type: "string" },
+    },
+    ["ok", "kind", "html"],
+  ),
 };
 
 const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> = {
@@ -644,6 +699,16 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
     target: "https://api.example.com",
     allowlist: ["*.example.com"],
     authorized: true,
+  },
+  "resource-chat": {
+    message: "Summarize Solana DeFi outlook in 3 bullets",
+    history: [],
+  },
+  "resource-image": {
+    message: "Minimal dark dashboard hero — gold accents, abstract market chart",
+  },
+  "resource-scaffold": {
+    message: "Landing page for a crypto intel newsletter — dark theme, hero, pricing, CTA",
   },
 };
 
@@ -774,6 +839,27 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
     breakdown: {},
     recommendations: ["Add strict-transport-security — max-age with includeSubDomains on HTTPS"],
     disclaimer: "Passive security breakdown only.",
+  },
+  "resource-chat": {
+    ok: true,
+    kind: "resource-chat",
+    slug: "resource-chat",
+    reply: "<p>Solana DeFi remains constructive…</p>",
+    topics: ["crypto", "defi"],
+  },
+  "resource-image": {
+    ok: true,
+    kind: "resource-image",
+    prompt: "Minimal dark dashboard hero",
+    images: ["data:image/png;base64,iVBORw0KGgo="],
+    count: 1,
+  },
+  "resource-scaffold": {
+    ok: true,
+    kind: "resource-scaffold",
+    slug: "crypto-intel-newsletter",
+    title: "Crypto Intel Newsletter",
+    html: "<!DOCTYPE html><html><head><title>Newsletter</title></head><body></body></html>",
   },
 };
 

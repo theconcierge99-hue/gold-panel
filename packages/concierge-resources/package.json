@@ -1,0 +1,12 @@
+{
+  "name": "@conc-exe/concierge-resources",
+  "version": "0.1.0-mvp",
+  "description": "Discover and execute Concierge Resources via x402 or TCX credits",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
