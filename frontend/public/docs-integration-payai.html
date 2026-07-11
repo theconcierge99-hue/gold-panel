@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>PayAI — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Concierge Agent x402 settlement via PayAI facilitator on Base and Solana." />
+<meta name="description" content="Concierge Agent x402 settlement via PayAI facilitator on Solana, Base, and Arbitrum." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/integration/payai" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -21,7 +21,7 @@
       <div class="docs-eyebrow">Integrations</div>
       <h1 class="docs-title">PayAI</h1>
       <p class="docs-lead">
-        <a class="ext" href="https://docs.payai.network/" target="_blank" rel="noopener">PayAI</a> is our <strong>primary x402 facilitator</strong> — USDC verify and settle on Base and Solana for all 24 paid Concierge Agent routes (intel, Resources, Security Desk, Lounge).
+        <a class="ext" href="https://docs.payai.network/" target="_blank" rel="noopener">PayAI</a> is our <strong>primary x402 facilitator</strong> — USDC verify and settle on Solana, Base, and Arbitrum for all 24 paid Concierge Agent routes (intel, Resources, Security Desk, Lounge).
       </p>
 
       <div class="card">
@@ -33,7 +33,7 @@
 
       <h2 class="docs-h2">Settlement flow</h2>
       <div class="steps">
-        <div class="step"><h4>402 challenge</h4><p>Client receives <code>PAYMENT-REQUIRED</code> with PayAI Solana fee payer or Base USDC requirements.</p></div>
+        <div class="step"><h4>402 challenge</h4><p>Client receives <code>PAYMENT-REQUIRED</code> with PayAI Solana fee payer or EVM USDC requirements (Base or Arbitrum).</p></div>
         <div class="step"><h4>Sign USDC</h4><p>Wallet or x402 client signs transfer to merchant <code>payTo</code>.</p></div>
         <div class="step"><h4>Verify + settle</h4><p>Server calls PayAI <code>POST /verify</code> then <code>POST /settle</code>.</p></div>
         <div class="step"><h4>200 response</h4><p>JSON intelligence + <code>PAYMENT-RESPONSE</code> with on-chain transaction hash.</p></div>
@@ -53,7 +53,7 @@ curl -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl \
         <table>
           <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
           <tbody>
-            <tr><td><code>X402_EVM_PAY_TO</code></td><td>Merchant USDC receive address on Base</td></tr>
+            <tr><td><code>X402_EVM_PAY_TO</code></td><td>Merchant USDC receive address on Base and Arbitrum (same <code>0x</code> wallet)</td></tr>
             <tr><td><code>X402_SOL_PAY_TO</code></td><td>Merchant USDC receive address on Solana (optional)</td></tr>
             <tr><td><code>PAYAI_API_KEY_ID</code></td><td>Optional JWT auth (10k free settlements/month without keys)</td></tr>
             <tr><td><code>PAYAI_API_KEY_SECRET</code></td><td>PayAI JWT secret</td></tr>

@@ -378,7 +378,7 @@ export function initAgentTerminalDemo(cmdEl, statusEl, origin = "", panelEl = nu
     },
     {
       cmd: `pay curl ${host}/api/concierge-intel-macro -d '{}'`,
-      status: "→ 402 Payment Required · USDC $0.02 · Solana",
+      status: "→ 402 Payment Required · USDC $0.02 · Arbitrum",
       ok: "✔ x402 settled · 200 · macro brief ready",
     },
     {
