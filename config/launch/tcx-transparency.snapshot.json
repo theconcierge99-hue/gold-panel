@@ -1,7 +1,7 @@
 {
   "_readme": "Fallback only — /token/transparency loads live data from GET /api/tcx-transparency (hourly cache). Edit this file only for emergency offline display; optional Vercel override: TCX_TRANSPARENCY_OVERRIDE_JSON.",
   "version": 1,
-  "launchDate": "2026-07-07",
+  "launchDate": "2026-07-09",
   "mint": "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump",
   "cadence": {
     "weekLengthDays": 7,
@@ -11,7 +11,7 @@
     "note": "Each 7-day period starts on launch day. Full recap publishes the following Monday (UTC)."
   },
   "snapshotAt": "2026-07-11T09:30:00Z",
-  "snapshotNote": "Week 1 in progress (Jul 7–13 UTC). First full recap due 2026-07-14 (Mon UTC).",
+  "snapshotNote": "Week 1 in progress (Jul 9–15 UTC). First full recap due 2026-07-16 (UTC).",
   "totals": {
     "revenueUsdcEquivalent": 1.05,
     "revenueListUsdc": 1.5,
@@ -24,11 +24,11 @@
   },
   "weeks": [
     {
-      "weekEnd": "2026-07-13",
-      "periodStart": "2026-07-07",
-      "periodEnd": "2026-07-13",
+      "weekEnd": "2026-07-15",
+      "periodStart": "2026-07-09",
+      "periodEnd": "2026-07-15",
       "status": "in_progress",
-      "recapPublish": "2026-07-14",
+      "recapPublish": "2026-07-16",
       "netUsd": 0,
       "revenueUsdcEquivalent": 1.05,
       "buybackUsd": 0,
