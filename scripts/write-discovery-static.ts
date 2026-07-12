@@ -74,6 +74,18 @@ const securitySkillOutDir = join(publicDir, "skills", "concierge-security");
 mkdirSync(securitySkillOutDir, { recursive: true });
 copyFileSync(securitySkillSrc, join(securitySkillOutDir, "SKILL.md"));
 
+const edgeSkillSrc = join(__dirname, "..", "skills", "concierge-edge", "SKILL.md");
+const edgeSkillOutDir = join(publicDir, "skills", "concierge-edge");
+mkdirSync(edgeSkillOutDir, { recursive: true });
+copyFileSync(edgeSkillSrc, join(edgeSkillOutDir, "SKILL.md"));
+
+const gemmaDistSrc = join(__dirname, "..", "distribution", "gemma");
+const gemmaDistOut = join(publicDir, "distribution", "gemma");
+mkdirSync(gemmaDistOut, { recursive: true });
+for (const name of ["concierge-edge-preset.py", "litert-tools-manifest.json", "README.md"] as const) {
+  copyFileSync(join(gemmaDistSrc, name), join(gemmaDistOut, name));
+}
+
 const pathCount = Object.keys(openapi.paths as object).length;
 console.log(
   `discovery static → ${origin} (${pathCount} OpenAPI paths, ${(x402.resources as string[]).length} x402 resources, api-catalog + asyncapi + robots.txt + skill)`,

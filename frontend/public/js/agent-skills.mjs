@@ -24,6 +24,15 @@ const SKILLS = [
     path: "/skills/concierge-security/SKILL.md",
     tags: ["x402", "security", "scout", "passive"],
   },
+  {
+    id: "concierge-edge",
+    name: "concierge-edge",
+    title: "Concierge Edge × Gemma 4",
+    summary:
+      "On-device Gemma 4 via LiteRT-LM — tool calling to Concierge intel routes through pay.sh. Local inference, live x402 market data.",
+    path: "/skills/concierge-edge/SKILL.md",
+    tags: ["edge", "Gemma 4", "LiteRT-LM", "privacy"],
+  },
 ];
 
 function escapeHtml(s) {

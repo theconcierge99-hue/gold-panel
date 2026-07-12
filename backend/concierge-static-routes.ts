@@ -43,6 +43,7 @@ export const CONCIERGE_STATIC_REWRITES: Record<string, string> = {
   "/docs/integration/agent-card": "/docs-integration-agent-card.html",
   "/docs/integration/privy": "/docs-integration-privy.html",
   "/docs/integration/oobe": "/docs-integration-oobe.html",
+  "/docs/integration/gemma": "/docs-integration-gemma.html",
   "/docs/api/overview": "/docs-api-overview.html",
   "/docs/api/concierge": "/docs-api-concierge.html",
   "/docs/api/intel": "/docs-intel.html",

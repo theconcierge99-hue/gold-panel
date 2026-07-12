@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
+<title>Gemma 4 Edge — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Edge — private on-device Gemma 4 agents with live market intel via x402. Your device computes. Concierge connects. LiteRT-LM preset, tool manifest, and pay.sh settlement." />
+<meta property="og:image" content="https://conc-exe.xyz/images/the-concierge-logo.png" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/gemma" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body class="el-premium">
+<div class="docs-layout" data-docs-page="integration-gemma">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <div class="docs-integration-brand">
+        <img class="int-partner-logo--round" src="/images/integrations/googlegemini.svg" alt="Gemma 4" width="52" height="52" />
+        <h1 class="docs-title">Gemma 4 Edge</h1>
+      </div>
+      <p class="docs-lead">
+        <a class="ext" href="https://deepmind.google/models/gemma/gemma-4/" target="_blank" rel="noopener">Gemma 4</a> runs <strong>on your hardware</strong> via <a class="ext" href="https://ai.google.dev/edge/litert-lm" target="_blank" rel="noopener">LiteRT-LM</a> — private inference, no cloud LLM API keys. Concierge is the <strong>intel + payment layer</strong>: Gemma 4 decides which route to call; <code>pay curl</code> settles live market data per x402 USDC.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live — developer preview on <code>conc-exe.xyz</code></p>
+        <p><strong>Model:</strong> <code>gemma-4-E2B-it</code> (on-device, Apache 2.0)</p>
+        <p><strong>Preset:</strong> <a href="/distribution/gemma/concierge-edge-preset.py" target="_blank" rel="noopener">concierge-edge-preset.py</a></p>
+        <p><strong>Manifest:</strong> <a href="/distribution/gemma/litert-tools-manifest.json" target="_blank" rel="noopener">litert-tools-manifest.json</a></p>
+        <p><strong>Agent skill:</strong> <a href="/skills/concierge-edge/SKILL.md" target="_blank" rel="noopener">concierge-edge/SKILL.md</a></p>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="card">
+        <ol>
+          <li>Developer installs <code>litert-lm</code> and downloads Gemma 4 E2B (<code>.litertlm</code>).</li>
+          <li>Run with Concierge preset — six Python tools wrap <code>pay curl</code> to intel routes.</li>
+          <li>User asks a market question locally; Gemma 4 emits <code>tool_call</code> JSON.</li>
+          <li>LiteRT-LM executes the tool → Concierge returns live JSON → Gemma synthesizes the answer on-device.</li>
+        </ol>
+        <p class="note"><strong>Your device computes. Concierge connects.</strong> LLM inference is free and offline-capable after model download. Intel routes still need network + pay.sh wallet for x402 settlement. Concierge does not host Gemma — you do.</p>
+      </div>
+
+      <h2 class="docs-h2">Stack split</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Layer</th><th>Runs on</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Gemma 4 inference</td><td>User device (CPU/GPU/WebGPU)</td><td>Free (open weights)</td></tr>
+            <tr><td>Concierge intel APIs</td><td>conc-exe.xyz Edge</td><td>$0.02–$0.25 USDC per call</td></tr>
+            <tr><td>x402 settlement</td><td>pay.sh wallet</td><td>USDC on Solana or Base</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Preset tools (phase 1)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Function</th><th>Endpoint</th><th>USDC</th></tr></thead>
+          <tbody>
+            <tr><td><code>intel_macro</code></td><td><code>POST /api/concierge-intel-macro</code></td><td>$0.02</td></tr>
+            <tr><td><code>intel_wire</code></td><td><code>POST /api/concierge-intel-wire</code></td><td>$0.02</td></tr>
+            <tr><td><code>intel_tvl</code></td><td><code>POST /api/concierge-intel-tvl</code></td><td>$0.02</td></tr>
+            <tr><td><code>intel_verdict</code></td><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td></tr>
+            <tr><td><code>intel_meteora</code></td><td><code>POST /api/concierge-intel-meteora</code></td><td>$0.10</td></tr>
+            <tr><td><code>intel_desk_brief</code></td><td><code>POST /api/concierge-intel-desk-brief</code></td><td>$0.25</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Developer setup (repo)</h2>
+      <div class="card">
+<pre><code># One-shot toolchain check (Python, uv, litert-lm, pay CLI)
+npm run edge:setup
+
+# Start local Concierge + verify all Gemma Edge assets
+npm run dev
+npm run edge:verify:local</code></pre>
+        <p>See also <code>distribution/gemma/README.md</code> in the repo.</p>
+      </div>
+
+      <h2 class="docs-h2">Quick start</h2>
+      <div class="card">
+<pre><code># 1. Install runtime + wallet
+uv tool install litert-lm
+pay setup && pay topup
+
+# 2. Download Concierge preset
+curl -fsSLO https://conc-exe.xyz/distribution/gemma/concierge-edge-preset.py
+
+# 3. Run Gemma 4 with Concierge tools
+litert-lm run \
+  --from-huggingface-repo=litert-community/gemma-4-E2B-it-litert-lm \
+  gemma-4-E2B-it.litertlm \
+  --preset=concierge-edge-preset.py</code></pre>
+        <p>Local dev against <code>npm run dev</code>:</p>
+<pre><code>export CONCIERGE_ORIGIN=http://localhost:8080
+export CONCIERGE_PAY_CMD="pay --sandbox"
+litert-lm run ... --preset=concierge-edge-preset.py</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Example flow</h2>
+      <div class="card">
+<pre><code>&gt; Outlook Solana DeFi — verdict dan pool Meteora terbaik?
+[tool_call] {"name": "intel_verdict", "arguments": {"message": "Solana DeFi outlook"}}
+[tool_response] {"verdict": {"signal": "watch", "confidence": "medium", ...}}
+[tool_call] {"name": "intel_meteora", "arguments": {"pool_hint": "SOL", "sort_by_apy": true}}
+[tool_response] {"pools": [...]}
+Gemma 4 synthesizes answer locally in Indonesian.</code></pre>
+      </div>
+
+      <h2 class="docs-h2">vs cloud Concierge chat</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th></th><th>Gemma 4 Edge</th><th><code>POST /api/concierge</code></th></tr></thead>
+          <tbody>
+            <tr><td>LLM location</td><td>User device</td><td>Concierge server (Gemini default)</td></tr>
+            <tr><td>Privacy</td><td>Questions stay on device</td><td>Message sent to cloud LLM</td></tr>
+            <tr><td>Live market context</td><td>Via paid intel tool calls</td><td>Bundled per request ($0.10)</td></tr>
+            <tr><td>Trading plans / images</td><td>Not included — use cloud Concierge</td><td>Full modes supported</td></tr>
+            <tr><td>Best for</td><td>Developer edge agents</td><td>End users in Executive Lounge</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/agent/skills?skill=concierge-edge" class="gold-link">Agent Skills UI</a> — concierge-edge skill</li>
+          <li><a href="/docs/integration/oobe" class="gold-link">OOBE Protocol</a> — SAP tools for on-chain agents</li>
+          <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> — full route reference</li>
+          <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — x402 wallet CLI</li>
+          <li><a href="/agent/playground" class="gold-link">Agent Playground</a> — probe endpoints</li>
+          <li><a class="ext" href="https://ai.google.dev/edge/litert-lm/cli" target="_blank" rel="noopener">LiteRT-LM CLI docs ↗</a></li>
+          <li><a class="ext" href="https://ai.google.dev/gemma/docs/core/model_card_4" target="_blank" rel="noopener">Gemma 4 model card ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/distribution/gemma/concierge-edge-preset.py" download>Download preset</a>
+        <a class="btn" href="/agent/skills?skill=concierge-edge">View skill</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+      </div>
+      <p class="docs-foot">Concierge Edge × Gemma 4 · <a href="https://deepmind.google/models/gemma/" class="ext" target="_blank" rel="noopener">Google DeepMind Gemma</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

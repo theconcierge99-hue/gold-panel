@@ -18,6 +18,7 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 - **HYRE Gateway** — `/docs/integration/hyre` · optional chat LLMs (`hyre-deepseek-v4-flash`, `hyre-glm-4.7-flash`) via `concierge-hyre.ts`; `HYRE_GATEWAY_KEY` on deploy
 - **Anthropic Claude** — `/docs/integration/anthropic` · optional chat LLMs (`claude-sonnet-4-6`, `claude-haiku-4-5`) via `concierge-anthropic.ts`; `ANTHROPIC_API_KEY` on deploy
 - **OpenAI GPT-5.6** — `/docs/integration/openai` · optional chat LLMs (`gpt-5.6-terra`, `gpt-5.6-luna`) via `concierge-openai.ts`; `OPENAI_API_KEY` on deploy
+- **Gemma 4 Edge** — `/docs/integration/gemma` · on-device LiteRT-LM preset + tool manifest (`distribution/gemma/concierge-edge-preset.py`); intel via pay.sh x402
 - **OOBE Protocol** — `/docs/integration/oobe` · SAP tool manifest for Synapse agents (`concierge:intel-verdict`, `concierge:intel-meteora`)
 - **x402scan / MPPscan / pay.sh** — discovery + AgentCash settlement
 
@@ -32,6 +33,8 @@ Docs: `/docs/grok-build` · Pay intel calls via `pay --sandbox curl https://conc
 npm run dev          # Vite + local API middleware
 npm run build        # production build
 npm run discovery:validate
+npm run edge:setup   # Gemma 4 Edge toolchain (Python, uv, litert-lm)
+npm run edge:verify:local  # verify Gemma Edge assets + preset against localhost:8080
 ```
 
 Do not add top-level `api/*.ts` files without checking the 12-function Hobby limit.

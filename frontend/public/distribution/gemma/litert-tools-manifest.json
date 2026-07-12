@@ -1,0 +1,82 @@
+{
+  "$schema": "https://conc-exe.xyz/distribution/gemma/litert-tools-manifest.json",
+  "version": "1.0.0",
+  "manifestKind": "concierge-litert-tools-v1",
+  "runtime": {
+    "name": "LiteRT-LM",
+    "model": "gemma-4-E2B-it",
+    "huggingface": "litert-community/gemma-4-E2B-it-litert-lm",
+    "docs": "https://ai.google.dev/edge/litert-lm"
+  },
+  "agent": {
+    "name": "Concierge Edge",
+    "description": "On-device Gemma 4 agent that orchestrates Concierge x402 intel APIs. Local inference is free; live data settles per call via pay.sh USDC.",
+    "protocols": ["x402", "LiteRT-LM", "A2A", "MCP"],
+    "categories": ["edge", "intel", "trading", "defi", "privacy"],
+    "homepage": "https://conc-exe.xyz",
+    "docs": "https://conc-exe.xyz/docs/integration/gemma",
+    "skill": "https://conc-exe.xyz/skills/concierge-edge/SKILL.md",
+    "preset": "https://conc-exe.xyz/distribution/gemma/concierge-edge-preset.py"
+  },
+  "discovery": {
+    "openapi": "https://conc-exe.xyz/openapi.json",
+    "x402": "https://conc-exe.xyz/.well-known/x402",
+    "agentCard": "https://conc-exe.xyz/.well-known/agent-card.json",
+    "mcp": "https://conc-exe.xyz/api/mcp",
+    "playground": "https://conc-exe.xyz/agent/playground"
+  },
+  "payment": {
+    "protocol": "x402-v2",
+    "cli": "pay curl",
+    "note": "Preset tools invoke pay curl automatically. Consumers need pay.sh wallet — no Concierge API key."
+  },
+  "tools": [
+    {
+      "id": "concierge:intel-macro",
+      "presetFunction": "intel_macro",
+      "endpoint": "POST /api/concierge-intel-macro",
+      "priceUsdc": 0.02,
+      "tier": "raw"
+    },
+    {
+      "id": "concierge:intel-wire",
+      "presetFunction": "intel_wire",
+      "endpoint": "POST /api/concierge-intel-wire",
+      "priceUsdc": 0.02,
+      "tier": "raw"
+    },
+    {
+      "id": "concierge:intel-tvl",
+      "presetFunction": "intel_tvl",
+      "endpoint": "POST /api/concierge-intel-tvl",
+      "priceUsdc": 0.02,
+      "tier": "raw"
+    },
+    {
+      "id": "concierge:intel-verdict",
+      "presetFunction": "intel_verdict",
+      "endpoint": "POST /api/concierge-intel-verdict",
+      "priceUsdc": 0.1,
+      "tier": "signal"
+    },
+    {
+      "id": "concierge:intel-meteora",
+      "presetFunction": "intel_meteora",
+      "endpoint": "POST /api/concierge-intel-meteora",
+      "priceUsdc": 0.1,
+      "tier": "signal"
+    },
+    {
+      "id": "concierge:intel-desk-brief",
+      "presetFunction": "intel_desk_brief",
+      "endpoint": "POST /api/concierge-intel-desk-brief",
+      "priceUsdc": 0.25,
+      "tier": "bundle"
+    }
+  ],
+  "quickstart": {
+    "install": "uv tool install litert-lm",
+    "pay": "pay setup && pay topup",
+    "download": "litert-lm run --from-huggingface-repo=litert-community/gemma-4-E2B-it-litert-lm gemma-4-E2B-it.litertlm --preset=concierge-edge-preset.py"
+  }
+}

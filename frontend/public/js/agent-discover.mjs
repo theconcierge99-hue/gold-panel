@@ -172,6 +172,8 @@ async function load() {
           ${discLink("/agent/skills", `${origin}/agent/skills`)}
           ${discLink("/skills/concierge-intel/SKILL.md", `${origin}/skills/concierge-intel/SKILL.md`)}
           ${discLink("/skills/concierge-security/SKILL.md", `${origin}/skills/concierge-security/SKILL.md`)}
+          ${discLink("/skills/concierge-edge/SKILL.md", `${origin}/skills/concierge-edge/SKILL.md`)}
+          ${discLink("/docs/integration/gemma", `${origin}/docs/integration/gemma`)}
           ${discLink("/docs/api/security", `${origin}/docs/api/security`)}
         </div>`,
       ),

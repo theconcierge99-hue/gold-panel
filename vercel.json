@@ -289,6 +289,10 @@
       "destination": "/docs-integration-oobe.html"
     },
     {
+      "source": "/docs/integration/gemma",
+      "destination": "/docs-integration-gemma.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

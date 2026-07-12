@@ -34,6 +34,7 @@ export { buildBazaarExtension, buildApiCatalogLinkset, buildAsyncApiDocument };
 import { corbitsDiscoveryLinks } from "./corbits-links";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { grokDiscoveryLinks } from "./grok-links";
+import { gemmaDiscoveryLinks } from "./gemma-links";
 import { oobeDiscoveryLinks } from "./oobe-links";
 import { payshDiscoveryLinks } from "./paysh-links";
 import {
@@ -351,6 +352,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
       ...payshDiscoveryLinks(origin),
       ...grokDiscoveryLinks(origin),
       ...oobeDiscoveryLinks(origin),
+      ...gemmaDiscoveryLinks(origin),
       corbits: corbitsDiscoveryLinks(),
       zauth: zauthMetaLinks(origin),
     },
@@ -510,6 +512,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       ...dexterDiscoveryLinks(base),
       ...payshDiscoveryLinks(base),
       ...oobeDiscoveryLinks(base),
+      ...gemmaDiscoveryLinks(base),
       serviceName: listing.serviceName,
       description: listing.description,
       tags: listing.tags,
@@ -570,6 +573,7 @@ export function discoveryMetaForConfig(origin: string) {
     ...dexterDiscoveryLinks(base),
     ...payshDiscoveryLinks(base),
     ...oobeDiscoveryLinks(base),
+    ...gemmaDiscoveryLinks(base),
     corbits: corbitsDiscoveryLinks(),
   };
 }
