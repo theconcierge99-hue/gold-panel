@@ -263,13 +263,18 @@
   .conc-model-title{display:inline-flex;align-items:center;gap:8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text-primary);letter-spacing:.02em}
   .conc-model .chev{font-size:11px;color:var(--text-muted);font-family:'Outfit',sans-serif}
   .conc-model-sub{font-family:'Outfit',sans-serif;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
-  .conc-model-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:228px;padding:6px;background:var(--header-bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:40;display:none}
+  .conc-model-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:248px;padding:6px;background:var(--header-bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:40;display:none}
   .conc-model-menu.open{display:block}
-  .conc-model-opt{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 12px;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;color:var(--text-primary);font-family:'Outfit',sans-serif}
+  .conc-model-opt{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;color:var(--text-primary);font-family:'Outfit',sans-serif}
   .conc-model-opt:hover{background:var(--nav-active-bg)}
   .conc-model-opt.active{background:var(--nav-active-bg)}
+  .conc-model-opt-logo{width:22px;height:22px;border-radius:6px;flex-shrink:0;object-fit:cover}
+  .conc-model-opt-logo--round{border-radius:50%}
+  .conc-model-opt-text{display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:0}
   .conc-model-opt-name{font-weight:500;font-size:13px}
   .conc-model-opt-sub{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)}
+  .conc-model .el-logo{border-radius:8px;object-fit:cover}
+  .conc-model .el-logo.conc-model-logo--round{border-radius:50%}
 
   .conc-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
   .conc-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .25s}
@@ -1130,7 +1135,7 @@
         <div class="conc-topbar">
           <div class="conc-model-wrap">
             <button type="button" class="conc-model" id="concModelBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="concModelMenu" aria-label="Concierge AI model">
-              <img class="el-logo" src="/images/the-concierge-logo.png" alt="" width="54" height="54" />
+              <img class="el-logo" id="concModelLogo" src="/images/the-concierge-logo.png" alt="" width="54" height="54" />
               <div class="conc-model-text">
                 <div class="conc-model-title">Concierge <span class="chev">▾</span></div>
                 <div class="conc-model-sub" id="concModelSub">Gemini Flash · Default</div>
@@ -1138,28 +1143,45 @@
             </button>
             <div class="conc-model-menu" id="concModelMenu" role="listbox" aria-label="Agent model">
               <button type="button" class="conc-model-opt active" role="option" data-model="gemini" aria-selected="true">
-                <span class="conc-model-opt-name">Gemini Flash</span>
-                <span class="conc-model-opt-sub">Default · Google AI</span>
+                <img class="conc-model-opt-logo" src="/images/integrations/googlegemini.svg" alt="" width="22" height="22" />
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">Gemini Flash</span>
+                  <span class="conc-model-opt-sub">Default · Google AI</span>
+                </span>
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="glm-4.7-flash" aria-selected="false">
-                <span class="conc-model-opt-name">GLM-4.7 Flash</span>
-                <span class="conc-model-opt-sub">Z.ai</span>
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">GLM-4.7 Flash</span>
+                  <span class="conc-model-opt-sub">Z.ai</span>
+                </span>
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="hyre-deepseek-v4-flash" aria-selected="false">
-                <span class="conc-model-opt-name">DeepSeek V4 Flash</span>
-                <span class="conc-model-opt-sub">HYRE Gateway</span>
+                <img class="conc-model-opt-logo conc-model-opt-logo--round" src="/images/integrations/hyre.ico" alt="" width="22" height="22" />
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">DeepSeek V4 Flash</span>
+                  <span class="conc-model-opt-sub">HYRE Gateway</span>
+                </span>
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="hyre-glm-4.7-flash" aria-selected="false">
-                <span class="conc-model-opt-name">GLM 4.7 Flash</span>
-                <span class="conc-model-opt-sub">HYRE Gateway</span>
+                <img class="conc-model-opt-logo conc-model-opt-logo--round" src="/images/integrations/hyre.ico" alt="" width="22" height="22" />
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">GLM 4.7 Flash</span>
+                  <span class="conc-model-opt-sub">HYRE Gateway</span>
+                </span>
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="claude-sonnet-4-6" aria-selected="false">
-                <span class="conc-model-opt-name">Claude Sonnet</span>
-                <span class="conc-model-opt-sub">Anthropic</span>
+                <img class="conc-model-opt-logo" src="/images/integrations/anthropic.png" alt="" width="22" height="22" />
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">Claude Sonnet</span>
+                  <span class="conc-model-opt-sub">Anthropic</span>
+                </span>
               </button>
               <button type="button" class="conc-model-opt" role="option" data-model="claude-haiku-4-5" aria-selected="false">
-                <span class="conc-model-opt-name">Claude Haiku</span>
-                <span class="conc-model-opt-sub">Anthropic · Fast</span>
+                <img class="conc-model-opt-logo" src="/images/integrations/anthropic.png" alt="" width="22" height="22" />
+                <span class="conc-model-opt-text">
+                  <span class="conc-model-opt-name">Claude Haiku</span>
+                  <span class="conc-model-opt-sub">Anthropic · Fast</span>
+                </span>
               </button>
             </div>
           </div>
@@ -2652,6 +2674,14 @@
     'claude-sonnet-4-6': { id: 'claude-sonnet-4-6', label: 'Claude Sonnet', subtitle: 'Anthropic' },
     'claude-haiku-4-5': { id: 'claude-haiku-4-5', label: 'Claude Haiku', subtitle: 'Anthropic · Fast' },
   };
+  const CONCIERGE_MODEL_LOGOS = {
+    gemini: { src: '/images/integrations/googlegemini.svg', round: false },
+    'glm-4.7-flash': { src: '/images/the-concierge-logo.png', round: false },
+    'hyre-deepseek-v4-flash': { src: '/images/integrations/hyre.ico', round: true },
+    'hyre-glm-4.7-flash': { src: '/images/integrations/hyre.ico', round: true },
+    'claude-sonnet-4-6': { src: '/images/integrations/anthropic.png', round: false },
+    'claude-haiku-4-5': { src: '/images/integrations/anthropic.png', round: false },
+  };
   const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];
   window._sessionMessages = [];
@@ -2666,6 +2696,12 @@
     const meta = CONCIERGE_AGENT_MODELS[model] || CONCIERGE_AGENT_MODELS.gemini;
     const sub = document.getElementById('concModelSub');
     if(sub) sub.textContent = meta.label + ' · ' + (model === 'gemini' ? 'Default' : meta.subtitle.replace(/^Default · /, ''));
+    const logoMeta = CONCIERGE_MODEL_LOGOS[model] || CONCIERGE_MODEL_LOGOS.gemini;
+    const logo = document.getElementById('concModelLogo');
+    if(logo && logoMeta){
+      logo.src = logoMeta.src;
+      logo.classList.toggle('conc-model-logo--round', !!logoMeta.round);
+    }
     document.querySelectorAll('.conc-model-opt').forEach(btn=>{
       const on = btn.dataset.model === model;
       btn.classList.toggle('active', on);

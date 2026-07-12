@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
+<title>Anthropic Claude — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Concierge Agent × Anthropic Claude — Sonnet 4.6 and Haiku 4.5 for pay-per-call chat via the Messages API." />
+<meta property="og:image" content="https://conc-exe.xyz/images/the-concierge-logo.png" />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/integration/anthropic" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body class="el-premium">
+<div class="docs-layout" data-docs-page="integration-anthropic">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/integrations">Integrations</a></div>
+      <div class="docs-eyebrow">Integrations</div>
+      <div class="docs-integration-brand">
+        <img class="int-partner-logo--round" src="/images/integrations/anthropic.png" alt="Anthropic Claude" width="52" height="52" />
+        <h1 class="docs-title">Anthropic Claude</h1>
+      </div>
+      <p class="docs-lead">
+        <a class="ext" href="https://www.anthropic.com/claude" target="_blank" rel="noopener">Claude</a> powers optional Concierge chat through the Anthropic Messages API — <strong>Claude Sonnet 4.6</strong> and <strong>Claude Haiku 4.5</strong> on the same x402 pay-per-call stack. Pick a model in <a href="/lounge" class="gold-link">Executive Lounge</a> or pass <code>agentModel</code> on <code>POST /api/concierge</code>.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> Live on <code>conc-exe.xyz</code> · Executive Lounge model picker + API</p>
+        <p><strong>API base:</strong> <code>https://api.anthropic.com/v1/messages</code></p>
+        <p><strong>Operator keys:</strong> <a class="ext" href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com/settings/keys ↗</a></p>
+        <p><strong>Concierge adapter:</strong> <code>backend/concierge-api/concierge-anthropic.ts</code></p>
+      </div>
+
+      <h2 class="docs-h2">How it works</h2>
+      <div class="card">
+        <ol>
+          <li>Operator sets <code>ANTHROPIC_API_KEY</code> (<code>sk-ant-*</code>) on the Concierge deployment.</li>
+          <li>Client selects <code>claude-sonnet-4-6</code> or <code>claude-haiku-4-5</code> in Lounge, or sends <code>agentModel</code> in the chat body.</li>
+          <li>Concierge maps the id to Anthropic model ids and calls <code>POST /v1/messages</code>.</li>
+          <li>x402 USDC (or Token Pay) settles the Concierge route — consumers do <strong>not</strong> need an Anthropic key when calling production.</li>
+          <li>On API error or missing operator key, Concierge falls back to Gemini (<code>modelFallback: true</code>).</li>
+        </ol>
+        <p class="note">Image, enhance, and trading-plan modes always use Gemini. Claude models apply to <code>mode: "chat"</code> only. The Anthropic account owner name is never exposed to end users.</p>
+      </div>
+
+      <h2 class="docs-h2">Model map</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th><code>agentModel</code></th><th>Anthropic model id</th><th>Lounge label</th></tr></thead>
+          <tbody>
+            <tr><td><code>claude-sonnet-4-6</code></td><td><code>claude-sonnet-4-6</code></td><td>Claude Sonnet</td></tr>
+            <tr><td><code>claude-haiku-4-5</code></td><td><code>claude-haiku-4-5-20251001</code></td><td>Claude Haiku</td></tr>
+          </tbody>
+        </table>
+        <p>Aliases accepted in the API: <code>claude</code>, <code>sonnet</code>, <code>haiku</code>. Registry: <code>concierge-llm-models.ts</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Configuration (operators)</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>API key (<code>sk-ant-*</code>) — required for Claude models on your deploy</td></tr>
+            <tr><td><code>ANTHROPIC_API_BASE_URL</code></td><td>Override API URL (default <code>https://api.anthropic.com/v1</code>)</td></tr>
+          </tbody>
+        </table>
+        <p>See repo <code>docs/configuration.md</code> and <code>.env.example</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Example API call</h2>
+      <div class="card">
+<pre><code>pay --sandbox curl https://conc-exe.xyz/api/concierge \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "chat",
+    "message": "Summarize BTC vs ETH momentum this week.",
+    "history": [],
+    "agentModel": "claude-sonnet-4-6"
+  }'</code></pre>
+        <p>Swap <code>agentModel</code> to <code>claude-haiku-4-5</code> for the fast tier. Expect HTML in <code>reply</code> and <code>modelUsed</code> reflecting the upstream model when Anthropic succeeds.</p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/api/concierge" class="gold-link">Concierge Chat API</a> — <code>agentModel</code> and response shape</li>
+          <li><a href="/docs/integration/hyre" class="gold-link">HYRE Gateway</a> — alternate optional chat models</li>
+          <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — Claude Desktop connects at <code>/api/mcp</code></li>
+          <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — <code>pay claude</code> for agents calling Concierge intel</li>
+          <li><a class="ext" href="https://platform.claude.com/docs" target="_blank" rel="noopener">Anthropic Platform docs ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/lounge">Open Executive Lounge</a>
+        <a class="btn" href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">Get API key ↗</a>
+        <a class="btn" href="/docs/api/concierge">Chat API</a>
+      </div>
+      <p class="docs-foot">Concierge Agent × Anthropic Claude · <a href="https://www.anthropic.com/" class="ext" target="_blank" rel="noopener">anthropic.com</a></p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

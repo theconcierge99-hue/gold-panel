@@ -43,7 +43,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 
 - Multi-mode assistant: **chat**, **enhance** (signal copy), **image** (analysis + optional visual).
 - **0.1 USDC** per chat/image request (enhance runs inside Create Signal flow).
-- Google **Gemini** (default) with optional **GLM-4.7 Flash** (Z.ai) for chat; live market data, general-knowledge feeds, and **lounge memory** (recent headlines + creator signals).
+- Google **Gemini** (default) with optional **GLM-4.7 Flash** (Z.ai), **HYRE Gateway**, and **Anthropic Claude** for chat; live market data, general-knowledge feeds, and **lounge memory** (recent headlines + creator signals).
 
 ### Creator signals & RWA
 

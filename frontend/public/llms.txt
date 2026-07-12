@@ -20,7 +20,9 @@
 - [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Published xyz.conc-exe/concierge-intel v1.0.1 — guide at /docs/integration/mcp-registry
 - [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Audit posture, distribution phase 2, verify commands
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
-- [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default) or GLM-4.7 Flash chat, enhance, image.
+- [HYRE Gateway](https://conc-exe.xyz/docs/integration/hyre): Optional DeepSeek / GLM chat models via OpenAI-compatible gateway.
+- [Anthropic Claude](https://conc-exe.xyz/docs/integration/anthropic): Optional Claude Sonnet / Haiku chat models via Messages API.
+- [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default), GLM, HYRE, or Claude chat, enhance, image.
 - [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields, macro, wire, whales, wallet, verdict, alpha desks.
 - [Agent Identity](https://conc-exe.xyz/docs/api/agent-identity): agt_ registry, agent cards, X-Agent-Id.
 - [Lounge & Signals](https://conc-exe.xyz/docs/api/lounge): Market feed, RWA signals, news unlock.

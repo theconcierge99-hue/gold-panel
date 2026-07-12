@@ -261,6 +261,10 @@
       "destination": "/docs-integration-hyre.html"
     },
     {
+      "source": "/docs/integration/anthropic",
+      "destination": "/docs-integration-anthropic.html"
+    },
+    {
       "source": "/docs/integration/zauth",
       "destination": "/docs-integration-zauth.html"
     },

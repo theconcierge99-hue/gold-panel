@@ -45,6 +45,26 @@ pay curl https://conc-exe.xyz/api/concierge-intel-a2a-pipeline \
 | Signal | $0.10 | verdict, meteora, yields, concierge chat, **intel-momentum** |
 | Bundle | $0.25 | desk-brief, **a2a-pipeline** |
 
+## Concierge chat models (optional)
+
+`POST /api/concierge` supports `agentModel` on `mode: "chat"` — operator-configured on deploy; consumers pay x402 only.
+
+| `agentModel` | Provider |
+|--------------|----------|
+| `gemini` (default) | Google Gemini |
+| `glm-4.7-flash` | Z.ai GLM |
+| `hyre-deepseek-v4-flash` | HYRE Gateway |
+| `hyre-glm-4.7-flash` | HYRE Gateway |
+| `claude-sonnet-4-6` | Anthropic Claude Sonnet |
+| `claude-haiku-4-5` | Anthropic Claude Haiku |
+
+Docs: `/docs/api/concierge` · `/docs/integration/hyre` · `/docs/integration/anthropic`
+
+```bash
+pay curl https://conc-exe.xyz/api/concierge \
+  -d '{"mode":"chat","message":"BTC outlook","agentModel":"claude-sonnet-4-6"}'
+```
+
 ## Robinhood Chain momentum desk
 
 When Robinhood Chain meme meta is hot (CASHCAT, Pump.fun cross-chain in SOL), use **`intel-momentum`** with `theme: "robinhood"`. Auto-detects from message keywords (`robinhood`, `cashcat`, `pump.fun robinhood`, etc.).

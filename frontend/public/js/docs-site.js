@@ -27,6 +27,7 @@
       { id: "integration-mcp-registry", href: "/docs/integration/mcp-registry", title: "MCP Registry" },
       { id: "integration-poncho", href: "/docs/integration/poncho", title: "Poncho" },
       { id: "integration-hyre", href: "/docs/integration/hyre", title: "HYRE Gateway" },
+      { id: "integration-anthropic", href: "/docs/integration/anthropic", title: "Anthropic Claude" },
       { id: "integration-oobe", href: "/docs/integration/oobe", title: "OOBE Protocol" },
       { id: "integration-zauth", href: "/docs/integration/zauth", title: "zauth" },
       { id: "integration-privy", href: "/docs/integration/privy", title: "Privy" },
