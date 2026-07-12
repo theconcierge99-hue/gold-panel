@@ -7,7 +7,6 @@ import { effectiveUsdcForTokenPay } from "./token-pay/x402";
 import { getDefaultTokenPayMerchant } from "./token-pay/registry";
 import { priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 import {
-  legacyEnvLedgerForActiveWeek,
   listTcxWeekLedgerTx,
   type TcxWeekLedgerTx,
 } from "./tcx-ledger-store";
@@ -145,18 +144,10 @@ function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
 
-function mergeWeekTxs(
-  stored: TcxWeekLedgerTx | undefined,
-  legacy: TcxWeekLedgerTx,
-  inProgress: boolean,
-): TcxWeekLedgerTx | undefined {
-  const merged: TcxWeekLedgerTx = { ...(stored ?? {}) };
-  if (inProgress && !stored) {
-    if (!merged.tcxBurnTx && legacy.tcxBurnTx) merged.tcxBurnTx = legacy.tcxBurnTx;
-    if (!merged.lpTx && legacy.lpTx) merged.lpTx = legacy.lpTx;
-  }
-  if (!merged.netUsdcTx && !merged.buybackTx && !merged.tcxBurnTx && !merged.lpTx) return undefined;
-  return merged;
+function weekTxsFromLedger(stored: TcxWeekLedgerTx | undefined): TcxWeekLedgerTx | undefined {
+  if (!stored) return undefined;
+  if (!stored.netUsdcTx && !stored.buybackTx && !stored.tcxBurnTx && !stored.lpTx) return undefined;
+  return { ...stored };
 }
 
 function aggregatePeriod(
@@ -233,7 +224,6 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const weeks: TcxTransparencyWeek[] = [];
   let periodStart = launchDate;
   const today = utcDateStr(nowMs);
-  const legacyEnv = legacyEnvLedgerForActiveWeek();
 
   while (parseUtcDate(periodStart) <= nowMs) {
     const periodEnd = addUtcDays(periodStart, WEEK_DAYS - 1);
@@ -271,11 +261,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
 
   const ledgerByWeek = await listTcxWeekLedgerTx(weeks.map((w) => w.weekEnd));
   for (const week of weeks) {
-    const txs = mergeWeekTxs(
-      ledgerByWeek.get(week.weekEnd),
-      legacyEnv,
-      week.status === "in_progress",
-    );
+    const txs = weekTxsFromLedger(ledgerByWeek.get(week.weekEnd));
     if (txs) week.txs = txs;
   }
 

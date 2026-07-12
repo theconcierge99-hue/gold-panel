@@ -143,9 +143,10 @@ a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:tran
 .tok-report-placeholder td{
   text-align:center;color:var(--tok-dim);font-size:13px;padding:24px 16px!important;
 }
+.tok-cell-line{white-space:nowrap}
 .tok-tx-link{
-  display:inline-block;margin-top:6px;font-size:10px;font-weight:600;letter-spacing:.12em;
-  color:var(--tok-gold);text-decoration:none;opacity:.85
+  display:inline;margin-left:6px;font-size:10px;font-weight:600;letter-spacing:.12em;
+  color:var(--tok-gold);text-decoration:none;opacity:.85;vertical-align:baseline
 }
 .tok-tx-link:hover{opacity:1;text-decoration:underline}
 .tok-report-note{

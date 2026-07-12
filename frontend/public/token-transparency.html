@@ -166,16 +166,18 @@
   }
 
   function txLink(sig) {
-    if (!sig) return "";
+    if (!sig || typeof sig !== "string" || sig.trim().length < 32) return "";
     return (
-      '<br><a class="tok-tx-link" href="https://solscan.io/tx/' +
-      encodeURIComponent(sig) +
+      ' <a class="tok-tx-link" href="https://solscan.io/tx/' +
+      encodeURIComponent(sig.trim()) +
       '" target="_blank" rel="noopener noreferrer">TX</a>'
     );
   }
 
   function cellValue(main, sig) {
-    return main + txLink(sig);
+    var link = txLink(sig);
+    if (!link) return main;
+    return '<span class="tok-cell-line">' + main + link + "</span>";
   }
 
   function showPlaceholder(msg) {
