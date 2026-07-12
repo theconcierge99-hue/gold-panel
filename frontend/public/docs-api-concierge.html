@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>Concierge Chat — API Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="POST /api/concierge — AI market strategist via x402. Chat, enhance, and image modes with Gemini (default), optional GLM-4.7 Flash, HYRE Gateway models, and live desk data." />
+<meta name="description" content="POST /api/concierge — AI market strategist via x402. Chat, enhance, and image modes with Gemini (default), optional GLM-4.7 Flash, HYRE Gateway models, Anthropic Claude, and live desk data." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/api/concierge" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -47,7 +47,7 @@
   "market": [],
   "agentModel": "gemini"
 }</code></pre>
-        <p>Optional <code>agentModel</code>: <code>gemini</code> (default), <code>glm-4.7-flash</code> (Z.ai — <code>GLM_API_KEY</code>), <code>hyre-deepseek-v4-flash</code>, or <code>hyre-glm-4.7-flash</code> (HYRE Gateway — <code>HYRE_GATEWAY_KEY</code> on deploy). Image, enhance, and trading-plan paths always use Gemini. Alternate models fall back to Gemini (<code>modelFallback: true</code>). See <a href="/docs/integration/hyre" class="gold-link">HYRE Gateway integration</a>.</p>
+        <p>Optional <code>agentModel</code>: <code>gemini</code> (default), <code>glm-4.7-flash</code> (Z.ai — <code>GLM_API_KEY</code>), <code>hyre-deepseek-v4-flash</code>, <code>hyre-glm-4.7-flash</code> (HYRE Gateway — <code>HYRE_GATEWAY_KEY</code>), <code>claude-sonnet-4-6</code>, or <code>claude-haiku-4-5</code> (Anthropic — <code>ANTHROPIC_API_KEY</code> on deploy). Image, enhance, and trading-plan paths always use Gemini. Alternate models fall back to Gemini (<code>modelFallback: true</code>). See <a href="/docs/integration/hyre" class="gold-link">HYRE Gateway integration</a>.</p>
         <table>
           <thead><tr><th>mode</th><th>Purpose</th></tr></thead>
           <tbody>

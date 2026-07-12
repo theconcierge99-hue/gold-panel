@@ -6,7 +6,7 @@ Security is the top priority for Executive Lounge documentation and operations. 
 
 | Category | Examples (do not document real values) |
 |----------|----------------------------------------|
-| API keys | `GEMINI_API_KEY`, PayAI `PAYAI_API_KEY_*` |
+| API keys | `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, PayAI `PAYAI_API_KEY_*` |
 | RPC URLs with keys | Helius / Alchemy URLs containing `api-key=` |
 | Private keys / seeds | Wallet mnemonics, JSON keyfiles, ~88-char Solana secrets |
 | KV / Redis tokens | `KV_REST_API_TOKEN`, `UPSTASH_REDIS_REST_TOKEN` |

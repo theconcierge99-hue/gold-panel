@@ -1153,6 +1153,14 @@
                 <span class="conc-model-opt-name">GLM 4.7 Flash</span>
                 <span class="conc-model-opt-sub">HYRE Gateway</span>
               </button>
+              <button type="button" class="conc-model-opt" role="option" data-model="claude-sonnet-4-6" aria-selected="false">
+                <span class="conc-model-opt-name">Claude Sonnet</span>
+                <span class="conc-model-opt-sub">Anthropic</span>
+              </button>
+              <button type="button" class="conc-model-opt" role="option" data-model="claude-haiku-4-5" aria-selected="false">
+                <span class="conc-model-opt-name">Claude Haiku</span>
+                <span class="conc-model-opt-sub">Anthropic · Fast</span>
+              </button>
             </div>
           </div>
           <button type="button" class="conc-drawer-btn" id="concHistBtn" aria-label="Chat history" onclick="toggleConcDrawer()">
@@ -2641,6 +2649,8 @@
     'glm-4.7-flash': { id: 'glm-4.7-flash', label: 'GLM-4.7 Flash', subtitle: 'Z.ai' },
     'hyre-deepseek-v4-flash': { id: 'hyre-deepseek-v4-flash', label: 'DeepSeek V4 Flash', subtitle: 'HYRE Gateway' },
     'hyre-glm-4.7-flash': { id: 'hyre-glm-4.7-flash', label: 'GLM 4.7 Flash', subtitle: 'HYRE Gateway' },
+    'claude-sonnet-4-6': { id: 'claude-sonnet-4-6', label: 'Claude Sonnet', subtitle: 'Anthropic' },
+    'claude-haiku-4-5': { id: 'claude-haiku-4-5', label: 'Claude Haiku', subtitle: 'Anthropic · Fast' },
   };
   const CONC_MAX_SESSIONS = 40;
   window._chatHistory = [];

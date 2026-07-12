@@ -50,6 +50,11 @@ import {
 } from "./market-data";
 import { GLM_CHAT_MODEL_ID, glmApiKeyFromEnv, glmChatCompletion } from "./concierge-glm";
 import {
+  ANTHROPIC_CHAT_MODELS,
+  anthropicApiKeyFromEnv,
+  anthropicChatCompletion,
+} from "./concierge-anthropic";
+import {
   HYRE_CHAT_MODELS,
   hyreChatCompletion,
   hyreGatewayApiKeyFromEnv,
@@ -538,6 +543,28 @@ async function tryAlternateConciergeChat(options: {
         recentUserMessages: options.recentUserMessages,
         maxTokens: options.maxTokens,
         temperature: options.temperature,
+        timeoutMs: options.timeoutMs,
+      });
+      modelUsed = upstream;
+    } else if (meta.provider === "anthropic") {
+      const anthropicKey = anthropicApiKeyFromEnv();
+      const upstream = ANTHROPIC_CHAT_MODELS[options.agentModel];
+      if (!anthropicKey) {
+        console.warn("[concierge-gemini] ANTHROPIC_API_KEY missing, fallback Gemini");
+        return null;
+      }
+      if (!upstream) {
+        console.warn("[concierge-gemini] unknown Anthropic model, fallback Gemini");
+        return null;
+      }
+      text = await anthropicChatCompletion({
+        apiKey: anthropicKey,
+        model: upstream,
+        systemPrompt: options.systemPrompt,
+        history: options.history,
+        message: options.message,
+        recentUserMessages: options.recentUserMessages,
+        maxTokens: options.maxTokens,
         timeoutMs: options.timeoutMs,
       });
       modelUsed = upstream;

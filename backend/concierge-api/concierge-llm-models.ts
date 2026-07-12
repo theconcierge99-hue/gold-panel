@@ -1,4 +1,4 @@
-/** Concierge chat agent models (Gemini default + optional GLM / HYRE Gateway). */
+/** Concierge chat agent models (Gemini default + optional GLM / HYRE / Anthropic). */
 export const CONCIERGE_AGENT_MODELS = {
   gemini: {
     id: "gemini",
@@ -24,6 +24,18 @@ export const CONCIERGE_AGENT_MODELS = {
     subtitle: "HYRE Gateway",
     provider: "hyre",
   },
+  "claude-sonnet-4-6": {
+    id: "claude-sonnet-4-6",
+    label: "Claude Sonnet",
+    subtitle: "Anthropic",
+    provider: "anthropic",
+  },
+  "claude-haiku-4-5": {
+    id: "claude-haiku-4-5",
+    label: "Claude Haiku",
+    subtitle: "Anthropic · Fast",
+    provider: "anthropic",
+  },
 } as const;
 
 export type ConciergeAgentModelId = keyof typeof CONCIERGE_AGENT_MODELS;
@@ -33,6 +45,9 @@ const AGENT_MODEL_ALIASES: Record<string, ConciergeAgentModelId> = {
   "hyre-deepseek": "hyre-deepseek-v4-flash",
   "deepseek-v4-flash": "hyre-deepseek-v4-flash",
   "hyre-glm": "hyre-glm-4.7-flash",
+  claude: "claude-sonnet-4-6",
+  sonnet: "claude-sonnet-4-6",
+  haiku: "claude-haiku-4-5",
 };
 
 export function parseConciergeAgentModel(raw: unknown): ConciergeAgentModelId {
