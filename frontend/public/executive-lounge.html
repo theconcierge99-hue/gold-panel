@@ -255,7 +255,7 @@
   .conc-hist-empty{padding:12px 16px;font-size:12px;color:var(--text-muted);line-height:1.5}
 
   .concierge-shell{display:flex;flex-direction:column;flex:1;min-height:0;height:100%;background:var(--bg);position:relative}
-  .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg)}
+  .conc-topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;min-height:72px;border-bottom:1px solid var(--border);background:var(--header-bg);position:relative;z-index:10}
   .conc-model-wrap{position:relative}
   .conc-model{display:flex;align-items:center;gap:14px;background:transparent;border:none;cursor:pointer;text-align:left;border-radius:8px;padding:4px 8px;margin:-4px -8px;transition:background .15s;font:inherit;color:inherit}
   .conc-model:hover,.conc-model[aria-expanded="true"]{background:var(--nav-active-bg)}
@@ -263,8 +263,10 @@
   .conc-model-title{display:inline-flex;align-items:center;gap:8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text-primary);letter-spacing:.02em}
   .conc-model .chev{font-size:11px;color:var(--text-muted);font-family:'Outfit',sans-serif}
   .conc-model-sub{font-family:'Outfit',sans-serif;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted)}
-  .conc-model-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:248px;padding:6px;background:var(--header-bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:40;display:none}
+  .conc-model-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:248px;max-height:min(70vh,360px);overflow-y:auto;padding:6px;background:var(--header-bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:50;display:none}
   .conc-model-menu.open{display:block}
+  .concierge-shell.conc-model-open .conc-body,
+  .concierge-shell.conc-model-open .conc-footer{pointer-events:none}
   .conc-model-opt{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;color:var(--text-primary);font-family:'Outfit',sans-serif}
   .conc-model-opt:hover{background:var(--nav-active-bg)}
   .conc-model-opt.active{background:var(--nav-active-bg)}
@@ -1020,7 +1022,7 @@
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script src="/js/tcx-ca.js"></script>
-<script type="module" src="/js/x402-pay.mjs?v=mrhimzwg"></script>
+<script type="module" src="/js/x402-pay.mjs?v=mri0jbso"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -2739,6 +2741,7 @@
     const btn = document.getElementById('concModelBtn');
     menu?.classList.remove('open');
     btn?.setAttribute('aria-expanded', 'false');
+    document.getElementById('conciergeShell')?.classList.remove('conc-model-open');
   }
   function initConciergeModelPicker(){
     if(window._concModelInit) return;
@@ -2746,12 +2749,15 @@
     syncConciergeModelUi();
     const btn = document.getElementById('concModelBtn');
     const menu = document.getElementById('concModelMenu');
+    const shell = document.getElementById('conciergeShell');
     if(!btn || !menu) return;
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
       const open = menu.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      shell?.classList.toggle('conc-model-open', open);
     });
+    menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
     menu.querySelectorAll('.conc-model-opt').forEach(opt=>{
       opt.addEventListener('click', (e)=>{
         e.stopPropagation();
@@ -2762,7 +2768,10 @@
         closeConcModelMenu();
       });
     });
-    document.addEventListener('click', closeConcModelMenu);
+    document.addEventListener('click', (e)=>{
+      if(btn.contains(e.target) || menu.contains(e.target)) return;
+      closeConcModelMenu();
+    });
     document.addEventListener('keydown', (e)=>{
       if(e.key === 'Escape') closeConcModelMenu();
     });
