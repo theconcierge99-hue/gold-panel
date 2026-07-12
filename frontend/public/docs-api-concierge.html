@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>Concierge Chat — API Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="POST /api/concierge — AI market strategist via x402. Chat, enhance, and image modes with Gemini (default), optional GLM-4.7 Flash, HYRE Gateway models, Anthropic Claude, and live desk data." />
+<meta name="description" content="POST /api/concierge — AI market strategist via x402. Chat, enhance, and image modes with Gemini (default), optional GLM, HYRE, Anthropic Claude, OpenAI GPT-5.6, and live desk data." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/api/concierge" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -23,7 +23,7 @@
       <p class="docs-lead">Natural-language market and DeFi intelligence — one paid turn at a time.</p>
 
       <div class="card">
-        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> (or equivalent in a live <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> merchant token on Solana) · <strong>Gemini 2.5 Flash</strong> (default), optional <strong>GLM-4.7 Flash</strong> (Z.ai), <strong>HYRE Gateway</strong>, or <strong>Anthropic Claude</strong> models with live market, DeFi desk, lounge memory, and trading-plan structure.</p>
+        <p><code>POST /api/concierge</code> · <strong>0.1 USDC</strong> (or TCX via <a href="/docs/payment/token-pay" class="gold-link">Token Pay</a> on Solana) · <strong>Gemini 2.5 Flash</strong> (default), optional <strong>GLM-4.7 Flash</strong>, <strong>HYRE Gateway</strong>, <strong>Anthropic Claude</strong>, or <strong>OpenAI GPT-5.6</strong> models with live market, DeFi desk, lounge memory, and trading-plan structure.</p>
       </div>
 
       <h2 class="docs-h2">Payment options</h2>
@@ -47,7 +47,7 @@
   "market": [],
   "agentModel": "gemini"
 }</code></pre>
-        <p>Optional <code>agentModel</code>: <code>gemini</code> (default), <code>glm-4.7-flash</code> (Z.ai — <code>GLM_API_KEY</code>), <code>hyre-deepseek-v4-flash</code>, <code>hyre-glm-4.7-flash</code> (HYRE Gateway — <code>HYRE_GATEWAY_KEY</code>), <code>claude-sonnet-4-6</code>, or <code>claude-haiku-4-5</code> (Anthropic — <code>ANTHROPIC_API_KEY</code> on deploy). Image, enhance, and trading-plan paths always use Gemini. Alternate models fall back to Gemini (<code>modelFallback: true</code>). See <a href="/docs/integration/hyre" class="gold-link">HYRE Gateway</a> and <a href="/docs/integration/anthropic" class="gold-link">Anthropic Claude</a>.</p>
+        <p>Optional <code>agentModel</code>: <code>gemini</code> (default), <code>glm-4.7-flash</code>, <code>hyre-deepseek-v4-flash</code>, <code>hyre-glm-4.7-flash</code>, <code>claude-sonnet-4-6</code>, <code>claude-haiku-4-5</code>, <code>gpt-5.6-terra</code>, or <code>gpt-5.6-luna</code>. Operator keys: <code>GLM_API_KEY</code>, <code>HYRE_GATEWAY_KEY</code>, <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>. Image, enhance, and trading-plan paths always use Gemini. Alternate models fall back to Gemini (<code>modelFallback: true</code>). See <a href="/docs/integration/hyre" class="gold-link">HYRE</a>, <a href="/docs/integration/anthropic" class="gold-link">Anthropic</a>, <a href="/docs/integration/openai" class="gold-link">OpenAI</a>.</p>
         <table>
           <thead><tr><th>mode</th><th>Purpose</th></tr></thead>
           <tbody>
@@ -92,6 +92,7 @@
         <a class="btn gold" href="/docs/quickstart">Quickstart</a>
         <a class="btn" href="/docs/integration/hyre">HYRE Gateway</a>
         <a class="btn" href="/docs/integration/anthropic">Anthropic Claude</a>
+        <a class="btn" href="/docs/integration/openai">OpenAI GPT-5.6</a>
         <a class="btn" href="/docs/payment/token-pay">Token Pay beta</a>
         <a class="btn" href="/docs/api/intel">DeFi Intel</a>
         <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>

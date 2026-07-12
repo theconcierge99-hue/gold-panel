@@ -233,6 +233,7 @@ export function sanitizePublicError(error: unknown): string {
     msg.includes("GLM_API_KEY") ||
     msg.includes("ZAI_API_KEY") ||
     msg.includes("ANTHROPIC_API_KEY") ||
+    msg.includes("OPENAI_API_KEY") ||
     msg.includes("API key") ||
     msg.includes("API_KEY")
   ) {
@@ -251,6 +252,9 @@ export function sanitizePublicError(error: unknown): string {
     return "Concierge is temporarily unavailable. Please try again shortly.";
   }
   if (/\bAnthropic\b/.test(msg) && !msg.includes("ANTHROPIC_API_KEY")) {
+    return "Concierge is temporarily unavailable. Please try again shortly.";
+  }
+  if (/\bOpenAI\b/.test(msg) && !msg.includes("OPENAI_API_KEY")) {
     return "Concierge is temporarily unavailable. Please try again shortly.";
   }
   if (msg.includes("Concierge timed out")) {

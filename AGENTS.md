@@ -17,6 +17,7 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 - **Poncho** — `/docs/integration/poncho` · discoverable via x402scan; no Concierge API key for consumers
 - **HYRE Gateway** — `/docs/integration/hyre` · optional chat LLMs (`hyre-deepseek-v4-flash`, `hyre-glm-4.7-flash`) via `concierge-hyre.ts`; `HYRE_GATEWAY_KEY` on deploy
 - **Anthropic Claude** — `/docs/integration/anthropic` · optional chat LLMs (`claude-sonnet-4-6`, `claude-haiku-4-5`) via `concierge-anthropic.ts`; `ANTHROPIC_API_KEY` on deploy
+- **OpenAI GPT-5.6** — `/docs/integration/openai` · optional chat LLMs (`gpt-5.6-terra`, `gpt-5.6-luna`) via `concierge-openai.ts`; `OPENAI_API_KEY` on deploy
 - **OOBE Protocol** — `/docs/integration/oobe` · SAP tool manifest for Synapse agents (`concierge:intel-verdict`, `concierge:intel-meteora`)
 - **x402scan / MPPscan / pay.sh** — discovery + AgentCash settlement
 

@@ -1,6 +1,6 @@
 # Concierge AI
 
-Concierge is the in-lounge research desk powered by **Google Gemini** (default) with optional **GLM-4.7 Flash** (Z.ai), **HYRE Gateway**, and **Anthropic Claude** for standard chat. It answers market questions, drafts trading frameworks, enhances signal copy, and optionally generates chart-style visuals.
+Concierge is the in-lounge research desk powered by **Google Gemini** (default) with optional **GLM-4.7 Flash** (Z.ai), **HYRE Gateway**, **Anthropic Claude**, and **OpenAI GPT-5.6** for standard chat. It answers market questions, drafts trading frameworks, enhances signal copy, and optionally generates chart-style visuals.
 
 **Endpoint:** `POST /api/concierge`  
 **Price:** 0.1 USDC per request (chat and image modes; enhance is invoked from Create Signal).
@@ -95,7 +95,7 @@ Implementation:
 }
 ```
 
-Optional `agentModel`: `gemini` (default), `glm-4.7-flash`, `hyre-deepseek-v4-flash`, `hyre-glm-4.7-flash`, `claude-sonnet-4-6`, or `claude-haiku-4-5`. Trading-plan, image, and enhance paths always use Gemini. GLM requires `GLM_API_KEY`; HYRE models require `HYRE_GATEWAY_KEY`; Claude models require `ANTHROPIC_API_KEY`. Alternate models fall back to Gemini on error.
+Optional `agentModel`: `gemini` (default), `glm-4.7-flash`, `hyre-deepseek-v4-flash`, `hyre-glm-4.7-flash`, `claude-sonnet-4-6`, `claude-haiku-4-5`, `gpt-5.6-terra`, or `gpt-5.6-luna`. Trading-plan, image, and enhance paths always use Gemini. GLM requires `GLM_API_KEY`; HYRE models require `HYRE_GATEWAY_KEY`; Claude models require `ANTHROPIC_API_KEY`; GPT-5.6 models require `OPENAI_API_KEY`. Alternate models fall back to Gemini on error. Payment per chat remains **0.1 USDC** or TCX via x402.
 
 ## Response example (chat)
 
@@ -119,6 +119,8 @@ Optional `agentModel`: `gemini` (default), `glm-4.7-flash`, `hyre-deepseek-v4-fl
 | **GLM 4.7 Flash (HYRE)** | Optional chat only | `HYRE_GATEWAY_KEY` — `agentModel: "hyre-glm-4.7-flash"` |
 | **Claude Sonnet 4.6** | Optional chat only | `ANTHROPIC_API_KEY` — `agentModel: "claude-sonnet-4-6"` |
 | **Claude Haiku 4.5** | Optional chat only | `ANTHROPIC_API_KEY` — `agentModel: "claude-haiku-4-5"` |
+| **GPT-5.6 Terra** | Optional chat only | `OPENAI_API_KEY` — `agentModel: "gpt-5.6-terra"` |
+| **GPT-5.6 Luna** | Optional chat only | `OPENAI_API_KEY` — `agentModel: "gpt-5.6-luna"` |
 
 Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 
@@ -126,7 +128,7 @@ Configured in `backend/concierge-api/concierge-gemini.ts` with Gemini fallback:
 - `gemini-2.5-flash-lite`
 - `gemini-2.0-flash`
 
-GLM adapter: `backend/concierge-api/concierge-glm.ts` · HYRE adapter: `concierge-hyre.ts` · Anthropic adapter: `concierge-anthropic.ts` · registry: `concierge-llm-models.ts` · integration guides: [/docs/integration/hyre](https://conc-exe.xyz/docs/integration/hyre), [/docs/integration/anthropic](https://conc-exe.xyz/docs/integration/anthropic)
+GLM adapter: `backend/concierge-api/concierge-glm.ts` · HYRE adapter: `concierge-hyre.ts` · Anthropic adapter: `concierge-anthropic.ts` · OpenAI adapter: `concierge-openai.ts` · registry: `concierge-llm-models.ts` · integration guides: [/docs/integration/hyre](https://conc-exe.xyz/docs/integration/hyre), [/docs/integration/anthropic](https://conc-exe.xyz/docs/integration/anthropic), [/docs/integration/openai](https://conc-exe.xyz/docs/integration/openai)
 
 ## External integration (agents)
 

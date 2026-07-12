@@ -25,7 +25,7 @@
         <ul>
           <li><strong>UI</strong> — <code>executive-lounge.html</code>, <code>x402-pay.mjs</code>, <code>agent-identity.mjs</code></li>
           <li><strong>APIs</strong> — Vercel Edge <code>/api/*</code></li>
-          <li><strong>AI</strong> — Google Gemini 2.5 Flash (default; text + image) · optional GLM-4.7 Flash (Z.ai), HYRE Gateway, and Anthropic Claude for chat</li>
+          <li><strong>AI</strong> — Google Gemini 2.5 Flash (default; text + image) · optional GLM, HYRE Gateway, Anthropic Claude, and OpenAI GPT-5.6 for chat</li>
           <li><strong>Payments</strong> — x402 v2 · PayAI (primary) + Dexter fallback · USDC on Base / Solana · <a href="/docs/payment/token-pay">Token Pay</a> native SPL self-settle (multi-merchant)</li>
           <li><strong>Storage</strong> — Redis/KV (signals, RWA, agent registry, lounge memory)</li>
           <li><strong>Trust</strong> — optional <a class="ext" href="https://zauth.inc/" target="_blank" rel="noopener">zauth</a> directory + Provider Hub telemetry</li>
@@ -46,7 +46,8 @@
             <tr><td>Wikipedia / news</td><td>General knowledge block in chat</td></tr>
             <tr><td>Z.ai (GLM)</td><td>Optional chat model (<code>agentModel: glm-4.7-flash</code>)</td></tr>
             <tr><td>HYRE Gateway</td><td>Optional chat models (<code>hyre-deepseek-v4-flash</code>, <code>hyre-glm-4.7-flash</code>)</td></tr>
-            <tr><td>Anthropic Claude</td><td>Optional chat models (<code>claude-sonnet-4-6</code>, <code>claude-haiku-4-5</code>) — <a href="/docs/integration/anthropic">integration guide</a></td></tr>
+            <tr><td>Anthropic Claude</td><td>Optional chat models (<code>claude-sonnet-4-6</code>, <code>claude-haiku-4-5</code>) — <a href="/docs/integration/anthropic">guide</a></td></tr>
+            <tr><td>OpenAI GPT-5.6</td><td>Optional chat models (<code>gpt-5.6-terra</code>, <code>gpt-5.6-luna</code>) — <a href="/docs/integration/openai">guide</a></td></tr>
           </tbody>
         </table>
       </div>

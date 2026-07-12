@@ -50,6 +50,7 @@ const STACK_PARTNERS = [
   { name: "Privy", logo: "/images/integrations/privy.svg", href: "/docs/integration/privy", external: false },
   { name: "HYRE", logo: "/images/integrations/hyre.ico", href: "/docs/integration/hyre", external: false },
   { name: "Claude", logo: "/images/integrations/anthropic.png", href: "/docs/integration/anthropic", external: false },
+  { name: "OpenAI", logo: "/images/integrations/openai.svg", href: "/docs/integration/openai", external: false },
   { name: "Poncho", logo: "/images/integrations/poncho.png", href: "/docs/integration/poncho", external: false },
 ];
 

@@ -18,6 +18,8 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 | `HYRE_GATEWAY_BASE_URL` | Default `https://gw.hyreagent.fun/api/inference/v1`. |
 | `ANTHROPIC_API_KEY` | Anthropic API key (`sk-ant-*`) from [platform.claude.com](https://platform.claude.com/settings/keys) for `agentModel: "claude-sonnet-4-6"` or `"claude-haiku-4-5"`. Falls back to Gemini if unset. |
 | `ANTHROPIC_API_BASE_URL` | Default `https://api.anthropic.com/v1`. |
+| `OPENAI_API_KEY` | OpenAI API key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys) for `agentModel: "gpt-5.6-terra"` or `"gpt-5.6-luna"`. Falls back to Gemini if unset. |
+| `OPENAI_API_BASE_URL` | Default `https://api.openai.com/v1`. |
 
 ## x402 payments
 

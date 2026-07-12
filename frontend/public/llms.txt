@@ -22,7 +22,8 @@
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [HYRE Gateway](https://conc-exe.xyz/docs/integration/hyre): Optional DeepSeek / GLM chat models via OpenAI-compatible gateway.
 - [Anthropic Claude](https://conc-exe.xyz/docs/integration/anthropic): Optional Claude Sonnet / Haiku chat models via Messages API.
-- [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default), GLM, HYRE, or Claude chat, enhance, image.
+- [OpenAI GPT-5.6](https://conc-exe.xyz/docs/integration/openai): Optional Terra / Luna chat models — x402 USDC or TCX per turn.
+- [Concierge Chat](https://conc-exe.xyz/docs/api/concierge): POST /api/concierge — Gemini (default), GLM, HYRE, Claude, or GPT-5.6 chat, enhance, image.
 - [DeFi Intel](https://conc-exe.xyz/docs/api/intel): TVL, yields, macro, wire, whales, wallet, verdict, alpha desks.
 - [Agent Identity](https://conc-exe.xyz/docs/api/agent-identity): agt_ registry, agent cards, X-Agent-Id.
 - [Lounge & Signals](https://conc-exe.xyz/docs/api/lounge): Market feed, RWA signals, news unlock.

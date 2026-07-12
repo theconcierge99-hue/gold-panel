@@ -265,6 +265,10 @@
       "destination": "/docs-integration-anthropic.html"
     },
     {
+      "source": "/docs/integration/openai",
+      "destination": "/docs-integration-openai.html"
+    },
+    {
       "source": "/docs/integration/zauth",
       "destination": "/docs-integration-zauth.html"
     },

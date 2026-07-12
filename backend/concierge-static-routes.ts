@@ -37,6 +37,7 @@ export const CONCIERGE_STATIC_REWRITES: Record<string, string> = {
   "/docs/integration/poncho": "/docs-integration-poncho.html",
   "/docs/integration/hyre": "/docs-integration-hyre.html",
   "/docs/integration/anthropic": "/docs-integration-anthropic.html",
+  "/docs/integration/openai": "/docs-integration-openai.html",
   "/docs/integration/zauth": "/docs-integration-zauth.html",
   "/docs/integration/metaplex": "/docs-integration-metaplex.html",
   "/docs/integration/agent-card": "/docs-integration-agent-card.html",

@@ -55,6 +55,11 @@ import {
   anthropicChatCompletion,
 } from "./concierge-anthropic";
 import {
+  OPENAI_CHAT_MODELS,
+  openaiApiKeyFromEnv,
+  openaiChatCompletion,
+} from "./concierge-openai";
+import {
   HYRE_CHAT_MODELS,
   hyreChatCompletion,
   hyreGatewayApiKeyFromEnv,
@@ -565,6 +570,29 @@ async function tryAlternateConciergeChat(options: {
         message: options.message,
         recentUserMessages: options.recentUserMessages,
         maxTokens: options.maxTokens,
+        timeoutMs: options.timeoutMs,
+      });
+      modelUsed = upstream;
+    } else if (meta.provider === "openai") {
+      const openaiKey = openaiApiKeyFromEnv();
+      const upstream = OPENAI_CHAT_MODELS[options.agentModel];
+      if (!openaiKey) {
+        console.warn("[concierge-gemini] OPENAI_API_KEY missing, fallback Gemini");
+        return null;
+      }
+      if (!upstream) {
+        console.warn("[concierge-gemini] unknown OpenAI model, fallback Gemini");
+        return null;
+      }
+      text = await openaiChatCompletion({
+        apiKey: openaiKey,
+        model: upstream,
+        systemPrompt: options.systemPrompt,
+        history: options.history,
+        message: options.message,
+        recentUserMessages: options.recentUserMessages,
+        maxTokens: options.maxTokens,
+        temperature: options.temperature,
         timeoutMs: options.timeoutMs,
       });
       modelUsed = upstream;

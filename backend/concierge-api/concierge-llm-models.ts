@@ -1,4 +1,4 @@
-/** Concierge chat agent models (Gemini default + optional GLM / HYRE / Anthropic). */
+/** Concierge chat agent models (Gemini default + optional GLM / HYRE / Anthropic / OpenAI). */
 export const CONCIERGE_AGENT_MODELS = {
   gemini: {
     id: "gemini",
@@ -36,6 +36,18 @@ export const CONCIERGE_AGENT_MODELS = {
     subtitle: "Anthropic · Fast",
     provider: "anthropic",
   },
+  "gpt-5.6-terra": {
+    id: "gpt-5.6-terra",
+    label: "GPT-5.6 Terra",
+    subtitle: "OpenAI · Balanced",
+    provider: "openai",
+  },
+  "gpt-5.6-luna": {
+    id: "gpt-5.6-luna",
+    label: "GPT-5.6 Luna",
+    subtitle: "OpenAI · Fast",
+    provider: "openai",
+  },
 } as const;
 
 export type ConciergeAgentModelId = keyof typeof CONCIERGE_AGENT_MODELS;
@@ -48,6 +60,10 @@ const AGENT_MODEL_ALIASES: Record<string, ConciergeAgentModelId> = {
   claude: "claude-sonnet-4-6",
   sonnet: "claude-sonnet-4-6",
   haiku: "claude-haiku-4-5",
+  openai: "gpt-5.6-terra",
+  gpt: "gpt-5.6-terra",
+  terra: "gpt-5.6-terra",
+  luna: "gpt-5.6-luna",
 };
 
 export function parseConciergeAgentModel(raw: unknown): ConciergeAgentModelId {

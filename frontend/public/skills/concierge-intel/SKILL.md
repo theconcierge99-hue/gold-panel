@@ -57,12 +57,14 @@ pay curl https://conc-exe.xyz/api/concierge-intel-a2a-pipeline \
 | `hyre-glm-4.7-flash` | HYRE Gateway |
 | `claude-sonnet-4-6` | Anthropic Claude Sonnet |
 | `claude-haiku-4-5` | Anthropic Claude Haiku |
+| `gpt-5.6-terra` | OpenAI GPT-5.6 Terra |
+| `gpt-5.6-luna` | OpenAI GPT-5.6 Luna |
 
-Docs: `/docs/api/concierge` · `/docs/integration/hyre` · `/docs/integration/anthropic`
+Docs: `/docs/api/concierge` · `/docs/integration/hyre` · `/docs/integration/anthropic` · `/docs/integration/openai`
 
 ```bash
 pay curl https://conc-exe.xyz/api/concierge \
-  -d '{"mode":"chat","message":"BTC outlook","agentModel":"claude-sonnet-4-6"}'
+  -d '{"mode":"chat","message":"BTC outlook","agentModel":"gpt-5.6-terra"}'
 ```
 
 ## Robinhood Chain momentum desk
