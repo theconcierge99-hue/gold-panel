@@ -50,6 +50,7 @@ h3.docs-h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var
 .docs-integration-brand{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .docs-integration-brand .docs-title{margin-bottom:0}
 .docs-integration-brand img{width:52px;height:52px;border-radius:8px;flex-shrink:0;object-fit:cover}
+.docs-integration-brand img.int-partner-logo--openai{background:#fff;padding:4px;box-sizing:border-box;object-fit:contain}
 .card,.docs-card{
   background:linear-gradient(180deg,var(--card-grad-1),var(--card-grad-2));
   border:1px solid var(--border);padding:22px 24px;margin-bottom:16px;

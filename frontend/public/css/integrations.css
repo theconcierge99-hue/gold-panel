@@ -54,6 +54,7 @@ a.int-logo-chip:hover{border-color:var(--int-gold-dim);background:var(--int-glow
 .int-partner-logo--metaplex{filter:brightness(0) invert(1)}
 html[data-theme="light"] .int-partner-logo--metaplex{filter:none}
 .int-partner-logo--round{border-radius:50%;border:1px solid var(--int-gold-dim)}
+.int-partner-logo--openai{background:#fff;border-radius:6px;padding:2px;box-sizing:border-box;object-fit:contain}
 
 .int-card-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .int-card h3,.int-card-brand h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;letter-spacing:.02em}

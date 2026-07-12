@@ -21,7 +21,7 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     method: "POST",
     path: "/api/concierge",
     name: "Concierge chat",
-    description: "Concierge chat — Gemini (default) or GLM-4.7 Flash; macro, DeFi desk, trading plans (HTML reply).",
+    description: "Concierge chat — Gemini (default), GLM-4.7 Flash, HYRE Gateway, Anthropic Claude, or OpenAI GPT-5.6; macro, DeFi desk, trading plans (HTML reply).",
     priceUsd: "0.10",
     tier: "signal",
     sampleBody: {

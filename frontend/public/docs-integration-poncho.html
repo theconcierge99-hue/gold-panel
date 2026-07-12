@@ -54,7 +54,7 @@
           <tbody>
             <tr><td><code>POST /api/concierge-intel-macro</code></td><td>SPX, VIX, DXY, gold, BTC/ETH, Fear &amp; Greed, Treasury yields, central-bank calendar</td></tr>
             <tr><td><code>POST /api/concierge-intel-wire</code></td><td>Wire headline digest — live RSS + Lounge memory; optional <code>category</code> / <code>message</code></td></tr>
-            <tr><td><code>POST /api/concierge</code></td><td>Natural-language research chat (Gemini, GLM-4.7 Flash, or HYRE Gateway models)</td></tr>
+            <tr><td><code>POST /api/concierge</code></td><td>Natural-language research chat (Gemini default; optional GLM, HYRE Gateway, Anthropic Claude, or OpenAI GPT-5.6)</td></tr>
             <tr><td><code>POST /api/news-open</code></td><td>Unlock full article URL from the wire</td></tr>
             <tr><td><code>POST /api/concierge-security-scan</code></td><td>Passive website security breakdown (authorized targets) — $0.10</td></tr>
             <tr><td><code>POST /api/concierge-security-headers</code></td><td>Scout HTTP header checklist — $0.02</td></tr>
@@ -94,6 +94,7 @@ curl -s https://conc-exe.xyz/openapi.json | jq '.paths | keys | length'</code></
           <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — discovery registry Poncho uses</li>
           <li><a href="/docs/integration/hyre" class="gold-link">HYRE Gateway</a> — optional chat models on <code>/api/concierge</code></li>
           <li><a href="/docs/integration/anthropic" class="gold-link">Anthropic Claude</a> — optional Sonnet / Haiku on <code>/api/concierge</code></li>
+          <li><a href="/docs/integration/openai" class="gold-link">OpenAI GPT-5.6</a> — optional Terra / Luna on <code>/api/concierge</code></li>
           <li><a href="/docs/payment/mpp" class="gold-link">MPP &amp; AgentCash</a></li>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a></li>
           <li><a href="/docs/api/security" class="gold-link">Security Desk</a></li>

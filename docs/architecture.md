@@ -9,7 +9,7 @@
 | Client Solana NFT mint | `public/js/mint-signal.mjs` ← `lib/mint-signal-browser.ts` |
 | Dev server | Vite + `lib/concierge-dev-plugin.ts` |
 | API routes | Vercel **Edge** (`runtime: "edge"`) under `api/`; some **Node** routes for payouts / legacy mint |
-| AI | Google Gemini + optional GLM-4.7 Flash (`backend/concierge-api/concierge-gemini.ts`, `concierge-glm.ts`) |
+| AI | Google Gemini (default) + optional GLM-4.7 Flash, HYRE Gateway, Anthropic Claude, and OpenAI GPT-5.6 (`backend/concierge-api/concierge-gemini.ts`, `concierge-glm.ts`, `concierge-hyre.ts`, `concierge-anthropic.ts`, `concierge-openai.ts`) |
 | Payments | x402 v2 via PayAI + Dexter fallback (`lib/concierge-api/x402-server.ts`) |
 | Signals + RWA + memory | Vercel KV / Upstash (`signal-store`, `rwa-store`, `lounge-memory`) |
 | TanStack Start | `src/` scaffold; production lounge is static HTML + Edge APIs |
