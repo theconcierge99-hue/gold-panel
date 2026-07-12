@@ -6,14 +6,17 @@ import { SOON_MERCHANT_ID } from "./token-pay/merchants/soon";
 import { effectiveUsdcForTokenPay } from "./token-pay/x402";
 import { getDefaultTokenPayMerchant } from "./token-pay/registry";
 import { priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
+import {
+  legacyEnvLedgerForActiveWeek,
+  listTcxWeekLedgerTx,
+  type TcxWeekLedgerTx,
+} from "./tcx-ledger-store";
 
 const BUYBACK_MIN_USD = 40;
 const BUYBACK_BUDGET_PCT = 0.15;
 const TCX_BURN_PCT = 0.8;
 const WEEK_DAYS = 7;
 const MS_DAY = 86_400_000;
-
-export type TcxTransparencyLink = { label: string; url: string };
 
 export type TcxTransparencyWeek = {
   weekEnd: string;
@@ -30,9 +33,7 @@ export type TcxTransparencyWeek = {
   tcxBurned: number;
   lpUsd: number;
   txCount: number;
-  burnTx?: string;
-  lpTx?: string;
-  links: TcxTransparencyLink[];
+  txs?: TcxWeekLedgerTx;
 };
 
 export type TcxTransparencyPayload = {
@@ -144,17 +145,18 @@ function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
 
-function weekTxLinksFromEnv(): { burnTx: string | null; lpTx: string | null } {
-  const burnTx = (process.env.TCX_TRANSPARENCY_BURN_TX ?? "").trim() || null;
-  const lpTx = (process.env.TCX_TRANSPARENCY_LP_TX ?? "").trim() || null;
-  return { burnTx, lpTx };
-}
-
-function buildWeekLinks(burnTx: string | null, lpTx: string | null): TcxTransparencyLink[] {
-  const links: TcxTransparencyLink[] = [];
-  if (burnTx) links.push({ label: "burned", url: `https://solscan.io/tx/${burnTx}` });
-  if (lpTx) links.push({ label: "add lp", url: `https://solscan.io/tx/${lpTx}` });
-  return links;
+function mergeWeekTxs(
+  stored: TcxWeekLedgerTx | undefined,
+  legacy: TcxWeekLedgerTx,
+  inProgress: boolean,
+): TcxWeekLedgerTx | undefined {
+  const merged: TcxWeekLedgerTx = { ...(stored ?? {}) };
+  if (inProgress && !stored) {
+    if (!merged.tcxBurnTx && legacy.tcxBurnTx) merged.tcxBurnTx = legacy.tcxBurnTx;
+    if (!merged.lpTx && legacy.lpTx) merged.lpTx = legacy.lpTx;
+  }
+  if (!merged.netUsdcTx && !merged.buybackTx && !merged.tcxBurnTx && !merged.lpTx) return undefined;
+  return merged;
 }
 
 function aggregatePeriod(
@@ -231,7 +233,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const weeks: TcxTransparencyWeek[] = [];
   let periodStart = launchDate;
   const today = utcDateStr(nowMs);
-  const envTx = weekTxLinksFromEnv();
+  const legacyEnv = legacyEnvLedgerForActiveWeek();
 
   while (parseUtcDate(periodStart) <= nowMs) {
     const periodEnd = addUtcDays(periodStart, WEEK_DAYS - 1);
@@ -259,7 +261,6 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
       tcxBurned: period.tcxReceived * TCX_BURN_PCT,
       lpUsd: 0,
       txCount: period.txCount,
-      links: buildWeekLinks(envTx.burnTx, envTx.lpTx),
     });
 
     periodStart = addUtcDays(periodStart, WEEK_DAYS);
@@ -267,6 +268,16 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   }
 
   weeks.reverse();
+
+  const ledgerByWeek = await listTcxWeekLedgerTx(weeks.map((w) => w.weekEnd));
+  for (const week of weeks) {
+    const txs = mergeWeekTxs(
+      ledgerByWeek.get(week.weekEnd),
+      legacyEnv,
+      week.status === "in_progress",
+    );
+    if (txs) week.txs = txs;
+  }
 
   const activeWeek = weeks.find((w) => w.status === "in_progress");
   const snapshotNote = activeWeek
@@ -284,7 +295,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
       publishDay: "monday",
       timezone: "UTC",
       refreshSeconds: 3600,
-      note: "Each 7-day period starts on launch day. Full recap publishes the following Monday (UTC).",
+      note: "Each 7-day period starts on launch day. Full recap publishes the following Monday (UTC). TX links come from config/launch/tcx-week-ledger.json.",
     },
     snapshotAt: new Date().toISOString(),
     snapshotNote,
@@ -315,5 +326,6 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
     totals: { ...base.totals, ...(override.totals ?? {}) },
     weeks: override.weeks ?? base.weeks,
     cadence: { ...base.cadence, ...(override.cadence ?? {}) },
+    links: { ...base.links, ...(override.links ?? {}) },
   };
 }

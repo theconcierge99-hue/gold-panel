@@ -34,7 +34,7 @@
     <div class="tok-pills">
       <span class="tok-pill">Min buyback $40 / week</span>
       <span class="tok-pill">Net revenue only</span>
-      <span class="tok-pill">TCX pay · 80% burn / tx</span>
+      <span class="tok-pill">TCX pay · 80% burn policy</span>
     </div>
   </header>
 
@@ -93,7 +93,7 @@
 
   <section class="tok-section" aria-labelledby="reports-h">
     <h2 id="reports-h">Weekly <em>ledger</em></h2>
-    <p>Each row: net USDC in the period, buyback executed, TCX burned, and LP added.</p>
+    <p>Each row: net USDC, buyback, TCX burned (manual weekly execution), and LP added. <strong>TX</strong> links open Solscan when posted.</p>
     <div class="tok-table-wrap">
       <table class="tok-table tok-table--reports">
         <thead>
@@ -103,12 +103,11 @@
             <th>Buyback USDC</th>
             <th>TCX burned</th>
             <th>LP add</th>
-            <th>Links</th>
           </tr>
         </thead>
         <tbody id="tok-report-body">
           <tr class="tok-report-placeholder">
-            <td colspan="6">Loading weekly ledger…</td>
+            <td colspan="5">Loading weekly ledger…</td>
           </tr>
         </tbody>
       </table>
@@ -128,11 +127,11 @@
       </div>
       <div class="tok-card">
         <h3>TCX payments</h3>
-        <p>Each Token Pay transfer: <strong>80%</strong> burned in-period, <strong>20%</strong> to treasury. Listed in weekly TCX burned column.</p>
+        <p>Each Token Pay transfer: <strong>80%</strong> burned per policy, <strong>20%</strong> to treasury. Weekly burn executed manually — link posted as <strong>TX</strong> under the column.</p>
       </div>
       <div class="tok-card">
         <h3>Verification</h3>
-        <p>All burns and swaps link to Solana explorers. Treasury multisig address published when multisig is live.</p>
+        <p><strong>TX</strong> under each column opens Solscan. Signatures are published in the repo ledger file when ops confirms a burn or LP tx.</p>
       </div>
     </div>
   </section>
@@ -166,17 +165,22 @@
     return Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + " TCX";
   }
 
-  function renderLinks(links) {
-    return (links || [])
-      .map(function (l) {
-        return '<a class="tok-inline-link" href="' + l.url + '" target="_blank" rel="noopener noreferrer">' + l.label + "</a>";
-      })
-      .join(" · ");
+  function txLink(sig) {
+    if (!sig) return "";
+    return (
+      '<br><a class="tok-tx-link" href="https://solscan.io/tx/' +
+      encodeURIComponent(sig) +
+      '" target="_blank" rel="noopener noreferrer">TX</a>'
+    );
+  }
+
+  function cellValue(main, sig) {
+    return main + txLink(sig);
   }
 
   function showPlaceholder(msg) {
     if (body) {
-      body.innerHTML = '<tr class="tok-report-placeholder"><td colspan="6">' + msg + "</td></tr>";
+      body.innerHTML = '<tr class="tok-report-placeholder"><td colspan="5">' + msg + "</td></tr>";
     }
   }
 
@@ -202,13 +206,13 @@
         weekLabel += ' <span class="tok-pill" style="font-size:9px;margin-left:6px">in progress</span>';
       }
       var buyback = "$" + Number(row.buybackUsd || 0).toFixed(2);
+      var txs = row.txs || {};
       tr.innerHTML =
         "<td>" + weekLabel + "</td>" +
-        "<td>" + fmtUsd(row.netUsd) + "</td>" +
-        "<td>" + buyback + "</td>" +
-        "<td>" + Number(row.tcxBurned || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + "</td>" +
-        "<td>" + fmtUsd(row.lpUsd) + "</td>" +
-        "<td>" + (renderLinks(row.links) || "—") + "</td>";
+        "<td>" + cellValue(fmtUsd(row.netUsd), txs.netUsdcTx) + "</td>" +
+        "<td>" + cellValue(buyback, txs.buybackTx) + "</td>" +
+        "<td>" + cellValue(Number(row.tcxBurned || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }), txs.tcxBurnTx) + "</td>" +
+        "<td>" + cellValue(fmtUsd(row.lpUsd), txs.lpTx) + "</td>";
       body.appendChild(tr);
     });
 

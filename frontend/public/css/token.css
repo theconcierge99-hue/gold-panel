@@ -143,6 +143,11 @@ a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:tran
 .tok-report-placeholder td{
   text-align:center;color:var(--tok-dim);font-size:13px;padding:24px 16px!important;
 }
+.tok-tx-link{
+  display:inline-block;margin-top:6px;font-size:10px;font-weight:600;letter-spacing:.12em;
+  color:var(--tok-gold);text-decoration:none;opacity:.85
+}
+.tok-tx-link:hover{opacity:1;text-decoration:underline}
 .tok-report-note{
   margin-top:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--tok-dim);letter-spacing:.06em;
 }
