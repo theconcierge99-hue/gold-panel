@@ -1,12 +1,14 @@
-/** OpenAPI path item for free scope validation (no x402). */
-export function openApiSecurityScopePathItem(origin: string): Record<string, unknown> {
+/** OpenAPI path item for free scope validation (no x402 / MPP). */
+export function openApiSecurityScopePathItem(_origin?: string): Record<string, unknown> {
   return {
     post: {
       operationId: "conciergeSecurityScope",
       summary: "Validate security probe scope (free)",
       description:
-        "Validates that a target is outside Concierge platform infrastructure and optionally matches a hostname allowlist. No outbound probing. conc-exe.xyz and project Vercel hosts are always forbidden.",
+        "Validates that a target is outside Concierge platform infrastructure and optionally matches a hostname allowlist. No outbound probing. conc-exe.xyz and project Vercel hosts are always forbidden. Public free endpoint — no payment required.",
       tags: ["security"],
+      // Public free: security:[] — never x-payment-info (MPPscan treats that as paid + requires MPP 402).
+      security: [],
       requestBody: {
         required: true,
         content: {
@@ -49,11 +51,6 @@ export function openApiSecurityScopePathItem(origin: string): Record<string, unk
         },
         "400": { description: "Invalid target or allowlist mismatch" },
         "403": { description: "Platform scope forbidden — Concierge infrastructure cannot be probed" },
-      },
-      "x-payment-info": {
-        priceUsd: "0.00",
-        note: "Free — scope validation only",
-        url: `${origin}/api/concierge-security-scope`,
       },
     },
   };

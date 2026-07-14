@@ -359,6 +359,8 @@ export function openApiIntelAccuracyPathItem(origin: string): Record<string, unk
         "Public trust signal scoring paid intel-verdict snapshots against 24h BTC price move. " +
         "No x402 payment required. Poll before routing agents to intel-verdict or for procurement due diligence.",
       tags: ["intel"],
+      // Public free: security:[] required by AgentCash/MPPscan auth-mode checks.
+      security: [],
       parameters: [openApiAgentHeadersParameter()],
       requestBody: {
         required: false,
