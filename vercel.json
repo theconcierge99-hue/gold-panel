@@ -293,6 +293,10 @@
       "destination": "/docs-integration-gemma.html"
     },
     {
+      "source": "/docs/integration/hermes",
+      "destination": "/docs-integration-hermes.html"
+    },
+    {
       "source": "/go/mppscan",
       "destination": "/api/mppscan-redirect"
     },

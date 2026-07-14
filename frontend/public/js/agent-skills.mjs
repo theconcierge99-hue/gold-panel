@@ -33,6 +33,15 @@ const SKILLS = [
     path: "/skills/concierge-edge/SKILL.md",
     tags: ["edge", "Gemma 4", "LiteRT-LM", "privacy"],
   },
+  {
+    id: "concierge-hermes",
+    name: "concierge-hermes",
+    title: "Concierge × Hermes Agent",
+    summary:
+      "Wire Hermes (Nous) to Concierge remote MCP + pay.sh/x402 — macro/wire cron briefs, DeFi desks, Security Desk. No Concierge API key.",
+    path: "/skills/concierge-hermes/SKILL.md",
+    tags: ["Hermes", "MCP", "x402", "cron"],
+  },
 ];
 
 function escapeHtml(s) {

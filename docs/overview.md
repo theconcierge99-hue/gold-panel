@@ -25,6 +25,7 @@ Replace `your-domain.com` with your deployed host (paths are stable):
 | `https://your-domain.com/docs/payment/mpp` | MPPscan listing, AgentCash install, 24-route structure |
 | `https://your-domain.com/docs/payment/paysh` | pay.sh CLI catalog — `pay curl`, Claude/Codex MCP, pay-skills listing |
 | `https://your-domain.com/docs/integration/poncho` | Poncho marketplace — macro, wire, intel, Security Desk via x402 (no API key) |
+| `https://your-domain.com/docs/integration/hermes` | Hermes Agent (Nous) — remote MCP + skill, cron desk briefs via x402 |
 
 ## Core features
 
