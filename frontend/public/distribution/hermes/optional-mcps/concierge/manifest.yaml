@@ -1,8 +1,5 @@
-# Nous-approved MCP catalog entry (draft for PR).
-# Copy this directory to NousResearch/hermes-agent as:
-#   optional-mcps/concierge/manifest.yaml
-# Presence in that directory = approval after merge.
-
+# Nous-approved MCP catalog entry.
+# Presence in this directory = approval. Merged via PR review.
 manifest_version: 1
 
 name: concierge
@@ -11,6 +8,7 @@ description: Pay-per-call market intelligence + Security Desk (x402 USDC). Macro
 source: https://conc-exe.xyz/docs/integration/hermes
 
 # Remote HTTP MCP — same endpoint as Official MCP Registry (xyz.conc-exe/concierge-intel).
+# No local install; Hermes connects over Streamable HTTP / JSON-RPC at /api/mcp.
 transport:
   type: http
   url: https://conc-exe.xyz/api/mcp
@@ -18,7 +16,7 @@ transport:
 auth:
   type: none
 
-# Curated default for daily desk use. Users can expand via:
+# Curated default for daily desk use. Expanding:
 #   hermes mcp configure concierge
 tools:
   default_enabled:
