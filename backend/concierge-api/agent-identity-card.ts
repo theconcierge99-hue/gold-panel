@@ -1,7 +1,19 @@
 import { resolveX402SiteOrigin, resourceUrlForOrigin } from "./x402-discovery";
 import { priceUsdcForResource } from "./x402-pricing";
-import type { AgentCardJson, LoungeAgentServiceCard } from "./agent-identity-types";
+import type {
+  AgentCardJson,
+  Erc8004RegistrationFile,
+  LoungeAgentServiceCard,
+} from "./agent-identity-types";
 import type { AgentIdentityRecord } from "./agent-identity-types";
+import {
+  basescanTokenUrl,
+  basescanTxUrl,
+  ERC8004_DEFAULT_CHAIN_ID,
+  ERC8004_IDENTITY_REGISTRY,
+  ERC8004_REGISTRATION_TYPE,
+  registrationFileUrl,
+} from "./erc-8004";
 
 export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
   const base = origin.replace(/\/$/, "");
@@ -9,11 +21,11 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     schema: "concierge-agent-registry-v1",
     name: "Concierge Agent Registry",
     description:
-      "Register autonomous agent identities with Solana, Base, and Arbitrum wallets. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
+      "Register autonomous agent identities with Solana, Base, and Arbitrum wallets. Mint optional ERC-8004 Identity NFTs on Base. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
     registerEndpoint: `${base}/api/agent-identity`,
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
-    protocols: ["x402", "mpp", "SAP"],
+    protocols: ["x402", "mpp", "SAP", "ERC-8004"],
     networks: ["solana", "eip155:8453", "eip155:42161"],
     discovery: {
       x402: `${base}/.well-known/x402`,
@@ -30,6 +42,73 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
       intelAccuracyEndpoint: `${base}/api/concierge-intel-accuracy`,
       description:
         "Free public leaderboard scoring paid intel-verdict signals vs 24h BTC alignment — observable trust signal for procurement and agent routing.",
+    },
+  };
+}
+
+export function buildErc8004RegistrationFile(
+  origin: string,
+  agent: AgentIdentityRecord,
+): Erc8004RegistrationFile {
+  const base = origin.replace(/\/$/, "");
+  const services: Erc8004RegistrationFile["services"] = [
+    {
+      name: "A2A",
+      endpoint: `${base}/api/agent-identity-card?id=${encodeURIComponent(agent.id)}`,
+      version: "1.0.0",
+    },
+    {
+      name: "MCP",
+      endpoint: `${base}/api/mcp`,
+      version: "1.1.0",
+    },
+    {
+      name: "web",
+      endpoint: `${base}/docs/agents`,
+    },
+    {
+      name: "openapi",
+      endpoint: `${base}/openapi.json`,
+    },
+  ];
+  if (agent.evmAddress) {
+    services.push({
+      name: "agentWallet",
+      endpoint: `eip155:${ERC8004_DEFAULT_CHAIN_ID}:${agent.evmAddress}`,
+    });
+  }
+  if (agent.solAddress) {
+    services.push({
+      name: "solanaWallet",
+      endpoint: agent.solAddress,
+    });
+  }
+
+  const registrations = agent.erc8004
+    ? [
+        {
+          agentId: Number(agent.erc8004.agentId),
+          agentRegistry: agent.erc8004.agentRegistry,
+        },
+      ]
+    : [];
+
+  return {
+    type: ERC8004_REGISTRATION_TYPE,
+    name: agent.name,
+    description:
+      agent.description ||
+      `Concierge agent ${agent.id} — x402 market intel on Solana / Base / Arbitrum.`,
+    image: `${base}/images/the-concierge-logo.png`,
+    services,
+    x402Support: true,
+    active: true,
+    registrations,
+    supportedTrust: ["reputation"],
+    concierge: {
+      agtId: agent.id,
+      cardUrl: `${base}/api/agent-identity-card?id=${encodeURIComponent(agent.id)}`,
+      profileUrl: `${base}/api/agent-identity?id=${encodeURIComponent(agent.id)}`,
     },
   };
 }
@@ -57,15 +136,30 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
         }
       : undefined;
 
+  const registrationUrl = registrationFileUrl(base, agent.id);
+  const erc8004 = agent.erc8004
+    ? {
+        ...agent.erc8004,
+        registrationUrl,
+        explorerTx: basescanTxUrl(agent.erc8004.txHash, agent.erc8004.chainId),
+        explorerToken: basescanTokenUrl(
+          agent.erc8004.agentId,
+          agent.erc8004.chainId,
+          agent.erc8004.registry,
+        ),
+      }
+    : undefined;
+
   return {
     schema: "executive-lounge-agent-card-v1",
-    type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+    type: ERC8004_REGISTRATION_TYPE,
     agentId: agent.id,
     name: agent.name,
     description: agent.description,
     registered: agent.createdAt,
     accounts,
     sap,
+    erc8004,
     services: [
       {
         name: "concierge",
@@ -151,6 +245,8 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
       grokBuildGuide: `${base}/docs/grok-build`,
       oobe: `${base}/docs/integration/oobe`,
       sapToolsManifest: `${base}/distribution/oobe/sap-tools-manifest.json`,
+      registration: registrationUrl,
+      erc8004Prepare: `${base}/api/agent-identity-erc8004?id=${encodeURIComponent(agent.id)}`,
     },
   };
 }
@@ -158,3 +254,5 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
 export function resolveOrigin(request: Request): string {
   return resolveX402SiteOrigin(request);
 }
+
+export { ERC8004_IDENTITY_REGISTRY, ERC8004_DEFAULT_CHAIN_ID };

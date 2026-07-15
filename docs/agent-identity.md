@@ -19,7 +19,10 @@ Fund the new addresses with **≥0.1 USDC** (and a little **SOL** on Solana for 
 | `GET /.well-known/agent-card.json` | Service registry card (how to register agents) |
 | `POST /api/agent-identity` | Register agent (public keys only) |
 | `GET /api/agent-identity?id=agt_…` | Profile + embedded card JSON |
-| `GET /api/agent-identity-card?id=agt_…` | Per-agent HTTP card (EIP-8004 `type` URI for indexing — **not** on-chain registration) |
+| `GET /api/agent-identity-card?id=agt_…` | Per-agent HTTP card (includes `erc8004` when linked) |
+| `GET /api/agent-identity-registration?id=agt_…` | EIP-8004 registration file (`agentURI` for on-chain mint) |
+| `GET /api/agent-identity-erc8004?id=agt_…` | Prepare Base Identity Registry `register(agentURI)` |
+| `POST /api/agent-identity-erc8004` | Verify on-chain mint + link tokenId to `agt_…` |
 | `GET /api/agent-identity?list=1` | Public directory (latest agents) |
 | `PATCH /api/agent-identity` | Link OOBE SAP wallet / agent PDA to existing `agt_…` |
 
@@ -66,7 +69,7 @@ At least **one** of `solAddress` or `evmAddress` is required. The server **never
     "cardUrl": "https://conc-exe.xyz/api/agent-identity-card?id=agt_…",
     "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…"
   },
-  "card": { "...": "per-agent HTTP card with optional EIP-8004 type URI" }
+  "card": { "...": "per-agent HTTP card; includes erc8004 when linked" }
 }
 ```
 
@@ -82,18 +85,41 @@ See [agents.md](agents.md) for full x402 client examples (Node / Python).
 
 ## Agent card format
 
-**Scope:** HTTP JSON discovery + off-chain `agt_…` registry (KV). This is **not** an on-chain ERC-8004 registration contract.
+**Two layers:**
+
+1. **HTTP** — off-chain `agt_…` in KV + Concierge service card at `/.well-known/agent-card.json`
+2. **On-chain (optional)** — mint into the canonical ERC-8004 Identity Registry on **Base** (`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`), with `agentURI` = Concierge registration file
 
 | Card | Schema | Notes |
 |------|--------|-------|
 | Service | `concierge-agent-registry-v1` at `/.well-known/agent-card.json` | How to register / discover Concierge |
-| Per-agent | `executive-lounge-agent-card-v1` | May include `type: …/eip-8004#registration-v1` so indexers can parse — still HTTP-only |
+| Per-agent HTTP | `executive-lounge-agent-card-v1` | A2A + x402 endpoints; `erc8004` block when linked |
+| Registration file | EIP-8004 `registration-v1` at `/api/agent-identity-registration?id=` | Used as on-chain `agentURI` |
 
-Each per-agent card includes:
+### Mint on Base (ERC-8004)
+
+1. Register HTTP identity (needs an EVM address).
+2. Fund the agent EVM wallet with a little **ETH on Base** (gas).
+3. Lounge → **Mint ERC-8004 on Base**, or:
+
+```bash
+# prepare
+curl -s "https://conc-exe.xyz/api/agent-identity-erc8004?id=agt_…"
+
+# after you call register(agentURI) on Base Identity Registry:
+curl -s -X POST https://conc-exe.xyz/api/agent-identity-erc8004 \
+  -H 'content-type: application/json' \
+  -d '{"id":"agt_…","agentId":"123","txHash":"0x…"}'
+```
+
+Server verifies `ownerOf(tokenId) == evmAddress` and `tokenURI` matches the registration URL before linking.
+
+Each per-agent HTTP card includes:
 
 - `accounts` — Solana + Base addresses  
 - `services` — Concierge, news-open (x402, 0.1 USDC)  
-- `discovery` — links to `/.well-known/x402` and `/openapi.json`
+- `discovery` — links to `/.well-known/x402`, `/openapi.json`, registration + ERC-8004 prepare
+- `erc8004` — present after on-chain link (tokenId, registry CAIP, explorer URLs)
 
 ## Security
 

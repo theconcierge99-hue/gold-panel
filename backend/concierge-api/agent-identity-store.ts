@@ -1,4 +1,10 @@
 import type { AgentIdentityRecord, AgentPublicView } from "./agent-identity-types";
+import {
+  basescanTokenUrl,
+  basescanTxUrl,
+  registrationFileUrl,
+  type Erc8004LinkRecord,
+} from "./erc-8004";
 
 const INDEX_KEY = "lounge:agents:index";
 const MAX_AGENTS = 5_000;
@@ -55,6 +61,18 @@ export function normalizeSapAgentPda(raw: string): string | null {
 export function toPublicView(origin: string, rec: AgentIdentityRecord): AgentPublicView {
   const base = origin.replace(/\/$/, "");
   const sapVerified = !!(rec.sapWallet && rec.sapAgentPda);
+  const erc8004 = rec.erc8004
+    ? {
+        ...rec.erc8004,
+        onChain: true as const,
+        explorerTx: basescanTxUrl(rec.erc8004.txHash, rec.erc8004.chainId),
+        explorerToken: basescanTokenUrl(
+          rec.erc8004.agentId,
+          rec.erc8004.chainId,
+          rec.erc8004.registry,
+        ),
+      }
+    : undefined;
   return {
     id: rec.id,
     name: rec.name,
@@ -64,9 +82,11 @@ export function toPublicView(origin: string, rec: AgentIdentityRecord): AgentPub
     sapWallet: rec.sapWallet,
     sapAgentPda: rec.sapAgentPda,
     sapVerified,
+    erc8004,
     createdAt: rec.createdAt,
     cardUrl: `${base}/api/agent-identity-card?id=${encodeURIComponent(rec.id)}`,
     profileUrl: `${base}/api/agent-identity?id=${encodeURIComponent(rec.id)}`,
+    registrationUrl: registrationFileUrl(base, rec.id),
   };
 }
 
@@ -192,6 +212,23 @@ export async function linkAgentSap(
     ...agent,
     sapWallet: sapWallet ?? agent.sapWallet,
     sapAgentPda: sapAgentPda ?? agent.sapAgentPda,
+  };
+  await persistAgent(updated);
+  return updated;
+}
+
+export async function linkAgentErc8004(
+  id: string,
+  link: Erc8004LinkRecord,
+): Promise<AgentIdentityRecord | null> {
+  const agent = await getAgentById(id);
+  if (!agent) return null;
+  if (agent.erc8004?.agentId && agent.erc8004.agentId !== link.agentId) {
+    throw new Error("Agent already linked to a different ERC-8004 agentId");
+  }
+  const updated: AgentIdentityRecord = {
+    ...agent,
+    erc8004: link,
   };
   await persistAgent(updated);
   return updated;

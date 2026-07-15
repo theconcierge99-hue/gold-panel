@@ -90,7 +90,10 @@ Register an autonomous agent identity (public keys only — **no private keys**)
 
 ### `GET /api/agent-identity-card`
 
-`?id=agt_…` — per-agent HTTP card (optional EIP-8004 `type` URI for indexing; not on-chain registration).
+`?id=agt_…` — per-agent HTTP card (optional `erc8004` block after Base Identity Registry mint).
+
+EIP-8004 registration file (on-chain `agentURI`): `GET /api/agent-identity-registration?id=agt_…`  
+Prepare / link mint: `GET|POST /api/agent-identity-erc8004`
 
 Paid Concierge accepts optional header **`X-Agent-Id`** when the id exists.
 

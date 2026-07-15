@@ -1,8 +1,8 @@
-import { buildAgentCard, resolveOrigin } from "../agent-identity-card";
+import { buildErc8004RegistrationFile, resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor, sanitizePublicError } from "../concierge-security";
 import { getAgentById } from "../agent-identity-store";
 
-/** Per-agent HTTP card JSON. On-chain ERC-8004 mint is optional via /api/agent-identity-erc8004. */
+/** EIP-8004 agentURI target — registration file JSON (HTTPS). */
 export default async function handler(request: Request): Promise<Response> {
   const cors = {
     ...corsHeadersFor(request),
@@ -20,7 +20,8 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   try {
-    const id = new URL(request.url).searchParams.get("id")?.trim();
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id")?.trim();
     if (!id) {
       return new Response(JSON.stringify({ error: "id query parameter required" }), {
         status: 400,
@@ -34,13 +35,14 @@ export default async function handler(request: Request): Promise<Response> {
         headers: { ...cors, "Content-Type": "application/json" },
       });
     }
-    const card = buildAgentCard(resolveOrigin(request), agent);
-    return new Response(JSON.stringify(card), {
+    const origin = resolveOrigin(request);
+    const file = buildErc8004RegistrationFile(origin, agent);
+    return new Response(JSON.stringify(file), {
       status: 200,
       headers: {
         ...cors,
         "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": agent.erc8004 ? "public, max-age=120" : "public, max-age=30",
       },
     });
   } catch (e) {

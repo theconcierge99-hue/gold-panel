@@ -26,6 +26,8 @@ import {
 import handleAgentA2aMesh from "./routes/agent-a2a-mesh";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
+import handleAgentIdentityErc8004 from "./routes/agent-identity-erc8004";
+import handleAgentIdentityRegistration from "./routes/agent-identity-registration";
 import handleConcierge from "./routes/concierge";
 import handleLoungeRwaRecordMint from "./routes/lounge-rwa-record-mint";
 import handleLoungeSignalOpen from "./routes/lounge-signal-open";
@@ -93,6 +95,8 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/agent-a2a-mesh": handleAgentA2aMesh,
   "/api/agent-identity": handleAgentIdentity,
   "/api/agent-identity-card": handleAgentIdentityCard,
+  "/api/agent-identity-erc8004": handleAgentIdentityErc8004,
+  "/api/agent-identity-registration": handleAgentIdentityRegistration,
   "/api/concierge": handleConcierge,
   "/api/lounge-rwa-record-mint": handleLoungeRwaRecordMint,
   "/api/lounge-signal-open": handleLoungeSignalOpen,

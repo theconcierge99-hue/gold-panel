@@ -1611,11 +1611,13 @@
       <div id="agentExisting" hidden>
         <p class="agent-id-row" id="agentExistingId"></p>
         <p class="wallet-intro" id="agentExistingMeta"></p>
-        <p class="wallet-intro" style="font-size:11px;margin-top:8px;color:var(--text-muted)">Saved in this browser only — separate from Connect wallet. Disconnecting your wallet does not remove this agent.</p>
+        <p class="wallet-intro" id="agentErc8004Meta" style="font-size:12px;margin-top:6px"></p>
+        <p class="wallet-intro" style="font-size:11px;margin-top:8px;color:var(--text-muted)">Saved in this browser only — separate from Connect wallet. Disconnecting your wallet does not remove this agent. ERC-8004 mint uses the agent EVM key + ETH on Base for gas.</p>
         <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
+          <button type="button" class="btn gold" id="agentErc8004Btn" onclick="mintAgentErc8004Ui()">Mint ERC-8004 on Base</button>
           <button type="button" class="btn" onclick="copyAgentCardUrl()">Copy card URL</button>
           <button type="button" class="btn" onclick="resetAgentIdentityUi()">Create new identity</button>
-          <button type="button" class="btn gold" onclick="closeAgentIdentityModal()">Done</button>
+          <button type="button" class="btn" onclick="closeAgentIdentityModal()">Done</button>
         </div>
       </div>
       <div id="agentCreate">
@@ -2237,6 +2239,8 @@
     const existing = typeof window.elLoadAgentIdentity === 'function' ? window.elLoadAgentIdentity() : null;
     const exEl = document.getElementById('agentExisting');
     const crEl = document.getElementById('agentCreate');
+    const ercMeta = document.getElementById('agentErc8004Meta');
+    const ercBtn = document.getElementById('agentErc8004Btn');
     if(existing?.agentId){
       exEl.hidden = false;
       crEl.hidden = true;
@@ -2246,6 +2250,18 @@
         (existing.solAddress ? ' · SOL '+shortAddr(existing.solAddress,'sol') : '') +
         (existing.evmAddress ? ' · EVM '+shortAddr(existing.evmAddress,'evm') : '');
       window._agentCardUrl = existing.cardUrl;
+      if(ercMeta){
+        if(existing.erc8004?.agentId){
+          ercMeta.innerHTML = 'On-chain ERC-8004 · tokenId <strong>'+existing.erc8004.agentId+'</strong>' +
+            (existing.erc8004.explorerTx ? ' · <a class="gold-link" href="'+existing.erc8004.explorerTx+'" target="_blank" rel="noopener">BaseScan</a>' : '');
+        }else{
+          ercMeta.textContent = 'HTTP identity only — mint on Base Identity Registry to go on-chain.';
+        }
+      }
+      if(ercBtn){
+        ercBtn.disabled = Boolean(existing.erc8004?.agentId);
+        ercBtn.textContent = existing.erc8004?.agentId ? 'On-chain ✓' : 'Mint ERC-8004 on Base';
+      }
     }else{
       exEl.hidden = true;
       crEl.hidden = false;
@@ -2253,6 +2269,7 @@
       document.getElementById('agentSecrets').hidden = true;
       document.getElementById('agentWarn').hidden = true;
       document.getElementById('agentRegBtn').disabled = true;
+      if(ercMeta) ercMeta.textContent = '';
     }
   }
 
@@ -2355,6 +2372,30 @@
     navigator.clipboard.writeText(url).then(()=>toast('Card URL copied')).catch(()=>toast(url));
   }
   window.copyAgentCardUrl = copyAgentCardUrl;
+
+  async function mintAgentErc8004Ui(){
+    const st = document.getElementById('agentStatus');
+    st.classList.remove('err');
+    if(typeof window.elRegisterAgentOnChain8004 !== 'function'){
+      st.textContent = 'Agent module loading — hard refresh (Ctrl+F5)';
+      st.classList.add('err');
+      return;
+    }
+    st.textContent = 'Minting ERC-8004 on Base… fund agent EVM with ETH if this fails on gas.';
+    try{
+      const out = await window.elRegisterAgentOnChain8004(window.location.origin);
+      if(!out.ok) throw new Error(out.error||'Mint failed');
+      toast('ERC-8004 linked · tokenId '+out.onChainAgentId);
+      renderAgentIdentityPanel();
+      st.textContent = out.explorerTx
+        ? 'On-chain · '+out.explorerTx
+        : 'On-chain Identity linked.';
+    }catch(e){
+      st.textContent = e?.message || 'ERC-8004 mint failed';
+      st.classList.add('err');
+    }
+  }
+  window.mintAgentErc8004Ui = mintAgentErc8004Ui;
 
   function resetAgentIdentityUi(){
     if(!confirm('Remove this agent identity from this browser? You will need your saved private keys to recover the same wallets. Continue?')) return;

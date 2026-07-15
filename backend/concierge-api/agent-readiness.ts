@@ -313,7 +313,7 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
         anchor: `${base}/.well-known/agent-card.json`,
         title: "Agent service card",
         description:
-          "HTTP A2A service registry card (off-chain). Per-agent cards may include EIP-8004 type URI for indexing — not an on-chain ERC-8004 registration.",
+          "HTTP A2A service registry. Per-agent identities can mint on-chain ERC-8004 Identity NFTs on Base (canonical registry 0x8004…).",
       },
       {
         anchor: `${base}/asyncapi.json`,

@@ -13,7 +13,7 @@
 - [Poncho](https://conc-exe.xyz/docs/integration/poncho): Conversational agent marketplace — macro, wire, intel via x402 (no API key).
 - [pay.sh](https://conc-exe.xyz/docs/payment/paysh): pay CLI catalog — sandbox curl, Claude/Codex MCP, pay-skills listing.
 - [Hermes Agent](https://conc-exe.xyz/docs/integration/hermes): Nous personal agent — remote MCP + skill; catalog PR pack in distribution/hermes.
-- [Agent Card (A2A)](https://conc-exe.xyz/docs/integration/agent-card): HTTP discovery at /.well-known/agent-card.json — off-chain registry (not on-chain ERC-8004).
+- [Agent Card (A2A)](https://conc-exe.xyz/docs/integration/agent-card): HTTP discovery at /.well-known/agent-card.json — optional ERC-8004 Identity mint on Base via /api/agent-identity-erc8004.
 - [Grok Build](https://conc-exe.xyz/docs/grok-build): x.ai/cli terminal agent — concierge-intel + concierge-security skills, pay.sh x402 probes.
 - [Corbits](https://conc-exe.xyz/docs/corbits): Optional Marketplace proxy · pay.sh primary catalog · PayAI settlement (ABK hosted wind-down Jun 2026).
 - [Security Desk](https://conc-exe.xyz/docs/api/security): Passive website scan, scout audits, free conc-exe.xyz self-audit — Lounge /lounge#security-scan

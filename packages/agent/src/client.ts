@@ -206,6 +206,50 @@ export class ConciergeAgentClient {
     return (await this.getJson("/.well-known/agent-card.json")) as Record<string, unknown>;
   }
 
+  /** EIP-8004 registration file for a Concierge `agt_…` (on-chain agentURI). */
+  async agentRegistration(agtId: string): Promise<Record<string, unknown>> {
+    const id = encodeURIComponent(agtId.trim());
+    return (await this.getJson(`/api/agent-identity-registration?id=${id}`)) as Record<
+      string,
+      unknown
+    >;
+  }
+
+  /** Prepare Base Identity Registry register(agentURI) payload for an `agt_…`. */
+  async prepareErc8004(agtId: string): Promise<Record<string, unknown>> {
+    const id = encodeURIComponent(agtId.trim());
+    return (await this.getJson(`/api/agent-identity-erc8004?id=${id}`)) as Record<string, unknown>;
+  }
+
+  /**
+   * Link a verified Base Identity Registry mint to `agt_…`.
+   * Caller must already have sent `register(agentURI)` from the agent EVM wallet.
+   */
+  async linkErc8004(input: {
+    id: string;
+    agentId: string | number;
+    txHash: `0x${string}` | string;
+  }): Promise<Record<string, unknown>> {
+    const res = await this.fetchFn(`${this.origin}/api/agent-identity-erc8004`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: input.id,
+        agentId: String(input.agentId),
+        txHash: input.txHash,
+      }),
+    });
+    const body = await readBody(res);
+    if (!res.ok) {
+      throw new ConciergeAgentError(
+        `linkErc8004 failed: HTTP ${res.status}`,
+        res.status,
+        body,
+      );
+    }
+    return body as Record<string, unknown>;
+  }
+
   /** Convenience namespace for intel desks. */
   get intel() {
     const call = this.call.bind(this);

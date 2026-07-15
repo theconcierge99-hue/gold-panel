@@ -76,7 +76,10 @@
           <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Service registry — how to register agents on this deployment</td></tr>
           <tr><td><code>POST /api/agent-identity</code></td><td>Register agent (public keys only)</td></tr>
           <tr><td><code>GET /api/agent-identity?id=agt_…</code></td><td>Profile + embedded card JSON</td></tr>
-          <tr><td><code>GET /api/agent-identity-card?id=agt_…</code></td><td>Per-agent HTTP card (EIP-8004 type URI for indexing — not on-chain)</td></tr>
+          <tr><td><code>GET /api/agent-identity-card?id=agt_…</code></td><td>Per-agent HTTP card (includes <code>erc8004</code> when linked)</td></tr>
+          <tr><td><code>GET /api/agent-identity-registration?id=agt_…</code></td><td>EIP-8004 registration file (<code>agentURI</code>)</td></tr>
+          <tr><td><code>GET /api/agent-identity-erc8004?id=agt_…</code></td><td>Prepare Base Identity Registry <code>register(agentURI)</code></td></tr>
+          <tr><td><code>POST /api/agent-identity-erc8004</code></td><td>Verify mint + link on-chain tokenId to <code>agt_…</code></td></tr>
           <tr><td><code>GET /api/agent-identity?list=1&amp;limit=24</code></td><td>Public directory (latest agents)</td></tr>
         </tbody>
       </table>
@@ -105,7 +108,8 @@ Content-Type: application/json
     "id": "agt_a1b2c3d4e5f67890",
     "name": "Macro Scout",
     "cardUrl": "https://conc-exe.xyz/api/agent-identity-card?id=agt_…",
-    "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…"
+    "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…",
+    "registrationUrl": "https://conc-exe.xyz/api/agent-identity-registration?id=agt_…"
   },
   "card": { "...": "per-agent HTTP card" },
   "message": "Identity registered. Store private keys only on the agent…"
@@ -145,8 +149,8 @@ Content-Type: application/json
         <li><strong>services</strong> — Concierge, news-open, and other x402 routes with USDC pricing</li>
         <li><strong>discovery</strong> — links to <code>/.well-known/x402</code> and <code>/openapi.json</code></li>
       </ul>
-      <p><strong>HTTP only (off-chain).</strong> The optional <code>type</code> field uses the EIP-8004 registration URI so registries can index your bot — Concierge does <strong>not</strong> deploy an on-chain ERC-8004 registry.</p>
-      <p>Fetch one agent: <code>GET /api/agent-identity-card?id=agt_…</code></p>
+      <p><strong>HTTP + optional on-chain.</strong> Register <code>agt_…</code> first, then mint into the canonical ERC-8004 Identity Registry on <strong>Base</strong> (<code>0x8004A169…</code>) with <code>agentURI</code> pointing at <code>/api/agent-identity-registration?id=</code>. Lounge UI: <strong>Mint ERC-8004 on Base</strong> (needs ETH on Base for gas).</p>
+      <p>Fetch HTTP card: <code>GET /api/agent-identity-card?id=agt_…</code> · Registration file: <code>GET /api/agent-identity-registration?id=agt_…</code></p>
     </div>
   </section>
 

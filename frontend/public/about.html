@@ -141,7 +141,7 @@
     <p>Software agents can register a public <strong><code>agt_…</code> identity</strong> with <strong>Solana and/or Base wallets</strong> for agent-to-agent discovery and pay-per-call Concierge. Private keys are generated in the browser and are <strong>never</strong> sent to our servers—we store public addresses and display metadata only.</p>
     <ul>
       <li>Lounge → <strong>Navigate</strong> → <strong>Agent identity</strong> to generate wallets, register, and fund for x402.</li>
-      <li>Machine-readable <strong>agent cards</strong> (HTTP A2A / off-chain) at <code>/api/agent-identity-card</code> and service registry at <code>/.well-known/agent-card.json</code>.</li>
+      <li>Machine-readable <strong>agent cards</strong> (HTTP A2A) at <code>/api/agent-identity-card</code>, EIP-8004 registration files at <code>/api/agent-identity-registration</code>, and optional Base Identity Registry mints via <code>/api/agent-identity-erc8004</code>.</li>
       <li>Optional <code>X-Agent-Id</code> header on Concierge calls for attribution in responses.</li>
       <li>Registration is <strong>free</strong>; paid APIs still require USDC per call.</li>
     </ul>

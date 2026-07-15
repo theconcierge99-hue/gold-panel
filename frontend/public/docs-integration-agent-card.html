@@ -22,7 +22,7 @@
       <h1 class="docs-title">Agent Card (A2A)</h1>
       <p class="docs-lead">
         Concierge publishes a machine-readable <strong>Agent Card</strong> at <code>/.well-known/agent-card.json</code> for agent-to-agent (A2A) discovery and x402-paid endpoints.
-        Cards are <strong>HTTP JSON</strong> (off-chain registry). Per-agent cards may include an EIP-8004 <code>type</code> URI for indexing — this is <strong>not</strong> an on-chain ERC-8004 registration.
+        Cards are <strong>HTTP JSON</strong> plus an optional <strong>on-chain ERC-8004</strong> Identity mint on Base (canonical registry <code>0x8004A169…</code>). Per-agent <code>agentURI</code> resolves to <code>/api/agent-identity-registration?id=agt_…</code>.
       </p>
 
       <div class="card">

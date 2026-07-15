@@ -75,6 +75,7 @@ Or `agent.payCurl("intel-macro")`.
 | `call(kind, body)` | Paid POST |
 | `intel.*` / `security.*` | Typed shortcuts |
 | `a2aMesh()` / `agentCard()` | Free discovery |
+| `agentRegistration()` / `prepareErc8004()` / `linkErc8004()` | ERC-8004 Identity on Base |
 | `payCurl(kind)` | Shell hint for agents |
 
 Remote MCP (same intel surface): `https://conc-exe.xyz/api/mcp`
