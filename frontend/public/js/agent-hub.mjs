@@ -18,7 +18,7 @@ function renderSubnav() {
     { href: "/agent/endpoints", page: "endpoints", label: "Endpoints" },
     { href: "/agent/playground", page: "playground", label: "Playground" },
     { href: "/agent/discover", page: "discover", label: "Discover" },
-    { href: "/#agent-identity", page: "identity", label: "Agent identity" },
+    { href: "/lounge#agent-identity", page: "identity", label: "Agent identity" },
   ];
   el.innerHTML = links
     .map((l) => {
@@ -29,7 +29,7 @@ function renderSubnav() {
 }
 
 window.openAgentIdentityFromHub = function () {
-  location.href = "/#agent-identity";
+  location.href = "/lounge#agent-identity";
 };
 
 function renderStats() {
