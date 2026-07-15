@@ -13,97 +13,138 @@
 <link rel="stylesheet" href="/css/docs-site.css" />
 </head>
 <body class="el-premium">
-<div class="docs-layout" data-docs-page="sdk-agent">
+<div class="docs-layout docs-layout--wide" data-docs-page="sdk-agent">
   <aside class="docs-sidebar" id="docs-sidebar"></aside>
   <main class="docs-main">
-    <div class="docs-content">
-      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/integration/mcp-registry">MCP Registry</a> · <a href="#try-live">Try live</a></div>
+    <div class="docs-content docs-content--sdk">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/integration/mcp-registry">MCP Registry</a></div>
       <div class="docs-eyebrow">SDK</div>
       <h1 class="docs-title"><code>@conc-exe/agent</code></h1>
       <p class="docs-lead">
-        TypeScript client for agents: <strong>discover</strong> Concierge pay-per-call routes, then <strong>call</strong> intel / security desks with x402
-        (<code>PAYMENT-SIGNATURE</code>) or TCX credits. No Concierge API keys.
+        Discover Concierge routes, settle with x402 or TCX, call intel — <strong>no API keys</strong>.
       </p>
 
-      <div class="card">
-        <p><strong>Status:</strong> <span class="gold-link">0.1.0</span> — monorepo <code>packages/agent</code> · publish with <code>npm run agent:build</code></p>
-        <p><strong>Sister SDK:</strong> <a href="/docs/payment/token-pay" class="gold-link"><code>@conc-exe/token-x402</code></a> — for merchants monetizing their own APIs (different audience).</p>
-        <p class="note" style="margin-bottom:0">Want to verify without installing? Jump to <a href="#try-live" class="gold-link">Try it live</a> — same steps as Quick start, in the browser.</p>
+      <div class="sdk-meta">
+        <span class="sdk-meta-pill">v0.1.0</span>
+        <span class="sdk-meta-sep">·</span>
+        <code>packages/agent</code>
+        <span class="sdk-meta-sep">·</span>
+        <a href="/docs/payment/token-pay" class="gold-link">Sister: @conc-exe/token-x402</a>
       </div>
 
-      <h2 class="docs-h2">Install</h2>
-      <div class="card">
-<pre><code>npm install @conc-exe/agent
-# monorepo: npm run agent:build</code></pre>
-      </div>
+      <section class="sdk-studio" id="try-live" aria-label="Quick start studio">
+        <header class="sdk-studio-intro">
+          <p class="sdk-studio-kicker">Quick start</p>
+          <h2 class="sdk-studio-title">Install once. Verify in the browser.</h2>
+          <p class="sdk-studio-lede">Same flow as the SDK — MCP, discover, unpaid call — without leaving the docs.</p>
 
-      <h2 class="docs-h2">Quick start</h2>
-      <div class="card">
-<pre><code>import { createConciergeAgent, PaymentRequiredError } from "@conc-exe/agent";
+          <div class="sdk-install">
+            <code id="sdk-install-cmd">npm install @conc-exe/agent</code>
+            <button type="button" class="sdk-install-copy" id="sdk-copy-install" aria-label="Copy install command">Copy</button>
+          </div>
+        </header>
+
+        <div class="sdk-tabs" role="tablist" aria-label="Quick start views">
+          <button type="button" class="sdk-tab is-active" role="tab" id="tab-live" aria-selected="true" aria-controls="panel-live" data-tab="live">Live lab</button>
+          <button type="button" class="sdk-tab" role="tab" id="tab-code" aria-selected="false" aria-controls="panel-code" data-tab="code">Source</button>
+        </div>
+
+        <div class="sdk-panel is-active" role="tabpanel" id="panel-live" aria-labelledby="tab-live" data-panel="live">
+          <div class="sdk-lab" id="sdk-live">
+            <div class="sdk-lab-rail">
+              <ol class="sdk-progress" aria-label="Setup progress">
+                <li data-step="mcp" data-state="pending">
+                  <span class="sdk-progress-idx">01</span>
+                  <span class="sdk-progress-label">MCP</span>
+                </li>
+                <li data-step="discover" data-state="pending">
+                  <span class="sdk-progress-idx">02</span>
+                  <span class="sdk-progress-label">Discover</span>
+                </li>
+                <li data-step="call" data-state="pending">
+                  <span class="sdk-progress-idx">03</span>
+                  <span class="sdk-progress-label">Call</span>
+                </li>
+              </ol>
+
+              <div class="sdk-lab-form">
+                <label class="sdk-field">
+                  <span>Route</span>
+                  <select id="sdk-kind"></select>
+                </label>
+                <label class="sdk-field">
+                  <span>Message</span>
+                  <input id="sdk-message" type="text" placeholder="DeFi outlook on Solana" autocomplete="off" />
+                </label>
+                <button type="button" class="sdk-run" id="sdk-run-all" data-sdk-action>
+                  <span class="sdk-run-label">Run setup check</span>
+                  <span class="sdk-run-hint">MCP → discover → unpaid call</span>
+                </button>
+                <div class="sdk-quiet">
+                  <button type="button" class="sdk-linkish" id="sdk-discover-only" data-sdk-action>Discover only</button>
+                  <span aria-hidden="true">·</span>
+                  <button type="button" class="sdk-linkish" id="sdk-call-only" data-sdk-action>Call probe</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sdk-lab-console">
+              <div class="sdk-console-bar">
+                <span class="sdk-console-dots" aria-hidden="true"></span>
+                <span class="sdk-console-title">agent · setup</span>
+                <span class="sdk-live-status" id="sdk-live-status" data-tone="">Ready</span>
+              </div>
+              <pre class="sdk-console-out" id="sdk-out" aria-live="polite">Ready when you are.
+
+Press Run setup check to probe this origin.</pre>
+              <div class="sdk-console-foot" id="sdk-result-rail">
+                <div class="sdk-pay-row">
+                  <label for="sdk-paycurl">payCurl</label>
+                  <div class="sdk-pay-box">
+                    <input id="sdk-paycurl" type="text" readonly spellcheck="false" value="" placeholder="Appears after a 402 probe" />
+                    <button type="button" class="sdk-install-copy" id="sdk-copy-paycurl">Copy</button>
+                  </div>
+                </div>
+                <div class="sdk-console-actions">
+                  <a class="sdk-run sdk-run--ghost" id="sdk-playground-link" href="/agent/playground?ep=intel-verdict"><span class="sdk-run-label">Pay in Playground</span></a>
+                  <a class="sdk-linkish" href="/docs/payment/paysh">pay.sh</a>
+                </div>
+                <p class="sdk-fineprint">402 is expected without payment. This lab never moves funds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sdk-panel" role="tabpanel" id="panel-code" aria-labelledby="tab-code" data-panel="code" hidden>
+          <div class="sdk-source">
+            <div class="sdk-console-bar">
+              <span class="sdk-console-dots" aria-hidden="true"></span>
+              <span class="sdk-console-title">quickstart.ts</span>
+            </div>
+<pre class="sdk-source-code"><code>import { createConciergeAgent, PaymentRequiredError } from "@conc-exe/agent";
 
 const agent = createConciergeAgent({
   origin: "https://conc-exe.xyz",
-  // paymentSignature / creditsWallet / settlePayment …
 });
 
 const snap = await agent.discover();
 console.log(snap.catalog.length, snap.mcpUrl);
 
 try {
-  const { body } = await agent.intel.verdict({ message: "DeFi outlook on Solana" });
+  const { body } = await agent.intel.verdict({
+    message: "DeFi outlook on Solana",
+  });
   console.log(body);
 } catch (e) {
   if (e instanceof PaymentRequiredError) {
-    console.log(agent.payCurl("intel-verdict", { message: "DeFi outlook on Solana" }));
+    console.log(agent.payCurl("intel-verdict", {
+      message: "DeFi outlook on Solana",
+    }));
   }
 }</code></pre>
-        <p class="note" style="margin-bottom:0">The panel below runs these checks against this origin — no npm required.</p>
-      </div>
-
-      <h2 class="docs-h2" id="try-live">Try it live</h2>
-      <div class="card sdk-live" id="sdk-live">
-        <div class="sdk-live-head">
-          <p style="margin:0;color:var(--text-primary)">Setup check — mirrors <code>discover()</code> + unpaid <code>call()</code></p>
-          <span class="sdk-live-status" id="sdk-live-status" data-tone="">Idle</span>
-        </div>
-
-        <ol class="sdk-live-steps">
-          <li data-step="mcp" data-state="pending"><strong>1. MCP / origin</strong> — <code>GET /api/mcp</code> version + free tools</li>
-          <li data-step="discover" data-state="pending"><strong>2. discover()</strong> — x402 · OpenAPI · agent card · A2A mesh</li>
-          <li data-step="call" data-state="pending"><strong>3. Unpaid call</strong> — expect <code>PaymentRequiredError</code> + <code>payCurl</code></li>
-        </ol>
-
-        <div class="sdk-live-controls">
-          <div class="sdk-live-row">
-            <div class="sdk-live-field">
-              <label for="sdk-kind">Route</label>
-              <select id="sdk-kind"></select>
-            </div>
-            <div class="sdk-live-field">
-              <label for="sdk-message">Message (optional)</label>
-              <input id="sdk-message" type="text" placeholder="e.g. DeFi outlook on Solana" />
-            </div>
-          </div>
-          <div class="sdk-live-row">
-            <button type="button" class="btn gold" id="sdk-run-all" data-sdk-action>Run setup check</button>
-            <button type="button" class="btn" id="sdk-discover-only" data-sdk-action>Discover only</button>
-            <button type="button" class="btn" id="sdk-call-only" data-sdk-action>Call probe</button>
-          </div>
-          <div class="sdk-live-field">
-            <label for="sdk-paycurl">payCurl (after probe)</label>
-            <textarea class="sdk-live-paycurl" id="sdk-paycurl" readonly spellcheck="false"></textarea>
           </div>
         </div>
-
-        <pre class="sdk-live-out" id="sdk-out">Press “Run setup check” to probe MCP → discover → unpaid call.</pre>
-
-        <div class="sdk-live-actions">
-          <button type="button" class="btn" id="sdk-copy-paycurl">Copy payCurl</button>
-          <a class="btn gold" id="sdk-playground-link" href="/agent/playground?ep=intel-verdict">Pay in Playground</a>
-          <a class="btn" href="/docs/payment/paysh">pay.sh docs</a>
-        </div>
-        <p class="note">Unpaid probes return HTTP 402 (expected). Settlement stays in Playground / pay.sh / your wallet — this panel does not move funds.</p>
-      </div>
+      </section>
 
       <h2 class="docs-h2">Settle hook</h2>
       <div class="card">
@@ -115,7 +156,7 @@ try {
 });
 
 const { body } = await agent.call("intel-macro", {});</code></pre>
-        <p class="note">Without an in-process wallet, use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>: <code>agent.payCurl("intel-macro")</code> — or the live panel above.</p>
+        <p class="note">Without an in-process wallet, use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> or the Live lab above.</p>
       </div>
 
       <h2 class="docs-h2">Surfaces</h2>
@@ -130,27 +171,25 @@ const { body } = await agent.call("intel-macro", {});</code></pre>
             <tr><td><code>payCurl(kind)</code></td><td>Shell hint for agents</td></tr>
           </tbody>
         </table>
-        <p>Same intel surface over MCP: <code>https://conc-exe.xyz/api/mcp</code> (v1.1 — free <code>concierge_catalog</code> / <code>concierge_prepare_payment</code>).</p>
+        <p>Same intel surface over MCP: <code>/api/mcp</code> (v1.1).</p>
       </div>
 
       <h2 class="docs-h2">Related</h2>
       <div class="card">
         <ul>
-          <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — Cursor / Claude / Hermes remote MCP</li>
+          <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — Cursor / Claude / Hermes</li>
           <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — CLI settlement</li>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/security" class="gold-link">Security Desk</a></li>
-          <li><a href="/docs/payment/token-pay" class="gold-link">Token Pay SDK</a> — partner merchant monetization</li>
-          <li><a href="/openapi.json" target="_blank" rel="noopener">openapi.json</a> · <a href="/agent/discover" class="gold-link">Discover UI</a></li>
+          <li><a href="/agent/playground" class="gold-link">Playground</a> · <a href="/agent/discover" class="gold-link">Discover UI</a></li>
         </ul>
       </div>
 
       <div class="cta-row">
-        <a class="btn gold" href="#try-live">Try live</a>
+        <a class="btn gold" href="#try-live">Back to lab</a>
         <a class="btn" href="/docs/integration/mcp-registry">MCP guide</a>
         <a class="btn" href="/agent/playground">Playground</a>
-        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       </div>
-      <p class="docs-foot">Concierge · <code>@conc-exe/agent</code> · packages/agent</p>
+      <p class="docs-foot">Concierge · <code>@conc-exe/agent</code></p>
     </div>
   </main>
 </div>

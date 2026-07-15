@@ -43,7 +43,7 @@ function payCurl(route, body) {
 }
 
 function setStep(id, state) {
-  const li = document.querySelector(`.sdk-live-steps [data-step="${id}"]`);
+  const li = document.querySelector(`.sdk-progress [data-step="${id}"]`);
   if (!li) return;
   li.dataset.state = state;
   li.classList.toggle("is-ok", state === "ok");
@@ -215,10 +215,31 @@ async function copyPayCurl() {
   const curl = payCurlEl?.value || payCurl(route, buildBody(route));
   try {
     await navigator.clipboard.writeText(curl);
-    setStatus("payCurl copied", "ok");
+    setStatus("Copied", "ok");
+    flashCopy("sdk-copy-paycurl");
   } catch {
-    setStatus("Clipboard blocked — select the payCurl field", "warn");
+    setStatus("Clipboard blocked", "warn");
   }
+}
+
+async function copyInstall() {
+  const cmd = document.getElementById("sdk-install-cmd")?.textContent?.trim() || "npm install @conc-exe/agent";
+  try {
+    await navigator.clipboard.writeText(cmd);
+    flashCopy("sdk-copy-install");
+  } catch {
+    setStatus("Clipboard blocked", "warn");
+  }
+}
+
+function flashCopy(id) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const prev = btn.textContent;
+  btn.textContent = "Copied";
+  setTimeout(() => {
+    btn.textContent = prev;
+  }, 1400);
 }
 
 function fillKindSelect() {
@@ -239,13 +260,33 @@ function syncCurlPreview() {
   }
 }
 
+function bindTabs() {
+  const tabs = document.querySelectorAll(".sdk-tab");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const name = tab.getAttribute("data-tab");
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      document.querySelectorAll(".sdk-panel").forEach((panel) => {
+        const match = panel.getAttribute("data-panel") === name;
+        panel.classList.toggle("is-active", match);
+        panel.hidden = !match;
+      });
+    });
+  });
+}
+
 function bind() {
   fillKindSelect();
   syncCurlPreview();
+  bindTabs();
   kindEl?.addEventListener("change", () => {
     const route = selectedRoute();
     if (msgEl && route.body?.message) msgEl.value = String(route.body.message);
-    else if (msgEl && !route.body?.message) msgEl.placeholder = "optional message";
+    else if (msgEl && !route.body?.message) msgEl.placeholder = "optional";
     syncCurlPreview();
   });
   msgEl?.addEventListener("input", syncCurlPreview);
@@ -288,6 +329,7 @@ function bind() {
     }
   });
   document.getElementById("sdk-copy-paycurl")?.addEventListener("click", () => copyPayCurl());
+  document.getElementById("sdk-copy-install")?.addEventListener("click", () => copyInstall());
 }
 
 if (document.readyState === "loading") {
