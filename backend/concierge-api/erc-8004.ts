@@ -77,8 +77,8 @@ export function agentRegistryCaip(chainId: number, registry: string): string {
 }
 
 export function basescanTxUrl(txHash: string, chainId: number = ERC8004_DEFAULT_CHAIN_ID): string {
-  const base = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
-  return `${base}/tx/${txHash}`;
+  const host = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
+  return `${host}/tx/${txHash}`;
 }
 
 export function basescanTokenUrl(
@@ -95,22 +95,25 @@ export function registrationFileUrl(origin: string, agtId: string): string {
   return `${base}/api/agent-identity-registration?id=${encodeURIComponent(agtId)}`;
 }
 
-function baseRpcUrl(): string {
-  return (
-    process.env.BASE_RPC_URL?.trim() ||
-    process.env.EVM_RPC_URL?.trim() ||
-    "https://mainnet.base.org"
-  );
+function baseRpcCandidates(): string[] {
+  const preferred = [
+    process.env.BASE_RPC_URL?.trim(),
+    process.env.EVM_RPC_URL?.trim(),
+    "https://base-rpc.publicnode.com",
+    "https://mainnet.base.org",
+    "https://base.llamarpc.com",
+    "https://1rpc.io/base",
+  ].filter((u): u is string => !!u);
+  return [...new Set(preferred)];
 }
 
 export async function readIdentityOnChain(input: {
   chainId?: number;
   agentId: string | number | bigint;
   registry?: string;
-}): Promise<{ owner: string; tokenURI: string } | null> {
+}): Promise<{ owner: string; tokenURI: string }> {
   const chainId = input.chainId ?? ERC8004_DEFAULT_CHAIN_ID;
   if (chainId !== ERC8004_DEFAULT_CHAIN_ID) {
-    // Only Base mainnet wired for now (same CREATE2 address on other chains, but RPC default is Base).
     throw new Error(`Unsupported ERC-8004 chainId ${chainId} (supported: ${ERC8004_DEFAULT_CHAIN_ID})`);
   }
   const registry = (input.registry || ERC8004_IDENTITY_REGISTRY) as `0x${string}`;
@@ -118,30 +121,72 @@ export async function readIdentityOnChain(input: {
 
   const { createPublicClient, http } = await import("viem");
   const { base } = await import("viem/chains");
-  const client = createPublicClient({
-    chain: base,
-    transport: http(baseRpcUrl()),
-  });
+  const errors: string[] = [];
 
-  try {
-    const [owner, tokenURI] = await Promise.all([
-      client.readContract({
-        address: registry,
-        abi: ERC8004_IDENTITY_ABI,
-        functionName: "ownerOf",
-        args: [tokenId],
-      }),
-      client.readContract({
-        address: registry,
-        abi: ERC8004_IDENTITY_ABI,
-        functionName: "tokenURI",
-        args: [tokenId],
-      }),
-    ]);
-    return { owner: String(owner).toLowerCase(), tokenURI: String(tokenURI) };
-  } catch {
-    return null;
+  for (const rpc of baseRpcCandidates()) {
+    try {
+      const client = createPublicClient({
+        chain: base,
+        transport: http(rpc, { timeout: 12_000 }),
+      });
+      const [owner, tokenURI] = await Promise.all([
+        client.readContract({
+          address: registry,
+          abi: ERC8004_IDENTITY_ABI,
+          functionName: "ownerOf",
+          args: [tokenId],
+        }),
+        client.readContract({
+          address: registry,
+          abi: ERC8004_IDENTITY_ABI,
+          functionName: "tokenURI",
+          args: [tokenId],
+        }),
+      ]);
+      return { owner: String(owner).toLowerCase(), tokenURI: String(tokenURI) };
+    } catch (e) {
+      errors.push(`${rpc}: ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
+  throw new Error(`Base RPC failed after ${errors.length} endpoint(s): ${errors.slice(0, 2).join(" | ")}`);
+}
+
+/** Verify mint via tx receipt Registered event (fallback when eth_call is flaky). */
+export async function readIdentityFromTx(input: {
+  txHash: `0x${string}` | string;
+  registry?: string;
+}): Promise<{ owner: string; tokenURI: string; agentId: string } | null> {
+  const registry = (input.registry || ERC8004_IDENTITY_REGISTRY).toLowerCase();
+  const hash = input.txHash as `0x${string}`;
+  const { createPublicClient, http, parseEventLogs } = await import("viem");
+  const { base } = await import("viem/chains");
+  const errors: string[] = [];
+
+  for (const rpc of baseRpcCandidates()) {
+    try {
+      const client = createPublicClient({
+        chain: base,
+        transport: http(rpc, { timeout: 12_000 }),
+      });
+      const receipt = await client.getTransactionReceipt({ hash });
+      if (!receipt || receipt.status !== "success") return null;
+      const logs = parseEventLogs({
+        abi: ERC8004_IDENTITY_ABI,
+        eventName: "Registered",
+        logs: receipt.logs.filter((l) => l.address.toLowerCase() === registry),
+      });
+      const ev = logs[0];
+      if (!ev) return null;
+      return {
+        agentId: String(ev.args.agentId),
+        tokenURI: String(ev.args.agentURI),
+        owner: String(ev.args.owner).toLowerCase(),
+      };
+    } catch (e) {
+      errors.push(`${rpc}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  throw new Error(`Base RPC failed after ${errors.length} endpoint(s): ${errors.slice(0, 2).join(" | ")}`);
 }
 
 /** agentURI must point at this Concierge registration endpoint for the same agt_ id. */
@@ -152,10 +197,13 @@ export function agentUriMatches(expectedUri: string, onChainUri: string): boolea
   try {
     const ua = new URL(a);
     const ub = new URL(b);
+    const idA = ua.searchParams.get("id");
+    const idB = ub.searchParams.get("id");
     return (
       ua.pathname === ub.pathname &&
-      ua.searchParams.get("id") === ub.searchParams.get("id") &&
-      ua.searchParams.get("id")?.startsWith("agt_") === true
+      idA === idB &&
+      !!idA &&
+      idA.startsWith("agt_")
     );
   } catch {
     return false;

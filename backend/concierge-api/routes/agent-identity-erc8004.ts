@@ -7,6 +7,7 @@ import {
   ERC8004_DEFAULT_CHAIN_ID,
   ERC8004_IDENTITY_ABI,
   ERC8004_IDENTITY_REGISTRY,
+  readIdentityFromTx,
   readIdentityOnChain,
   registrationFileUrl,
   type Erc8004LinkRecord,
@@ -114,15 +115,49 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     const expectedUri = registrationFileUrl(origin, agent.id);
-    const onChain = await readIdentityOnChain({
-      chainId: ERC8004_DEFAULT_CHAIN_ID,
-      agentId: onChainAgentId,
-      registry: ERC8004_IDENTITY_REGISTRY,
-    });
+    let onChain: { owner: string; tokenURI: string; agentId?: string } | null = null;
+    let readError = "";
+    try {
+      onChain = await readIdentityOnChain({
+        chainId: ERC8004_DEFAULT_CHAIN_ID,
+        agentId: onChainAgentId,
+        registry: ERC8004_IDENTITY_REGISTRY,
+      });
+    } catch (e) {
+      readError = e instanceof Error ? e.message : String(e);
+      try {
+        const fromTx = await readIdentityFromTx({ txHash });
+        if (fromTx) {
+          if (fromTx.agentId !== onChainAgentId) {
+            return json(
+              request,
+              {
+                error: `txHash Registered agentId ${fromTx.agentId} does not match body agentId ${onChainAgentId}`,
+              },
+              400,
+            );
+          }
+          onChain = fromTx;
+        }
+      } catch (e2) {
+        const msg2 = e2 instanceof Error ? e2.message : String(e2);
+        return json(
+          request,
+          {
+            error: `Could not read Identity Registry via eth_call or tx receipt. ${readError} | ${msg2}`,
+          },
+          400,
+        );
+      }
+    }
     if (!onChain) {
       return json(
         request,
-        { error: "Could not read Identity Registry — check agentId / Base RPC" },
+        {
+          error: readError
+            ? `Could not read Identity Registry — ${readError}`
+            : "Could not read Identity Registry — check agentId / Base RPC",
+        },
         400,
       );
     }

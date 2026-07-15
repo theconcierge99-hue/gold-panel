@@ -285,20 +285,32 @@ export async function registerAgentOnChain8004(
     }
     const onChainAgentId = String(registered.args.agentId);
 
-    const linkRes = await fetch(`${base}/api/agent-identity-erc8004`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: agentId, agentId: onChainAgentId, txHash: hash }),
-    });
-    const linkData = (await linkRes.json().catch(() => ({}))) as {
+    let linkRes: Response | null = null;
+    let linkData: {
       ok?: boolean;
       agent?: RegisterAgentApiRow;
       error?: string;
-    };
-    if (!linkRes.ok || !linkData.agent) {
+    } = {};
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 1500 * attempt));
+      linkRes = await fetch(`${base}/api/agent-identity-erc8004`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: agentId, agentId: onChainAgentId, txHash: hash }),
+      });
+      linkData = (await linkRes.json().catch(() => ({}))) as {
+        ok?: boolean;
+        agent?: RegisterAgentApiRow;
+        error?: string;
+      };
+      if (linkRes.ok && linkData.agent) break;
+    }
+    if (!linkRes?.ok || !linkData.agent) {
       return {
         ok: false,
-        error: linkData.error || `Link failed HTTP ${linkRes.status}`,
+        error:
+          linkData.error ||
+          `Mint landed on-chain (tokenId ${onChainAgentId}) but link failed HTTP ${linkRes?.status}. Retry mint link later with the same tx.`,
         onChainAgentId,
         txHash: hash,
         explorerTx: `https://basescan.org/tx/${hash}`,
