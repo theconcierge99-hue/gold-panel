@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
+<script src="/js/concierge-boot-head.js"></script>
+<title>@conc-exe/agent SDK — Concierge Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Discover and call Concierge pay-per-call intel from any agent runtime — @conc-exe/agent TypeScript SDK with x402 / TCX settlement." />
+<link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
+<link rel="canonical" href="/docs/sdk/agent" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/docs-site.css" />
+</head>
+<body class="el-premium">
+<div class="docs-layout" data-docs-page="sdk-agent">
+  <aside class="docs-sidebar" id="docs-sidebar"></aside>
+  <main class="docs-main">
+    <div class="docs-content">
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/integration/mcp-registry">MCP Registry</a></div>
+      <div class="docs-eyebrow">SDK</div>
+      <h1 class="docs-title"><code>@conc-exe/agent</code></h1>
+      <p class="docs-lead">
+        TypeScript client for agents: <strong>discover</strong> Concierge pay-per-call routes, then <strong>call</strong> intel / security desks with x402
+        (<code>PAYMENT-SIGNATURE</code>) or TCX credits. No Concierge API keys.
+      </p>
+
+      <div class="card">
+        <p><strong>Status:</strong> <span class="gold-link">0.1.0</span> — monorepo <code>packages/agent</code> · publish with <code>npm run agent:build</code></p>
+        <p><strong>Sister SDK:</strong> <a href="/docs/payment/token-pay" class="gold-link"><code>@conc-exe/token-x402</code></a> — for merchants monetizing their own APIs (different audience).</p>
+      </div>
+
+      <h2 class="docs-h2">Install</h2>
+      <div class="card">
+<pre><code>npm install @conc-exe/agent
+# monorepo: npm run agent:build</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Quick start</h2>
+      <div class="card">
+<pre><code>import { createConciergeAgent, PaymentRequiredError } from "@conc-exe/agent";
+
+const agent = createConciergeAgent({
+  origin: "https://conc-exe.xyz",
+  // paymentSignature / creditsWallet / settlePayment …
+});
+
+const snap = await agent.discover();
+console.log(snap.catalog.length, snap.mcpUrl);
+
+try {
+  const { body } = await agent.intel.verdict({ message: "DeFi outlook on Solana" });
+  console.log(body);
+} catch (e) {
+  if (e instanceof PaymentRequiredError) {
+    console.log(agent.payCurl("intel-verdict", { message: "DeFi outlook on Solana" }));
+  }
+}</code></pre>
+      </div>
+
+      <h2 class="docs-h2">Settle hook</h2>
+      <div class="card">
+        <p>Wire a wallet once; unpaid calls get a 402 challenge, then the client retries:</p>
+<pre><code>const agent = createConciergeAgent({
+  async settlePayment({ accepts, paymentRequiredHeader }) {
+    return await yourWallet.signX402(paymentRequiredHeader, accepts);
+  },
+});
+
+const { body } = await agent.call("intel-macro", {});</code></pre>
+        <p class="note">Without an in-process wallet, use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>: <code>agent.payCurl("intel-macro")</code>.</p>
+      </div>
+
+      <h2 class="docs-h2">Surfaces</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>API</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>discover()</code></td><td>well-known x402 + OpenAPI + agent card + A2A mesh</td></tr>
+            <tr><td><code>catalog()</code></td><td>Offline kind → path → price (24 routes)</td></tr>
+            <tr><td><code>call(kind, body)</code> · <code>intel.*</code> · <code>security.*</code></td><td>Paid POST</td></tr>
+            <tr><td><code>a2aMesh()</code> / <code>agentCard()</code></td><td>Free discovery</td></tr>
+            <tr><td><code>payCurl(kind)</code></td><td>Shell hint for agents</td></tr>
+          </tbody>
+        </table>
+        <p>Same intel surface over MCP: <code>https://conc-exe.xyz/api/mcp</code> (v1.1 — free <code>concierge_catalog</code> / <code>concierge_prepare_payment</code>).</p>
+      </div>
+
+      <h2 class="docs-h2">Related</h2>
+      <div class="card">
+        <ul>
+          <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — Cursor / Claude / Hermes remote MCP</li>
+          <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — CLI settlement</li>
+          <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/security" class="gold-link">Security Desk</a></li>
+          <li><a href="/docs/payment/token-pay" class="gold-link">Token Pay SDK</a> — partner merchant monetization</li>
+          <li><a href="/openapi.json" target="_blank" rel="noopener">openapi.json</a> · <a href="/agent/discover" class="gold-link">Discover UI</a></li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn gold" href="/docs/integration/mcp-registry">MCP guide</a>
+        <a class="btn" href="/agent/playground">Playground</a>
+        <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+      </div>
+      <p class="docs-foot">Concierge · <code>@conc-exe/agent</code> · packages/agent</p>
+    </div>
+  </main>
+</div>
+<script src="/js/docs-site.js"></script>
+</body>
+</html>

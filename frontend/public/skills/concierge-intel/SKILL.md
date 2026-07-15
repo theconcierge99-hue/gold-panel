@@ -95,9 +95,12 @@ Playground: `/agent/playground?ep=intel-a2a-pipeline`
 
 ## MCP
 
-- **URL:** `https://conc-exe.xyz/api/mcp`
+- **URL:** `https://conc-exe.xyz/api/mcp` (v1.1)
 - **Methods:** `initialize`, `tools/list`, `tools/call`
-- Pass `arguments.paymentSignature` after x402 pay, or use `pay curl` first
+- **Free:** `concierge_catalog`, `concierge_prepare_payment`
+- Unpaid paid-tools return a live `PAYMENT-REQUIRED` in `_meta.paymentRequiredHeader` — settle then retry with `paymentSignature`, or pass `creditsWallet` / `soonHolderWallet`
+- Or use `pay curl` on the matching HTTP route
+- **SDK:** `npm i @conc-exe/agent` — docs `/docs/sdk/agent`
 
 ## Agent identity (optional)
 
@@ -105,9 +108,11 @@ Register `agt_…` and send `X-Agent-Id` header — see `/docs/api/agent-identit
 
 ## Docs
 
+- Agent SDK: `/docs/sdk/agent` (`@conc-exe/agent`)
 - Intel APIs (A2A): `/docs/api/intel#a2a`
 - Security Desk (passive scan): `/docs/api/security` · skill `/skills/concierge-security/SKILL.md`
 - Agent card (A2A): `/docs/integration/agent-card`
 - Agent readiness audit: `/docs/api/agent-readiness`
+- MCP Registry: `/docs/integration/mcp-registry`
 - Builders: `/docs/builders`
 - OpenAPI: `/openapi.json`

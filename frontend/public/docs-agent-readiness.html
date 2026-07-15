@@ -41,7 +41,7 @@
             <tr><td>Agent card</td><td><code>GET /.well-known/agent-card.json</code></td><td>ERC-8004-style A2A discovery</td></tr>
             <tr><td>MCP HTTP</td><td><code>GET /api/mcp</code></td><td>JSON-RPC <code>tools/list</code> · <code>tools/call</code> for intel routes</td></tr>
             <tr><td>Verdict accuracy</td><td><code>GET /api/concierge-intel-accuracy</code></td><td>Free trust signal — 24h BTC alignment leaderboard · <a href="/docs/builders/case-study" class="gold-link">B2B case study</a></td></tr>
-            <tr><td>Official MCP Registry</td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code></a></td><td>Published v1.0.1 — <a href="/docs/integration/mcp-registry" class="gold-link">integration guide</a></td></tr>
+            <tr><td>Official MCP Registry</td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code></a></td><td>Published v1.1.0 — <a href="/docs/integration/mcp-registry" class="gold-link">integration guide</a> · <a href="/docs/sdk/agent" class="gold-link">Agent SDK</a></td></tr>
             <tr><td>AsyncAPI stub</td><td><code>GET /asyncapi.json</code></td><td>Event contract placeholder (HTTP-only today; webhooks reserved)</td></tr>
             <tr><td>LLM index</td><td><code>GET /llms.txt</code></td><td>Human + agent doc map</td></tr>
             <tr><td>Rate-limit policy</td><td><code>X-RateLimit-Limit</code>, <code>RateLimit-Limit</code></td><td>120 req/min soft limit on <code>/api/*</code> — documented in OpenAPI 429 responses</td></tr>
@@ -92,7 +92,7 @@ curl -s https://conc-exe.xyz/openapi.json | jq '.paths["/api/concierge-intel-acc
         <table>
           <thead><tr><th>Channel</th><th>Status</th><th>Public URL</th></tr></thead>
           <tbody>
-            <tr><td>MCP Registry</td><td><span class="gold-link">Published</span></td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> v1.0.1</a> · <a href="/docs/integration/mcp-registry" class="gold-link">guide</a></td></tr>
+            <tr><td>MCP Registry</td><td><span class="gold-link">Published</span></td><td><a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> v1.1.0</a> · <a href="/docs/integration/mcp-registry" class="gold-link">guide</a> · <a href="/docs/sdk/agent" class="gold-link">SDK</a></td></tr>
             <tr><td>thebuyside <code>pay.discover</code></td><td>Pending merge</td><td>Six verified intel routes — see <a href="/docs/api/agent-readiness" class="gold-link">distribution notes</a></td></tr>
             <tr><td>pay.sh catalog</td><td>Bundle live</td><td><a href="/docs/payment/paysh" class="gold-link">pay.sh guide</a> · FQN <code>conc-exe/concierge-agent</code></td></tr>
             <tr><td>Agent Skill (SKILL.md)</td><td>Published</td><td><a href="/skills/concierge-intel/SKILL.md"><code>/skills/concierge-intel/SKILL.md</code></a></td></tr>

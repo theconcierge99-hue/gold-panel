@@ -229,6 +229,10 @@
       "destination": "/docs-payment-token-pay.html"
     },
     {
+      "source": "/docs/sdk/agent",
+      "destination": "/docs-sdk-agent.html"
+    },
+    {
       "source": "/docs/corbits",
       "destination": "/docs-corbits.html"
     },

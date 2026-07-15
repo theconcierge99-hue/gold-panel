@@ -163,8 +163,8 @@
   <section id="mcp">
     <h2>MCP</h2>
     <div class="card">
-      <p><code>POST /api/mcp</code> — tools <code>security_scan</code>, <code>security_readiness</code>, <code>security_headers</code>. Pass <code>paymentSignature</code> after x402.</p>
-      <p>Skill: <a href="/skills/concierge-security/SKILL.md">/skills/concierge-security/SKILL.md</a> · OpenAPI: <a href="/openapi.json">openapi.json</a></p>
+      <p><code>POST /api/mcp</code> — tools <code>security_scan</code>, <code>security_readiness</code>, <code>security_headers</code> (plus free <code>concierge_catalog</code> / <code>concierge_prepare_payment</code>). Unpaid calls return a live <code>PAYMENT-REQUIRED</code> challenge; retry with <code>paymentSignature</code>, <code>creditsWallet</code>, or <code>pay curl</code>.</p>
+      <p>Skill: <a href="/skills/concierge-security/SKILL.md">/skills/concierge-security/SKILL.md</a> · OpenAPI: <a href="/openapi.json">openapi.json</a> · SDK: <a href="/docs/sdk/agent"><code>@conc-exe/agent</code></a></p>
     </div>
   </section>
 

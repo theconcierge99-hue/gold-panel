@@ -107,4 +107,4 @@ Bump `version` in `server.json` when tools or URLs change.
 }
 ```
 
-Paid tools require x402 settlement — pass `paymentSignature` in `tools/call` arguments after `pay curl`, or use [pay.sh](https://pay.sh/) MCP.
+Paid tools proxy x402 — unpaid `tools/call` returns live `PAYMENT-REQUIRED` in `_meta`. Retry with `paymentSignature`, pass `creditsWallet`, or use [pay.sh](https://pay.sh/) / `@conc-exe/agent`. Free: `concierge_catalog`, `concierge_prepare_payment`.

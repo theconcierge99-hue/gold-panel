@@ -85,9 +85,12 @@ Passive exposure findings on `security-scan`: `summary.surfaceGrade`, `summary.s
 
 ## MCP
 
-`POST /api/mcp` — tools `security_scan`, `security_readiness`, `security_headers` (underscore names).
+`POST /api/mcp` (v1.1) — tools `security_scan`, `security_readiness`, `security_headers` plus free `concierge_catalog` / `concierge_prepare_payment`. Unpaid tools return live `PAYMENT-REQUIRED`; retry with `paymentSignature` or `creditsWallet`, or use `pay curl`.
+
+SDK: `npm i @conc-exe/agent` · `/docs/sdk/agent`
 
 ## Related
 
 - Intel desks: `/skills/concierge-intel/SKILL.md`
 - Docs: `https://conc-exe.xyz/docs/api/security`
+- MCP: `https://conc-exe.xyz/docs/integration/mcp-registry`

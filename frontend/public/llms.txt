@@ -17,7 +17,8 @@
 - [Security Desk](https://conc-exe.xyz/docs/api/security): Passive website scan, scout audits, free conc-exe.xyz self-audit — Lounge /lounge#security-scan
 - [Agent Skills](https://conc-exe.xyz/agent/skills): concierge-intel + concierge-security SKILL.md — raw at /skills/
 - [Agent Skill (SKILL.md)](https://conc-exe.xyz/skills/concierge-intel/SKILL.md): Agent Skills pattern for Claude/Cursor/Grok sessions
-- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Published xyz.conc-exe/concierge-intel v1.0.1 — guide at /docs/integration/mcp-registry
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel): Published xyz.conc-exe/concierge-intel v1.1.0 — guide at /docs/integration/mcp-registry
+- [Agent SDK](https://conc-exe.xyz/docs/sdk/agent): @conc-exe/agent — discover → pay → call intel/security from TypeScript agents
 - [Agent Readiness](https://conc-exe.xyz/docs/api/agent-readiness): Audit posture, distribution phase 2, verify commands
 - [API Overview](https://conc-exe.xyz/docs/api/overview): Base URL, discovery, verdict signal vocabulary.
 - [HYRE Gateway](https://conc-exe.xyz/docs/integration/hyre): Optional DeepSeek / GLM chat models via OpenAI-compatible gateway.

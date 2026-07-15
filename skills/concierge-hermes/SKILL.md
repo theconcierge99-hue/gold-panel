@@ -48,6 +48,7 @@ mcp_servers:
     url: "https://conc-exe.xyz/api/mcp"
     tools:
       include:
+        - concierge_catalog
         - intel_macro
         - intel_wire
         - intel_tvl
@@ -60,17 +61,19 @@ mcp_servers:
 
 ## Procedure
 
-1. Prefer **MCP tools** when Concierge MCP is connected (`intel_*`, `security_*`).
-2. For HTTP one-shots without MCP settlement wiring, use **pay.sh**:
+1. Prefer **MCP tools** when Concierge MCP is connected (`concierge_catalog`, `intel_*`, `security_*`).
+2. Unpaid MCP calls return a **live** `PAYMENT-REQUIRED` challenge — settle then retry with `paymentSignature`, or pass `creditsWallet` / `soonHolderWallet`.
+3. For HTTP one-shots, use **pay.sh**:
 
 ```bash
 pay curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
 pay curl https://conc-exe.xyz/api/concierge-intel-wire -d '{"limit":8}'
 ```
 
-3. Production Concierge is **mainnet** — do not use `pay --sandbox` against `conc-exe.xyz`.
-4. Security tools require `authorized: true` + hostname **allowlist** matching the target. Never scan hosts the user does not own/operate.
-5. Free scope check: `POST /api/concierge-security-scope` (no payment).
+4. Production Concierge is **mainnet** — do not use `pay --sandbox` against `conc-exe.xyz`.
+5. Security tools require `authorized: true` + hostname **allowlist** matching the target. Never scan hosts the user does not own/operate.
+6. Free scope check: `POST /api/concierge-security-scope` (no payment).
+7. Free MCP: `concierge_catalog`, `concierge_prepare_payment`.
 
 ## Pricing (USDC)
 
@@ -91,7 +94,7 @@ Natural-language schedule Hermes can adopt:
 ## Pitfalls
 
 - **Sandbox vs mainnet** — sandbox pay against production Concierge fails settlement.
-- **Empty MCP tools/call** — paid tools need a settled `paymentSignature` or use `pay curl` on the HTTP route first.
+- **MCP payment** — unpaid `tools/call` returns `_meta.paymentRequiredHeader`; retry with `paymentSignature`, or use `pay curl` / TCX credits.
 - **Security scope** — platform hosts (`conc-exe.xyz`, project Vercel) are always forbidden for probe targets.
 - **Do not invent partnership** — Concierge is compatible with Hermes; official catalog listing requires a merged Nous `optional-mcps/` PR.
 

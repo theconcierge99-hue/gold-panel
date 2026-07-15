@@ -1,0 +1,45 @@
+{
+  "name": "@conc-exe/agent",
+  "version": "0.1.0",
+  "description": "Discover and call Concierge pay-per-call intel APIs (x402 / TCX) from any agent runtime",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theconcierge99-hue/gold-panel.git",
+    "directory": "packages/agent"
+  },
+  "homepage": "https://conc-exe.xyz/docs/sdk/agent",
+  "bugs": {
+    "url": "https://t.me/Theconcierge33"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "x402",
+    "concierge",
+    "agent",
+    "mcp",
+    "intel",
+    "solana",
+    "micropayments",
+    "a2a"
+  ]
+}

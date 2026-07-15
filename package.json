@@ -32,6 +32,7 @@
     "paysh:validate:token-pay": "npx -y @solana/pay catalog check pay-skills/conc-exe/token-pay/PAY.md",
     "paysh:prepare-pr": "node scripts/prepare-paysh-pr.mjs",
     "token-x402:build": "npm run build --prefix packages/token-x402",
+    "agent:build": "npm run build --prefix packages/agent",
     "token-pay:test-preview": "node scripts/test-token-pay-preview.mjs",
     "tcx:telegram-bot": "node scripts/tcx-telegram-trade-bot.mjs"
   },

@@ -28,6 +28,7 @@ export const CONCIERGE_STATIC_REWRITES: Record<string, string> = {
   "/docs/payment/mpp": "/docs-payment-mpp.html",
   "/docs/payment/paysh": "/docs-payment-paysh.html",
   "/docs/payment/token-pay": "/docs-payment-token-pay.html",
+  "/docs/sdk/agent": "/docs-sdk-agent.html",
   "/docs/corbits": "/docs-corbits.html",
   "/docs/grok-build": "/docs-grok-build.html",
   "/docs/integration/dexter": "/docs-integration-dexter.html",

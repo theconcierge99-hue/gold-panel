@@ -43,7 +43,7 @@
           <li>Install Hermes · connect messaging surfaces you care about.</li>
           <li>Add Concierge as a remote HTTP MCP server (snippet below).</li>
           <li>Install the <code>concierge-hermes</code> skill so Hermes knows routes, prices, and payment flow.</li>
-          <li>Settle paid calls with <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>, Hermes x402 skill, or <code>paymentSignature</code> on MCP <code>tools/call</code>.</li>
+          <li>Settle paid calls with <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>, Hermes x402 skill, <code>paymentSignature</code> / <code>creditsWallet</code> on MCP <code>tools/call</code>, or <a href="/docs/sdk/agent" class="gold-link"><code>@conc-exe/agent</code></a>.</li>
           <li>Optional: schedule cron (morning macro, wire digest) — Hermes gateway runs unattended; Concierge bills per call.</li>
         </ol>
         <p class="note">Hermes is not a marketplace like <a href="/docs/integration/poncho" class="gold-link">Poncho</a>. It is a personal agent runtime. Concierge is the paid intel tool Hermes calls.</p>
@@ -60,13 +60,14 @@
     # Optional — keep the surface small for daily briefs:
     # tools:
     #   include:
+    #     - concierge_catalog
     #     - intel_macro
     #     - intel_wire
     #     - intel_verdict
     #     - intel_meteora
     #     - security_headers
     #     - security_scan</code></pre>
-        <p class="note">Paid <code>tools/call</code> need x402 settlement. Prefer <code>pay curl</code> for HTTP routes, or pass <code>arguments.paymentSignature</code> after a 402 challenge. See <a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a>.</p>
+        <p class="note">MCP v1.1 proxies x402 — unpaid calls return a live <code>PAYMENT-REQUIRED</code> challenge. Use free <code>concierge_catalog</code> / <code>concierge_prepare_payment</code>, then settle via <code>pay curl</code>, <code>paymentSignature</code>, or <code>creditsWallet</code>. See <a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> · <a href="/docs/sdk/agent" class="gold-link">Agent SDK</a>.</p>
       </div>
 
       <h2 class="docs-h2">Install the skill</h2>
@@ -84,6 +85,7 @@ hermes skills install https://conc-exe.xyz/skills/concierge-hermes/SKILL.md
         <table>
           <thead><tr><th>MCP tool</th><th>Route</th><th>USDC</th></tr></thead>
           <tbody>
+            <tr><td><code>concierge_catalog</code></td><td>free</td><td>—</td></tr>
             <tr><td><code>intel_macro</code></td><td><code>POST /api/concierge-intel-macro</code></td><td>$0.02</td></tr>
             <tr><td><code>intel_wire</code></td><td><code>POST /api/concierge-intel-wire</code></td><td>$0.02</td></tr>
             <tr><td><code>intel_tvl</code></td><td><code>POST /api/concierge-intel-tvl</code></td><td>$0.02</td></tr>
@@ -123,6 +125,7 @@ pay curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'</code></pre>
       <div class="card">
         <ul>
           <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — <code>xyz.conc-exe/concierge-intel</code></li>
+          <li><a href="/docs/sdk/agent" class="gold-link">Agent SDK</a> — <code>@conc-exe/agent</code></li>
           <li><a href="/docs/integration/poncho" class="gold-link">Poncho</a> — marketplace consumers (different surface)</li>
           <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — payment CLI / MCP</li>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/security" class="gold-link">Security Desk</a></li>

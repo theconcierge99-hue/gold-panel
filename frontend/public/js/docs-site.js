@@ -21,6 +21,7 @@
       { id: "payment-paysh", href: "/docs/payment/paysh", title: "pay.sh" },
     ]},
     { label: "Integrations", items: [
+      { id: "sdk-agent", href: "/docs/sdk/agent", title: "Agent SDK" },
       { id: "integration-dexter", href: "/docs/integration/dexter", title: "Dexter & OpenDexter" },
       { id: "integration-payai", href: "/docs/integration/payai", title: "PayAI" },
       { id: "integration-x402scan", href: "/docs/integration/x402scan", title: "x402scan" },

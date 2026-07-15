@@ -26,7 +26,7 @@
       </p>
 
       <div class="card">
-        <p><strong>Status:</strong> <span class="gold-link">Published</span> — v1.0.1</p>
+        <p><strong>Status:</strong> <span class="gold-link">Published</span> — v1.1.0</p>
         <p><strong>Listing:</strong> <a class="ext" href="https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel" target="_blank" rel="noopener"><code>xyz.conc-exe/concierge-intel</code> ↗</a></p>
         <p><strong>Remote URL:</strong> <code>https://conc-exe.xyz/api/mcp</code></p>
         <p><strong>Agent skills:</strong> <a href="/agent/skills">Agent Skills UI</a> · <a href="/skills/concierge-intel/SKILL.md"><code>concierge-intel</code></a> · <a href="/skills/concierge-security/SKILL.md"><code>concierge-security</code></a></p>
@@ -42,7 +42,7 @@
     }
   }
 }</code></pre>
-        <p class="note">Paid <code>tools/call</code> require x402 settlement — pass <code>paymentSignature</code> after <code>pay curl</code>, or use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a> MCP.</p>
+        <p class="note">Paid <code>tools/call</code> proxy x402 — unpaid calls return a live <code>PAYMENT-REQUIRED</code> challenge. Retry with <code>paymentSignature</code>, pass <code>creditsWallet</code>, or use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>. Free tools: <code>concierge_catalog</code>, <code>concierge_prepare_payment</code>. SDK: <code>@conc-exe/agent</code>.</p>
       </div>
 
       <h2 class="docs-h2">Discovery on conc-exe.xyz</h2>
@@ -74,6 +74,7 @@ npm run agent-readiness:audit</code></pre>
       <div class="card">
         <ul>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> — structured JSON routes behind MCP tools</li>
+          <li><a href="/docs/sdk/agent" class="gold-link">Agent SDK</a> — <code>@conc-exe/agent</code> discover → pay → call</li>
           <li><a href="/docs/api/security" class="gold-link">Security Desk</a> — <code>security_*</code> MCP tools · passive authorized scans</li>
           <li><a href="/docs/integration/hermes" class="gold-link">Hermes Agent</a> — Nous personal agent · remote MCP + skill</li>
           <li><a href="/docs/integration/x402scan" class="gold-link">x402scan</a> — x402 resource fan-out</li>
