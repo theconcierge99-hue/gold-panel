@@ -6,7 +6,7 @@
 <script src="/js/concierge-boot-head.js"></script>
 <title>@conc-exe/agent SDK — Concierge Documentation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Discover and call Concierge pay-per-call intel from any agent runtime — @conc-exe/agent TypeScript SDK with x402 / TCX settlement." />
+<meta name="description" content="Discover and call Concierge pay-per-call intel from any agent runtime — @conc-exe/agent TypeScript SDK with x402 / TCX settlement and optional ERC-8004 identity link." />
 <link rel="icon" href="/images/the-concierge-logo.png" type="image/png" />
 <link rel="canonical" href="/docs/sdk/agent" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -22,6 +22,7 @@
       <h1 class="docs-title"><code>@conc-exe/agent</code></h1>
       <p class="docs-lead">
         Discover Concierge routes, settle with x402 or TCX, call intel — <strong>no API keys</strong>.
+        Optional: prepare and link <strong>ERC-8004</strong> Identity mints on Base.
       </p>
 
       <div class="sdk-meta">
@@ -168,15 +169,32 @@ const { body } = await agent.call("intel-macro", {});</code></pre>
             <tr><td><code>catalog()</code></td><td>Offline kind → path → price (24 routes)</td></tr>
             <tr><td><code>call(kind, body)</code> · <code>intel.*</code> · <code>security.*</code></td><td>Paid POST</td></tr>
             <tr><td><code>a2aMesh()</code> / <code>agentCard()</code></td><td>Free discovery</td></tr>
+            <tr><td><code>agentRegistration(agtId)</code></td><td>EIP-8004 registration file (<code>agentURI</code>)</td></tr>
+            <tr><td><code>prepareErc8004(agtId)</code> / <code>linkErc8004({ id, agentId, txHash })</code></td><td>Base Identity Registry mint prepare + link</td></tr>
             <tr><td><code>payCurl(kind)</code></td><td>Shell hint for agents</td></tr>
           </tbody>
         </table>
         <p>Same intel surface over MCP: <code>/api/mcp</code> (v1.1).</p>
+        <p class="note">ERC-8004 mint still needs a signer with ETH on Base (Lounge UI or your wallet). SDK helpers only prepare/link — see <a href="/docs/api/agent-identity" class="gold-link">Agent identity</a>.</p>
+      </div>
+
+      <h2 class="docs-h2">ERC-8004 identity (optional)</h2>
+      <div class="card">
+        <p>After you register <code>agt_…</code> and mint on the Base Identity Registry, link the tokenId back to Concierge:</p>
+<pre><code>const prep = await agent.prepareErc8004("agt_…");
+// prep.agentURI → pass to register(agentURI) on-chain from the agent EVM wallet
+await agent.linkErc8004({
+  id: "agt_…",
+  agentId: "123",       // on-chain tokenId
+  txHash: "0x…",
+});</code></pre>
+        <p>Lounge one-click: <a href="/lounge#agent-identity" class="gold-link">/lounge#agent-identity</a></p>
       </div>
 
       <h2 class="docs-h2">Related</h2>
       <div class="card">
         <ul>
+          <li><a href="/docs/api/agent-identity" class="gold-link">Agent identity / ERC-8004</a> — register + Base mint</li>
           <li><a href="/docs/integration/mcp-registry" class="gold-link">MCP Registry</a> — Cursor / Claude / Hermes</li>
           <li><a href="/docs/payment/paysh" class="gold-link">pay.sh</a> — CLI settlement</li>
           <li><a href="/docs/api/intel" class="gold-link">Intel APIs</a> · <a href="/docs/api/security" class="gold-link">Security Desk</a></li>
