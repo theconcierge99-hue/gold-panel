@@ -21,7 +21,8 @@
       <div class="docs-eyebrow">Integrations</div>
       <h1 class="docs-title">Agent Card (A2A)</h1>
       <p class="docs-lead">
-        Concierge publishes a machine-readable <strong>Agent Card</strong> at <code>/.well-known/agent-card.json</code> for agent-to-agent (A2A) discovery — compatible with ERC-8004-style service registries and x402-paid endpoints.
+        Concierge publishes a machine-readable <strong>Agent Card</strong> at <code>/.well-known/agent-card.json</code> for agent-to-agent (A2A) discovery and x402-paid endpoints.
+        Cards are <strong>HTTP JSON</strong> (off-chain registry). Per-agent cards may include an EIP-8004 <code>type</code> URI for indexing — this is <strong>not</strong> an on-chain ERC-8004 registration.
       </p>
 
       <div class="card">
@@ -70,7 +71,7 @@ curl -s https://conc-exe.xyz/api/agent-identity-card?id=agt_demo | jq .</code></
 
       <div class="cta-row">
         <a class="btn gold" href="/.well-known/agent-card.json" target="_blank" rel="noopener">Agent card ↗</a>
-        <a class="btn" href="/agent/endpoints">18 routes</a>
+        <a class="btn" href="/agent/endpoints">24 routes</a>
         <a class="btn" href="/api/agent-a2a-mesh" target="_blank" rel="noopener">A2A mesh ↗</a>
         <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       </div>

@@ -287,7 +287,7 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
           {
             href: "https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel",
             type: "text/html",
-            title: "Official MCP Registry listing (xyz.conc-exe/concierge-intel v1.0.1)",
+            title: "Official MCP Registry listing (xyz.conc-exe/concierge-intel v1.1.0)",
           },
         ],
       },
@@ -312,7 +312,8 @@ export function buildApiCatalogLinkset(origin: string): Record<string, unknown> 
       {
         anchor: `${base}/.well-known/agent-card.json`,
         title: "Agent service card",
-        description: "ERC-8004-style A2A discovery card",
+        description:
+          "HTTP A2A service registry card (off-chain). Per-agent cards may include EIP-8004 type URI for indexing — not an on-chain ERC-8004 registration.",
       },
       {
         anchor: `${base}/asyncapi.json`,

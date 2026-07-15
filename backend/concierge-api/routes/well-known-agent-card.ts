@@ -2,7 +2,7 @@ import { buildLoungeServiceCard, resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor } from "../concierge-security";
 import { withEdgeCache } from "../edge-response-cache";
 
-/** Service-level agent registry card (ERC-8004-style discovery). */
+/** Service-level agent registry card (HTTP A2A discovery — not on-chain ERC-8004). */
 export default async function handler(request: Request): Promise<Response> {
   const cors = {
     ...corsHeadersFor(request),

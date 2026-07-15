@@ -201,7 +201,7 @@ export class ConciergeAgentClient {
     return (await this.getJson("/api/agent-a2a-mesh")) as Record<string, unknown>;
   }
 
-  /** Service agent card (ERC-8004-style JSON). */
+  /** Service agent card JSON (HTTP A2A discovery). */
   async agentCard(): Promise<Record<string, unknown>> {
     return (await this.getJson("/.well-known/agent-card.json")) as Record<string, unknown>;
   }

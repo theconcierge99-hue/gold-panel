@@ -40,7 +40,7 @@ export const SOON_TIERS: SoonTier[] = [
     benefits: [
       {
         id: "soon-checkout",
-        label: "TCX checkout (all 18 routes)",
+        label: "TCX checkout (all 24 routes)",
         detail: "~30% less TCX vs USDC list price (SOON_TOKEN_DISCOUNT_PERCENT). 80% of each payment burns.",
         status: "live",
       },

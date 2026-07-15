@@ -2,7 +2,7 @@ import { buildAgentCard, resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor, sanitizePublicError } from "../concierge-security";
 import { getAgentById } from "../agent-identity-store";
 
-/** ERC-8004-style agent card JSON for one registered agent. */
+/** Per-agent HTTP card JSON. Includes EIP-8004 type URI for indexing — not on-chain registration. */
 export default async function handler(request: Request): Promise<Response> {
   const cors = {
     ...corsHeadersFor(request),

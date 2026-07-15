@@ -76,7 +76,7 @@
           <tr><td><code>GET /.well-known/agent-card.json</code></td><td>Service registry — how to register agents on this deployment</td></tr>
           <tr><td><code>POST /api/agent-identity</code></td><td>Register agent (public keys only)</td></tr>
           <tr><td><code>GET /api/agent-identity?id=agt_…</code></td><td>Profile + embedded card JSON</td></tr>
-          <tr><td><code>GET /api/agent-identity-card?id=agt_…</code></td><td>ERC-8004-style agent card for one agent</td></tr>
+          <tr><td><code>GET /api/agent-identity-card?id=agt_…</code></td><td>Per-agent HTTP card (EIP-8004 type URI for indexing — not on-chain)</td></tr>
           <tr><td><code>GET /api/agent-identity?list=1&amp;limit=24</code></td><td>Public directory (latest agents)</td></tr>
         </tbody>
       </table>
@@ -107,7 +107,7 @@ Content-Type: application/json
     "cardUrl": "https://conc-exe.xyz/api/agent-identity-card?id=agt_…",
     "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…"
   },
-  "card": { "...": "ERC-8004-style card" },
+  "card": { "...": "per-agent HTTP card" },
   "message": "Identity registered. Store private keys only on the agent…"
 }</code></pre>
       <p>Re-registering the same wallet pair is <strong>idempotent</strong> — you receive the existing <code>agt_…</code> id.</p>
@@ -145,7 +145,7 @@ Content-Type: application/json
         <li><strong>services</strong> — Concierge, news-open, and other x402 routes with USDC pricing</li>
         <li><strong>discovery</strong> — links to <code>/.well-known/x402</code> and <code>/openapi.json</code></li>
       </ul>
-      <p>The <code>type</code> field follows ERC-8004-style discovery so registries and other agents can index your bot without custom parsers.</p>
+      <p><strong>HTTP only (off-chain).</strong> The optional <code>type</code> field uses the EIP-8004 registration URI so registries can index your bot — Concierge does <strong>not</strong> deploy an on-chain ERC-8004 registry.</p>
       <p>Fetch one agent: <code>GET /api/agent-identity-card?id=agt_…</code></p>
     </div>
   </section>

@@ -19,7 +19,7 @@ Fund the new addresses with **≥0.1 USDC** (and a little **SOL** on Solana for 
 | `GET /.well-known/agent-card.json` | Service registry card (how to register agents) |
 | `POST /api/agent-identity` | Register agent (public keys only) |
 | `GET /api/agent-identity?id=agt_…` | Profile + embedded card JSON |
-| `GET /api/agent-identity-card?id=agt_…` | ERC-8004-style agent card |
+| `GET /api/agent-identity-card?id=agt_…` | Per-agent HTTP card (EIP-8004 `type` URI for indexing — **not** on-chain registration) |
 | `GET /api/agent-identity?list=1` | Public directory (latest agents) |
 | `PATCH /api/agent-identity` | Link OOBE SAP wallet / agent PDA to existing `agt_…` |
 
@@ -66,7 +66,7 @@ At least **one** of `solAddress` or `evmAddress` is required. The server **never
     "cardUrl": "https://conc-exe.xyz/api/agent-identity-card?id=agt_…",
     "profileUrl": "https://conc-exe.xyz/api/agent-identity?id=agt_…"
   },
-  "card": { "...": "ERC-8004-style card" }
+  "card": { "...": "per-agent HTTP card with optional EIP-8004 type URI" }
 }
 ```
 
@@ -82,13 +82,18 @@ See [agents.md](agents.md) for full x402 client examples (Node / Python).
 
 ## Agent card format
 
-Each agent exposes a machine-readable card (`executive-lounge-agent-card-v1`) with:
+**Scope:** HTTP JSON discovery + off-chain `agt_…` registry (KV). This is **not** an on-chain ERC-8004 registration contract.
+
+| Card | Schema | Notes |
+|------|--------|-------|
+| Service | `concierge-agent-registry-v1` at `/.well-known/agent-card.json` | How to register / discover Concierge |
+| Per-agent | `executive-lounge-agent-card-v1` | May include `type: …/eip-8004#registration-v1` so indexers can parse — still HTTP-only |
+
+Each per-agent card includes:
 
 - `accounts` — Solana + Base addresses  
 - `services` — Concierge, news-open (x402, 0.1 USDC)  
 - `discovery` — links to `/.well-known/x402` and `/openapi.json`
-
-Compatible with ERC-8004-style discovery (`type` field).
 
 ## Security
 
