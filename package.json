@@ -26,6 +26,8 @@
     "edge:verify": "node scripts/verify-gemma-edge-integration.mjs",
     "edge:verify:local": "node scripts/verify-gemma-edge-integration.mjs --origin=http://localhost:8080",
     "launch:verify": "node scripts/verify-launch-readiness.mjs",
+    "tcx:burn:setup": "powershell -ExecutionPolicy Bypass -File scripts/tcx-burn-setup.ps1",
+    "tcx:burn": "powershell -ExecutionPolicy Bypass -File scripts/tcx-burn-run.ps1",
     "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
     "paysh:sync-token-pay-openapi": "npx tsx scripts/generate-paysh-token-pay-openapi.ts",
     "paysh:validate": "npx -y @solana/pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md",
