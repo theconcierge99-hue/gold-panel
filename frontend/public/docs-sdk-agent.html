@@ -17,7 +17,7 @@
   <aside class="docs-sidebar" id="docs-sidebar"></aside>
   <main class="docs-main">
     <div class="docs-content">
-      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/integration/mcp-registry">MCP Registry</a></div>
+      <div class="docs-topbar"><a href="/docs">← Docs home</a> · <a href="/docs/integration/mcp-registry">MCP Registry</a> · <a href="#try-live">Try live</a></div>
       <div class="docs-eyebrow">SDK</div>
       <h1 class="docs-title"><code>@conc-exe/agent</code></h1>
       <p class="docs-lead">
@@ -28,6 +28,7 @@
       <div class="card">
         <p><strong>Status:</strong> <span class="gold-link">0.1.0</span> — monorepo <code>packages/agent</code> · publish with <code>npm run agent:build</code></p>
         <p><strong>Sister SDK:</strong> <a href="/docs/payment/token-pay" class="gold-link"><code>@conc-exe/token-x402</code></a> — for merchants monetizing their own APIs (different audience).</p>
+        <p class="note" style="margin-bottom:0">Want to verify without installing? Jump to <a href="#try-live" class="gold-link">Try it live</a> — same steps as Quick start, in the browser.</p>
       </div>
 
       <h2 class="docs-h2">Install</h2>
@@ -56,6 +57,52 @@ try {
     console.log(agent.payCurl("intel-verdict", { message: "DeFi outlook on Solana" }));
   }
 }</code></pre>
+        <p class="note" style="margin-bottom:0">The panel below runs these checks against this origin — no npm required.</p>
+      </div>
+
+      <h2 class="docs-h2" id="try-live">Try it live</h2>
+      <div class="card sdk-live" id="sdk-live">
+        <div class="sdk-live-head">
+          <p style="margin:0;color:var(--text-primary)">Setup check — mirrors <code>discover()</code> + unpaid <code>call()</code></p>
+          <span class="sdk-live-status" id="sdk-live-status" data-tone="">Idle</span>
+        </div>
+
+        <ol class="sdk-live-steps">
+          <li data-step="mcp" data-state="pending"><strong>1. MCP / origin</strong> — <code>GET /api/mcp</code> version + free tools</li>
+          <li data-step="discover" data-state="pending"><strong>2. discover()</strong> — x402 · OpenAPI · agent card · A2A mesh</li>
+          <li data-step="call" data-state="pending"><strong>3. Unpaid call</strong> — expect <code>PaymentRequiredError</code> + <code>payCurl</code></li>
+        </ol>
+
+        <div class="sdk-live-controls">
+          <div class="sdk-live-row">
+            <div class="sdk-live-field">
+              <label for="sdk-kind">Route</label>
+              <select id="sdk-kind"></select>
+            </div>
+            <div class="sdk-live-field">
+              <label for="sdk-message">Message (optional)</label>
+              <input id="sdk-message" type="text" placeholder="e.g. DeFi outlook on Solana" />
+            </div>
+          </div>
+          <div class="sdk-live-row">
+            <button type="button" class="btn gold" id="sdk-run-all" data-sdk-action>Run setup check</button>
+            <button type="button" class="btn" id="sdk-discover-only" data-sdk-action>Discover only</button>
+            <button type="button" class="btn" id="sdk-call-only" data-sdk-action>Call probe</button>
+          </div>
+          <div class="sdk-live-field">
+            <label for="sdk-paycurl">payCurl (after probe)</label>
+            <textarea class="sdk-live-paycurl" id="sdk-paycurl" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <pre class="sdk-live-out" id="sdk-out">Press “Run setup check” to probe MCP → discover → unpaid call.</pre>
+
+        <div class="sdk-live-actions">
+          <button type="button" class="btn" id="sdk-copy-paycurl">Copy payCurl</button>
+          <a class="btn gold" id="sdk-playground-link" href="/agent/playground?ep=intel-verdict">Pay in Playground</a>
+          <a class="btn" href="/docs/payment/paysh">pay.sh docs</a>
+        </div>
+        <p class="note">Unpaid probes return HTTP 402 (expected). Settlement stays in Playground / pay.sh / your wallet — this panel does not move funds.</p>
       </div>
 
       <h2 class="docs-h2">Settle hook</h2>
@@ -68,7 +115,7 @@ try {
 });
 
 const { body } = await agent.call("intel-macro", {});</code></pre>
-        <p class="note">Without an in-process wallet, use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>: <code>agent.payCurl("intel-macro")</code>.</p>
+        <p class="note">Without an in-process wallet, use <a href="/docs/payment/paysh" class="gold-link">pay.sh</a>: <code>agent.payCurl("intel-macro")</code> — or the live panel above.</p>
       </div>
 
       <h2 class="docs-h2">Surfaces</h2>
@@ -98,7 +145,8 @@ const { body } = await agent.call("intel-macro", {});</code></pre>
       </div>
 
       <div class="cta-row">
-        <a class="btn gold" href="/docs/integration/mcp-registry">MCP guide</a>
+        <a class="btn gold" href="#try-live">Try live</a>
+        <a class="btn" href="/docs/integration/mcp-registry">MCP guide</a>
         <a class="btn" href="/agent/playground">Playground</a>
         <a class="btn" href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
       </div>
@@ -107,5 +155,6 @@ const { body } = await agent.call("intel-macro", {});</code></pre>
   </main>
 </div>
 <script src="/js/docs-site.js"></script>
+<script type="module" src="/js/docs-sdk-agent.mjs"></script>
 </body>
 </html>
