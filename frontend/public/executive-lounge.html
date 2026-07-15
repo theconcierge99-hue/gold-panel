@@ -1612,9 +1612,11 @@
         <p class="agent-id-row" id="agentExistingId"></p>
         <p class="wallet-intro" id="agentExistingMeta"></p>
         <p class="wallet-intro" id="agentErc8004Meta" style="font-size:12px;margin-top:6px"></p>
-        <p class="wallet-intro" style="font-size:11px;margin-top:8px;color:var(--text-muted)">Saved in this browser only — separate from Connect wallet. Disconnecting your wallet does not remove this agent. ERC-8004 mint uses the agent EVM key + ETH on Base for gas.</p>
+        <p class="wallet-intro" id="agentFundHint" style="font-size:11px;margin-top:8px;color:var(--text-muted)"></p>
+        <p class="wallet-intro" style="font-size:11px;margin-top:8px;color:var(--text-muted)">Saved in this browser only — separate from Connect wallet. Mint uses the <strong>agent</strong> EVM address (not your connected wallet).</p>
         <div class="modal-foot" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
           <button type="button" class="btn gold" id="agentErc8004Btn" onclick="mintAgentErc8004Ui()">Mint ERC-8004 on Base</button>
+          <button type="button" class="btn" onclick="copyAgentEvmAddress()">Copy agent EVM</button>
           <button type="button" class="btn" onclick="copyAgentCardUrl()">Copy card URL</button>
           <button type="button" class="btn" onclick="resetAgentIdentityUi()">Create new identity</button>
           <button type="button" class="btn" onclick="closeAgentIdentityModal()">Done</button>
@@ -2240,6 +2242,7 @@
     const exEl = document.getElementById('agentExisting');
     const crEl = document.getElementById('agentCreate');
     const ercMeta = document.getElementById('agentErc8004Meta');
+    const fundHint = document.getElementById('agentFundHint');
     const ercBtn = document.getElementById('agentErc8004Btn');
     if(existing?.agentId){
       exEl.hidden = false;
@@ -2250,12 +2253,22 @@
         (existing.solAddress ? ' · SOL '+shortAddr(existing.solAddress,'sol') : '') +
         (existing.evmAddress ? ' · EVM '+shortAddr(existing.evmAddress,'evm') : '');
       window._agentCardUrl = existing.cardUrl;
+      window._agentEvmAddress = existing.evmAddress || '';
       if(ercMeta){
         if(existing.erc8004?.agentId){
           ercMeta.innerHTML = 'On-chain ERC-8004 · tokenId <strong>'+existing.erc8004.agentId+'</strong>' +
             (existing.erc8004.explorerTx ? ' · <a class="gold-link" href="'+existing.erc8004.explorerTx+'" target="_blank" rel="noopener">BaseScan</a>' : '');
         }else{
           ercMeta.textContent = 'HTTP identity only — mint on Base Identity Registry to go on-chain.';
+        }
+      }
+      if(fundHint){
+        if(existing.erc8004?.agentId){
+          fundHint.textContent = '';
+        }else if(existing.evmAddress){
+          fundHint.innerHTML = 'Fund this agent address with ETH on Base first: <code style="word-break:break-all">'+existing.evmAddress+'</code> — your Connect-wallet ETH does not count.';
+        }else{
+          fundHint.textContent = '';
         }
       }
       if(ercBtn){
@@ -2266,10 +2279,12 @@
       exEl.hidden = true;
       crEl.hidden = false;
       _pendingAgentWallets = null;
+      window._agentEvmAddress = '';
       document.getElementById('agentSecrets').hidden = true;
       document.getElementById('agentWarn').hidden = true;
       document.getElementById('agentRegBtn').disabled = true;
       if(ercMeta) ercMeta.textContent = '';
+      if(fundHint) fundHint.textContent = '';
     }
   }
 
@@ -2372,6 +2387,13 @@
     navigator.clipboard.writeText(url).then(()=>toast('Card URL copied')).catch(()=>toast(url));
   }
   window.copyAgentCardUrl = copyAgentCardUrl;
+
+  function copyAgentEvmAddress(){
+    const addr = window._agentEvmAddress || (typeof window.elLoadAgentIdentity==='function' && window.elLoadAgentIdentity()?.evmAddress);
+    if(!addr){ toast('No agent EVM address'); return; }
+    navigator.clipboard.writeText(addr).then(()=>toast('Agent EVM copied — send ETH on Base here')).catch(()=>toast(addr));
+  }
+  window.copyAgentEvmAddress = copyAgentEvmAddress;
 
   async function mintAgentErc8004Ui(){
     const st = document.getElementById('agentStatus');

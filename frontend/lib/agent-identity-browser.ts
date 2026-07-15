@@ -256,6 +256,15 @@ export async function registerAgentOnChain8004(
   });
 
   try {
+    const balance = await publicClient.getBalance({ address: account.address });
+    if (balance === 0n) {
+      return {
+        ok: false,
+        error:
+          `Agent EVM wallet has 0 ETH on Base. Send a little ETH on Base to ${account.address} (not your Connect wallet), then mint again.`,
+      };
+    }
+
     const hash = await walletClient.writeContract({
       address: ERC8004_IDENTITY_REGISTRY,
       abi: ERC8004_IDENTITY_ABI,
