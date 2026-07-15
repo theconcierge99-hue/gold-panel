@@ -75,6 +75,17 @@ pay curl https://conc-exe.xyz/api/concierge-intel-wire -d '{"limit":8}'
 6. Free scope check: `POST /api/concierge-security-scope` (no payment).
 7. Free MCP: `concierge_catalog`, `concierge_prepare_payment`.
 
+## Optional agent identity (ERC-8004)
+
+Register a public `agt_…` (Solana/Base wallets, public keys only), then optionally mint an ERC-8004 Identity NFT on Base:
+
+1. Lounge UI: https://conc-exe.xyz/lounge#agent-identity  
+2. Docs: https://conc-exe.xyz/docs/api/agent-identity  
+3. Registration file (`agentURI`): `GET /api/agent-identity-registration?id=agt_…`  
+4. Prepare / link: `GET|POST /api/agent-identity-erc8004`  
+
+Fund the **agent** EVM address with ETH on Base for gas (not the Hermes host wallet). Pass `X-Agent-Id: agt_…` on paid Concierge calls for attribution.
+
 ## Pricing (USDC)
 
 | Tier | Amount | Examples |
@@ -114,3 +125,5 @@ pay curl https://conc-exe.xyz/api/concierge-intel-macro -d '{}'
 - Hermes MCP docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp
 - Call cookbook: `references/calls.md`
 - Catalog PR pack: https://conc-exe.xyz/distribution/hermes/
+- Agent identity / ERC-8004: https://conc-exe.xyz/docs/api/agent-identity
+- Agent SDK: https://conc-exe.xyz/docs/sdk/agent

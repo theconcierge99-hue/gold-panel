@@ -30,3 +30,6 @@ Docs: https://conc-exe.xyz/docs/integration/hermes
 - MCP: https://conc-exe.xyz/api/mcp
 - Skill: https://conc-exe.xyz/skills/concierge-hermes/SKILL.md
 - Registry: https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel
+- Agent identity / ERC-8004 (Base): https://conc-exe.xyz/docs/api/agent-identity
+- Lounge mint UI: https://conc-exe.xyz/lounge#agent-identity
+- Agent SDK: https://conc-exe.xyz/docs/sdk/agent

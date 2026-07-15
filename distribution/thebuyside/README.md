@@ -24,3 +24,5 @@ curl -s -o NUL -w "%{http_code}" -X POST https://conc-exe.xyz/api/concierge-inte
 ```
 
 See [adding-an-api.md](https://github.com/jaysperspective/thebuyside-x402-agent/blob/main/docs/adding-an-api.md).
+
+Seed entries stay **paid x402 routes only**. Free discovery (agent identity / ERC-8004 mint) lives on Concierge docs — not in this seed: https://conc-exe.xyz/docs/api/agent-identity

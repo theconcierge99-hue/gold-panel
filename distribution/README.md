@@ -1,14 +1,16 @@
-# Distribution bundles (phase 2)
+# Distribution bundles
 
 External registry PR materials — **0 Vercel functions**.
 
 | Channel | Path | Command |
 |---------|------|---------|
 | MCP Registry | `mcp-registry/server.json` | `npm run mcp-registry:validate` · publish: `mcp-registry/PUBLISH.md` |
+| Hermes Agent | `hermes/` | Pack for `NousResearch/hermes-agent` `optional-mcps/concierge` · `OUTREACH.md` |
 | thebuyside-x402-agent | `thebuyside/seed-entries.json` | `npm run distribution:thebuyside-pr` |
 | pay.sh / pay-skills | `../pay-skills/conc-exe/` | `npm run distribution:paysh-pr` |
 | OOBE / SAP | `oobe/sap-tools-manifest.json` | Manifest at `/distribution/oobe/sap-tools-manifest.json` · guide `/docs/integration/oobe` |
 | Agent Skill | `../skills/concierge-intel/SKILL.md` | Public URL: `https://conc-exe.xyz/skills/concierge-intel/SKILL.md` |
+| Hermes skill | `../skills/concierge-hermes/SKILL.md` | Public URL: `https://conc-exe.xyz/skills/concierge-hermes/SKILL.md` |
 
 ## npm scripts
 
@@ -23,11 +25,13 @@ External registry PR materials — **0 Vercel functions**.
 
 CI: `.github/workflows/discovery-quality.yml`
 
-## Phase 2 checklist
+## Checklist
 
 | Step | Status | Action |
 |------|--------|--------|
-| In-repo bundles | Done | MCP manifest, thebuyside seed, pay-skills bundle, SKILL.md, CI |
-| pay-skills PRs | Open | [#119 concierge-agent](https://github.com/solana-foundation/pay-skills/pull/119) · [#146 token-pay](https://github.com/solana-foundation/pay-skills/pull/146) — await maintainer merge |
-| MCP Registry publish | **Published** | [xyz.conc-exe/concierge-intel v1.0.0](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel) · republish: [PUBLISH.md](../mcp-registry/PUBLISH.md) |
-| thebuyside PR | Open | [PR #2](https://github.com/jaysperspective/thebuyside-x402-agent/pull/2) — await maintainer merge |
+| In-repo bundles | Done | MCP manifest, Hermes pack, thebuyside seed, pay-skills bundle, skills, CI |
+| pay-skills PRs | Open | [#119 concierge-agent](https://github.com/solana-foundation/pay-skills/pull/119) · [#146 token-pay](https://github.com/solana-foundation/pay-skills/pull/146) — await maintainer merge · refresh Discovery for ERC-8004 in `PAY.md` |
+| MCP Registry publish | **Published** | [xyz.conc-exe/concierge-intel](https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel) · republish: [PUBLISH.md](../mcp-registry/PUBLISH.md) |
+| thebuyside PR | Open | [PR #2](https://github.com/jaysperspective/thebuyside-x402-agent/pull/2) — await maintainer merge (seed stays paid-route only) |
+| Hermes optional-mcps | Pack ready | Submit PR to `NousResearch/hermes-agent` from `hermes/optional-mcps/concierge/` · templates in `hermes/OUTREACH.md` |
+| Agent identity / ERC-8004 | **Live** | Lounge `#agent-identity` · docs `/docs/api/agent-identity` · linked from Hermes + pay-skills Discovery |

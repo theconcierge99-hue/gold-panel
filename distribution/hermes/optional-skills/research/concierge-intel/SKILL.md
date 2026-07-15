@@ -30,4 +30,5 @@ hermes skills install https://conc-exe.xyz/skills/concierge-hermes/SKILL.md
 
 - https://conc-exe.xyz/docs/integration/hermes
 - https://conc-exe.xyz/docs/integration/mcp-registry
+- Agent identity / ERC-8004 (optional): https://conc-exe.xyz/docs/api/agent-identity
 - MCP catalog manifest: `../../optional-mcps/concierge/manifest.yaml`

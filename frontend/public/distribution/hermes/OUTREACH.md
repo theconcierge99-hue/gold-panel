@@ -53,6 +53,7 @@ Hermes already supports remote HTTP MCP + x402 skills. Concierge is listed on th
 - Docs: https://conc-exe.xyz/docs/integration/hermes
 - Skill: https://conc-exe.xyz/skills/concierge-hermes/SKILL.md
 - Registry: https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel
+- Agent identity / ERC-8004 (optional): https://conc-exe.xyz/docs/api/agent-identity
 ```
 
 ## Claim policy

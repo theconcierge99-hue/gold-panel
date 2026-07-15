@@ -5,7 +5,7 @@ description: "Pay-per-call market intelligence and Security Desk for AI agents �
 use_case: "Agent market research and authorized passive security posture — macro, wire, DeFi intel, alpha desks, wallet snapshots, website security scan. Callable from Poncho/x402scan. No API keys or subscriptions."
 category: finance
 service_url: https://conc-exe.xyz
-version: "4.1.0"
+version: "4.2.0"
 openapi:
   path: openapi.json
 ---
@@ -46,3 +46,5 @@ x402 USDC payment accepted on Solana mainnet ($0.02–$0.25 per call; $0.02 secu
 - x402: `https://conc-exe.xyz/.well-known/x402`
 - Docs: `https://conc-exe.xyz/docs` · Agent: `https://conc-exe.xyz/agent` · Security: `https://conc-exe.xyz/docs/api/security`
 - Skills: `/skills/concierge-intel/SKILL.md` · `/skills/concierge-security/SKILL.md`
+- Agent identity / ERC-8004 (Base Identity Registry mint): `https://conc-exe.xyz/docs/api/agent-identity` · Lounge: `https://conc-exe.xyz/lounge#agent-identity`
+- Agent SDK: `https://conc-exe.xyz/docs/sdk/agent` · MCP: `https://conc-exe.xyz/api/mcp`

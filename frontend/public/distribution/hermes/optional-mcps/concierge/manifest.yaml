@@ -50,6 +50,12 @@ post_install: |
   Skill (routes, prices, cron briefs):
     hermes skills install https://conc-exe.xyz/skills/concierge-hermes/SKILL.md
 
+  Optional agent identity (HTTP `agt_…` + ERC-8004 Identity NFT on Base):
+    Lounge: https://conc-exe.xyz/lounge#agent-identity
+    Docs: https://conc-exe.xyz/docs/api/agent-identity
+    Registration file (agentURI): /api/agent-identity-registration?id=agt_…
+    Prepare / link mint: GET|POST /api/agent-identity-erc8004
+
   SDK: npm i @conc-exe/agent
   Docs: https://conc-exe.xyz/docs/integration/hermes
   Registry: https://registry.modelcontextprotocol.io/?search=xyz.conc-exe%2Fconcierge-intel
