@@ -76,18 +76,18 @@ export function agentRegistryCaip(chainId: number, registry: string): string {
   return `eip155:${chainId}:${registry}`;
 }
 
-export function basescanTxUrl(txHash: string, chainId = ERC8004_DEFAULT_CHAIN_ID): string {
+export function basescanTxUrl(txHash: string, chainId: number = ERC8004_DEFAULT_CHAIN_ID): string {
   const base = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
   return `${base}/tx/${txHash}`;
 }
 
 export function basescanTokenUrl(
   tokenId: string,
-  chainId = ERC8004_DEFAULT_CHAIN_ID,
-  registry = ERC8004_IDENTITY_REGISTRY,
+  chainId: number = ERC8004_DEFAULT_CHAIN_ID,
+  registry: string = ERC8004_IDENTITY_REGISTRY,
 ): string {
-  const base = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
-  return `${base}/token/${registry}?a=${encodeURIComponent(tokenId)}`;
+  const host = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
+  return `${host}/token/${registry}?a=${encodeURIComponent(tokenId)}`;
 }
 
 export function registrationFileUrl(origin: string, agtId: string): string {

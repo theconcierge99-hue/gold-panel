@@ -3,7 +3,7 @@
  * GET /api/agent-a2a-mesh
  */
 import { buildA2aMeshDocument } from "../a2a-mesh";
-import { listAgents } from "../agent-identity-store";
+import { listAgents, toPublicView } from "../agent-identity-store";
 import { resolveOrigin } from "../agent-identity-card";
 import { corsHeadersFor } from "../concierge-security";
 import { withEdgeCache } from "../edge-response-cache";
@@ -31,16 +31,7 @@ export default async function handleAgentA2aMesh(request: Request): Promise<Resp
     const agents = await listAgents(limit);
     return buildA2aMeshDocument(
       origin,
-      agents.map((a) => ({
-        id: a.id,
-        name: a.name,
-        description: a.description,
-        solAddress: a.solAddress,
-        evmAddress: a.evmAddress,
-        createdAt: a.createdAt,
-        cardUrl: `${origin.replace(/\/$/, "")}/api/agent-identity-card?id=${encodeURIComponent(a.id)}`,
-        profileUrl: `${origin.replace(/\/$/, "")}/api/agent-identity?id=${encodeURIComponent(a.id)}`,
-      })),
+      agents.map((a) => toPublicView(origin, a)),
     );
   });
 

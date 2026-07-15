@@ -13,7 +13,7 @@ import {
   type Hex,
 } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { base } from "viem/chains";
+import { base as baseChain } from "viem/chains";
 
 export type GeneratedAgentWallets = {
   solAddress: string;
@@ -248,10 +248,10 @@ export async function registerAgentOnChain8004(
 
   const account = privateKeyToAccount(pk);
   const rpc = options?.rpcUrl || "https://mainnet.base.org";
-  const publicClient = createPublicClient({ chain: base, transport: http(rpc) });
+  const publicClient = createPublicClient({ chain: baseChain, transport: http(rpc) });
   const walletClient = createWalletClient({
     account,
-    chain: base,
+    chain: baseChain,
     transport: http(rpc),
   });
 
@@ -261,6 +261,8 @@ export async function registerAgentOnChain8004(
       abi: ERC8004_IDENTITY_ABI,
       functionName: "register",
       args: [prep.agentURI],
+      chain: baseChain,
+      account,
     });
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     const logs = parseEventLogs({

@@ -172,8 +172,12 @@ export function buildA2aMeshDocument(origin: string, agents: AgentPublicView[]):
       description: a.description,
       cardUrl: a.cardUrl,
       profileUrl: a.profileUrl,
+      registrationUrl: a.registrationUrl,
       solAddress: a.solAddress,
       evmAddress: a.evmAddress,
+      erc8004: a.erc8004
+        ? { agentId: a.erc8004.agentId, agentRegistry: a.erc8004.agentRegistry, onChain: true }
+        : undefined,
     })),
     guidance:
       "Agent A pays Concierge via x402, receives intel + A2A handoff line. " +
