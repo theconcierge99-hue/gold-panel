@@ -3,6 +3,8 @@
  */
 import { getTokenPayMerchant } from "./registry";
 import type { TokenPayMerchant } from "./types";
+import { scheduleSeasonPayerCredit } from "../tcx-season-store";
+import { isInSeasonWindow } from "../tcx-season-core";
 
 const MAX_RECENT = 40;
 const MAX_DAILY_DAYS = 90;
@@ -143,6 +145,17 @@ export async function recordTokenPaySettlement(input: {
     ...(listMicro > 0n ? { listUsdcMicro: Number(listMicro) } : {}),
     ...(effectiveMicro > 0n ? { effectiveUsdcMicro: Number(effectiveMicro) } : {}),
   };
+
+  if (isInSeasonWindow(at)) {
+    scheduleSeasonPayerCredit({
+      merchantId: input.merchantId,
+      payer: input.payer,
+      amountAtomic: input.amountAtomic,
+      resourceKind: input.resourceKind,
+      tx: input.tx,
+      at,
+    });
+  }
 
   if (hasRedis()) {
     const kv = await kvClient();

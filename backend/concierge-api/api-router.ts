@@ -51,6 +51,7 @@ import handleTcxHealth from "./routes/tcx-health";
 import handleTcxCredits from "./routes/tcx-credits";
 import handleTcxHolder from "./routes/tcx-holder";
 import handleTcxTransparency from "./routes/tcx-transparency";
+import handleTcxSeason from "./routes/tcx-season";
 import handleTokenPayVerify from "./routes/token-pay-verify";
 import handleSolanaRpc from "./routes/solana-rpc";
 import handleSolanaRpcSend from "./routes/solana-rpc-send";
@@ -120,6 +121,7 @@ const EXACT_ROUTES: Record<string, RouteHandler> = {
   "/api/tcx-health": handleTcxHealth,
   "/api/tcx-holder": handleTcxHolder,
   "/api/tcx-transparency": handleTcxTransparency,
+  "/api/tcx-season": handleTcxSeason,
   "/api/token-pay-verify": handleTokenPayVerify,
   "/api/solana-rpc": handleSolanaRpc,
   "/api/solana-rpc-send": handleSolanaRpcSend,

@@ -89,6 +89,13 @@ SOON is the default **Token Pay** merchant (native-token x402). Set `SOON_TOKEN_
 | `SOON_HOLDER_FREE_TIER_ENABLED` | `false` to disable SOON holder free raw-tier calls (default enabled when mint live). |
 | `SOON_HOLDER_FREE_RAW_PER_DAY` | Free raw-tier calls per wallet per UTC day (default `5`). |
 | `SOON_HOLDER_MIN_TOKENS` | Min SOON balance (UI units) for free tier (default `1000000` = Deluxe tier, 0.1% of 1B supply). |
+| `TCX_SEASON_START` | UTC date Season points start (`YYYY-MM-DD`). Default `2026-07-16`. Only Token Pay settles on/after this day count. |
+| `TCX_SEASON_SNAPSHOT_AT` | Optional UTC snapshot moment (`YYYY-MM-DD` or ISO datetime). Unset = season `in_progress`. When set and reached, status becomes `snapshot_ready`. |
+| `TCX_SEASON_MIN_CALLS` | Min TCX paid calls in-window for eligibility (default `3`). |
+| `TCX_SEASON_CALL_CAP` | Cap on call points (default `20`). Points = tier weight + min(calls, cap). |
+| `TCX_SEASON_MIN_HOLD_DAYS` | Days between first Season payment and snapshot/check (default `7`). |
+
+**Season API:** `GET /api/tcx-season` · `GET /api/tcx-season?wallet=` · `GET /api/tcx-season?leaderboard=1&limit=50`
 
 **Launch snapshots:** [launch-playbook.md](launch-playbook.md) · `config/launch/pre-launch.env.snapshot` · `config/launch/post-launch.env.snapshot` · `npm run launch:verify -- --phase=pre|post`
 
