@@ -420,8 +420,8 @@ async function facilitatorAuthHeaders(
 
     const base = new URL(facilitator.url);
     const requestPath = `${base.pathname.replace(/\/$/, "")}/${endpoint}`;
-    const { generateJwt } = await import("@coinbase/cdp-sdk/auth");
-    const jwt = await generateJwt({
+    const { generateCdpJwt } = await import("./cdp-jwt");
+    const jwt = await generateCdpJwt({
       apiKeyId,
       apiKeySecret,
       requestMethod: "POST",
@@ -772,7 +772,7 @@ export async function requireX402Payment(
     }
     if (
       e instanceof Error &&
-      (/CDP facilitator requires|Invalid key format|Facilitator \/verify HTTP 401|Facilitator \/settle HTTP 401|Facilitator \/verify HTTP 403|Facilitator \/settle HTTP 403/i.test(
+      (/CDP facilitator requires|CDP_API_KEY_SECRET is not a valid|Invalid key format|Failed to generate .* JWT|Facilitator \/(?:verify|settle) HTTP 40[13]/i.test(
         e.message,
       ))
     ) {
@@ -793,11 +793,16 @@ export async function requireX402Payment(
       };
     }
     console.error("[x402]", e instanceof Error ? e.message : e);
+    const rawDetail = e instanceof Error ? e.message : String(e);
+    const safeDetail = rawDetail
+      .replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer [redacted]")
+      .slice(0, 200);
     return {
       ok: false,
       response: new Response(
         JSON.stringify({
           error: "Payment service temporarily unavailable. Try again shortly.",
+          detail: safeDetail,
         }),
         {
           status: 503,
