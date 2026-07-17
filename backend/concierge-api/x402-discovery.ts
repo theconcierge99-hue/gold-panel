@@ -502,7 +502,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       contact: {
         name: "Concierge Agent",
         url: `${base}/docs`,
-        email: "support@conc-exe.xyz",
+        email: "theconcierge99@gmail.com",
       },
     },
     "x-service-info": buildXServiceInfo(base),
