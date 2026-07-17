@@ -6,10 +6,12 @@ export const WALLET_PROVIDERS = {
   phantom: {
     label: "Phantom",
     sol: () => window.phantom?.solana ?? window.solana ?? null,
+    evm: () => window.phantom?.ethereum ?? null,
   },
   okx: {
     label: "OKX Wallet",
     sol: () => window.okxwallet?.solana ?? null,
+    evm: () => window.okxwallet?.ethereum ?? null,
   },
 };
 
@@ -59,6 +61,40 @@ export async function connectSolanaWallet(providerId = "phantom") {
   session.sol = { wallet: providerId, address, connectedAt: Date.now() };
   saveWalletSession(session);
   return session.sol;
+}
+
+async function connectEvmWallet(providerId = "phantom") {
+  const cfg = WALLET_PROVIDERS[providerId] || WALLET_PROVIDERS.phantom;
+  const provider = cfg.evm?.();
+  if (!provider?.request) {
+    throw new Error(`${cfg.label} EVM not available — update the extension or reconnect on Lounge`);
+  }
+  const accounts = await provider.request({ method: "eth_requestAccounts" });
+  if (!accounts?.[0]) throw new Error("EVM connection cancelled");
+  const session = loadWalletSession();
+  session.evm = { wallet: providerId, address: accounts[0], connectedAt: Date.now() };
+  saveWalletSession(session);
+  return session.evm;
+}
+
+export async function connectWalletPair(providerId = "phantom") {
+  const errors = [];
+  let sol = null;
+  let evm = null;
+  try {
+    sol = await connectSolanaWallet(providerId);
+  } catch (e) {
+    errors.push(`SOL: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  try {
+    evm = await connectEvmWallet(providerId);
+  } catch (e) {
+    errors.push(`EVM: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  if (!sol && !evm) {
+    throw new Error(errors.join(" · ") || "Wallet connection failed");
+  }
+  return { sol, evm, warnings: errors };
 }
 
 export function disconnectSolanaWallet() {

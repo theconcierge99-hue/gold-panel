@@ -5,10 +5,12 @@ import {
   endpointUrl,
 } from "./concierge-agent-endpoints.mjs";
 import {
-  connectSolanaWallet,
+  connectWalletPair,
   disconnectSolanaWallet,
   getWalletSession,
+  loadWalletSession,
   paidFetchOptionsForRail,
+  saveWalletSession,
   shortAddr,
   x402ServerPayConfigFromApi,
 } from "./pg-wallet.mjs";
@@ -67,7 +69,7 @@ function renderWalletUi() {
     if (hasEvm) parts.push(`EVM ${shortAddr(session.evm.address, "evm")}`);
     walletStatusEl.textContent = parts.join(" · ");
     walletStatusEl.classList.add("ok");
-    walletConnectBtn.textContent = hasSol ? "Disconnect" : "Connect Solana";
+    walletConnectBtn.textContent = hasSol || hasEvm ? "Disconnect" : "Connect";
   } else {
     walletStatusEl.textContent = "Not connected — Phantom or OKX";
     walletStatusEl.classList.remove("ok");
@@ -114,19 +116,26 @@ async function loadX402Config() {
 
 async function toggleWalletConnect() {
   const session = getWalletSession();
-  if (session.sol?.address) {
+  if (session.sol?.address || session.evm?.address) {
     disconnectSolanaWallet();
+    const next = loadWalletSession();
+    delete next.evm;
+    saveWalletSession(next);
     renderWalletUi();
-    log("Wallet disconnected (Solana).", "dim");
+    log("Wallet disconnected.", "dim");
     return;
   }
 
   walletConnectBtn.disabled = true;
   try {
-    const pick = window.phantom?.solana ? "phantom" : "okx";
-    await connectSolanaWallet(pick);
+    const pick = window.phantom?.solana || window.phantom?.ethereum ? "phantom" : "okx";
+    const result = await connectWalletPair(pick);
     renderWalletUi();
-    log(`Connected Solana wallet (${pick}).`, "ok");
+    const parts = [];
+    if (result.sol) parts.push("Solana");
+    if (result.evm) parts.push("EVM");
+    log(`Connected ${parts.join(" + ")} via ${pick}.`, "ok");
+    if (result.warnings.length) log(result.warnings.join(" · "), "warn");
   } catch (e) {
     log(String(e instanceof Error ? e.message : e), "err");
   } finally {

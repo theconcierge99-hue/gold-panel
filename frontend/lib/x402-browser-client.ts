@@ -255,8 +255,8 @@ type PhantomSolanaProvider = {
 declare global {
   interface Window {
     ethereum?: EIP1193Provider;
-    phantom?: { solana?: PhantomSolanaProvider };
-    okxwallet?: { solana?: PhantomSolanaProvider };
+    phantom?: { solana?: PhantomSolanaProvider; ethereum?: EIP1193Provider };
+    okxwallet?: { solana?: PhantomSolanaProvider; ethereum?: EIP1193Provider };
     getX402PaymentOptions?: (
       session: WalletSession,
       networkMode?: "mainnet" | "testnet",
@@ -410,7 +410,37 @@ function evmProviderForSession(session: WalletSession): EIP1193Provider | undefi
   if (session.evm?.wallet === "privy") {
     return elPrivy()?.getEvmProvider?.() ?? undefined;
   }
-  return window.ethereum;
+  if (session.evm?.wallet === "okx") {
+    return window.okxwallet?.ethereum ?? window.ethereum;
+  }
+  if (session.evm?.wallet === "phantom") {
+    return window.phantom?.ethereum ?? window.ethereum;
+  }
+  return window.phantom?.ethereum ?? window.okxwallet?.ethereum ?? window.ethereum;
+}
+
+function normalizeEvmAddress(address: string): `0x${string}` {
+  const trimmed = address.trim();
+  const withPrefix = trimmed.startsWith("0x") ? trimmed : `0x${trimmed}`;
+  if (!/^0x[0-9a-fA-F]{40}$/.test(withPrefix)) {
+    throw new Error("EVM wallet address is invalid — reconnect your wallet");
+  }
+  return withPrefix as `0x${string}`;
+}
+
+async function resolveEvmUserAddress(
+  provider: EIP1193Provider,
+  session: WalletSession,
+): Promise<`0x${string}`> {
+  const accounts = (await provider.request({ method: "eth_accounts" })) as string[] | undefined;
+  if (accounts?.[0]) return normalizeEvmAddress(accounts[0]);
+  if (session.evm?.address) return normalizeEvmAddress(session.evm.address);
+
+  const requested = (await provider.request({ method: "eth_requestAccounts" })) as string[] | undefined;
+  if (!requested?.[0]) {
+    throw new Error("EVM wallet not connected — unlock Phantom/OKX and approve the connection");
+  }
+  return normalizeEvmAddress(requested[0]);
 }
 
 function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
@@ -823,9 +853,21 @@ export async function createX402PaidFetch(
   );
 
   if (preferred === "base" || preferred === "arbitrum") {
-    if (!provider) throw new Error(`EVM wallet not connected — connect ${preferred === "arbitrum" ? "Arbitrum" : "Base"} in your wallet`);
+    if (!provider) {
+      const walletLabel =
+        session.evm?.wallet === "privy"
+          ? "Privy"
+          : session.evm?.wallet === "okx"
+            ? "OKX"
+            : session.evm?.wallet === "phantom"
+              ? "Phantom"
+              : "EVM";
+      throw new Error(
+        `${walletLabel} EVM provider not found — reconnect on Lounge or reopen this page in your wallet browser`,
+      );
+    }
     await ensureWalletOnEvmRail(provider, preferred, networkMode);
-    const userAddress = session.evm!.address as `0x${string}`;
+    const userAddress = await resolveEvmUserAddress(provider, session);
     const chain = viemChainForRail(preferred, networkMode);
     const railCfg = evmRailConfig(preferred, networkMode);
     const walletClient = createWalletClient({
