@@ -508,8 +508,10 @@ async function facilitatorPost<T>(
   if (!res.ok) {
     let detail = text.slice(0, 240).replace(/\s+/g, " ").trim();
     try {
-      const err = JSON.parse(text) as { error?: string; message?: string; errorMessage?: string };
-      detail = err.error || err.message || err.errorMessage || detail;
+      const err = JSON.parse(text) as { error?: unknown; message?: unknown; errorMessage?: unknown };
+      const candidate = err.error ?? err.message ?? err.errorMessage;
+      if (typeof candidate === "string" && candidate) detail = candidate;
+      else if (candidate != null) detail = JSON.stringify(candidate).slice(0, 240);
     } catch {
       /* non-JSON error body (HTML/WAF) — keep truncated text */
     }
