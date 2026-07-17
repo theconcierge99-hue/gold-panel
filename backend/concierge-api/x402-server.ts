@@ -19,6 +19,7 @@ import {
   type X402FacilitatorProfile,
 } from "./x402-facilitator";
 import { corsHeadersFor } from "./concierge-security";
+import { loungeApiOrigin } from "./lounge-internal-auth";
 import { buildBazaarExtension } from "./x402-discovery";
 import { priceUsdcForResource, atomicAmountForResource, priceLabelForResource, type X402ResourceKind } from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
@@ -458,23 +459,46 @@ async function facilitatorAuthHeaders(
   }
 }
 
+async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function facilitatorPost<T>(
   path: string,
   body: unknown,
   endpoint: "verify" | "settle",
   facilitator: X402FacilitatorProfile,
 ): Promise<T> {
-  const auth = await facilitatorAuthHeaders(endpoint, facilitator);
-  const res = await fetch(`${facilitator.url}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...auth,
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(25_000),
-  });
+  let res: Response;
+  if (facilitator.id === "cdp" && process.env.VERCEL) {
+    // Coinbase's WAF serves HTML 403 to Vercel Edge egress; hop through the
+    // Node serverless proxy (AWS egress) which also signs the CDP JWT.
+    const secret = process.env.CDP_API_KEY_SECRET?.trim();
+    if (!secret) throw new Error("CDP facilitator requires CDP_API_KEY_ID and CDP_API_KEY_SECRET");
+    res = await fetch(`${loungeApiOrigin()}/api/x402-cdp-proxy`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-internal-cdp": await sha256Hex(secret),
+      },
+      body: JSON.stringify({ endpoint, body }),
+      signal: AbortSignal.timeout(28_000),
+    });
+  } else {
+    const auth = await facilitatorAuthHeaders(endpoint, facilitator);
+    res = await fetch(`${facilitator.url}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...auth,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(25_000),
+    });
+  }
   const text = await res.text();
   // CDP reports Bazaar discovery accept/reject status here; surface it for indexing diagnosis.
   const extResponses = res.headers.get("extension-responses") ?? res.headers.get("EXTENSION-RESPONSES");
