@@ -490,7 +490,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
     openapi: "3.1.0",
     info: {
       title: "Concierge Agent API",
-      version: "4.0.0",
+      version: "4.2.0",
       description:
         "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC or TCX on Solana and Base.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
