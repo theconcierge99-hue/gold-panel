@@ -79,6 +79,18 @@ export function getUsdcAssetForNetwork(network: string): string {
   return asset;
 }
 
+/** EIP-712 domain metadata for USDC exact-scheme accepts — must match on-chain token.name(). */
+export function getUsdcEip712ExtraForNetwork(network: string): { name: string; version: string } {
+  // x402 token table: Base/Arbitrum/Polygon mainnet native USDC → "USD Coin"; Base Sepolia → "USDC".
+  if (network === "eip155:84532" || network === "eip155:421614") {
+    return { name: "USDC", version: "2" };
+  }
+  if (network.startsWith("eip155:")) {
+    return { name: "USD Coin", version: "2" };
+  }
+  return { name: "USDC", version: "2" };
+}
+
 export type X402NetworkProfile = {
   evm: `eip155:${number}`;
   arbitrum: `eip155:${number}`;

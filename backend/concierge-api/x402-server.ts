@@ -7,6 +7,7 @@ import {
   getX402EvmAcceptNetworks,
   getX402NetworkProfile,
   getUsdcAssetForNetwork,
+  getUsdcEip712ExtraForNetwork,
   isX402Enabled,
 } from "./x402-config";
 import {
@@ -336,7 +337,7 @@ async function buildAcceptsAsync(
         asset: getUsdcAssetForNetwork(network),
         payTo: evm,
         maxTimeoutSeconds: 120,
-        extra: { name: "USDC", version: "2" },
+        extra: getUsdcEip712ExtraForNetwork(network),
       });
     }
   }
