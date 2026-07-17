@@ -28,10 +28,12 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 | `X402_EVM_PAY_TO` | Merchant USDC receive address on **Base** (`0x` + 40 hex). |
 | `X402_SOL_PAY_TO` | Optional merchant USDC receive address on **Solana** (base58, 32–44 chars). |
 | `X402_ENABLED` | Set `false` to disable payments entirely. Default: enabled when a valid pay-to exists. |
-| `X402_FACILITATOR` | `payai` (default) or `dexter`. PayAI primary; Dexter listed as fallback in 402 accepts and EVM retry. |
+| `X402_FACILITATOR` | `payai` (default), `dexter`, or `cdp`. PayAI remains the default; `cdp` enables Coinbase CDP settlement for Bazaar indexing and requires both CDP credentials below. |
 | `X402_NETWORK_MODE` | `mainnet` (default) or `testnet` (Base Sepolia + Solana devnet). |
 | `PAYAI_API_KEY_ID` | Optional PayAI JWT key id — only when `X402_FACILITATOR=payai`. |
 | `PAYAI_API_KEY_SECRET` | Optional PayAI JWT secret. |
+| `CDP_API_KEY_ID` | Coinbase Developer Platform key ID — required when `X402_FACILITATOR=cdp`. |
+| `CDP_API_KEY_SECRET` | Coinbase Developer Platform API key secret — required when `X402_FACILITATOR=cdp`; server-only. |
 | `SOLANA_RPC_URL` | Helius or [publicnode](https://solana-rpc.publicnode.com) mainnet URL — **server only** (used by `/api/solana-rpc-send` for Phantom NFT mint). **Do not** use `solana.drpc.org` or Ankr free RPC — they block `getLatestBlockhash`. If unset or set to a blocked host, the server falls back to publicnode. |
 
 **Aliases accepted:** `X402_EVM_PAY_ID`, `X402_SOL_PAY_ID` (typo compatibility).

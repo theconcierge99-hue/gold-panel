@@ -11,15 +11,19 @@ import { getX402FacilitatorProfile, getX402FacilitatorFallback, mppPaymentProtoc
 export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
 export const MPPSCAN_DISCOVERY_DOC_URL = "https://www.mppscan.com/discovery";
+export const MPPSCAN_DEFAULT_SERVER_URL =
+  "https://www.mppscan.com/server/6ded0eed8d9dd654f2021f37268ea5f782be7e0c3265640c13568a37effb53d1";
 
 /**
- * MPPscan assigns a new /server/{hash} per registration — do not hardcode in HTML.
- * Set MPPSCAN_SERVER_URL in Vercel to the URL copied from the MPPscan server page.
+ * MPPscan derives /server/{hash} from the registered origin. Keep the verified
+ * production profile as the default and allow an env override for migrations.
  */
 export function getMppscanServerUrl(): string | null {
   const raw = process.env.MPPSCAN_SERVER_URL?.trim();
-  if (!raw) return null;
-  if (!/^https:\/\/www\.mppscan\.com\/server\/[a-f0-9]+$/i.test(raw)) return null;
+  if (!raw) return MPPSCAN_DEFAULT_SERVER_URL;
+  if (!/^https:\/\/www\.mppscan\.com\/server\/[a-f0-9]+$/i.test(raw)) {
+    return MPPSCAN_DEFAULT_SERVER_URL;
+  }
   return raw;
 }
 
@@ -990,9 +994,9 @@ export function mppDiscoveryLinks(origin: string): Record<string, string> {
   const base = origin.replace(/\/$/, "");
   return {
     mppscanRegister: MPPSCAN_REGISTER_URL,
-    mppscan: MPPSCAN_EXPLORE_URL,
+    mppscan: MPPSCAN_DEFAULT_SERVER_URL,
     mppscanServer: getMppscanServerUrl() ?? resolveMppscanProfileLink(base),
-    mppscanProfileLink: resolveMppscanProfileLink(base),
+    mppscanProfileLink: MPPSCAN_DEFAULT_SERVER_URL,
     mppscanDiscovery: MPPSCAN_DISCOVERY_DOC_URL,
     agentcashDiscover: `npx -y @agentcash/discovery@latest discover ${base}`,
     agentcashCheckIntel: `npx -y @agentcash/discovery@latest check ${base}/api/concierge-intel-tvl`,

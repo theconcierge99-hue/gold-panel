@@ -26,7 +26,7 @@ const doc = {
     "/api/token-pay": {
       get: {
         operationId: "tokenPayRegistry",
-        summary: "Token Pay merchant registry",
+        summary: "Fetch the Token Pay merchant registry",
         description: "Platform meta + merchant list. ?merchant=ID for readiness.",
         tags: ["Token Pay"],
         responses: { "200": { description: "Registry JSON" } },
@@ -35,7 +35,7 @@ const doc = {
     "/api/token-pay-build-accept": {
       post: {
         operationId: "tokenPayBuildAccept",
-        summary: "Build x402 accept for partner API",
+        summary: "Generate an x402 accept for a partner API",
         description:
           "Server-built SPL self-settle accept. Call from your backend before returning HTTP 402.",
         tags: ["Token Pay"],
@@ -47,9 +47,22 @@ const doc = {
                 type: "object",
                 required: ["merchantId", "usdAmount"],
                 properties: {
-                  merchantId: { type: "string", example: "acme" },
-                  usdAmount: { type: "number", example: 0.1 },
-                  resourceUrl: { type: "string", example: "https://api.acme.xyz/v1/intel" },
+                  merchantId: {
+                    type: "string",
+                    description: "Registered Token Pay merchant slug.",
+                    example: "acme",
+                  },
+                  usdAmount: {
+                    type: "number",
+                    description: "Partner-authorized list price in USD.",
+                    example: 0.1,
+                  },
+                  resourceUrl: {
+                    type: "string",
+                    format: "uri",
+                    description: "Partner API resource protected by this accept.",
+                    example: "https://api.acme.xyz/v1/intel",
+                  },
                 },
               },
             },
@@ -70,6 +83,7 @@ const doc = {
             name: "PAYMENT-SIGNATURE",
             in: "header",
             required: true,
+            description: "Base64 x402 payment payload signed by the payer wallet.",
             schema: { type: "string" },
           },
         ],
@@ -81,9 +95,19 @@ const doc = {
                 type: "object",
                 required: ["merchantId", "usdAmount"],
                 properties: {
-                  merchantId: { type: "string" },
-                  usdAmount: { type: "number" },
-                  resourceUrl: { type: "string" },
+                  merchantId: {
+                    type: "string",
+                    description: "Registered Token Pay merchant slug.",
+                  },
+                  usdAmount: {
+                    type: "number",
+                    description: "Server-authorized USD price used to build the original accept.",
+                  },
+                  resourceUrl: {
+                    type: "string",
+                    format: "uri",
+                    description: "Partner API resource protected by the original accept.",
+                  },
                 },
               },
             },
@@ -106,7 +130,11 @@ const doc = {
                 type: "object",
                 required: ["merchant"],
                 properties: {
-                  merchant: { type: "object" },
+                  merchant: {
+                    type: "object",
+                    description: "Candidate merchant registry row to validate without persisting.",
+                    additionalProperties: true,
+                  },
                   resourceKind: { type: "string", enum: ["concierge", "external"] },
                 },
               },

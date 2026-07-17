@@ -2,6 +2,8 @@
 
 [MPPscan](https://www.mppscan.com/) indexes APIs that advertise the Machine Payments Protocol. Concierge Agent uses **x402 settlement via PayAI** (Solana + Base USDC) and exposes **MPP-compatible OpenAPI** so `agentcash` and MPPscan can list the same **24 paid routes** as Hyre-style MPP servers — without changing the agent site layout.
 
+**Verified profile:** [Concierge Agent API on MPPscan](https://www.mppscan.com/server/6ded0eed8d9dd654f2021f37268ea5f782be7e0c3265640c13568a37effb53d1) — 40 discoverable operations (38 paid + 2 public).
+
 ## What we expose
 
 | URL | Purpose |
@@ -12,18 +14,18 @@
 
 Implementation: `api/lib/mpp-discovery.ts`, `api/lib/x402-discovery.ts`, `api/lib/x402-service-meta.ts`.
 
-## Validate before register
+## Validate or refresh registration
 
 ```bash
 npx -y @agentcash/discovery@latest discover https://conc-exe.xyz
 npx -y @agentcash/discovery@latest check https://conc-exe.xyz/api/concierge-intel-tvl
 ```
 
-Fix OpenAPI until the CLI reports no errors, then:
+The production profile is already registered. After changing OpenAPI, validate first, then refresh the origin at MPPscan if needed:
 
 1. [MPPscan — Add your Server](https://www.mppscan.com/register) — origin `https://conc-exe.xyz` (or your `X402_SITE_ORIGIN`)
-2. Copy the server profile URL from the browser → set **`MPPSCAN_SERVER_URL`** in Vercel (site links use `https://conc-exe.xyz/go/mppscan`)
-2. [x402scan — Register](https://www.x402scan.com/resources/register) — same origin (optional second listing)
+2. The verified Concierge profile is the default redirect target. Set **`MPPSCAN_SERVER_URL`** in Vercel only if MPPscan assigns a replacement profile URL.
+3. [x402scan profile](https://www.x402scan.com/server/b4bb359a-17db-4f54-88c5-bb47c6d2aca4) — parallel x402 listing.
 
 ## Agent integration
 

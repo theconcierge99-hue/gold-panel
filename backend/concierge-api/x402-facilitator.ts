@@ -1,10 +1,11 @@
 /**
- * x402 facilitator profiles — PayAI (primary) and Dexter (fallback).
+ * x402 facilitator profiles — PayAI, Dexter, and CDP Bazaar activation.
  * @see https://docs.dexter.cash/docs/facilitator-and-chains/
  * @see https://docs.payai.network/x402/facilitators/pricing
+ * @see https://docs.cdp.coinbase.com/x402/bazaar
  */
 
-export type X402FacilitatorId = "dexter" | "payai";
+export type X402FacilitatorId = "cdp" | "dexter" | "payai";
 
 export type X402FacilitatorProfile = {
   id: X402FacilitatorId;
@@ -36,10 +37,23 @@ export const DEXTER_FACILITATOR: X402FacilitatorProfile = {
   sellersUrl: "https://dexter.cash/sellers",
 };
 
-/** Primary facilitator — default PayAI. Set X402_FACILITATOR=dexter to swap primary. */
+export const CDP_FACILITATOR: X402FacilitatorProfile = {
+  id: "cdp",
+  name: "Coinbase CDP",
+  url: "https://api.cdp.coinbase.com/platform/v2/x402",
+  // Solana requirements remain bound to the advertised PayAI/Dexter fee payer.
+  solanaFeePayer: "",
+  docsUrl: "https://docs.cdp.coinbase.com/x402/bazaar",
+  marketplaceUrl: "https://agentic.market/",
+  sellersUrl: "https://docs.cdp.coinbase.com/x402/bazaar",
+};
+
+/** Primary facilitator — default PayAI. Set X402_FACILITATOR=dexter|cdp to swap primary. */
 export function getX402FacilitatorProfile(): X402FacilitatorProfile {
   const raw = (process.env.X402_FACILITATOR || "payai").trim().toLowerCase();
-  return raw === "dexter" ? DEXTER_FACILITATOR : PAYAI_FACILITATOR;
+  if (raw === "cdp") return CDP_FACILITATOR;
+  if (raw === "dexter") return DEXTER_FACILITATOR;
+  return PAYAI_FACILITATOR;
 }
 
 /** Secondary facilitator when primary verify/settle is unavailable (EVM) or listed in 402 accepts (Solana). */
@@ -61,13 +75,20 @@ export function resolveFacilitatorForSolanaFeePayer(feePayer: string): X402Facil
 export function mppPaymentProtocols(): Record<string, unknown>[] {
   const primary = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
-  return [
-    { x402: { network: "solana", facilitator: primary.url, role: "primary" } },
+  const protocols: Record<string, unknown>[] = [
     { x402: { network: "base", facilitator: primary.url, role: "primary" } },
     { x402: { network: "arbitrum", facilitator: primary.url, role: "primary" } },
-    { x402: { network: "solana", facilitator: fallback.url, role: "fallback" } },
     { x402: { network: "base", facilitator: fallback.url, role: "fallback" } },
     { x402: { network: "arbitrum", facilitator: fallback.url, role: "fallback" } },
-    { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
   ];
+  if (primary.id !== "cdp") {
+    protocols.unshift({ x402: { network: "solana", facilitator: primary.url, role: "primary" } });
+  }
+  if (fallback.id !== "cdp") {
+    protocols.push({ x402: { network: "solana", facilitator: fallback.url, role: "fallback" } });
+  }
+  protocols.push(
+    { mpp: { method: "solana", intent: "charge", currency: "USDC" } },
+  );
+  return protocols;
 }

@@ -34,7 +34,8 @@ Competitive and operational playbook for **pre-launch (now)** and **launch day (
 | USDC pay (Solana + Base) | Live |
 | Token Pay infra (SOON merchant) | Built — **mint not set** |
 | Agent identity + discovery | Live |
-| Poncho / pay.sh / x402scan / Grok skill | Live |
+| Poncho merchant / MPPscan / x402scan / Grok skill | Live — verified profiles |
+| pay.sh catalog | Pending maintainer merge — [pay-skills #119](https://github.com/solana-foundation/pay-skills/pull/119) |
 | Creator signals (Lounge) | Live |
 | MCP `/api/mcp` + accuracy leaderboard | Live |
 

@@ -4,6 +4,8 @@
 
 Executive Lounge is branded in discovery as **Executive Lounge x402 API** on your production origin (set via `X402_SITE_ORIGIN`).
 
+**Verified profile:** [Concierge Agent on x402scan](https://www.x402scan.com/server/b4bb359a-17db-4f54-88c5-bb47c6d2aca4) — refreshed 17 July 2026 with **38 paid operations + 2 public operations**, no registration failures.
+
 ## What we expose
 
 | URL | Format | Purpose |
@@ -87,7 +89,7 @@ x402scan probes endpoints with **GET** and **POST**. Paid routes use `guardPaidX
 - **POST** without payment → **402**
 - Origin checks run **after** the payment gate so server-side probes without `Origin` still receive a valid challenge
 
-## Register on x402scan
+## Register or refresh on x402scan
 
 1. Deploy production with valid `X402_EVM_PAY_TO` and/or `X402_SOL_PAY_TO`.
 2. Set `X402_SITE_ORIGIN=https://your-production-domain.com` in Vercel.
@@ -97,7 +99,7 @@ x402scan probes endpoints with **GET** and **POST**. Paid routes use `guardPaidX
    curl -sI https://your-production-domain.com/api/concierge | head -1
    ```
    Expect HTTP **402** and `PAYMENT-REQUIRED` header.
-4. Open [Add your API](https://www.x402scan.com/resources/register).
+4. Open [Add your API](https://www.x402scan.com/resources/register). For Concierge itself, use the existing [verified profile](https://www.x402scan.com/server/b4bb359a-17db-4f54-88c5-bb47c6d2aca4); submit the origin again only to refresh changed discovery metadata.
 
 ### Recommended registration URLs
 

@@ -22,6 +22,7 @@ import {
   formatUsdAmountForDiscovery,
   isIntelKindWithGetProbe,
   mppDiscoveryLinks,
+  MPPSCAN_DEFAULT_SERVER_URL,
   MPPSCAN_REGISTER_URL,
   openApiQueryParameters,
   openApiRequestSchema,
@@ -53,6 +54,8 @@ import { zauthMetaLinks } from "./zauth";
 
 export const X402SCAN_REGISTER_URL = "https://www.x402scan.com/resources/register";
 export const X402SCAN_EXPLORE_URL = "https://www.x402scan.com/";
+export const X402SCAN_PROFILE_URL =
+  "https://www.x402scan.com/server/b4bb359a-17db-4f54-88c5-bb47c6d2aca4";
 
 export type X402DiscoveryResource = {
   kind: X402ResourceKind;
@@ -345,8 +348,9 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
-      x402scan: X402SCAN_EXPLORE_URL,
+      x402scan: X402SCAN_PROFILE_URL,
       mppscanRegister: MPPSCAN_REGISTER_URL,
+      mppscan: MPPSCAN_DEFAULT_SERVER_URL,
       ...mppDiscoveryLinks(origin),
       ...dexterDiscoveryLinks(origin),
       ...payshDiscoveryLinks(origin),
@@ -506,8 +510,10 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
     paths,
     "x-discovery": {
       ownershipProofs: proofs,
-      x402scan: X402SCAN_REGISTER_URL,
-      mppscan: MPPSCAN_REGISTER_URL,
+      x402scan: X402SCAN_PROFILE_URL,
+      x402scanRegister: X402SCAN_REGISTER_URL,
+      mppscan: MPPSCAN_DEFAULT_SERVER_URL,
+      mppscanRegister: MPPSCAN_REGISTER_URL,
       ...mppDiscoveryLinks(base),
       ...dexterDiscoveryLinks(base),
       ...payshDiscoveryLinks(base),
@@ -550,7 +556,7 @@ export function discoveryMetaForConfig(origin: string) {
     openApiUrl: `${base}/openapi.json`,
     resourceUrls: listDiscoveryResourceUrls(base),
     x402scanRegisterUrl: X402SCAN_REGISTER_URL,
-    x402scanExploreUrl: X402SCAN_EXPLORE_URL,
+    x402scanExploreUrl: X402SCAN_PROFILE_URL,
     zauth: zauthMetaLinks(base),
     ownershipProofs: ownershipProofs(),
     protocols: ["x402", "mpp", "SAP"],

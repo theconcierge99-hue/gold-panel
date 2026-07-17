@@ -1,6 +1,6 @@
 /**
  * x402 payment gate via facilitator HTTP API (Edge-safe).
- * Primary: PayAI. Fallback: Dexter (dual Solana accepts + EVM retry on outage).
+ * Primary: PayAI by default. Optional CDP/Dexter primary with EVM fallback.
  */
 import {
   getMerchantAddresses,
@@ -405,11 +405,34 @@ function findMatchingRequirement(
   return null;
 }
 
-/** PayAI only — optional PAYAI_API_KEY_* uses Ed25519 JWT (Web Crypto). Dexter needs no auth. */
+/** Facilitator authentication. Dexter needs no auth. */
 async function facilitatorAuthHeaders(
   endpoint: "verify" | "settle",
   facilitator: X402FacilitatorProfile,
 ): Promise<Record<string, string>> {
+  if (facilitator.id === "cdp") {
+    const apiKeyId = process.env.CDP_API_KEY_ID?.trim();
+    const apiKeySecret = process.env.CDP_API_KEY_SECRET?.trim();
+    if (!apiKeyId || !apiKeySecret) {
+      throw new Error("CDP facilitator requires CDP_API_KEY_ID and CDP_API_KEY_SECRET");
+    }
+
+    const base = new URL(facilitator.url);
+    const requestPath = `${base.pathname.replace(/\/$/, "")}/${endpoint}`;
+    const { generateJwt } = await import("@coinbase/cdp-sdk/auth");
+    const jwt = await generateJwt({
+      apiKeyId,
+      apiKeySecret,
+      requestMethod: "POST",
+      requestHost: base.host,
+      requestPath,
+    });
+    return {
+      Authorization: `Bearer ${jwt}`,
+      "Correlation-Context": "sdkLanguage=typescript,source=concierge-agent",
+    };
+  }
+
   if (facilitator.id !== "payai") return {};
 
   const keyId = process.env.PAYAI_API_KEY_ID?.trim();
