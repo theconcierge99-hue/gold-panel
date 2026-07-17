@@ -35,9 +35,15 @@ const footOrigin = document.getElementById("pg-foot-origin");
 const walletStatusEl = document.getElementById("pg-wallet-status");
 const walletConnectBtn = document.getElementById("pg-wallet-connect");
 const payWalletBtn = document.getElementById("play-pay-wallet");
+const bazaarActivateBtn = document.getElementById("play-bazaar-activate");
+const bazaarHintEl = document.getElementById("pg-bazaar-hint");
 const payRailEl = document.getElementById("pg-pay-rail");
 const tcxCreditsRow = document.getElementById("pg-tcx-credits-row");
 const tcxCreditsBadge = document.getElementById("pg-tcx-credits-badge");
+
+const BAZAAR_DONE_KEY = "el-bazaar-activated-routes";
+/** intel-macro already settled successfully for CDP Bazaar activation. */
+const BAZAAR_SEED_DONE = ["intel-macro"];
 
 const SEGMENT_LABELS = {
   concierge: "Concierge",
@@ -55,6 +61,43 @@ let x402ConfigCache = null;
 
 function isPaidEndpoint(ep) {
   return ep.priceUsd !== "0" && Number(ep.priceUsd) > 0;
+}
+
+function loadBazaarDone() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BAZAAR_DONE_KEY) || "[]");
+    const set = new Set(Array.isArray(raw) ? raw : []);
+    for (const id of BAZAAR_SEED_DONE) set.add(id);
+    return set;
+  } catch {
+    return new Set(BAZAAR_SEED_DONE);
+  }
+}
+
+function saveBazaarDone(set) {
+  localStorage.setItem(BAZAAR_DONE_KEY, JSON.stringify([...set]));
+}
+
+function markBazaarDone(id) {
+  const set = loadBazaarDone();
+  set.add(id);
+  saveBazaarDone(set);
+  refreshBazaarHint();
+}
+
+function bazaarPendingEndpoints() {
+  const done = loadBazaarDone();
+  return CONCIERGE_AGENT_ENDPOINTS.filter((ep) => isPaidEndpoint(ep) && !done.has(ep.id));
+}
+
+function refreshBazaarHint() {
+  if (!bazaarHintEl) return;
+  const pending = bazaarPendingEndpoints();
+  const doneCount = CONCIERGE_AGENT_ENDPOINTS.filter((ep) => isPaidEndpoint(ep)).length - pending.length;
+  const est = pending.reduce((sum, ep) => sum + Number(ep.priceUsd || 0), 0);
+  bazaarHintEl.textContent = pending.length
+    ? `${doneCount}/24 Base settlements marked · ${pending.length} remaining ≈ $${est.toFixed(2)} USDC. Approve each Phantom signature.`
+    : "All 24 paid routes marked settled for Bazaar in this browser. Re-check Agentic.Market / CDP search.";
 }
 
 function renderWalletUi() {
@@ -77,6 +120,10 @@ function renderWalletUi() {
   }
 
   payWalletBtn.disabled = !isPaidEndpoint(selected) || (!hasSol && !hasEvm);
+  if (bazaarActivateBtn) {
+    bazaarActivateBtn.disabled = !hasEvm || bazaarPendingEndpoints().length === 0;
+  }
+  refreshBazaarHint();
   void refreshTcxCredits();
 }
 
@@ -432,8 +479,126 @@ function clearLog() {
   updateEntryCount();
 }
 
+function settlementSucceeded(res) {
+  // Concierge settles before the route handler. 402/503 means facilitator gate failed.
+  // 2xx/4xx after pay still means CDP settlement ran (good enough for Bazaar indexing).
+  return res.status !== 402 && res.status !== 503;
+}
+
+async function activateBazaarRemaining() {
+  const pending = bazaarPendingEndpoints();
+  if (!pending.length) {
+    log("No remaining paid routes to activate.", "ok");
+    return;
+  }
+
+  const session = getWalletSession();
+  if (!session.evm?.address) {
+    log("Connect an EVM wallet first (Phantom Base).", "err");
+    return;
+  }
+  if (typeof window.createX402PaidFetch !== "function") {
+    log("Payment module not loaded — hard refresh (Ctrl+F5).", "err");
+    return;
+  }
+
+  const est = pending.reduce((sum, ep) => sum + Number(ep.priceUsd || 0), 0);
+  const ok = window.confirm(
+    `Activate ${pending.length} remaining Bazaar routes via Base USDC?\n\n` +
+      `Estimated spend ≈ $${est.toFixed(2)} USDC.\n` +
+      `Approve each Phantom signature. Cancel anytime to stop.`,
+  );
+  if (!ok) {
+    log("Bazaar activation cancelled.", "warn");
+    return;
+  }
+
+  if (payRailEl) payRailEl.value = "evm";
+
+  bazaarActivateBtn.disabled = true;
+  payWalletBtn.disabled = true;
+  execBtn.disabled = true;
+
+  log("");
+  log(`→ CDP Bazaar activation: ${pending.length} routes on USDC · Base…`, "warn");
+
+  let okCount = 0;
+  let failCount = 0;
+
+  try {
+    const cfg = await loadX402Config();
+    const serverCfg = x402ServerPayConfigFromApi(cfg);
+
+    for (let i = 0; i < pending.length; i++) {
+      const ep = pending[i];
+      const body = ep.sampleBody ?? {};
+      log("");
+      log(`[${i + 1}/${pending.length}] ${ep.method} ${ep.path} · $${ep.priceUsd}`, "dim");
+
+      try {
+        const paidFetch = await window.createX402PaidFetch(
+          session,
+          "mainnet",
+          serverCfg,
+          paidFetchOptionsForRail("evm"),
+        );
+        const res = await paidFetch(endpointUrl(ep.path), {
+          method: ep.method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const text = await res.text();
+        const settled = settlementSucceeded(res);
+
+        if (settled) {
+          markBazaarDone(ep.id);
+          okCount += 1;
+          log(
+            `✓ Settled HTTP ${res.status}${res.ok ? "" : " (handler soft-fail OK for Bazaar)"}`,
+            "ok",
+          );
+        } else {
+          failCount += 1;
+          log(`✗ Not settled — HTTP ${res.status}`, "err");
+          try {
+            const json = JSON.parse(text);
+            if (json.detail || json.error) log(String(json.detail || json.error), "warn");
+          } catch {
+            if (text) log(text.slice(0, 240), "warn");
+          }
+          log("Stopping batch — fix the error, then click Activate again to resume.", "warn");
+          break;
+        }
+      } catch (e) {
+        failCount += 1;
+        const msg = e instanceof Error ? e.message : String(e);
+        if (/cancel|reject|denied/i.test(msg)) {
+          log("Wallet cancelled — batch stopped. Click Activate again to resume.", "warn");
+        } else {
+          log(msg, "err");
+          log("Stopping batch — click Activate again to resume remaining routes.", "warn");
+        }
+        break;
+      }
+
+      await new Promise((r) => setTimeout(r, 800));
+    }
+  } finally {
+    log("");
+    log(`Bazaar batch finished · settled ${okCount} · failed/stopped ${failCount} · remaining ${bazaarPendingEndpoints().length}`, "ok");
+    log(
+      "Check: https://api.cdp.coinbase.com/platform/v2/x402/discovery/search?payTo=0xb85c83cc448edca8eb724f5d79b523faff9375a7&limit=20",
+      "dim",
+    );
+    payWalletBtn.disabled = false;
+    execBtn.disabled = false;
+    renderWalletUi();
+  }
+}
+
 execBtn.addEventListener("click", execute);
 payWalletBtn?.addEventListener("click", executePaid);
+bazaarActivateBtn?.addEventListener("click", activateBazaarRemaining);
 walletConnectBtn?.addEventListener("click", toggleWalletConnect);
 copyCurlBtn?.addEventListener("click", copyCurlCommand);
 clearBtn.addEventListener("click", clearLog);
