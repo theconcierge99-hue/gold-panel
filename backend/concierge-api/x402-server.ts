@@ -207,6 +207,7 @@ type PaymentPayloadV2 = {
   x402Version?: number;
   scheme?: string;
   network?: string;
+  resource?: string;
   accepted?: X402AcceptRequirement;
   payload?: unknown;
   extensions?: Record<string, unknown>;
@@ -475,7 +476,8 @@ async function facilitatorPost<T>(
   }
   if (!res.ok) {
     const err = data as { error?: string; message?: string };
-    throw new Error(err.error || err.message || `Facilitator ${path} HTTP ${res.status}`);
+    const detail = err.error || err.message || text.slice(0, 240);
+    throw new Error(`Facilitator ${path} HTTP ${res.status}: ${detail}`);
   }
   return data;
 }
@@ -505,6 +507,7 @@ async function verifyAndSettle(
   paymentPayload: PaymentPayloadV2,
   matched: X402AcceptRequirement,
   resourceKind: X402ResourceKind,
+  resource?: string,
 ): Promise<{
   payer: string;
   transaction: string;
@@ -526,11 +529,14 @@ async function verifyAndSettle(
   }
 
   let lastError: unknown;
+  const facilitatorPayload: PaymentPayloadV2 = resource
+    ? { ...paymentPayload, resource: paymentPayload.resource || resource }
+    : paymentPayload;
   for (const facilitator of facilitators) {
     try {
       const verify = await facilitatorPost<{ isValid: boolean; invalidReason?: string; payer?: string }>(
         "/verify",
-        { paymentPayload, paymentRequirements: matched },
+        { paymentPayload: facilitatorPayload, paymentRequirements: matched },
         "verify",
         facilitator,
       );
@@ -545,7 +551,7 @@ async function verifyAndSettle(
         payer?: string;
         transaction?: string;
         network?: string;
-      }>("/settle", { paymentPayload, paymentRequirements: matched }, "settle", facilitator);
+      }>("/settle", { paymentPayload: facilitatorPayload, paymentRequirements: matched }, "settle", facilitator);
 
       if (!settle.success) {
         throw new Error(settle.errorReason || "Payment settlement failed");
@@ -732,7 +738,12 @@ export async function requireX402Payment(
       };
     }
 
-    const settle = await verifyAndSettle(paymentPayload, matched, kind);
+    const settle = await verifyAndSettle(
+      paymentPayload,
+      matched,
+      kind,
+      resourceUrl(request, kind),
+    );
 
     const paymentResponseHeader = b64EncodeJson({
       success: true,
@@ -757,6 +768,28 @@ export async function requireX402Payment(
       return {
         ok: false,
         response: await buildPaymentRequiredResponse(request, kind, cors, e.message),
+      };
+    }
+    if (
+      e instanceof Error &&
+      (/CDP facilitator requires|Invalid key format|Facilitator \/verify HTTP 401|Facilitator \/settle HTTP 401|Facilitator \/verify HTTP 403|Facilitator \/settle HTTP 403/i.test(
+        e.message,
+      ))
+    ) {
+      console.error("[x402]", e.message);
+      return {
+        ok: false,
+        response: new Response(
+          JSON.stringify({
+            error: "CDP facilitator authentication failed.",
+            detail:
+              "Check CDP_API_KEY_ID and CDP_API_KEY_SECRET in Vercel (Secret API Key, no quotes, redeploy after update).",
+          }),
+          {
+            status: 503,
+            headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+          },
+        ),
       };
     }
     console.error("[x402]", e instanceof Error ? e.message : e);
