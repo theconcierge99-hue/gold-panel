@@ -481,18 +481,21 @@ async function facilitatorPost<T>(
   if (extResponses) {
     console.log(`[x402] ${facilitator.id} ${path} EXTENSION-RESPONSES: ${extResponses}`);
   }
-  let data: T;
+  if (!res.ok) {
+    let detail = text.slice(0, 240).replace(/\s+/g, " ").trim();
+    try {
+      const err = JSON.parse(text) as { error?: string; message?: string; errorMessage?: string };
+      detail = err.error || err.message || err.errorMessage || detail;
+    } catch {
+      /* non-JSON error body (HTML/WAF) — keep truncated text */
+    }
+    throw new Error(`Facilitator ${path} HTTP ${res.status}: ${detail || "empty body"}`);
+  }
   try {
-    data = JSON.parse(text) as T;
+    return JSON.parse(text) as T;
   } catch {
     throw new Error(`Facilitator ${path} returned invalid JSON (${res.status})`);
   }
-  if (!res.ok) {
-    const err = data as { error?: string; message?: string };
-    const detail = err.error || err.message || text.slice(0, 240);
-    throw new Error(`Facilitator ${path} HTTP ${res.status}: ${detail}`);
-  }
-  return data;
 }
 
 function resolveFacilitatorForRequirement(req: X402AcceptRequirement): X402FacilitatorProfile {
@@ -503,8 +506,16 @@ function resolveFacilitatorForRequirement(req: X402AcceptRequirement): X402Facil
   return getX402FacilitatorProfile();
 }
 
+function isFacilitatorAuthError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false;
+  return /Facilitator \/(?:verify|settle) HTTP 40[13]\b/i.test(e.message);
+}
+
 function isFacilitatorOutageError(e: unknown): boolean {
   if (!(e instanceof Error)) return false;
+  // Auth failures must not look like outages — otherwise CDP 403 silently falls back to
+  // PayAI, the call "succeeds", and Bazaar never indexes the settle.
+  if (isFacilitatorAuthError(e)) return false;
   const msg = e.message.toLowerCase();
   return (
     msg.includes("invalid json") ||
