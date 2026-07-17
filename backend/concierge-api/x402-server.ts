@@ -204,11 +204,18 @@ export type X402AcceptRequirement = {
   extra?: Record<string, unknown>;
 };
 
+type PaymentPayloadResource = {
+  url: string;
+  description?: string;
+  mimeType?: string;
+};
+
 type PaymentPayloadV2 = {
   x402Version?: number;
   scheme?: string;
   network?: string;
-  resource?: string;
+  /** x402 v2 spec §5.2: object form; older buyers may send a bare URL string. */
+  resource?: string | PaymentPayloadResource;
   accepted?: X402AcceptRequirement;
   payload?: unknown;
   extensions?: Record<string, unknown>;
@@ -469,6 +476,11 @@ async function facilitatorPost<T>(
     signal: AbortSignal.timeout(25_000),
   });
   const text = await res.text();
+  // CDP reports Bazaar discovery accept/reject status here; surface it for indexing diagnosis.
+  const extResponses = res.headers.get("extension-responses") ?? res.headers.get("EXTENSION-RESPONSES");
+  if (extResponses) {
+    console.log(`[x402] ${facilitator.id} ${path} EXTENSION-RESPONSES: ${extResponses}`);
+  }
   let data: T;
   try {
     data = JSON.parse(text) as T;
@@ -530,9 +542,30 @@ async function verifyAndSettle(
   }
 
   let lastError: unknown;
-  const facilitatorPayload: PaymentPayloadV2 = resource
-    ? { ...paymentPayload, resource: paymentPayload.resource || resource }
-    : paymentPayload;
+  // CDP Bazaar indexes a resource only when the settle payload carries both the v2
+  // `resource` object (spec §5.2) and the `extensions.bazaar` block from the 402
+  // challenge (x402-foundation/x402#2207). Buyer SDKs rarely echo either, so inject
+  // them server-side before settlement.
+  const buyerResource = paymentPayload.resource;
+  const resourceObject: PaymentPayloadResource | undefined =
+    typeof buyerResource === "object" && buyerResource?.url
+      ? buyerResource
+      : typeof buyerResource === "string" && buyerResource
+        ? { url: buyerResource }
+        : resource
+          ? {
+              url: resource,
+              description: RESOURCE_META[resourceKind]?.description,
+              mimeType: RESOURCE_META[resourceKind]?.mimeType,
+            }
+          : undefined;
+  const hasExtensions =
+    paymentPayload.extensions && Object.keys(paymentPayload.extensions).length > 0;
+  const facilitatorPayload: PaymentPayloadV2 = {
+    ...paymentPayload,
+    ...(resourceObject ? { resource: resourceObject } : {}),
+    extensions: hasExtensions ? paymentPayload.extensions : buildBazaarExtension(resourceKind),
+  };
   for (const facilitator of facilitators) {
     try {
       const verify = await facilitatorPost<{ isValid: boolean; invalidReason?: string; payer?: string }>(
