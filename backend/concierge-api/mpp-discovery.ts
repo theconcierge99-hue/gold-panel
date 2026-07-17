@@ -478,6 +478,9 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
   "intel-scalp": jsonSchemaBody(
     {
       ok: { type: "boolean" },
+      // Schema must admit the response example (CDP Bazaar validates example
+      // against schema; additionalProperties is false).
+      filters: { type: "object" },
       assets: {
         type: "array",
         items: {
