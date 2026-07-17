@@ -600,14 +600,22 @@ async function verifyAndSettle(
     paymentPayload.extensions && Object.keys(paymentPayload.extensions).length > 0;
   const facilitatorPayload: PaymentPayloadV2 = {
     ...paymentPayload,
+    // CDP /verify and /settle require x402Version on both the envelope and the
+    // nested paymentPayload (v2 schema). Buyer headers sometimes omit it.
+    x402Version: paymentPayload.x402Version ?? 2,
     ...(resourceObject ? { resource: resourceObject } : {}),
     extensions: hasExtensions ? paymentPayload.extensions : buildBazaarExtension(resourceKind),
+  };
+  const facilitatorBody = {
+    x402Version: facilitatorPayload.x402Version ?? 2,
+    paymentPayload: facilitatorPayload,
+    paymentRequirements: matched,
   };
   for (const facilitator of facilitators) {
     try {
       const verify = await facilitatorPost<{ isValid: boolean; invalidReason?: string; payer?: string }>(
         "/verify",
-        { paymentPayload: facilitatorPayload, paymentRequirements: matched },
+        facilitatorBody,
         "verify",
         facilitator,
       );
@@ -622,7 +630,7 @@ async function verifyAndSettle(
         payer?: string;
         transaction?: string;
         network?: string;
-      }>("/settle", { paymentPayload: facilitatorPayload, paymentRequirements: matched }, "settle", facilitator);
+      }>("/settle", facilitatorBody, "settle", facilitator);
 
       if (!settle.success) {
         throw new Error(settle.errorReason || "Payment settlement failed");
