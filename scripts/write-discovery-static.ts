@@ -32,6 +32,12 @@ const x402Body = `${JSON.stringify(x402, null, 2)}\n`;
 writeFileSync(join(wellKnownDir, "x402.json"), x402Body, "utf8");
 writeFileSync(join(wellKnownDir, "x402"), x402Body, "utf8");
 
+// x402-list.com owner-update domain proof (public by design; only its hash is stored server-side).
+const x402ListProofTokens = [
+  "x402list-verify-IM0GFNbBk89D5oMYiMP5Pa7tY94oZUDtf5or4WM0sQ0",
+];
+writeFileSync(join(wellKnownDir, "x402list.txt"), `${x402ListProofTokens.join("\n")}\n`, "utf8");
+
 const agentCard = buildLoungeServiceCard(origin);
 writeFileSync(
   join(wellKnownDir, "agent-card.json"),
