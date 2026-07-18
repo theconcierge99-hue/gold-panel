@@ -260,9 +260,22 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
   ),
   "security-scan": jsonSchemaBody(
     {
-      target: { type: "string", description: "Authorized external https URL (never conc-exe.xyz)" },
-      allowlist: { type: "array", items: { type: "string" }, description: "Hostname allowlist (*.example.com)" },
+      target: {
+        type: "string",
+        description:
+          "Authorized external https URL. For free platform self-audit only, use https://conc-exe.xyz with selfAudit: true; otherwise never conc-exe.xyz.",
+      },
+      allowlist: {
+        type: "array",
+        items: { type: "string" },
+        description: "Hostname allowlist (*.example.com). Optional for selfAudit of conc-exe.xyz.",
+      },
       authorized: { type: "boolean", description: "Must be true — caller attests permission" },
+      selfAudit: {
+        type: "boolean",
+        description:
+          "When true with target https://conc-exe.xyz (or www), runs free platform self-audit and skips x402 settlement",
+      },
     },
     ["target", "authorized"],
   ),
