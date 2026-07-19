@@ -31,13 +31,18 @@ import { applyScanTierFilter, resolveScanAccessTier } from "./concierge-security
 
 export type { X402SecurityKind };
 
-export const SECURITY_ROUTE_PATH: Record<X402SecurityKind, string> = {
+export const SECURITY_ROUTE_PATH: Record<
+  Exclude<X402SecurityKind, "security-deep-scan">,
+  string
+> = {
   "security-readiness": "/api/concierge-security-readiness",
   "security-headers": "/api/concierge-security-headers",
   "security-scan": "/api/concierge-security-scan",
 };
 
-const PAID_SECURITY_KINDS = Object.keys(SECURITY_ROUTE_PATH) as X402SecurityKind[];
+const PAID_SECURITY_KINDS = Object.keys(SECURITY_ROUTE_PATH) as Array<
+  Exclude<X402SecurityKind, "security-deep-scan">
+>;
 
 export type SecurityRequestBody = {
   /** Required — https origin to audit. */
@@ -50,15 +55,17 @@ export type SecurityRequestBody = {
   selfAudit?: boolean;
 };
 
-export function resolveSecurityKindFromRequest(request: Request): X402SecurityKind | null {
+export type SyncSecurityKind = Exclude<X402SecurityKind, "security-deep-scan">;
+
+export function resolveSecurityKindFromRequest(request: Request): SyncSecurityKind | null {
   const url = new URL(request.url);
   const fromQuery = url.searchParams.get("kind");
-  if (fromQuery && PAID_SECURITY_KINDS.includes(fromQuery as X402SecurityKind)) {
-    return fromQuery as X402SecurityKind;
+  if (fromQuery && PAID_SECURITY_KINDS.includes(fromQuery as SyncSecurityKind)) {
+    return fromQuery as SyncSecurityKind;
   }
   const match = url.pathname.match(/^\/api\/concierge-security-([a-z][a-z0-9-]*)$/);
   if (!match) return null;
-  const kind = `security-${match[1]}` as X402SecurityKind;
+  const kind = `security-${match[1]}` as SyncSecurityKind;
   return PAID_SECURITY_KINDS.includes(kind) ? kind : null;
 }
 
@@ -185,7 +192,7 @@ export async function handleSecurityScopeRoute(request: Request): Promise<Respon
 
 export async function handleConciergeSecurityRoute(
   request: Request,
-  kind: X402SecurityKind,
+  kind: SyncSecurityKind,
 ): Promise<Response> {
   const startedAt = Date.now();
   let preBody: SecurityRequestBody | null = null;

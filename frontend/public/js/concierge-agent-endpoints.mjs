@@ -223,6 +223,23 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     },
   },
   {
+    id: "security-deep-scan",
+    segment: "security",
+    method: "POST",
+    path: "/api/concierge-security-deep-scan",
+    name: "Security — Deep scan",
+    description:
+      "Async Concierge Deep Scan ($1.00) — job ticket then poll GET ?jobId=. Authorized targets only; passive templates.",
+    priceUsd: "1.00",
+    tier: "deep",
+    sampleBody: {
+      target: "https://api.example.com",
+      allowlist: ["*.example.com"],
+      authorized: true,
+      profile: "passive-web",
+    },
+  },
+  {
     id: "security-readiness",
     segment: "security",
     method: "POST",

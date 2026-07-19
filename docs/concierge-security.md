@@ -14,6 +14,7 @@ Passive security intelligence for **authorized targets** — unified website sca
 |-------|------|---------|
 | `POST /api/concierge-security-scope` | Free | Validate target + allowlist (no fetch) |
 | `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, **Concierge Surface Review**, recommendations |
+| `POST /api/concierge-security-deep-scan` | $1.00 | **Deep scan job** — async worker templates; poll `GET ?jobId=` |
 | `POST /api/concierge-security-scan` + `selfAudit: true` on `conc-exe.xyz` | **Free** | Canonical public self-audit (see below) |
 | `POST /api/concierge-security-readiness` | $0.02 | Scout — passive API readiness |
 | `POST /api/concierge-security-headers` | $0.02 | Scout — passive header review |

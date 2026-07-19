@@ -202,11 +202,11 @@ function renderSummary(data) {
         <strong>${escapeHtml(s.overallGrade)}</strong>
       </div>
       <div class="sec-scan-stat-grid ${deluxe ? "sec-scan-stat-grid--5" : ""}">
-        ${deluxe ? `<div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax}</strong></div>` : ""}
-        ${deluxe ? `<div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal}</strong></div>` : ""}
+        ${deluxe && s.readinessScore != null ? `<div class="sec-scan-stat"><span>Readiness</span><strong>${s.readinessScore}/${s.readinessMax ?? 3}</strong></div>` : ""}
+        ${deluxe && s.headersPresent != null ? `<div class="sec-scan-stat"><span>Headers</span><strong>${s.headersPresent}/${s.headersTotal}</strong></div>` : ""}
         <div class="sec-scan-stat"><span>Surface</span><strong>${escapeHtml(s.surfaceGrade ?? "—")} · ${s.surfaceFindings ?? 0}</strong></div>
-        ${deluxe ? `<div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles}</strong></div>` : ""}
-        ${deluxe ? `<div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>` : `<div class="sec-scan-stat"><span>Severity</span><strong>${escapeHtml(formatSeverityBrief(s.surfaceBySeverity))}</strong></div>`}
+        ${deluxe && s.discoveryFiles != null ? `<div class="sec-scan-stat"><span>Discovery</span><strong>${s.discoveryFiles}</strong></div>` : ""}
+        ${deluxe && s.mcpReachable != null ? `<div class="sec-scan-stat"><span>MCP</span><strong>${s.mcpReachable ? "Yes" : "No"}</strong></div>` : `<div class="sec-scan-stat"><span>Severity</span><strong>${escapeHtml(formatSeverityBrief(s.surfaceBySeverity))}</strong></div>`}
       </div>
     </div>`;
 }
@@ -394,14 +394,39 @@ function setScopeStatus(msg, kind) {
   el.hidden = !msg;
 }
 
-function setLoading(on) {
+function setLoading(on, mode = "scan") {
   const btn = $("sec-scan-run-btn");
+  const deep = $("sec-scan-deep-btn");
   const self = $("sec-scan-self-btn");
   if (btn) {
     btn.disabled = on;
-    btn.textContent = on ? "Scanning…" : "Run scan · $0.10";
+    btn.textContent = on && mode === "scan" ? "Scanning…" : "Run scan · $0.10";
+  }
+  if (deep) {
+    deep.disabled = on;
+    deep.textContent = on && mode === "deep" ? "Deep scanning…" : "Deep scan · $1.00";
   }
   if (self) self.disabled = on;
+}
+
+async function pollDeepScan(jobId, toast) {
+  const maxAttempts = 60;
+  for (let i = 0; i < maxAttempts; i++) {
+    const res = await fetch(`/api/concierge-security-deep-scan?jobId=${encodeURIComponent(jobId)}`, {
+      headers: { Accept: "application/json" },
+    });
+    const data = await res.json();
+    if (res.status === 404 || res.status === 410) {
+      throw new Error(data.error ?? "Deep scan job expired");
+    }
+    if (data.status === "completed") return data;
+    if (data.status === "failed") {
+      throw new Error(data.error ?? "Deep scan failed");
+    }
+    const wait = Number(data.pollAfterMs) || 3000;
+    await new Promise((r) => setTimeout(r, wait));
+  }
+  throw new Error("Deep scan timed out — try again shortly");
 }
 
 let _secScanReady = false;
@@ -433,6 +458,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
   const scopeBtn = $("sec-scan-scope-btn");
   const selfBtn = $("sec-scan-self-btn");
   const runBtn = $("sec-scan-run-btn");
+  const deepBtn = $("sec-scan-deep-btn");
   const results = $("sec-scan-results");
 
   if (!input || !runBtn) return;
@@ -527,7 +553,7 @@ export async function initLoungeSecurityScan(ctx = {}) {
     const scoped = await checkScope();
     if (!scoped) return;
 
-    setLoading(true);
+    setLoading(true, "scan");
     if (results) results.hidden = true;
 
     try {
@@ -552,6 +578,58 @@ export async function initLoungeSecurityScan(ctx = {}) {
     } catch (e) {
       if (e?.message === "Payment cancelled") return;
       toast(e?.message ?? "Scan failed");
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  deepBtn?.addEventListener("click", async () => {
+    const raw = input.value.trim();
+    const origin = normalizeTargetInput(raw);
+    if (!origin) {
+      toast("Enter a valid website URL");
+      return;
+    }
+    if (typeof paidApiFetch !== "function") {
+      toast("Payment module not ready — refresh the page");
+      return;
+    }
+
+    const scoped = await checkScope();
+    if (!scoped) return;
+
+    setLoading(true, "deep");
+    if (results) results.hidden = true;
+    setScopeStatus("Deep scan queued…", "");
+
+    try {
+      const res = await paidApiFetch("/api/concierge-security-deep-scan", {
+        method: "POST",
+        headers: scanHeaders(getSoonHolderWallet),
+        body: JSON.stringify({
+          target: origin,
+          allowlist: allowlistFromTarget(raw),
+          authorized: true,
+          profile: "passive-web",
+        }),
+      });
+      const ticket = await res.json();
+      if (!res.ok && res.status !== 202) {
+        toast(ticket.error ?? "Deep scan failed");
+        return;
+      }
+      let data = ticket;
+      if (ticket.status === "queued" || ticket.status === "running") {
+        setScopeStatus(`Deep scan · ${ticket.jobId}`, "ok");
+        data = await pollDeepScan(ticket.jobId, toast);
+      }
+      renderScanResults(data);
+      if (results) results.hidden = false;
+      revealResultsPanels();
+      toast("Deep scan complete");
+    } catch (e) {
+      if (e?.message === "Payment cancelled") return;
+      toast(e?.message ?? "Deep scan failed");
     } finally {
       setLoading(false);
     }

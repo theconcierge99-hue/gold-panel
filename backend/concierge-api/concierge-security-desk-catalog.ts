@@ -170,10 +170,10 @@ export const CONCIERGE_DESK_MODULE_DEFS: ConciergeDeskModuleDef[] = [
     id: "extended-path-discovery",
     phase: "reconnaissance",
     title: "Extended path discovery",
-    subtitle: "Broader passive path catalog beyond Hobby probes",
-    minTier: "president",
-    hobbyStatus: "soon",
-    soonNote: "Scheduled after Hobby scale-out.",
+    subtitle: "Broader passive path catalog via Concierge Deep Scan worker",
+    minTier: "executive",
+    hobbyStatus: "live",
+    implementation: "surface",
   },
 
   // ── Intelligence data layer (OMOP intel files) ─────────────────────────────

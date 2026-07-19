@@ -135,6 +135,16 @@ export function conciergeDevPlugin(): Plugin {
       });
 
       const env = loadEnv(server.config.mode, process.cwd(), "");
+      for (const [key, value] of Object.entries(env)) {
+        const cleaned = String(value).replace(/\r/g, "").trim();
+        if (
+          process.env[key] === undefined ||
+          key.startsWith("SECURITY_DEEP_SCAN_") ||
+          key.startsWith("SECURITY_")
+        ) {
+          process.env[key] = cleaned;
+        }
+      }
 
       server.middlewares.use(async (req, res, next) => {
         const url = req.url?.split("?")[0];
@@ -198,8 +208,12 @@ export function conciergeDevPlugin(): Plugin {
               "content-type": req.headers["content-type"] ?? "application/json",
               "content-length": String(Buffer.byteLength(bodyText)),
               origin: req.headers.origin ?? "http://localhost:8080",
+              host: req.headers.host ?? "localhost:8080",
+              "x-forwarded-proto": "http",
             });
             for (const name of [
+              "authorization",
+              "x-concierge-worker-secret",
               "payment-signature",
               "payment-required",
               "x-agent-id",
@@ -210,6 +224,7 @@ export function conciergeDevPlugin(): Plugin {
               "x-payment-sig",
               "x-payment-escrow",
               "x-soon-holder-wallet",
+              "x-tcx-credits-wallet",
             ]) {
               const v = req.headers[name];
               if (typeof v === "string" && v) fwdHeaders.set(name, v);

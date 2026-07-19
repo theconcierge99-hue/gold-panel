@@ -64,6 +64,7 @@ Scout routes only — 3 free/day on `security-readiness` / `security-headers` wi
 |-------------|-------|--------|
 | `POST /api/concierge-security-scope` | Free | Platform guard + allowlist match |
 | `POST /api/concierge-security-scan` | $0.10 | **Unified breakdown** — grade, readiness, headers, Surface Review, `deskModules[]` |
+| `POST /api/concierge-security-deep-scan` | $1.00 | Async Deep Scan job — poll `GET ?jobId=` |
 | `POST /api/concierge-security-scan` + `selfAudit: true` | Free | `conc-exe.xyz` self-audit only |
 | `POST /api/concierge-security-readiness` | $0.02 | OpenAPI, discovery, headers, MCP scores |
 | `POST /api/concierge-security-headers` | $0.02 | Security header checklist + grade |

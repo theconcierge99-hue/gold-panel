@@ -22,6 +22,8 @@ const EXPECTED_BY_KIND: Partial<Record<X402ResourceKind, string>> = {
   "security-readiness": "JSON with passive agent-readiness dimensions and scores for external target",
   "security-headers": "JSON with HTTP security header checks and grade for external target",
   "security-scan": "JSON with unified security breakdown — summary grade, readiness, headers, Concierge Surface Review findings, recommendations",
+  "security-deep-scan":
+    "JSON job ticket (202) with jobId — poll GET for Concierge Deep Scan status and template findings",
 };
 
 /** Report successful paid responses to zauth Provider Hub (no-op without ZAUTH_API_KEY). */

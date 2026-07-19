@@ -273,10 +273,29 @@ export class ConciergeAgentClient {
 
   get security() {
     const call = this.call.bind(this);
+    const origin = this.origin;
+    const fetchFn = this.fetchFn;
+    const buildHeaders = this.buildHeaders.bind(this);
     return {
       readiness: (body: Record<string, unknown>) => call("security-readiness", body),
       headers: (body: Record<string, unknown>) => call("security-headers", body),
       scan: (body: Record<string, unknown>) => call("security-scan", body),
+      deepScan: (body: Record<string, unknown>) => call("security-deep-scan", body),
+      deepScanStatus: async (jobId: string) => {
+        const res = await fetchFn(
+          `${origin}/api/concierge-security-deep-scan?jobId=${encodeURIComponent(jobId)}`,
+          { headers: buildHeaders() },
+        );
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg =
+            body && typeof body === "object" && "error" in body
+              ? String((body as { error: unknown }).error)
+              : `HTTP ${res.status}`;
+          throw new ConciergeAgentError(msg, res.status, body);
+        }
+        return body;
+      },
     };
   }
 
