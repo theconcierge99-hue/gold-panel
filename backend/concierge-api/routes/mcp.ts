@@ -22,8 +22,9 @@ import {
 import {
   SECURITY_ROUTE_PATH,
   handleConciergeSecurityRoute,
-  type X402SecurityKind,
+  type SyncSecurityKind,
 } from "../concierge-security-handler";
+import { handleDeepScanRoute } from "../concierge-security-deep-scan-handler";
 import { buildPaymentRequiredResponse } from "../x402-server";
 import { resourceUrlForOrigin } from "../x402-discovery";
 import { withEdgeCache } from "../edge-response-cache";
@@ -72,6 +73,12 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
     target: "https://api.example.com",
     allowlist: ["*.example.com"],
     authorized: true,
+  },
+  "security-deep-scan": {
+    target: "https://api.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+    profile: "passive-web",
   },
 };
 
@@ -142,7 +149,11 @@ function siteOrigin(request: Request): string {
 
 function pathForKind(kind: X402ResourceKind): string {
   if (isIntelResourceKind(kind)) return INTEL_ROUTE_PATH[kind];
-  if (isSecurityResourceKind(kind)) return SECURITY_ROUTE_PATH[kind];
+  if (kind === "security-deep-scan") return "/api/concierge-security-deep-scan";
+  if (kind === "concierge-lp") return "/api/concierge-lp/start";
+  if (isSecurityResourceKind(kind)) {
+    return SECURITY_ROUTE_PATH[kind as SyncSecurityKind];
+  }
   return `/api/concierge-${kind}`;
 }
 
@@ -167,7 +178,7 @@ function buildPaidTools(origin: string): McpTool[] {
     const defaultBody = INTEL_TOOL_BODIES[kind] ?? {};
     tools.push({
       name: kind.replace(/-/g, "_"),
-      description: `${kind} — ${price} USDC x402 (or TCX credits). POST ${origin}${path}. Default body: ${JSON.stringify(defaultBody)}. Unpaid calls return live PAYMENT-REQUIRED accepts.`,
+      description: `${kind} — ${price} USDC/USDG x402 (or TCX credits). POST ${origin}${path}. Default body: ${JSON.stringify(defaultBody)}. Unpaid calls return live PAYMENT-REQUIRED accepts (Solana/Base/Arbitrum USDC · Robinhood USDG).`,
       inputSchema: {
         ...PAID_ARG_SCHEMA,
         properties: {
@@ -269,7 +280,7 @@ async function formatPaymentChallenge(input: {
   const payCurl = payCurlFor(origin, kind, body);
 
   const text = [
-    `Payment required: ${priceLabelForResource(kind)} USDC via x402 (or TCX credits / SOON holder free tier).`,
+    `Payment required: ${priceLabelForResource(kind)} USDC/USDG via x402 (or TCX credits / SOON holder free tier).`,
     `POST ${origin}${path}`,
     `Body: ${JSON.stringify(body)}`,
     `CLI (easiest): ${payCurl}`,
@@ -468,7 +479,9 @@ async function proxyPaidTool(input: {
   try {
     res = isIntelResourceKind(kind)
       ? await handleConciergeIntelRoute(proxyReq, kind as X402IntelKind)
-      : await handleConciergeSecurityRoute(proxyReq, kind as X402SecurityKind);
+      : kind === "security-deep-scan"
+        ? await handleDeepScanRoute(proxyReq)
+        : await handleConciergeSecurityRoute(proxyReq, kind as SyncSecurityKind);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Paid route failed";
     return mcpJsonResponse(cors, {

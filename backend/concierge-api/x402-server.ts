@@ -184,6 +184,13 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "security", "utility", "research"],
   },
+  "concierge-lp": {
+    name: "Concierge LP — Session start",
+    description:
+      "Start a wallet-signed Concierge LP session — autonomous Meteora DLMM screen/manage loop with Concierge intel. Poll status; stop with signed message.",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "defi", "dlmm", "meteora", "utility"],
+  },
   "resource-chat": {
     name: "Concierge Resources — Chat",
     description: "Agent-friendly Concierge chat turn — lite context, structured JSON reply",
@@ -309,6 +316,8 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-security-scan";
     case "security-deep-scan":
       return "/api/concierge-security-deep-scan";
+    case "concierge-lp":
+      return "/api/concierge-lp/start";
     case "resource-chat":
       return "/api/resource-chat";
     case "resource-image":

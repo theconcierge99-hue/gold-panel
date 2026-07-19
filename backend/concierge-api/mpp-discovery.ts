@@ -289,6 +289,24 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["target", "authorized"],
   ),
+  "concierge-lp": jsonSchemaBody(
+    {
+      wallet: { type: "string", description: "Solana wallet base58" },
+      message: {
+        type: "string",
+        description: "Signed message concierge-lp:v1:start:{wallet}:{nonce}:{exp}",
+      },
+      signature: { type: "string", description: "Ed25519 signature (base58 or base64)" },
+      nonce: { type: "string" },
+      exp: { type: "number", description: "Unix expiry seconds" },
+      dryRun: { type: "boolean", description: "Paper mode (default true)" },
+      criteria: {
+        type: "object",
+        description: "LP screening/manage thresholds (minTvl, maxApy, oorMinutes, maxCapitalSol, …)",
+      },
+    },
+    ["wallet", "message", "signature"],
+  ),
   "resource-chat": jsonSchemaBody(
     {
       message: { type: "string", description: "User message (max 4000 chars)" },
@@ -663,6 +681,16 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "kind", "status", "jobId"],
   ),
+  "concierge-lp": jsonSchemaBody(
+    {
+      sessionId: { type: "string" },
+      status: { type: "string" },
+      dryRun: { type: "boolean" },
+      depositAddress: { type: "string" },
+      decisions: { type: "array" },
+    },
+    ["sessionId", "status", "depositAddress"],
+  ),
   "resource-chat": jsonSchemaBody(
     {
       ok: { type: "boolean" },
@@ -749,6 +777,15 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
     allowlist: ["*.example.com"],
     authorized: true,
     profile: "passive-web",
+  },
+  "concierge-lp": {
+    wallet: "7humExampleWallet111111111111111111111111",
+    message: "concierge-lp:v1:start:7hum…:nonce:1710000000",
+    signature: "base58sig…",
+    nonce: "n1",
+    exp: 1710000000,
+    dryRun: true,
+    criteria: { minTvl: 50000, maxCapitalSol: 0.5, oorMinutes: 15 },
   },
   "resource-chat": {
     message: "Summarize Solana DeFi outlook in 3 bullets",
@@ -898,6 +935,15 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
     pollAfterMs: 3000,
     target: { origin: "https://api.example.com", hostname: "api.example.com" },
     disclaimer: "Concierge Deep Scan — authorized passive templates only.",
+  },
+  "concierge-lp": {
+    ok: true,
+    kind: "concierge-lp",
+    sessionId: "lp_abc123",
+    status: "active",
+    dryRun: true,
+    depositAddress: "SessionDeposit111111111111111111111111111",
+    disclaimer: "Concierge LP — autonomous DLMM session; you can lose funds in live mode.",
   },
   "resource-chat": {
     ok: true,

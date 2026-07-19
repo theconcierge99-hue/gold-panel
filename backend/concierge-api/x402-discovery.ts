@@ -273,6 +273,16 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     tags: [...X402_OPERATION_TAGS["security-deep-scan"]],
   },
   {
+    kind: "concierge-lp",
+    method: "POST",
+    path: "/api/concierge-lp/start",
+    name: "Concierge LP — Session start",
+    description:
+      "Start a wallet-signed Concierge LP session ($0.25) — autonomous Meteora DLMM screen/manage with Concierge intel. Poll GET /api/concierge-lp/status; stop via POST /api/concierge-lp/stop.",
+    priceUsd: "0.25",
+    tags: [...X402_OPERATION_TAGS["concierge-lp"]],
+  },
+  {
     kind: "resource-chat",
     method: "POST",
     path: "/api/resource-chat",

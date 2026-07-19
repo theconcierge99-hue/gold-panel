@@ -23,6 +23,11 @@ import {
   isSecurityScopeRoute,
   resolveSecurityKindFromRequest,
 } from "./concierge-security-handler";
+import {
+  handleDeepScanRoute,
+  isDeepScanRoute,
+} from "./concierge-security-deep-scan-handler";
+import { handleConciergeLpRoute, isConciergeLpRoute } from "./concierge-lp-handler";
 import handleAgentA2aMesh from "./routes/agent-a2a-mesh";
 import handleAgentIdentity from "./routes/agent-identity";
 import handleAgentIdentityCard from "./routes/agent-identity-card";
@@ -153,6 +158,14 @@ export async function dispatchApiRoute(request: Request): Promise<Response> {
   const intelKind = resolveIntelKindFromRequest(request);
   if (intelKind) {
     return dispatchHandler(request, (req) => handleConciergeIntelRoute(req, intelKind), rateLimit);
+  }
+
+  if (isDeepScanRoute(request)) {
+    return dispatchHandler(request, handleDeepScanRoute, rateLimit);
+  }
+
+  if (isConciergeLpRoute(request)) {
+    return dispatchHandler(request, handleConciergeLpRoute, rateLimit);
   }
 
   const securityKind = resolveSecurityKindFromRequest(request);

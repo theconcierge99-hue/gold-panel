@@ -1019,6 +1019,40 @@
     #view-security-scan .sec-scan-dim-row{grid-template-columns:1fr;gap:6px}
     #view-security-scan .tcx-bar-pct{text-align:left}
   }
+
+  #view-concierge-lp .lp-wrap{max-width:none;padding:0}
+  #view-concierge-lp .lp-lead{font-size:13px;line-height:1.55;color:var(--text-secondary);max-width:62ch;margin:0 0 18px}
+  #view-concierge-lp .lp-criteria-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+  #view-concierge-lp .lp-field{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted)}
+  #view-concierge-lp .lp-field input{
+    font-family:'DM Mono',monospace;font-size:13px;text-transform:none;letter-spacing:0;
+    padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.25);color:var(--text-primary)
+  }
+  #view-concierge-lp .lp-live-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin:4px 0 14px}
+  #view-concierge-lp .lp-actions{display:flex;gap:8px;flex-wrap:wrap}
+  #view-concierge-lp .lp-meta{display:grid;gap:14px}
+  #view-concierge-lp .lp-mono{font-family:'DM Mono',monospace;font-size:12px;word-break:break-all;color:var(--text-primary)}
+  #view-concierge-lp .lp-muted{font-size:12px;color:var(--text-secondary)}
+  #view-concierge-lp .lp-deposit-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+  #view-concierge-lp .lp-status-pill{
+    font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text-secondary)
+  }
+  #view-concierge-lp .lp-status-pill.ok{color:var(--signal-green,#7dcea0);border-color:rgba(125,206,160,.4)}
+  #view-concierge-lp .lp-status-pill.warn{color:#f0d878;border-color:rgba(240,168,90,.4)}
+  #view-concierge-lp .lp-status-pill.dim{opacity:.7}
+  #view-concierge-lp .lp-row{font-size:13px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);color:var(--text-secondary)}
+  #view-concierge-lp .lp-row strong{color:var(--text-primary);font-weight:500}
+  #view-concierge-lp .lp-log{max-height:320px;overflow:auto}
+  #view-concierge-lp .lp-log-line{font-size:12px;line-height:1.45;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);color:var(--text-secondary)}
+  #view-concierge-lp .lp-log-t{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-right:6px}
+  @media (max-width:900px){
+    #view-concierge-lp .lp-criteria-grid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:560px){
+    #view-concierge-lp .lp-criteria-grid{grid-template-columns:1fr}
+  }
+  }
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script src="/js/tcx-ca.js"></script>
@@ -1073,6 +1107,7 @@
       <a class="nav-i" href="/token/stake">Stake <span class="badge">SOON</span></a>
       <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">TCX</span></div>
       <div class="nav-i" data-nav="security-scan" onclick="showView('security-scan')">Security Scan <span class="badge">API</span></div>
+      <div class="nav-i" data-nav="concierge-lp" onclick="showView('concierge-lp')">Concierge LP <span class="badge">DLMM</span></div>
     </div>
     <div class="nav-group">
       <div class="nav-h">Categories</div>
@@ -1467,6 +1502,89 @@
           </section>
 
           <p class="sec-scan-footnote" id="sec-scan-legal">Passive review only. Authorized targets. Responsibility remains with the requester.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCIERGE LP (session-based autonomous DLMM) -->
+    <section class="view" id="view-concierge-lp">
+      <div class="section-h el-reveal" style="margin-bottom:20px">
+        <h2>Concierge LP</h2>
+      </div>
+      <div class="tcx-wrap lp-wrap">
+        <p class="lp-lead el-reveal">Autonomous Meteora DLMM sessions — wallet-signed Start/Stop. Fund the session deposit address; Concierge intel screens pools while Hunter/Healer manage the loop. You can lose funds in live mode.</p>
+
+        <div id="lp-idle">
+          <section class="tcx-panel el-reveal" aria-labelledby="lp-criteria-title">
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Criteria</p>
+                <h3 class="tcx-panel-title" id="lp-criteria-title">Session thresholds</h3>
+              </div>
+            </div>
+            <div class="lp-criteria-grid">
+              <label class="lp-field">Min TVL (USD)<input id="lp-min-tvl" type="number" value="50000" min="0" step="1000" /></label>
+              <label class="lp-field">Max APY %<input id="lp-max-apy" type="number" value="250" min="1" step="1" /></label>
+              <label class="lp-field">Min organic<input id="lp-min-organic" type="number" value="0" min="0" step="1" /></label>
+              <label class="lp-field">Take profit %<input id="lp-tp" type="number" value="5" min="0" step="0.5" /></label>
+              <label class="lp-field">OOR minutes<input id="lp-oor" type="number" value="15" min="1" step="1" /></label>
+              <label class="lp-field">Max capital (SOL)<input id="lp-max-sol" type="number" value="0.5" min="0" step="0.1" /></label>
+            </div>
+            <label class="lp-live-row">
+              <input type="checkbox" id="lp-live-toggle" />
+              <span>Live mode (default is paper / dry-run)</span>
+            </label>
+            <div class="lp-actions">
+              <button type="button" class="tcx-btn tcx-btn--primary" id="lp-start-btn">Start session · $0.25</button>
+            </div>
+          </section>
+        </div>
+
+        <div id="lp-active" hidden>
+          <section class="tcx-panel el-reveal">
+            <div class="tcx-panel-head">
+              <div>
+                <p class="tcx-panel-kicker">Active session</p>
+                <h3 class="tcx-panel-title">Monitor</h3>
+              </div>
+              <span class="lp-status-pill" id="lp-session-status">—</span>
+            </div>
+            <div class="lp-meta">
+              <div><span class="lp-muted">Session</span><div class="lp-mono" id="lp-session-id">—</div></div>
+              <div>
+                <span class="lp-muted">Deposit address</span>
+                <div class="lp-deposit-row">
+                  <code class="lp-mono" id="lp-deposit">—</code>
+                  <button type="button" class="tcx-btn" id="lp-copy-deposit">Copy</button>
+                </div>
+              </div>
+            </div>
+            <p class="lp-muted" style="margin-top:10px">Fund this address with SOL for live LP. Paper mode still screens and logs decisions without spending capital.</p>
+            <div class="lp-actions" style="margin-top:14px">
+              <button type="button" class="tcx-btn tcx-btn--gold" id="lp-stop-btn">Stop session (sign wallet)</button>
+            </div>
+          </section>
+
+          <div class="tcx-grid-2" style="margin-top:14px">
+            <section class="tcx-panel el-reveal">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Hunter</p>
+                  <h3 class="tcx-panel-title">Screened pools</h3>
+                </div>
+              </div>
+              <div id="lp-screen-list"></div>
+            </section>
+            <section class="tcx-panel el-reveal">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Healer</p>
+                  <h3 class="tcx-panel-title">Decision log</h3>
+                </div>
+              </div>
+              <div id="lp-decision-log" class="lp-log"></div>
+            </section>
+          </div>
         </div>
       </div>
     </section>
@@ -2525,6 +2643,9 @@
     if(v==='security-scan'){
       initLoungeSecurityScan();
     }
+    if(v==='concierge-lp'){
+      initLoungeConciergeLp();
+    }
   }
   window.showView = showView;
 
@@ -2566,6 +2687,25 @@
 
   if (location.hash === '#security-scan') {
     setTimeout(function(){ showView('security-scan'); }, 120);
+  }
+
+  let _conciergeLpReady = false;
+  async function initLoungeConciergeLp(){
+    if(!window.__initLoungeConciergeLp) return;
+    await window.__initLoungeConciergeLp({
+      paidApiFetch,
+      toast,
+      getSolWallet: () => {
+        const s = typeof getWalletSession === 'function' ? getWalletSession() : null;
+        return s?.sol?.address || null;
+      },
+      openWalletModal: () => { if (typeof openModal === 'function') openModal(); },
+    });
+    _conciergeLpReady = true;
+  }
+
+  if (location.hash === '#concierge-lp') {
+    setTimeout(function(){ showView('concierge-lp'); }, 120);
   }
 
   // MODAL
@@ -4161,6 +4301,7 @@
 <script type="module" src="/js/market-clocks.mjs"></script>
 <script type="module" src="/js/token-health.mjs"></script>
 <script type="module" src="/js/lounge-security-scan.mjs"></script>
+<script type="module" src="/js/lounge-concierge-lp.mjs"></script>
 <script type="module">
   import { initConciergeFx } from "/js/concierge-fx.mjs";
   const stop = initConciergeFx();

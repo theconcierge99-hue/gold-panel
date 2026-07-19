@@ -25,6 +25,8 @@ export type ResourceKind =
   | "security-readiness"
   | "security-headers"
   | "security-scan"
+  | "security-deep-scan"
+  | "concierge-lp"
   | "resource-chat"
   | "resource-image"
   | "resource-scaffold";
@@ -230,6 +232,26 @@ export const CATALOG: readonly CatalogEntry[] = [
     description: "Unified passive security scan bundle.",
     priceUsd: "0.10",
     tags: ["security", "bundle"],
+  },
+  {
+    kind: "security-deep-scan",
+    method: "POST",
+    path: "/api/concierge-security-deep-scan",
+    name: "Security — Deep scan",
+    description:
+      "Authorized async deep scan job ($1). Poll GET ?jobId= for status and findings.",
+    priceUsd: "1.00",
+    tags: ["security", "async"],
+  },
+  {
+    kind: "concierge-lp",
+    method: "POST",
+    path: "/api/concierge-lp/start",
+    name: "Concierge LP — Session start",
+    description:
+      "Start a wallet-signed Concierge LP session ($0.25). Poll /api/concierge-lp/status; stop via /api/concierge-lp/stop.",
+    priceUsd: "0.25",
+    tags: ["defi", "dlmm", "meteora", "session"],
   },
   {
     kind: "resource-chat",

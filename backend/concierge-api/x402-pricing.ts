@@ -18,8 +18,23 @@ export type X402IntelKind =
   | "intel-desk-brief"
   | "intel-a2a-pipeline";
 
-/** Passive security desk — scout ($0.02) + unified scan bundle ($0.10) */
-export type X402SecurityKind = "security-readiness" | "security-headers" | "security-scan";
+/** Passive security desk — scout ($0.02) + unified scan ($0.10) + async deep scan ($1.00) */
+export type X402SecurityKind =
+  | "security-readiness"
+  | "security-headers"
+  | "security-scan"
+  | "security-deep-scan";
+
+/** Concierge LP — session start ($0.25) */
+export type X402LpKind = "concierge-lp";
+
+/** Concierge Deep Scan — async worker (Nuclei/httpx templates), authorized targets only */
+export const X402_DEEP_SCAN_PRICE_USDC = 1;
+export const X402_DEEP_SCAN_PRICE_ATOMIC = "1000000";
+
+/** Concierge LP session start */
+export const X402_LP_SESSION_PRICE_USDC = 0.25;
+export const X402_LP_SESSION_PRICE_ATOMIC = "250000";
 
 /** MVP Concierge Resources — agent-friendly creative endpoints */
 export type X402MvpResourceKind = "resource-chat" | "resource-image" | "resource-scaffold";
@@ -28,6 +43,7 @@ export type X402ResourceKind =
   | X402CoreKind
   | X402IntelKind
   | X402SecurityKind
+  | X402LpKind
   | X402MvpResourceKind;
 
 export const X402_READ_PRICE_USDC = 0.1;
@@ -89,7 +105,11 @@ export function isRawSecurityKind(kind: X402ResourceKind): kind is X402SecurityK
 }
 
 export function isSecurityResourceKind(kind: X402ResourceKind): kind is X402SecurityKind {
-  return kind === "security-scan" || isRawSecurityKind(kind);
+  return (
+    kind === "security-scan" ||
+    kind === "security-deep-scan" ||
+    isRawSecurityKind(kind)
+  );
 }
 
 export function usdcToAtomic(usdc: number): string {
@@ -101,6 +121,8 @@ export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
   if (kind === "security-scan") return X402_SIGNAL_PRICE_ATOMIC;
+  if (kind === "security-deep-scan") return X402_DEEP_SCAN_PRICE_ATOMIC;
+  if (kind === "concierge-lp") return X402_LP_SESSION_PRICE_ATOMIC;
   if (kind === "resource-chat") return X402_RESOURCE_CHAT_ATOMIC;
   if (kind === "resource-image" || kind === "resource-scaffold") return X402_RESOURCE_CREATIVE_ATOMIC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_ATOMIC;
@@ -111,6 +133,8 @@ export function priceUsdcForResource(kind: X402ResourceKind): number {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_USDC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_USDC;
   if (kind === "security-scan") return X402_SIGNAL_PRICE_USDC;
+  if (kind === "security-deep-scan") return X402_DEEP_SCAN_PRICE_USDC;
+  if (kind === "concierge-lp") return X402_LP_SESSION_PRICE_USDC;
   if (kind === "resource-chat") return X402_RESOURCE_CHAT_USDC;
   if (kind === "resource-image" || kind === "resource-scaffold") return X402_RESOURCE_CREATIVE_USDC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_USDC;
@@ -153,6 +177,8 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "security-readiness",
   "security-headers",
   "security-scan",
+  "security-deep-scan",
+  "concierge-lp",
   "resource-chat",
   "resource-image",
   "resource-scaffold",

@@ -38,6 +38,7 @@ export const X402_OPERATION_TAGS: Record<
   | "security-headers"
   | "security-scan"
   | "security-deep-scan"
+  | "concierge-lp"
   | "resource-chat"
   | "resource-image"
   | "resource-scaffold",
@@ -65,6 +66,7 @@ export const X402_OPERATION_TAGS: Record<
   "security-headers": ["Utility", "Research"],
   "security-scan": ["Utility", "Research", "AI"],
   "security-deep-scan": ["Utility", "Research", "AI"],
+  "concierge-lp": ["AI", "Crypto", "Trading", "Utility"],
   "resource-chat": ["AI", "Utility"],
   "resource-image": ["AI", "Utility"],
   "resource-scaffold": ["AI", "Utility"],
@@ -73,7 +75,7 @@ export const X402_OPERATION_TAGS: Record<
 export const X402_SERVICE_NAME = "Concierge Agent";
 
 export const X402_SERVICE_TAGLINE =
-  "Market intelligence + Concierge Resources — pay-per-call routes: creative AI, macro & wire research, DeFi intel, Lounge RWA signals, passive security scans, and Concierge Deep Scan. USDC (Solana/Base/Arbitrum) or USDG (Robinhood Chain) via x402; TCX on Solana (MPP-compatible discovery).";
+  "Market intelligence + Concierge Resources — pay-per-call routes: creative AI, macro & wire research, DeFi intel, Concierge LP sessions, Lounge RWA signals, passive security scans, and Concierge Deep Scan. USDC (Solana/Base/Arbitrum) or USDG (Robinhood Chain) via x402; TCX on Solana (MPP-compatible discovery).";
 
 export function x402ServiceListingMeta(origin: string): {
   serviceName: string;
