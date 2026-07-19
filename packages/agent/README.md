@@ -47,7 +47,7 @@ Wire your wallet / facilitator once; the client retries after 402:
 ```typescript
 const agent = createConciergeAgent({
   async settlePayment({ accepts, paymentRequiredHeader }) {
-    // Sign/settle against accepts[0] (Solana USDC or Base), return PAYMENT-SIGNATURE
+    // Sign/settle against accepts (Solana/Base/Arbitrum USDC or Robinhood USDG), return PAYMENT-SIGNATURE
     return await yourWallet.signX402(paymentRequiredHeader, accepts);
   },
 });

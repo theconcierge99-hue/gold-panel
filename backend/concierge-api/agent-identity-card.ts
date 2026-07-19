@@ -21,12 +21,12 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     schema: "concierge-agent-registry-v1",
     name: "Concierge Agent Registry",
     description:
-      "Register autonomous agent identities with Solana, Base, and Arbitrum wallets. Mint optional ERC-8004 Identity NFTs on Base. Pay for Concierge via x402 USDC (MPP-discoverable) — no API keys.",
+      "Register autonomous agent identities with Solana, Base, Arbitrum, and Robinhood Chain wallets. Mint optional ERC-8004 Identity NFTs on Base. Pay for Concierge via x402 USDC or USDG (MPP-discoverable) — no API keys.",
     registerEndpoint: `${base}/api/agent-identity`,
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
     protocols: ["x402", "mpp", "SAP", "ERC-8004"],
-    networks: ["solana", "eip155:8453", "eip155:42161"],
+    networks: ["solana", "eip155:8453", "eip155:42161", "eip155:4663"],
     discovery: {
       x402: `${base}/.well-known/x402`,
       openapi: `${base}/openapi.json`,
@@ -98,7 +98,7 @@ export function buildErc8004RegistrationFile(
     name: agent.name,
     description:
       agent.description ||
-      `Concierge agent ${agent.id} — x402 market intel on Solana / Base / Arbitrum.`,
+      `Concierge agent ${agent.id} — x402 market intel on Solana / Base / Arbitrum / Robinhood.`,
     image: `${base}/images/the-concierge-logo.png`,
     services,
     x402Support: true,
@@ -120,6 +120,7 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
   if (agent.evmAddress) {
     accounts.push({ chain: "eip155:8453", address: agent.evmAddress });
     accounts.push({ chain: "eip155:42161", address: agent.evmAddress });
+    accounts.push({ chain: "eip155:4663", address: agent.evmAddress });
   }
   if (agent.sapWallet && agent.sapWallet !== agent.solAddress) {
     accounts.push({ chain: "sap", address: agent.sapWallet });

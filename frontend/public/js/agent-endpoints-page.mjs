@@ -23,7 +23,7 @@ if (chipsEl) {
     `<span><strong>${c.total}</strong> routes</span>`,
     `<span class="dot">·</span><span>x402</span>`,
     `<span class="dot">·</span><span>from $0.02</span>`,
-    `<span class="dot">·</span><span>Solana · Base</span>`,
+    `<span class="dot">·</span><span>Solana · Base · Arbitrum · Robinhood</span>`,
   ].join("");
 }
 

@@ -8,7 +8,7 @@ description: Call Concierge Intel from OOBE Synapse agents — desk verdict and 
 **Origin:** `https://conc-exe.xyz`  
 **OOBE:** [oobeprotocol.ai](https://www.oobeprotocol.ai/) · [SAP docs](https://explorer.oobeprotocol.ai/docs)  
 **Manifest:** `GET /distribution/oobe/sap-tools-manifest.json`  
-**Payment:** x402 v2 USDC — PayAI facilitator (`PAYMENT-SIGNATURE`). No API keys.
+**Payment:** x402 v2 USDC (Solana / Base / Arbitrum) or USDG (Robinhood Chain) — PayAI for USDC; Primer for Robinhood (`PAYMENT-SIGNATURE`). No API keys.
 
 ## When to use
 

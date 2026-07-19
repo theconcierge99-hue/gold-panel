@@ -45,6 +45,7 @@ const STACK_PARTNERS = [
   { name: "Solana", logo: "/images/integrations/solana.svg", href: "https://solana.com/", external: true },
   { name: "Base", logo: "/images/integrations/base.svg", href: "https://base.org/", external: true },
   { name: "Arbitrum", logo: "/images/integrations/arbitrum.svg", href: "https://arbitrum.io/", external: true },
+  { name: "Robinhood Chain", logo: "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/rh_favicon_32.png", href: "https://docs.robinhood.com/chain/", external: true },
   { name: "x402", logo: "/images/integrations/x402.svg", href: "/docs/payment/x402", external: false },
   { name: "Metaplex", logo: "/images/integrations/metaplex.svg", href: "/docs/integration/metaplex", external: false },
   { name: "Privy", logo: "/images/integrations/privy.svg", href: "/docs/integration/privy", external: false },
@@ -93,7 +94,7 @@ const ABOUT = [
   {
     icon: "x402",
     title: "x402 settlement",
-    desc: "HTTP 402 micropayments on Solana, Base, and Arbitrum. Settle USDC via facilitators or TCX via Token Pay and prepaid credits.",
+    desc: "HTTP 402 micropayments on Solana, Base, Arbitrum, and Robinhood Chain. Settle USDC via facilitators, USDG on Robinhood, or TCX via Token Pay and prepaid credits.",
   },
   {
     icon: "mesh",
@@ -152,7 +153,7 @@ const MODULES = [
   {
     tag: "Commerce",
     title: "x402 Playground",
-    desc: "Probe paid routes, settle USDC on Solana, Base, or Arbitrum, TCX via Token Pay, or test SPL merchants in one workspace.",
+    desc: "Probe paid routes, settle USDC on Solana/Base/Arbitrum, USDG on Robinhood, TCX via Token Pay, or test SPL merchants in one workspace.",
     href: "/agent/playground",
     cta: "Open Playground",
   },

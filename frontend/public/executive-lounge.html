@@ -1022,7 +1022,7 @@
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script src="/js/tcx-ca.js"></script>
-<script type="module" src="/js/x402-pay.mjs?v=mroq1y4g"></script>
+<script type="module" src="/js/x402-pay.mjs?v=mrrdowhg"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -1384,6 +1384,7 @@
               <button type="button" class="tcx-btn" id="sec-scan-scope-btn">Check scope</button>
               <button type="button" class="tcx-btn tcx-btn--gold" id="sec-scan-self-btn">Scan Concierge</button>
               <button type="button" class="tcx-btn tcx-btn--primary" id="sec-scan-run-btn">Run scan · $0.10</button>
+              <button type="button" class="tcx-btn tcx-btn--gold" id="sec-scan-deep-btn">Deep scan · $1.00</button>
             </div>
           </div>
         </section>
@@ -3039,6 +3040,9 @@
     return {
       acceptsEvm: !!cfg.acceptsEvm,
       acceptsArbitrum: !!cfg.acceptsArbitrum,
+      acceptsRobinhood: !!cfg.acceptsRobinhood,
+      robinhoodUsdg: cfg.robinhoodUsdg || undefined,
+      robinhoodNetwork: cfg.robinhoodNetwork || undefined,
       evmNetworks: cfg.evmNetworks,
       acceptsSol: !!cfg.acceptsSol,
       evmPayToReady: !!cfg.evmPayToReady,
@@ -3273,7 +3277,7 @@
     }
 
     const solReady = chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient);
-    const evmReady = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient);
+    const evmReady = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient);
     const list = document.getElementById('payChainList');
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
@@ -3300,10 +3304,10 @@
       });
     });
 
-    const defaultOpt = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient&&!o.balanceUnknown)
+    const defaultOpt = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.available&&o.sufficient&&!o.balanceUnknown)
-      || chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum')&&o.available&&o.sufficient)
+      || chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available)
@@ -3335,7 +3339,10 @@
     );
     const chainHint = preferredChain === 'soon'
       ? (payOpts?.preferredTokenMerchantId ? payOpts.preferredTokenMerchantId+' (Solana)' : 'native token (Solana)')
-      : preferredChain === 'sol' ? 'Solana' : preferredChain === 'arbitrum' ? 'Arbitrum' : (preferredChain === 'base' || preferredChain === 'evm') ? 'Base' : 'wallet';
+      : preferredChain === 'sol' ? 'Solana'
+      : preferredChain === 'robinhood' ? 'Robinhood (USDG)'
+      : preferredChain === 'arbitrum' ? 'Arbitrum'
+      : (preferredChain === 'base' || preferredChain === 'evm') ? 'Base' : 'wallet';
     const u = String(url);
     const agentId = typeof window.elGetStoredAgentId === 'function' ? window.elGetStoredAgentId() : null;
     const baseOpts = options || {};

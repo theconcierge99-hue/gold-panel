@@ -3,7 +3,7 @@
   "info": {
     "title": "Concierge Agent API",
     "version": "4.2.0",
-    "description": "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC or TCX on Solana and Base.",
+    "description": "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. No API keys. x402 + MPP discovery; USDC on Solana/Base/Arbitrum, USDG on Robinhood Chain, or TCX on Solana.",
     "x-guidance": "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate. Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana, Base, or Arbitrum (PayAI (primary) · Dexter (fallback)). Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload). Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). TCX holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch. Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($0.02), /api/lounge-signal-open. CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery pay.sh: pay --sandbox curl <origin>/api/concierge-intel-tvl -d '{}' · pay skills search market intelligence Idempotency: optional Idempotency-Key header on POST mutating routes. Reuse the same PAYMENT-SIGNATURE after a successful x402 settlement — facilitators will not double-charge the same on-chain payment. Rate limits: soft limit 120 requests/minute per IP on /api/* — responses include X-RateLimit-Limit; 429 returns Retry-After. Discovery index: GET /.well-known/api-catalog (RFC 9727 linkset) · GET /llms.txt · GET /.well-known/agent-card.json",
     "x-marketplace-tags": [
       "AI",
@@ -46,8 +46,13 @@
     "networks": [
       "solana",
       "base",
-      "arbitrum"
-    ]
+      "arbitrum",
+      "robinhood"
+    ],
+    "robinhoodNetwork": "eip155:4663",
+    "robinhoodAsset": "USDG",
+    "robinhoodFacilitator": "Primer (Robinhood)",
+    "robinhoodFacilitatorUrl": "https://x402.primer.systems"
   },
   "servers": [
     {

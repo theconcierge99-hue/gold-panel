@@ -44,7 +44,12 @@ import {
   SIGNAL_CREATOR_SHARE_PERCENT,
   SIGNAL_MERCHANT_SHARE_PERCENT,
 } from "./signal-revenue";
-import { getSolanaFeePayer, getX402FacilitatorProfile, getX402FacilitatorFallback } from "./x402-facilitator";
+import {
+  getSolanaFeePayer,
+  getX402FacilitatorProfile,
+  getX402FacilitatorFallback,
+  getRobinhoodFacilitatorProfile,
+} from "./x402-facilitator";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { isSoonLaunched, publicSoonHolderTiers, SOON_TIERS } from "./soon-token";
 
@@ -64,6 +69,12 @@ export const SOLANA_FEE_PAYER = getSolanaFeePayer();
 export const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 export const SOLANA_DEVNET_CAIP2 = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
 
+/** Robinhood Chain — Arbitrum Orbit L2 (USDG settlement, not Circle USDC). */
+export const ROBINHOOD_MAINNET_CAIP2 = "eip155:4663" as const;
+export const ROBINHOOD_TESTNET_CAIP2 = "eip155:46630" as const;
+/** Paxos Global Dollar (USDG) on Robinhood Chain mainnet — 6 decimals, EIP-3009. */
+export const ROBINHOOD_USDG_MAINNET = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
+
 const USDC_BY_NETWORK: Record<string, string> = {
   "eip155:8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   "eip155:84532": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
@@ -73,14 +84,41 @@ const USDC_BY_NETWORK: Record<string, string> = {
   [SOLANA_DEVNET_CAIP2]: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 };
 
+export function isRobinhoodNetwork(network: string): boolean {
+  return network === ROBINHOOD_MAINNET_CAIP2 || network === ROBINHOOD_TESTNET_CAIP2;
+}
+
+/** Settlement asset for a CAIP-2 network (USDC or Robinhood USDG). */
 export function getUsdcAssetForNetwork(network: string): string {
+  if (isRobinhoodNetwork(network)) {
+    const usdg = getRobinhoodUsdgAsset(network);
+    if (!usdg) throw new Error(`Robinhood USDG not configured for ${network}`);
+    return usdg;
+  }
   const asset = USDC_BY_NETWORK[network];
   if (!asset) throw new Error(`Unsupported x402 network: ${network}`);
   return asset;
 }
 
-/** EIP-712 domain metadata for USDC exact-scheme accepts — must match on-chain token.name(). */
+export function getRobinhoodUsdgAsset(network: string): string | null {
+  if (network === ROBINHOOD_MAINNET_CAIP2) {
+    return (
+      cleanEnvAddress(process.env.X402_ROBINHOOD_USDG) || ROBINHOOD_USDG_MAINNET
+    );
+  }
+  if (network === ROBINHOOD_TESTNET_CAIP2) {
+    // Testnet USDG mint is not the mainnet address — require explicit env.
+    return cleanEnvAddress(process.env.X402_ROBINHOOD_USDG) || null;
+  }
+  return null;
+}
+
+/** EIP-712 domain metadata for exact-scheme accepts — must match on-chain token.name(). */
 export function getUsdcEip712ExtraForNetwork(network: string): { name: string; version: string } {
+  if (isRobinhoodNetwork(network)) {
+    // USDG (Paxos Global Dollar) — confirmed via Naven / Blockscout token metadata.
+    return { name: "Global Dollar", version: "1" };
+  }
   // x402 token table: Base/Arbitrum/Polygon mainnet native USDC → "USD Coin"; Base Sepolia → "USDC".
   if (network === "eip155:84532" || network === "eip155:421614") {
     return { name: "USDC", version: "2" };
@@ -94,6 +132,7 @@ export function getUsdcEip712ExtraForNetwork(network: string): { name: string; v
 export type X402NetworkProfile = {
   evm: `eip155:${number}`;
   arbitrum: `eip155:${number}`;
+  robinhood: `eip155:${number}`;
   sol: `solana:${string}`;
   label: string;
 };
@@ -101,15 +140,17 @@ export type X402NetworkProfile = {
 const MAINNET: X402NetworkProfile = {
   evm: "eip155:8453",
   arbitrum: "eip155:42161",
+  robinhood: ROBINHOOD_MAINNET_CAIP2,
   sol: SOLANA_MAINNET_CAIP2,
-  label: "Base + Arbitrum + Solana mainnet",
+  label: "Base + Arbitrum + Robinhood + Solana mainnet",
 };
 
 const TESTNET: X402NetworkProfile = {
   evm: "eip155:84532",
   arbitrum: "eip155:421614",
+  robinhood: ROBINHOOD_TESTNET_CAIP2,
   sol: SOLANA_DEVNET_CAIP2,
-  label: "Base Sepolia + Arbitrum Sepolia + Solana devnet",
+  label: "Base Sepolia + Arbitrum Sepolia + Robinhood testnet + Solana devnet",
 };
 
 export function getX402NetworkProfile(): X402NetworkProfile {
@@ -123,11 +164,23 @@ export function isArbitrumX402Enabled(): boolean {
   return !!getMerchantAddresses().evm;
 }
 
-/** EVM networks advertised in 402 accepts (Base + optional Arbitrum). */
+/**
+ * Robinhood Chain USDG rail — on when EVM merchant is set unless disabled.
+ * Testnet requires X402_ROBINHOOD_USDG (mainnet mint is not deployed on 46630).
+ */
+export function isRobinhoodX402Enabled(): boolean {
+  if (process.env.X402_ROBINHOOD_ENABLED === "false") return false;
+  if (!getMerchantAddresses().evm) return false;
+  const profile = getX402NetworkProfile();
+  return !!getRobinhoodUsdgAsset(profile.robinhood);
+}
+
+/** EVM networks advertised in 402 accepts (Base + optional Arbitrum + Robinhood). */
 export function getX402EvmAcceptNetworks(): Array<`eip155:${number}`> {
   const profile = getX402NetworkProfile();
   const nets: Array<`eip155:${number}`> = [profile.evm];
   if (isArbitrumX402Enabled()) nets.push(profile.arbitrum);
+  if (isRobinhoodX402Enabled()) nets.push(profile.robinhood);
   return nets;
 }
 
@@ -215,6 +268,7 @@ export function getPublicX402Config() {
 
   const facilitator = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
+  const robinhoodFacilitator = isRobinhoodX402Enabled() ? getRobinhoodFacilitatorProfile() : null;
 
   return {
     enabled: isX402Enabled(),
@@ -232,6 +286,14 @@ export function getPublicX402Config() {
     networks: nets,
     acceptsEvm: !!evm,
     acceptsArbitrum: isArbitrumX402Enabled() && !!evm,
+    acceptsRobinhood: isRobinhoodX402Enabled() && !!evm,
+    robinhoodNetwork: isRobinhoodX402Enabled() ? nets.robinhood : undefined,
+    robinhoodUsdg: isRobinhoodX402Enabled()
+      ? getRobinhoodUsdgAsset(nets.robinhood) ?? undefined
+      : undefined,
+    robinhoodFacilitator: robinhoodFacilitator?.name,
+    robinhoodFacilitatorUrl: robinhoodFacilitator?.url,
+    robinhoodFacilitatorDocsUrl: robinhoodFacilitator?.docsUrl,
     evmNetworks: getX402EvmAcceptNetworks(),
     acceptsSol: !!sol,
     evmPayToReady: !!evm,

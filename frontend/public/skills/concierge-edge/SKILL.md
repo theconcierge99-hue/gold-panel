@@ -9,7 +9,7 @@ description: Run Gemma 4 on-device with Concierge x402 intel tools — local inf
 **Gemma:** [LiteRT-LM](https://ai.google.dev/edge/litert-lm) · [Gemma 4 model card](https://ai.google.dev/gemma/docs/core/model_card_4)  
 **Preset:** `GET /distribution/gemma/concierge-edge-preset.py`  
 **Manifest:** `GET /distribution/gemma/litert-tools-manifest.json`  
-**Payment:** x402 USDC via `pay curl` — no Concierge API keys.
+**Payment:** x402 USDC via `pay curl` (Solana / Base / Arbitrum) or USDG on Robinhood Chain — no Concierge API keys.
 
 ## When to use
 

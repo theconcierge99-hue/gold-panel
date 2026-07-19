@@ -7,7 +7,7 @@ description: Pay-per-call market intelligence on conc-exe.xyz — macro, wire, D
 
 **Origin:** `https://conc-exe.xyz`  
 **Discovery:** `GET /.well-known/api-catalog` · `GET /openapi.json` · `GET /api/mcp` · `GET /api/agent-a2a-mesh`  
-**Payment:** HTTP 402 + USDC on Solana or Base (PayAI primary, Dexter fallback). No API keys.
+**Payment:** HTTP 402 + USDC on Solana / Base / Arbitrum, or USDG on Robinhood Chain (`eip155:4663`, Primer facilitator). PayAI primary for USDC; Dexter fallback. No API keys.
 
 ## When to use
 

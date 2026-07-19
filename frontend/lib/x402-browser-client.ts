@@ -1,5 +1,5 @@
 /**
- * Browser x402 client — EVM (Base, Arbitrum) + Solana USDC via connected Phantom/OKX wallets.
+ * Browser x402 client — EVM (Base, Arbitrum, Robinhood) + Solana USDC via connected Phantom/OKX wallets.
  */
 import { x402Client } from "@x402/core/client";
 import type { PaymentRequirements } from "@x402/core/types";
@@ -16,6 +16,7 @@ import {
   createPublicClient,
   createWalletClient,
   custom,
+  defineChain,
   http,
   publicActions,
   type EIP1193Provider,
@@ -45,6 +46,9 @@ export type TokenPayMerchantConfig = {
 export type X402ServerPayConfig = {
   acceptsEvm?: boolean;
   acceptsArbitrum?: boolean;
+  acceptsRobinhood?: boolean;
+  robinhoodUsdg?: string;
+  robinhoodNetwork?: string;
   evmNetworks?: string[];
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
@@ -121,6 +125,7 @@ function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
   return !!(
     (serverConfig.acceptsEvm && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsArbitrum && serverConfig.evmPayToReady) ||
+    (serverConfig.acceptsRobinhood && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsSol && serverConfig.solPayToReady)
   );
 }
@@ -132,7 +137,36 @@ type EvmRailConfig = {
   chainName: string;
   rpc: string;
   explorer: string;
+  /** Display symbol for balance/insufficient messages */
+  symbol: "USDC" | "USDG";
 };
+
+const robinhoodMainnet = defineChain({
+  id: 4663,
+  name: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.mainnet.chain.robinhood.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Blockscout", url: "https://robinhoodchain.blockscout.com" },
+  },
+});
+
+const robinhoodTestnet = defineChain({
+  id: 46630,
+  name: "Robinhood Chain Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.testnet.chain.robinhood.com"] },
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://explorer.testnet.chain.robinhood.com",
+    },
+  },
+});
 
 const USDC = {
   mainnet: {
@@ -143,6 +177,7 @@ const USDC = {
       chainName: "Base",
       rpc: "https://mainnet.base.org",
       explorer: "https://basescan.org",
+      symbol: "USDC",
     },
     arbitrum: {
       asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -151,6 +186,16 @@ const USDC = {
       chainName: "Arbitrum One",
       rpc: "https://arb1.arbitrum.io/rpc",
       explorer: "https://arbiscan.io",
+      symbol: "USDC",
+    },
+    robinhood: {
+      asset: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      network: "eip155:4663",
+      chainId: 4663,
+      chainName: "Robinhood Chain",
+      rpc: "https://rpc.mainnet.chain.robinhood.com",
+      explorer: "https://robinhoodchain.blockscout.com",
+      symbol: "USDG",
     },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" as const,
@@ -169,6 +214,7 @@ const USDC = {
       chainName: "Base Sepolia",
       rpc: "https://sepolia.base.org",
       explorer: "https://sepolia.basescan.org",
+      symbol: "USDC",
     },
     arbitrum: {
       asset: "0x75faf114eafb1BDbe2F6496Ed7E7eD0Eb74e2Da",
@@ -177,6 +223,17 @@ const USDC = {
       chainName: "Arbitrum Sepolia",
       rpc: "https://sepolia-rollup.arbitrum.io/rpc",
       explorer: "https://sepolia.arbiscan.io",
+      symbol: "USDC",
+    },
+    robinhood: {
+      // Override via server accepts when X402_ROBINHOOD_USDG is set on testnet.
+      asset: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      network: "eip155:46630",
+      chainId: 46630,
+      chainName: "Robinhood Chain Testnet",
+      rpc: "https://rpc.testnet.chain.robinhood.com",
+      explorer: "https://explorer.testnet.chain.robinhood.com",
+      symbol: "USDG",
     },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const,
@@ -203,7 +260,7 @@ export type WalletSession = {
   sol?: { address: string; wallet: string } | null;
 };
 
-export type PayChain = "base" | "arbitrum" | "sol" | "soon";
+export type PayChain = "base" | "arbitrum" | "robinhood" | "sol" | "soon";
 /** @deprecated Use "base" — kept for older Lounge callers */
 export type LegacyPayChain = PayChain | "evm";
 
@@ -213,14 +270,22 @@ function normalizePayChain(chain?: LegacyPayChain): PayChain | undefined {
   return chain;
 }
 
-function evmRailConfig(
-  rail: "base" | "arbitrum",
-  networkMode: "mainnet" | "testnet",
-): EvmRailConfig {
-  return USDC[networkMode][rail];
+type EvmPayRail = "base" | "arbitrum" | "robinhood";
+
+function evmRailConfig(rail: EvmPayRail, networkMode: "mainnet" | "testnet", serverConfig?: X402ServerPayConfig): EvmRailConfig {
+  const baseCfg = USDC[networkMode][rail];
+  if (rail === "robinhood" && serverConfig?.robinhoodUsdg?.startsWith("0x")) {
+    return {
+      ...baseCfg,
+      asset: serverConfig.robinhoodUsdg as `0x${string}`,
+      network: (serverConfig.robinhoodNetwork as `eip155:${number}`) || baseCfg.network,
+    };
+  }
+  return baseCfg;
 }
 
-function viemChainForRail(rail: "base" | "arbitrum", networkMode: "mainnet" | "testnet") {
+function viemChainForRail(rail: EvmPayRail, networkMode: "mainnet" | "testnet") {
+  if (rail === "robinhood") return networkMode === "testnet" ? robinhoodTestnet : robinhoodMainnet;
   if (rail === "arbitrum") return networkMode === "testnet" ? arbitrumSepolia : arbitrum;
   return networkMode === "testnet" ? baseSepolia : base;
 }
@@ -279,10 +344,11 @@ declare global {
 
 async function ensureWalletOnEvmRail(
   provider: EIP1193Provider,
-  rail: "base" | "arbitrum",
+  rail: EvmPayRail,
   networkMode: "mainnet" | "testnet",
+  serverConfig?: X402ServerPayConfig,
 ): Promise<void> {
-  const cfg = evmRailConfig(rail, networkMode);
+  const cfg = evmRailConfig(rail, networkMode, serverConfig);
   const raw = await provider.request({ method: "eth_chainId" });
   const current =
     typeof raw === "string" ? parseInt(raw, 16) : typeof raw === "number" ? raw : 0;
@@ -344,11 +410,15 @@ async function solTokenBalanceViaApi(
   }
 }
 
-function formatUsdc(atomic: bigint): string {
+function formatStable(atomic: bigint, symbol: "USDC" | "USDG" = "USDC"): string {
   const whole = atomic / 1_000_000n;
   const frac = atomic % 1_000_000n;
-  if (frac === 0n) return `${whole} USDC`;
-  return `${whole}.${frac.toString().padStart(6, "0").replace(/0+$/, "")} USDC`;
+  if (frac === 0n) return `${whole} ${symbol}`;
+  return `${whole}.${frac.toString().padStart(6, "0").replace(/0+$/, "")} ${symbol}`;
+}
+
+function formatUsdc(atomic: bigint): string {
+  return formatStable(atomic, "USDC");
 }
 
 function solRpcProxyUrl(): string {
@@ -454,9 +524,10 @@ function solanaProvider(session: WalletSession): PhantomSolanaProvider | null {
 async function evmUsdcBalance(
   userAddress: `0x${string}`,
   networkMode: "mainnet" | "testnet",
-  rail: "base" | "arbitrum",
+  rail: EvmPayRail,
+  serverConfig?: X402ServerPayConfig,
 ): Promise<bigint> {
-  const cfg = evmRailConfig(rail, networkMode);
+  const cfg = evmRailConfig(rail, networkMode, serverConfig);
   const chain = viemChainForRail(rail, networkMode);
   const client = createPublicClient({
     chain,
@@ -550,16 +621,28 @@ export async function getPaymentChainOptions(
   const provider = evmProviderForSession(session);
   const options: ChainPayOption[] = [];
 
-  const evmRails: Array<{ rail: "base" | "arbitrum"; enabled: boolean; label: string }> = [
-    { rail: "base", enabled: !!(serverConfig.acceptsEvm && serverConfig.evmPayToReady), label: "Base" },
+  const evmRails: Array<{
+    rail: EvmPayRail;
+    enabled: boolean;
+    label: string;
+    symbol: "USDC" | "USDG";
+  }> = [
+    { rail: "base", enabled: !!(serverConfig.acceptsEvm && serverConfig.evmPayToReady), label: "Base", symbol: "USDC" },
     {
       rail: "arbitrum",
       enabled: !!(serverConfig.acceptsArbitrum && serverConfig.evmPayToReady),
       label: "Arbitrum",
+      symbol: "USDC",
+    },
+    {
+      rail: "robinhood",
+      enabled: !!(serverConfig.acceptsRobinhood && serverConfig.evmPayToReady),
+      label: "Robinhood",
+      symbol: "USDG",
     },
   ];
 
-  for (const { rail, enabled, label } of evmRails) {
+  for (const { rail, enabled, label, symbol } of evmRails) {
     if (!enabled) continue;
     const hasWallet = !!session.evm?.address;
     let bal = 0n;
@@ -572,7 +655,7 @@ export async function getPaymentChainOptions(
           ? "Privy EVM wallet not ready — reconnect Privy"
           : "EVM provider not found — reopen Phantom/OKX";
     } else {
-      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, rail);
+      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, rail, serverConfig);
     }
     const sufficient = bal >= PRICE_ATOMIC;
     options.push({
@@ -580,13 +663,15 @@ export async function getPaymentChainOptions(
       optionId: rail,
       label,
       sublabel: hasWallet ? shortAddr(session.evm!.address, "evm") : "Not connected",
-      balanceUsdc: hasWallet && provider ? formatUsdc(bal) : "—",
+      balanceUsdc: hasWallet && provider ? formatStable(bal, symbol) : "—",
       balanceAtomic: bal,
       sufficient,
       available: hasWallet && !!provider,
       disabledReason:
         disabledReason ??
-        (!sufficient && hasWallet ? `Need at least ${PRICE_USDC} USDC on ${label}` : undefined),
+        (!sufficient && hasWallet
+          ? `Need at least ${PRICE_USDC} ${symbol} on ${label}`
+          : undefined),
     });
   }
 
@@ -615,7 +700,7 @@ export async function getPaymentChainOptions(
       balanceUnknown = solBal.unknown;
       if (serverConfig.solMerchantUsdcAta === false) {
         disabledReason =
-          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base/Arbitrum";
+          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base/Arbitrum/Robinhood";
       }
     }
     const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
@@ -770,7 +855,16 @@ function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: 
       const match = evm.find((a) => String(a.network).startsWith("eip155:42161"));
       if (match) return match;
     }
-    if ((preferred === "base" || preferred === "arbitrum") && evm.length) return evm[0];
+    if (preferred === "robinhood" && evm.length) {
+      const match = evm.find(
+        (a) =>
+          String(a.network) === "eip155:4663" || String(a.network) === "eip155:46630",
+      );
+      if (match) return match;
+    }
+    if ((preferred === "base" || preferred === "arbitrum" || preferred === "robinhood") && evm.length) {
+      return evm[0];
+    }
     return accepts[0];
   };
 }
@@ -803,7 +897,7 @@ async function resolvePaymentChain(
     const pick = findPayOption(opts, normalizedPreferred, preferredMerchantId);
     if (!pick?.available) throw new Error(pick?.disabledReason || "Selected chain is not available");
     if (!pick.sufficient && !pick.balanceUnknown) {
-      throw new Error(pick.disabledReason || `Insufficient USDC on ${pick.label}`);
+      throw new Error(pick.disabledReason || `Insufficient funds on ${pick.label}`);
     }
     return normalizedPreferred;
   }
@@ -813,20 +907,25 @@ async function resolvePaymentChain(
   if (usable.length) {
     const soon = usable.find((o) => o.chain === "soon");
     const sol = usable.find((o) => o.chain === "sol");
+    const rh = usable.find((o) => o.chain === "robinhood");
     const arb = usable.find((o) => o.chain === "arbitrum");
     const baseOpt = usable.find((o) => o.chain === "base");
-    const evmSufficient = !!(arb?.sufficient || baseOpt?.sufficient);
+    const evmSufficient = !!(rh?.sufficient || arb?.sufficient || baseOpt?.sufficient);
     if (soon?.sufficient && !sol?.sufficient && !evmSufficient) return "soon";
     if (sol?.sufficient && !evmSufficient) return "sol";
-    if (evmSufficient && !sol?.sufficient) return arb?.sufficient ? "arbitrum" : "base";
+    if (evmSufficient && !sol?.sufficient) {
+      if (rh?.sufficient) return "robinhood";
+      if (arb?.sufficient) return "arbitrum";
+      return "base";
+    }
     return usable.sort((a, b) =>
       a.balanceAtomic >= b.balanceAtomic ? -1 : 1,
     )[0].chain;
   }
   const anyAvail = opts.find((o) => o.available);
-  if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC");
+  if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC/USDG");
   throw new Error(
-    "Connect Solana and/or EVM (Base/Arbitrum) in your wallet, or configure merchant receive addresses on the server.",
+    "Connect Solana and/or EVM (Base/Arbitrum/Robinhood) in your wallet, or configure merchant receive addresses on the server.",
   );
 }
 
@@ -852,7 +951,7 @@ export async function createX402PaidFetch(
     paymentRequirementsSelector(preferred, options.preferredTokenMerchantId),
   );
 
-  if (preferred === "base" || preferred === "arbitrum") {
+  if (preferred === "base" || preferred === "arbitrum" || preferred === "robinhood") {
     if (!provider) {
       const walletLabel =
         session.evm?.wallet === "privy"
@@ -866,10 +965,10 @@ export async function createX402PaidFetch(
         `${walletLabel} EVM provider not found — reconnect on Lounge or reopen this page in your wallet browser`,
       );
     }
-    await ensureWalletOnEvmRail(provider, preferred, networkMode);
+    await ensureWalletOnEvmRail(provider, preferred, networkMode, serverConfig);
     const userAddress = await resolveEvmUserAddress(provider, session);
     const chain = viemChainForRail(preferred, networkMode);
-    const railCfg = evmRailConfig(preferred, networkMode);
+    const railCfg = evmRailConfig(preferred, networkMode, serverConfig);
     const walletClient = createWalletClient({
       account: userAddress,
       chain,

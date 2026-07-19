@@ -1,11 +1,12 @@
 /**
- * x402 facilitator profiles — PayAI, Dexter, and CDP Bazaar activation.
+ * x402 facilitator profiles — PayAI, Dexter, CDP Bazaar, and Robinhood (Primer/Naven).
  * @see https://docs.dexter.cash/docs/facilitator-and-chains/
  * @see https://docs.payai.network/x402/facilitators/pricing
  * @see https://docs.cdp.coinbase.com/x402/bazaar
+ * @see https://docs.primer.systems/facilitator.html
  */
 
-export type X402FacilitatorId = "cdp" | "dexter" | "payai";
+export type X402FacilitatorId = "cdp" | "dexter" | "payai" | "robinhood";
 
 export type X402FacilitatorProfile = {
   id: X402FacilitatorId;
@@ -16,6 +17,10 @@ export type X402FacilitatorProfile = {
   marketplaceUrl: string;
   sellersUrl: string;
 };
+
+/** Default Robinhood Chain facilitator (USDG on eip155:4663). Override with X402_ROBINHOOD_FACILITATOR_URL. */
+export const PRIMER_ROBINHOOD_FACILITATOR_URL = "https://x402.primer.systems";
+export const NAVEN_ROBINHOOD_FACILITATOR_URL = "https://facilitator.naven.network";
 
 export const PAYAI_FACILITATOR: X402FacilitatorProfile = {
   id: "payai",
@@ -48,6 +53,25 @@ export const CDP_FACILITATOR: X402FacilitatorProfile = {
   sellersUrl: "https://docs.cdp.coinbase.com/x402/bazaar",
 };
 
+/** Robinhood Chain USDG rail — separate from PayAI/CDP (they do not settle eip155:4663). */
+export function getRobinhoodFacilitatorProfile(): X402FacilitatorProfile {
+  const raw = (process.env.X402_ROBINHOOD_FACILITATOR_URL || PRIMER_ROBINHOOD_FACILITATOR_URL)
+    .trim()
+    .replace(/\/$/, "");
+  const isNaven = /naven\.network/i.test(raw);
+  return {
+    id: "robinhood",
+    name: isNaven ? "Naven (Robinhood)" : "Primer (Robinhood)",
+    url: raw || PRIMER_ROBINHOOD_FACILITATOR_URL,
+    solanaFeePayer: "",
+    docsUrl: isNaven
+      ? "https://naven.network/docs/demo/robinhood-x402"
+      : "https://docs.primer.systems/facilitator.html",
+    marketplaceUrl: "https://agent402.tools/robinhood",
+    sellersUrl: "https://docs.robinhood.com/chain/",
+  };
+}
+
 /** Primary facilitator — default PayAI. Set X402_FACILITATOR=dexter|cdp to swap primary. */
 export function getX402FacilitatorProfile(): X402FacilitatorProfile {
   const raw = (process.env.X402_FACILITATOR || "payai").trim().toLowerCase();
@@ -72,7 +96,7 @@ export function resolveFacilitatorForSolanaFeePayer(feePayer: string): X402Facil
 }
 
 /** AgentCash / MPPscan dual-protocol payment metadata (PayAI primary, Dexter fallback). */
-export function mppPaymentProtocols(): Record<string, unknown>[] {
+export function mppPaymentProtocols(opts?: { robinhood?: boolean }): Record<string, unknown>[] {
   const primary = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
   const protocols: Record<string, unknown>[] = [
@@ -86,6 +110,19 @@ export function mppPaymentProtocols(): Record<string, unknown>[] {
   }
   if (fallback.id !== "cdp") {
     protocols.push({ x402: { network: "solana", facilitator: fallback.url, role: "fallback" } });
+  }
+  if (opts?.robinhood) {
+    const rh = getRobinhoodFacilitatorProfile();
+    protocols.push({
+      x402: {
+        network: "robinhood",
+        caip2: "eip155:4663",
+        asset: "USDG",
+        facilitator: rh.url,
+        role: "primary",
+      },
+    });
+    protocols.push({ mpp: { method: "eip155", network: "robinhood", intent: "charge", currency: "USDG" } });
   }
   protocols.push(
     { mpp: { method: "solana", intent: "charge", currency: "USDC" } },

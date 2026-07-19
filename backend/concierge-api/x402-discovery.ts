@@ -263,6 +263,16 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     tags: [...X402_OPERATION_TAGS["security-scan"]],
   },
   {
+    kind: "security-deep-scan",
+    method: "POST",
+    path: "/api/concierge-security-deep-scan",
+    name: "Concierge Security — Deep scan",
+    description:
+      "Authorized async deep scan — creates a job ticket ($1.00). Poll GET /api/concierge-security-deep-scan?jobId=… for status and findings. Passive templates only; no exploitation.",
+    priceUsd: "1.00",
+    tags: [...X402_OPERATION_TAGS["security-deep-scan"]],
+  },
+  {
     kind: "resource-chat",
     method: "POST",
     path: "/api/resource-chat",
@@ -344,7 +354,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — 24 pay-per-call routes (Concierge Resources: chat, image, scaffold; macro & wire research; DeFi intel; Alpha desks; Lounge; Security Desk). x402 + MPP discovery; USDC or TCX settlement via PayAI (primary) with Dexter fallback on Solana/Base. Credits: GET /api/tcx-credits · Catalog: GET /api/resources.",
+      "Concierge Agent — 24 pay-per-call routes (Concierge Resources: chat, image, scaffold; macro & wire research; DeFi intel; Alpha desks; Lounge; Security Desk). x402 + MPP discovery; USDC on Solana/Base/Arbitrum (PayAI primary, Dexter fallback) or USDG on Robinhood Chain (Primer); TCX on Solana. Credits: GET /api/tcx-credits · Catalog: GET /api/resources.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -496,7 +506,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.2.0",
       description:
-        "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC or TCX on Solana and Base.",
+        "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC on Solana/Base/Arbitrum, USDG on Robinhood Chain, or TCX on Solana.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {

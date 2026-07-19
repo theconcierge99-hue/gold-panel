@@ -1,6 +1,6 @@
 # MPPscan + AgentCash discovery
 
-[MPPscan](https://www.mppscan.com/) indexes APIs that advertise the Machine Payments Protocol. Concierge Agent uses **x402 settlement via PayAI** (Solana + Base USDC) and exposes **MPP-compatible OpenAPI** so `agentcash` and MPPscan can list the same **24 paid routes** as Hyre-style MPP servers — without changing the agent site layout.
+[MPPscan](https://www.mppscan.com/) indexes APIs that advertise the Machine Payments Protocol. Concierge Agent uses **x402 settlement via PayAI** (Solana / Base / Arbitrum USDC) **and Primer** (Robinhood Chain USDG) and exposes **MPP-compatible OpenAPI** so `agentcash` and MPPscan can list the same **24 paid routes** as Hyre-style MPP servers — without changing the agent site layout.
 
 **Verified profile:** [Concierge Agent API on MPPscan](https://www.mppscan.com/server/6ded0eed8d9dd654f2021f37268ea5f782be7e0c3265640c13568a37effb53d1) — 40 discoverable operations (38 paid + 2 public).
 

@@ -6,7 +6,8 @@
 import type { X402ResourceKind } from "./x402-pricing";
 import { atomicAmountForResource } from "./x402-pricing";
 import { X402_SERVICE_TAGS, x402ServiceListingMeta } from "./x402-service-meta";
-import { getX402FacilitatorProfile, getX402FacilitatorFallback, mppPaymentProtocols } from "./x402-facilitator";
+import { getX402FacilitatorProfile, getX402FacilitatorFallback, getRobinhoodFacilitatorProfile, mppPaymentProtocols } from "./x402-facilitator";
+import { isRobinhoodX402Enabled } from "./x402-config";
 
 export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
@@ -40,12 +41,12 @@ function facilitatorLabel(): string {
 
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
 export function getMppPaymentProtocols(): Record<string, unknown>[] {
-  return mppPaymentProtocols();
+  return mppPaymentProtocols({ robinhood: isRobinhoodX402Enabled() });
 }
 
 export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
-  `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 USDC settlement on Solana, Base, or Arbitrum (${facilitatorLabel()}).`,
+  `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 settlement in USDC (Solana, Base, Arbitrum) or USDG (Robinhood Chain) — ${facilitatorLabel()}.`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
   "Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). TCX holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch.",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($0.02), /api/lounge-signal-open.",
@@ -276,6 +277,15 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
         description:
           "When true with target https://conc-exe.xyz (or www), runs free platform self-audit and skips x402 settlement",
       },
+    },
+    ["target", "authorized"],
+  ),
+  "security-deep-scan": jsonSchemaBody(
+    {
+      target: { type: "string", description: "Authorized external https origin (never conc-exe.xyz)" },
+      allowlist: { type: "array", items: { type: "string" }, description: "Hostname allowlist (*.example.com)" },
+      authorized: { type: "boolean", description: "Must be true — caller attests permission" },
+      profile: { type: "string", description: "Scan profile (default passive-web)" },
     },
     ["target", "authorized"],
   ),
@@ -639,6 +649,20 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "kind", "target", "summary"],
   ),
+  "security-deep-scan": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      kind: { type: "string" },
+      status: { type: "string" },
+      jobId: { type: "string" },
+      target: { type: "object" },
+      summary: { type: "object" },
+      breakdown: { type: "object" },
+      pollAfterMs: { type: "number" },
+      disclaimer: { type: "string" },
+    },
+    ["ok", "kind", "status", "jobId"],
+  ),
   "resource-chat": jsonSchemaBody(
     {
       ok: { type: "boolean" },
@@ -719,6 +743,12 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
     target: "https://api.example.com",
     allowlist: ["*.example.com"],
     authorized: true,
+  },
+  "security-deep-scan": {
+    target: "https://api.example.com",
+    allowlist: ["*.example.com"],
+    authorized: true,
+    profile: "passive-web",
   },
   "resource-chat": {
     message: "Summarize Solana DeFi outlook in 3 bullets",
@@ -860,6 +890,15 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
     recommendations: ["Add strict-transport-security — max-age with includeSubDomains on HTTPS"],
     disclaimer: "Passive security breakdown only.",
   },
+  "security-deep-scan": {
+    ok: true,
+    kind: "security-deep-scan",
+    status: "queued",
+    jobId: "ds_abc123",
+    pollAfterMs: 3000,
+    target: { origin: "https://api.example.com", hostname: "api.example.com" },
+    disclaimer: "Concierge Deep Scan — authorized passive templates only.",
+  },
   "resource-chat": {
     ok: true,
     kind: "resource-chat",
@@ -966,25 +1005,38 @@ export function buildXPaymentInfo(priceUsd: string, kind: X402ResourceKind): Rec
   const atomic = atomicAmountForResource(kind);
   const facilitator = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
+  const robinhood = isRobinhoodX402Enabled();
+  const offers: Record<string, unknown>[] = [
+    {
+      protocol: "x402",
+      amount: atomic,
+      currency: "USDC",
+      intent: "charge",
+      description: `$${priceUsd} USDC via ${facilitator.name} (primary; ${fallback.name} fallback on Solana/Base/Arbitrum)`,
+    },
+    {
+      protocol: "mpp",
+      amount: atomic,
+      currency: "USDC",
+      intent: "charge",
+      description: `$${priceUsd} USDC — x402 settlement compatible with MPP clients`,
+    },
+  ];
+  if (robinhood) {
+    const rh = getRobinhoodFacilitatorProfile();
+    offers.push({
+      protocol: "x402",
+      amount: atomic,
+      currency: "USDG",
+      network: "eip155:4663",
+      intent: "charge",
+      description: `$${priceUsd} USDG on Robinhood Chain via ${rh.name}`,
+    });
+  }
   return {
     price: { mode: "fixed", currency: "USD", amount },
     protocols: getMppPaymentProtocols(),
-    offers: [
-      {
-        protocol: "x402",
-        amount: atomic,
-        currency: "USDC",
-        intent: "charge",
-        description: `$${priceUsd} USDC via ${facilitator.name} (primary; ${fallback.name} fallback on Solana/Base)`,
-      },
-      {
-        protocol: "mpp",
-        amount: atomic,
-        currency: "USDC",
-        intent: "charge",
-        description: `$${priceUsd} USDC — x402 settlement compatible with MPP clients`,
-      },
-    ],
+    offers,
   };
 }
 
@@ -992,7 +1044,9 @@ export function buildXServiceInfo(origin: string): Record<string, unknown> {
   const listing = x402ServiceListingMeta(origin);
   const facilitator = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
-  return {
+  const networks = ["solana", "base", "arbitrum"];
+  if (isRobinhoodX402Enabled()) networks.push("robinhood");
+  const info: Record<string, unknown> = {
     name: listing.serviceName,
     description: listing.description,
     tags: listing.tags,
@@ -1002,8 +1056,16 @@ export function buildXServiceInfo(origin: string): Record<string, unknown> {
     facilitatorUrl: facilitator.url,
     fallbackFacilitator: fallback.name,
     fallbackFacilitatorUrl: fallback.url,
-    networks: ["solana", "base", "arbitrum"],
+    networks,
   };
+  if (isRobinhoodX402Enabled()) {
+    const rh = getRobinhoodFacilitatorProfile();
+    info.robinhoodFacilitator = rh.name;
+    info.robinhoodFacilitatorUrl = rh.url;
+    info.robinhoodNetwork = "eip155:4663";
+    info.robinhoodAsset = "USDG";
+  }
+  return info;
 }
 
 export function mppDiscoveryLinks(origin: string): Record<string, string> {

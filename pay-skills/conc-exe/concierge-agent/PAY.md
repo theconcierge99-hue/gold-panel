@@ -1,7 +1,7 @@
 ---
 name: concierge-agent
 title: "Concierge Agent"
-description: "Pay-per-call market intelligence and Security Desk for AI agents — Concierge chat, macro & wire research, DeFi intel, Alpha desks, Lounge wire, and passive security scans. x402 USDC on Solana, no API keys."
+description: "Pay-per-call market intelligence and Security Desk for AI agents — Concierge chat, macro & wire research, DeFi intel, Alpha desks, Lounge wire, and passive security scans. x402 USDC on Solana/Base/Arbitrum or USDG on Robinhood Chain, no API keys."
 use_case: "Agent market research and authorized passive security posture — macro, wire, DeFi intel, alpha desks, wallet snapshots, website security scan. Callable from Poncho/x402scan. No API keys or subscriptions."
 category: finance
 service_url: https://conc-exe.xyz
@@ -10,7 +10,7 @@ openapi:
   path: openapi.json
 ---
 
-Concierge Agent is **market intelligence + Concierge Resources + Security Desk as a service** for autonomous agents and builders. **24 pay-per-call routes** on `https://conc-exe.xyz` — settlement via **x402 USDC or TCX** ([PayAI facilitator](https://facilitator.payai.network) primary; [Dexter](https://x402.dexter.cash) fallback + [OpenDexter](https://dexter.cash/opendexter) discovery). Listed on [x402scan](https://www.x402scan.com/) and callable from [Poncho](https://tryponcho.com/) — **no Concierge API key**.
+Concierge Agent is **market intelligence + Concierge Resources + Security Desk as a service** for autonomous agents and builders. **24 pay-per-call routes** on `https://conc-exe.xyz` — settlement via **x402 USDC or TCX** ([PayAI facilitator](https://facilitator.payai.network) primary; [Dexter](https://x402.dexter.cash) fallback + [OpenDexter](https://dexter.cash/opendexter) discovery) **or USDG on Robinhood Chain** ([Primer](https://x402.primer.systems)). Listed on [x402scan](https://www.x402scan.com/) and callable from [Poncho](https://tryponcho.com/) — **no Concierge API key**.
 
 **Concierge AI** — natural-language desk (`POST /api/concierge`) for macro, geo, technicals, and trading plans.
 
@@ -24,9 +24,9 @@ Concierge Agent is **market intelligence + Concierge Resources + Security Desk a
 
 **Security Desk** — passive authorized scans: unified `security-scan` ($0.10), scout `security-readiness` / `security-headers` ($0.02), free `security-scope`, free `conc-exe.xyz` self-audit (`selfAudit: true`). Docs: https://conc-exe.xyz/docs/api/security · skill `/skills/concierge-security/SKILL.md`.
 
-Flow: `POST` + JSON → **402** + `PAYMENT-REQUIRED` → sign USDC → retry with `PAYMENT-SIGNATURE` → **200** JSON (or HTML `reply` for chat).
+Flow: `POST` + JSON → **402** + `PAYMENT-REQUIRED` → sign USDC/USDG → retry with `PAYMENT-SIGNATURE` → **200** JSON (or HTML `reply` for chat).
 
-x402 USDC payment accepted on Solana mainnet ($0.02–$0.25 per call; $0.02 security scout; $1.00 signal publish).
+x402 payment accepted on Solana / Base / Arbitrum (USDC) and Robinhood Chain (USDG, `eip155:4663`) — $0.02–$0.25 per call; $0.02 security scout; $1.00 signal publish.
 
 ## Spend-aware usage
 

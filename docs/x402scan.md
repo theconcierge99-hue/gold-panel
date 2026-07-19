@@ -78,7 +78,7 @@ x402scan does **not** copy OpenAPI / Bazaar tags into the **Tags** row on re-reg
 | **AI** | Concierge AI desk |
 | **Trading** | Trading plans, market categories |
 | **Search** | Wire unlock, knowledge retrieval |
-| **Crypto** | Onchain economy, Solana/Base USDC |
+| **Crypto** | Onchain economy, Solana/Base/Arbitrum USDC · Robinhood USDG |
 | **RWA** | Tokenized intelligence signals + optional Solana NFT |
 
 ## Probe behavior (why GET returns 402)

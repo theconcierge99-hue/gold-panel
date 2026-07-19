@@ -8,11 +8,13 @@ import {
   getX402NetworkProfile,
   getUsdcAssetForNetwork,
   getUsdcEip712ExtraForNetwork,
+  isRobinhoodNetwork,
   isX402Enabled,
 } from "./x402-config";
 import {
   getX402FacilitatorProfile,
   getX402FacilitatorFallback,
+  getRobinhoodFacilitatorProfile,
   resolveFacilitatorForSolanaFeePayer,
   PAYAI_FACILITATOR,
   DEXTER_FACILITATOR,
@@ -175,6 +177,13 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "security", "utility", "research"],
   },
+  "security-deep-scan": {
+    name: "Concierge Security — Deep scan",
+    description:
+      "Authorized async deep scan job — template probes via Concierge Security worker (queued). Poll with jobId. No exploitation.",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "security", "utility", "research"],
+  },
   "resource-chat": {
     name: "Concierge Resources — Chat",
     description: "Agent-friendly Concierge chat turn — lite context, structured JSON reply",
@@ -298,6 +307,8 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-security-headers";
     case "security-scan":
       return "/api/concierge-security-scan";
+    case "security-deep-scan":
+      return "/api/concierge-security-deep-scan";
     case "resource-chat":
       return "/api/resource-chat";
     case "resource-image":
@@ -317,6 +328,10 @@ function resourceUrl(request: Request, kind: X402ResourceKind): string {
 
 function normalizePayTo(addr: string): string {
   return addr.startsWith("0x") ? addr.toLowerCase() : addr;
+}
+
+function normalizeAsset(asset: string): string {
+  return asset.startsWith("0x") ? asset.toLowerCase() : asset;
 }
 
 /** Match CAIP-2 Solana IDs whether facilitator sends 32-char or full genesis reference */
@@ -398,7 +413,7 @@ function findMatchingRequirement(
       return false;
     }
     if (req.amount !== accepted.amount) return false;
-    if (req.asset !== accepted.asset) return false;
+    if (normalizeAsset(req.asset) !== normalizeAsset(accepted.asset)) return false;
     if (normalizePayTo(req.payTo) !== normalizePayTo(accepted.payTo)) return false;
     return true;
   });
@@ -525,6 +540,9 @@ async function facilitatorPost<T>(
 }
 
 function resolveFacilitatorForRequirement(req: X402AcceptRequirement): X402FacilitatorProfile {
+  if (isRobinhoodNetwork(req.network)) {
+    return getRobinhoodFacilitatorProfile();
+  }
   const feePayer = req.extra?.feePayer;
   if (typeof feePayer === "string" && req.network.startsWith("solana:")) {
     return resolveFacilitatorForSolanaFeePayer(feePayer);
@@ -573,9 +591,14 @@ async function verifyAndSettle(
 
   const primary = resolveFacilitatorForRequirement(matched);
   const facilitators: X402FacilitatorProfile[] = [primary];
-  const fallback = getX402FacilitatorFallback();
-  if (fallback.id !== primary.id && !matched.network.startsWith("solana:")) {
-    facilitators.push(fallback);
+  // Robinhood USDG must settle only on the RH facilitator (PayAI/Dexter/CDP do not support 4663).
+  let outageFallback: X402FacilitatorProfile | null = null;
+  if (!isRobinhoodNetwork(matched.network) && !matched.network.startsWith("solana:")) {
+    const fallback = getX402FacilitatorFallback();
+    if (fallback.id !== primary.id) {
+      facilitators.push(fallback);
+      outageFallback = fallback;
+    }
   }
 
   let lastError: unknown;
@@ -643,8 +666,16 @@ async function verifyAndSettle(
       };
     } catch (e) {
       lastError = e;
-      if (facilitators.length > 1 && facilitator.id === primary.id && isFacilitatorOutageError(e)) {
-        console.warn(`[x402] ${primary.name} unavailable, trying ${fallback.name}`, e instanceof Error ? e.message : e);
+      if (
+        facilitators.length > 1 &&
+        outageFallback &&
+        facilitator.id === primary.id &&
+        isFacilitatorOutageError(e)
+      ) {
+        console.warn(
+          `[x402] ${primary.name} unavailable, trying ${outageFallback.name}`,
+          e instanceof Error ? e.message : e,
+        );
         continue;
       }
       throw e;

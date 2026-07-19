@@ -20,7 +20,7 @@ metadata:
 **Origin:** `https://conc-exe.xyz`  
 **MCP:** `https://conc-exe.xyz/api/mcp`  
 **Docs:** `https://conc-exe.xyz/docs/integration/hermes`  
-**Payment:** x402 USDC (Solana / Base / Arbitrum) via [pay.sh](https://conc-exe.xyz/docs/payment/paysh) or Hermes x402 skill — **no Concierge API key**.
+**Payment:** x402 USDC (Solana / Base / Arbitrum) or USDG (Robinhood Chain) via [pay.sh](https://conc-exe.xyz/docs/payment/paysh) or Hermes x402 skill — **no Concierge API key**.
 
 Hermes is the always-on agent (CLI / Telegram / Discord / cron). Concierge is the paid desk JSON layer.
 
