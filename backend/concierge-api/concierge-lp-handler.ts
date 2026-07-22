@@ -17,7 +17,8 @@ import {
 } from "./concierge-lp-store";
 import { guardPaidX402Api } from "./x402-server";
 import { reportPaidRouteToZauth } from "./zauth-paid-response";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { normalizeSolPayTo } from "./x402-address";
+import bs58 from "bs58";
 
 const KIND = "concierge-lp" as const;
 const BASE = "/api/concierge-lp";
@@ -134,13 +135,20 @@ async function workerStatus(sessionId: string): Promise<Record<string, unknown> 
   }
 }
 
+/** Edge-safe stub pubkey (no @solana/web3.js). */
+function stubDepositAddress(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return bs58.encode(bytes);
+}
+
 function stubStartView(sessionId: string, ownerWallet: string, dryRun: boolean, criteria: object) {
-  const kp = Keypair.generate();
+  const deposit = stubDepositAddress();
   return {
     sessionId,
     ownerWallet,
-    sessionPubkey: kp.publicKey.toBase58(),
-    depositAddress: kp.publicKey.toBase58(),
+    sessionPubkey: deposit,
+    depositAddress: deposit,
     dryRun,
     status: "active",
     criteria,
@@ -208,9 +216,7 @@ async function handleStart(request: Request): Promise<Response> {
     );
   }
 
-  try {
-    new PublicKey(wallet);
-  } catch {
+  if (!normalizeSolPayTo(wallet)) {
     return jsonResponse(request, { error: "Invalid Solana wallet", code: "invalid_wallet", kind: KIND }, 400);
   }
 

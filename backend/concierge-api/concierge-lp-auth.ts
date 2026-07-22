@@ -4,8 +4,10 @@
  * Messages:
  *   concierge-lp:v1:start:{wallet}:{nonce}:{exp}
  *   concierge-lp:v1:stop:{wallet}:{sessionId}:{nonce}:{exp}
+ *
+ * Edge-safe: no @solana/web3.js (Node http/https blocked on Vercel Edge).
  */
-import { PublicKey } from "@solana/web3.js";
+import { normalizeSolPayTo } from "./x402-address";
 
 const MSG_MAX_AGE_MS = 10 * 60 * 1000;
 
@@ -76,9 +78,18 @@ export async function verifyLpWalletSignature(opts: {
   signature: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const { wallet, message, signature } = opts;
-  let pubkey: PublicKey;
+  const normalized = normalizeSolPayTo(wallet);
+  if (!normalized) {
+    return { ok: false, error: "invalid_wallet" };
+  }
+
+  let pubkeyBytes: Uint8Array;
   try {
-    pubkey = new PublicKey(wallet);
+    const bs58 = (await import("bs58")).default;
+    pubkeyBytes = bs58.decode(normalized);
+    if (pubkeyBytes.length !== 32) {
+      return { ok: false, error: "invalid_wallet" };
+    }
   } catch {
     return { ok: false, error: "invalid_wallet" };
   }
@@ -114,7 +125,7 @@ export async function verifyLpWalletSignature(opts: {
   try {
     const { ed25519 } = await import("@noble/curves/ed25519");
     const msgBytes = new TextEncoder().encode(message);
-    const ok = ed25519.verify(sigBytes, msgBytes, pubkey.toBytes());
+    const ok = ed25519.verify(sigBytes, msgBytes, pubkeyBytes);
     if (!ok) return { ok: false, error: "signature_invalid" };
     return { ok: true };
   } catch {
