@@ -614,9 +614,10 @@ Users may ask about ANY category below. Detect intent, apply the matching playbo
 When the user names a category (e.g. "Energy insight", "question about Stocks"), answer as that desk's lead strategist first, then cross-asset implications.`;
 
 const COMPLETION_RULES = `RESPONSE COMPLETENESS (mandatory):
-- Never stop mid-sentence or mid-section. Always finish the thought you started.
+- Never stop mid-sentence, mid-price, or mid-section (e.g. never end on "TP2: $6" — finish the full dollar amount).
 - If you open a section or bullet list, complete it before ending the response.
 - Answer the user's exact question first — do not drift to unrelated assets or generic macro filler.
+- Prefer a complete shorter plan over an incomplete long one: finish entry/stop/TP1/TP2, disclaimer, and A2A handoff.
 - If space is tight, shorten later sections — never truncate the direct answer or leave "if" / "because" dangling.
 - Every response must end with a complete sentence (and a trading disclaimer when giving trade ideas or plans).`;
 

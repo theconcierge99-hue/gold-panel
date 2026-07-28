@@ -88,7 +88,12 @@ const IMAGE_MODELS = [
 
 type GeminiContent = { role: string; parts: { text: string }[] };
 
-type GeminiPart = { text?: string; inlineData?: { mimeType: string; data: string } };
+type GeminiPart = {
+  text?: string;
+  /** Gemini 2.5+ internal reasoning — must not be shown or counted as the reply. */
+  thought?: boolean;
+  inlineData?: { mimeType: string; data: string };
+};
 
 export function normalizeGeminiApiKey(raw: string | undefined): string {
   const key = (raw ?? "").trim();
@@ -147,6 +152,7 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
   let text = "";
   const images: string[] = [];
   for (const p of parts ?? []) {
+    if (p.thought) continue;
     if (p.text) text += p.text;
     if (p.inlineData?.data) {
       const mime = p.inlineData.mimeType || "image/png";
@@ -154,6 +160,37 @@ function parseParts(parts: GeminiPart[] | undefined): { text: string; images: st
     }
   }
   return { text: text.trim(), images };
+}
+
+/** Gemini 2.5+/3 thinking tokens count against maxOutputTokens — disable for text chat completeness. */
+function modelSupportsThinkingBudget(model: string): boolean {
+  return /gemini-(2\.5|3)/i.test(model) && !/image/i.test(model);
+}
+
+function withChatGenerationConfig(
+  model: string,
+  generationConfig: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const base = { ...(generationConfig ?? {}) };
+  const modalities = base.responseModalities;
+  const isImageGen =
+    Array.isArray(modalities) &&
+    modalities.some((m) => String(m).toUpperCase() === "IMAGE");
+  if (!isImageGen && modelSupportsThinkingBudget(model) && !base.thinkingConfig) {
+    base.thinkingConfig = { thinkingBudget: 0 };
+  }
+  return base;
+}
+
+/** Strong truncation signals only — avoid false positives that burn a second LLM call. */
+function looksTruncatedReply(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (/\$\d{1,3}$/.test(t)) return true;
+  if (/\b(TP2?|stop|entry|bias|R:R)\s*[:：]?\s*\$?\d{0,3}$/i.test(t)) return true;
+  if (/[—–,:;({\[]\s*$/.test(t)) return true;
+  if (/\b(A2A\|[^<\n]*)$/i.test(t) && !/\|\s*regime=/i.test(t)) return true;
+  return false;
 }
 
 const GEMINI_CALL_MS = 18_000;
@@ -174,16 +211,17 @@ const TRADING_PLAN_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
 const STANDARD_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
 
 function generationConfigForMode(mode: ConciergeResponseMode): Record<string, unknown> {
+  // Gemini 2.5 thinking shares this budget — keep headroom even with thinkingBudget: 0.
   if (mode === "trading_plan") {
-    return { temperature: 0.55, maxOutputTokens: 3072 };
+    return { temperature: 0.55, maxOutputTokens: 8192 };
   }
   if (mode === "scalping_plan") {
-    return { temperature: 0.5, maxOutputTokens: 3072 };
+    return { temperature: 0.5, maxOutputTokens: 8192 };
   }
   if (mode === "trade_ideas") {
     return { temperature: 0.55, maxOutputTokens: 4096 };
   }
-  return { temperature: 0.55, maxOutputTokens: 3072 };
+  return { temperature: 0.55, maxOutputTokens: 4096 };
 }
 
 async function geminiCall(
@@ -191,12 +229,19 @@ async function geminiCall(
   model: string,
   payload: Record<string, unknown>,
   timeoutMs = GEMINI_CALL_MS,
-): Promise<{ text: string; images: string[] }> {
+): Promise<{ text: string; images: string[]; finishReason?: string }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    ...payload,
+    generationConfig: withChatGenerationConfig(
+      model,
+      payload.generationConfig as Record<string, unknown> | undefined,
+    ),
+  };
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
 
@@ -218,7 +263,77 @@ async function geminiCall(
   if (candidate?.finishReason === "MAX_TOKENS" && parsed.text) {
     console.warn(`[concierge-gemini] ${model} hit MAX_TOKENS (${parsed.text.length} chars)`);
   }
-  return parsed;
+  return { ...parsed, finishReason: candidate?.finishReason };
+}
+
+/** One continuation pass when Gemini hits MAX_TOKENS mid-reply (e.g. TP2: $6…). */
+async function geminiCallComplete(
+  apiKey: string,
+  model: string,
+  payload: Record<string, unknown>,
+  timeoutMs = GEMINI_CALL_MS,
+): Promise<{ text: string; images: string[] }> {
+  const started = Date.now();
+  // Keep a slice of the wall-clock budget for a continuation if the first pass truncates.
+  const reserveForContinue = timeoutMs >= 10_000 ? 4_500 : 0;
+  const firstTimeout = Math.max(3_500, timeoutMs - reserveForContinue);
+  const first = await geminiCall(apiKey, model, payload, firstTimeout);
+  const needsContinue =
+    first.finishReason === "MAX_TOKENS" || looksTruncatedReply(first.text);
+  if (!needsContinue || !first.text) {
+    return { text: first.text, images: first.images };
+  }
+
+  const elapsed = Date.now() - started;
+  const remain = timeoutMs - elapsed - 400;
+  if (remain < 3_500) {
+    console.warn(`[concierge-gemini] ${model} truncated but no time left to continue`);
+    return { text: first.text, images: first.images };
+  }
+
+  const priorContents = Array.isArray(payload.contents)
+    ? (payload.contents as GeminiContent[])
+    : [];
+  const contPayload: Record<string, unknown> = {
+    ...payload,
+    contents: [
+      ...priorContents,
+      { role: "model", parts: [{ text: first.text }] },
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              "Continue the Concierge reply from exactly where you stopped. Do not repeat any prior text. Finish remaining sections, price levels, disclaimer, and A2A handoff if started.",
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      ...((payload.generationConfig as Record<string, unknown> | undefined) ?? {}),
+      // Continuation only needs room for the tail of the plan.
+      maxOutputTokens: Math.min(
+        4096,
+        Number(
+          (payload.generationConfig as { maxOutputTokens?: number } | undefined)
+            ?.maxOutputTokens ?? 4096,
+        ),
+      ),
+    },
+  };
+
+  try {
+    const cont = await geminiCall(apiKey, model, contPayload, remain);
+    if (!cont.text) return { text: first.text, images: first.images };
+    const joined = `${first.text.trimEnd()}\n${cont.text.trimStart()}`.trim();
+    return { text: joined, images: [...first.images, ...cont.images] };
+  } catch (e) {
+    console.warn(
+      `[concierge-gemini] ${model} continuation failed`,
+      e instanceof Error ? e.message : e,
+    );
+    return { text: first.text, images: first.images };
+  }
 }
 
 async function geminiGenerateText(
@@ -229,7 +344,7 @@ async function geminiGenerateText(
   const errors: string[] = [];
   for (const model of options?.models ?? TEXT_MODELS) {
     try {
-      const { text } = await geminiCall(apiKey, model, payload);
+      const { text } = await geminiCallComplete(apiKey, model, payload);
       if (text) return text;
       errors.push(`${model}: empty`);
     } catch (e) {
@@ -766,7 +881,7 @@ export async function runConciergeGemini(options: {
       history: historyForLlm.slice(-historyTurns),
       message,
       recentUserMessages: recentUser,
-      maxTokens: Math.min(2048, Number(genConfig.maxOutputTokens ?? 3072)),
+      maxTokens: Number(genConfig.maxOutputTokens ?? 4096),
       temperature: Number(genConfig.temperature ?? 0.55),
       timeoutMs: altLlmBudget,
       topics,
@@ -793,7 +908,7 @@ export async function runConciergeGemini(options: {
       : chatTimeout;
     if (requireTradingPlan && modelTimeout < 3_000) break;
     try {
-      const { text } = await geminiCall(apiKey, model, geminiPayload, modelTimeout);
+      const { text } = await geminiCallComplete(apiKey, model, geminiPayload, modelTimeout);
       if (text) {
         reply = text;
         modelUsed = model;
