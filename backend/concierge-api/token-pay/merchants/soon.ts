@@ -1,10 +1,11 @@
 /**
- * Default platform merchant — SOON (Concierge utility token).
+ * Default platform merchant — SOON (Concierge utility token / TCX).
  * Reads SOON_* env today; replace branding by adding merchants via TOKEN_PAY_MERCHANTS_JSON later.
  */
 import { ALL_X402_RESOURCE_KINDS } from "../../x402-pricing";
 import type { TokenPayMerchant } from "../types";
 import { normalizeSolanaMint } from "../mint";
+import { normalizeSolPayTo } from "../../x402-address";
 
 function numEnv(key: string, fallback: number): number {
   const n = Number(process.env[key] ?? String(fallback));
@@ -19,6 +20,15 @@ function optionalUsd(key: string): number | null {
 }
 
 export const SOON_MERCHANT_ID = "soon";
+
+/**
+ * Canonical TCX receive wallet (owner of ATA 6f2JW47bc7NSCM7m8TzTdv3gZkry92JABdwLaQubvd7b).
+ * Hard-pinned so Token Pay never drifts if X402_SOL_PAY_TO is mis-set.
+ */
+export const SOON_MERCHANT_PAY_TO = "9uiwHcDNYg8rbPDRaJBfMHVo8f8CAgCCZzz1JB6XyEFN";
+
+/** TCX Token-2022 mint (pump.fun). */
+export const SOON_TOKEN_MINT_CANONICAL = "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump";
 
 /** Pre-launch default — concierge only. Post-launch snapshot uses SOON_RESOURCE_KINDS=all. */
 const SOON_DEFAULT_RESOURCE_KINDS = ["concierge"];
@@ -41,10 +51,21 @@ export function getSoonTokenDiscountPercent(): number {
   return Math.min(90, Math.floor(n));
 }
 
+/** Resolve TCX payTo — always the canonical merchant wallet. */
+export function resolveSoonMerchantPayTo(solPayTo?: string | null): string {
+  const fromEnv = normalizeSolPayTo(solPayTo ?? undefined);
+  if (fromEnv && fromEnv !== SOON_MERCHANT_PAY_TO) {
+    console.warn(
+      `[token-pay] X402_SOL_PAY_TO (${fromEnv}) differs from canonical TCX wallet; using ${SOON_MERCHANT_PAY_TO}`,
+    );
+  }
+  return SOON_MERCHANT_PAY_TO;
+}
+
 export function buildSoonMerchantFromEnv(solPayTo: string | null): TokenPayMerchant {
-  const mint = normalizeSolanaMint(
-    process.env.SOON_TOKEN_MINT ?? process.env.SOON_MINT ?? "",
-  );
+  const mint =
+    normalizeSolanaMint(process.env.SOON_TOKEN_MINT ?? process.env.SOON_MINT ?? "") ||
+    normalizeSolanaMint(SOON_TOKEN_MINT_CANONICAL);
   const priceSource =
     (process.env.SOON_PRICE_SOURCE ?? "dexscreener").trim().toLowerCase() === "env"
       ? "env"
@@ -58,7 +79,7 @@ export function buildSoonMerchantFromEnv(solPayTo: string | null): TokenPayMerch
     name: process.env.TOKEN_PAY_SOON_NAME?.trim() || "TCX",
     mint,
     decimals: numEnv("SOON_TOKEN_DECIMALS", 6),
-    payTo: solPayTo,
+    payTo: resolveSoonMerchantPayTo(solPayTo),
     x402Enabled,
     price: {
       source: priceSource,

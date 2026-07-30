@@ -10,6 +10,7 @@ import {
   isTokenPayMerchantLive,
   merchantSupportsResource,
 } from "./registry";
+import { SOON_MERCHANT_ID } from "./merchants/soon";
 import { tokenPaySelfSettleRailMatches } from "./security";
 import { verifyAndSettleTokenPaySelf } from "./self-settle";
 import type { TokenPayMerchant, TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./types";
@@ -76,7 +77,8 @@ export async function buildTokenPayPartnerAcceptAsync(input: {
   const usdAmount = clampPartnerUsdAmount(input.usdAmount);
   const { sol } = getMerchantAddresses();
   const network = input.network?.trim() || getX402NetworkProfile().sol;
-  const payTo = (merchant.payTo ?? sol ?? "").trim();
+  // Partner merchants must set their own payTo; soon/TCX is already pinned on the merchant.
+  const payTo = (merchant.payTo ?? (merchant.id === SOON_MERCHANT_ID ? "" : sol) ?? "").trim();
   if (!payTo || !merchant.mint) throw new Error("Merchant mint or payTo not configured");
 
   const amount = await tokenPayAtomicForResourceAsync(usdAmount, merchant);

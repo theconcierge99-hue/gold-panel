@@ -69,4 +69,4 @@ export {
   verifyTokenPayPartnerPayment,
 } from "./partner";
 export { b64DecodeJson, b64EncodeJson } from "./b64-json";
-export { SOON_MERCHANT_ID, buildSoonMerchantFromEnv } from "./merchants/soon";
+export { SOON_MERCHANT_ID, SOON_MERCHANT_PAY_TO, SOON_TOKEN_MINT_CANONICAL, buildSoonMerchantFromEnv, resolveSoonMerchantPayTo } from "./merchants/soon";

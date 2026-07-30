@@ -110,7 +110,11 @@ export async function buildTokenPayAcceptsForResourceAsync(
     if (!tokenPaySupportsResource(resourceKind, merchant) || !isTokenPayX402Live(merchant)) {
       continue;
     }
-    const payTo = (merchant.payTo ?? fallbackSolPayTo ?? "").trim();
+    // TCX (soon) never falls back to a misconfigured X402_SOL_PAY_TO — payTo is pinned.
+    const payTo =
+      merchant.id === SOON_MERCHANT_ID
+        ? (merchant.payTo ?? "").trim()
+        : (merchant.payTo ?? fallbackSolPayTo ?? "").trim();
     if (!payTo || !merchant.mint) continue;
 
     const tokenAmount = await tokenPayAtomicForResourceAsync(usdcAmount, merchant);

@@ -23,7 +23,9 @@ import {
 } from "@solana/spl-token";
 
 const MINT = new PublicKey("F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump");
+/** ATA for owner 9uiwHcDNYg8rbPDRaJBfMHVo8f8CAgCCZzz1JB6XyEFN (Token-2022). */
 const MERCHANT_ATA = new PublicKey("6f2JW47bc7NSCM7m8TzTdv3gZkry92JABdwLaQubvd7b");
+const EXPECTED_OWNER = "9uiwHcDNYg8rbPDRaJBfMHVo8f8CAgCCZzz1JB6XyEFN";
 const BURN_PCT = 0.8;
 const DECIMALS = 6;
 
@@ -133,6 +135,12 @@ async function main() {
   const conn = new Connection(rpc, "confirmed");
 
   console.log("Merchant wallet:", keypair.publicKey.toBase58());
+  if (keypair.publicKey.toBase58() !== EXPECTED_OWNER) {
+    console.error(
+      `Wrong merchant key. Expected owner ${EXPECTED_OWNER}, got ${keypair.publicKey.toBase58()}`,
+    );
+    process.exit(1);
+  }
   console.log("Token account:  ", MERCHANT_ATA.toBase58());
   console.log("Mint:           ", MINT.toBase58());
   console.log("RPC:            ", rpc);

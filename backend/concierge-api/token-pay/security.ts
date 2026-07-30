@@ -8,6 +8,7 @@ import {
   isTokenPayMerchantLive,
   merchantSupportsResource,
 } from "./registry";
+import { SOON_MERCHANT_ID, SOON_MERCHANT_PAY_TO } from "./merchants/soon";
 import type { TokenPayMerchant, TokenPaySelfSettleRequirement } from "./types";
 
 function normalizePayTo(addr: string): string {
@@ -91,7 +92,12 @@ export function assertTokenPaySelfSettleAuthorized(
     throw new Error("Token payment asset does not match merchant mint");
   }
 
-  const expectedPayTo = merchant.payTo ? normalizePayTo(merchant.payTo) : null;
+  const expectedPayTo =
+    merchant.id === SOON_MERCHANT_ID
+      ? SOON_MERCHANT_PAY_TO
+      : merchant.payTo
+        ? normalizePayTo(merchant.payTo)
+        : null;
   const actualPayTo = normalizePayTo(matched.payTo);
   if (!expectedPayTo || actualPayTo !== expectedPayTo) {
     throw new Error("Token payment payTo does not match merchant wallet");
