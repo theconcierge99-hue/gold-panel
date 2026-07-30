@@ -515,15 +515,42 @@
   }
   .wallet-mobile-hint[hidden]{display:none!important}
 
-  .pay-modal{width:480px;max-width:94vw}
+  .pay-modal{width:440px;max-width:94vw;padding:26px 28px 22px}
+  .pay-modal > h2{font-size:24px;letter-spacing:-.01em;margin-bottom:6px}
+  .pay-modal > .sub{letter-spacing:.18em;margin-bottom:14px}
   .pay-setup p{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--text2,#9aa3b2)}
   .pay-setup-hint{margin-top:12px!important;color:var(--text,#c8d0dc)!important}
   .pay-setup-diag{font-size:12px;opacity:.85}
   .pay-setup-steps{margin:12px 0 0;padding-left:1.2rem;font-size:13px;line-height:1.5;color:var(--text2,#9aa3b2)}
   .pay-setup-steps li{margin-bottom:8px}
   .pay-setup-steps code{font-size:12px;color:var(--gold,#c9a227)}
-  .pay-story{font-size:13px;line-height:1.5;color:var(--text-secondary);margin:12px 0 16px;max-height:4.5em;overflow:hidden}
-  .pay-amount{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:18px}
+  .pay-story{
+    font-size:12.5px;line-height:1.55;color:var(--text-secondary);
+    margin:0 0 16px;padding:10px 12px;
+    border-left:2px solid rgba(201,168,76,.35);
+    background:rgba(255,255,255,.02);
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  }
+  .pay-story[hidden]{display:none!important}
+  .pay-amount{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:12px 14px;margin:0 0 18px;
+    border:1px solid var(--border);border-radius:6px;
+    background:rgba(201,168,76,.05);
+  }
+  .pay-amount > span:first-child{
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--text-muted);font-family:'Outfit',sans-serif;flex-shrink:0;
+  }
+  .pay-amount .pay-amt-val{
+    font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;
+    color:var(--gold);line-height:1;text-align:right;
+  }
+  .pay-section-label{
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--text-muted);margin:0 0 8px;font-family:'Outfit',sans-serif;
+  }
+  .pay-section-label[hidden]{display:none!important}
   .signal-reader-modal{max-width:640px;max-height:90vh;overflow-y:auto}
   .signal-body{font-size:14px;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap;margin-top:14px}
   .rwa-chip{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--gold);border:1px solid rgba(201,168,76,.35);padding:2px 7px;border-radius:2px;margin-left:6px}
@@ -548,21 +575,54 @@
   .conc-tape-foot{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);letter-spacing:.04em}
   .signal-cats span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--border);color:var(--gold)}
   .fcard.creator-signal .chain{color:var(--gold)}
-  .pay-amount span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Outfit',sans-serif}
-  .pay-chains{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
-  .pay-chain-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);background:var(--gcard-bg);cursor:pointer;transition:all .15s;text-align:left}
-  .pay-chain-opt:hover:not(.disabled){border-color:var(--gold-dim)}
-  .pay-chain-opt.sel{border-color:var(--gold);background:var(--nav-active-bg)}
-  .pay-chain-opt.disabled{opacity:.45;cursor:not-allowed}
-  .pay-chain-opt input{margin-top:3px;accent-color:var(--gold)}
-  .pay-chain-opt .pc-body{flex:1;min-width:0}
-  .pay-chain-opt .pc-title{font-size:13px;font-weight:500;color:var(--text-primary)}
-  .pay-chain-opt .pc-meta{font-size:11px;color:var(--text-secondary);margin-top:2px}
-  .pay-chain-opt .pc-bal{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:6px}
-  .pay-chain-opt .pc-warn{font-size:10px;color:var(--signal-red);margin-top:4px}
-  .pay-chain-opt .pc-rec{font-size:9px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
-  .pay-chain-opt .pc-soon{font-size:9px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
-  .pay-loading{font-size:12px;color:var(--text-muted);padding:20px 0;text-align:center}
+  .pay-chains{
+    display:flex;flex-direction:column;gap:6px;margin-bottom:2px;
+    max-height:min(320px,48vh);overflow-y:auto;padding-right:2px;
+  }
+  .pay-chain-opt{
+    display:flex;align-items:center;gap:12px;padding:11px 13px;
+    border:1px solid var(--border);border-radius:6px;background:transparent;
+    cursor:pointer;transition:border-color .15s,background .15s;text-align:left;position:relative;
+  }
+  .pay-chain-opt:hover:not(.disabled){border-color:rgba(201,168,76,.45);background:rgba(255,255,255,.02)}
+  .pay-chain-opt.sel{
+    border-color:var(--gold);
+    background:linear-gradient(135deg,rgba(201,168,76,.1),transparent 65%);
+  }
+  .pay-chain-opt.disabled{opacity:.58;cursor:not-allowed}
+  .pay-chain-opt input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+  .pay-chain-opt .pc-radio{
+    flex-shrink:0;width:16px;height:16px;border-radius:50%;
+    border:1.5px solid rgba(232,236,244,.22);display:grid;place-items:center;
+    transition:border-color .15s;
+  }
+  .pay-chain-opt.sel .pc-radio{border-color:var(--gold)}
+  .pay-chain-opt.sel .pc-radio::after{
+    content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);
+  }
+  .pay-chain-opt .pc-body{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .pay-chain-opt .pc-main{min-width:0;flex:1}
+  .pay-chain-opt .pc-title{
+    font-size:13px;font-weight:500;color:var(--text-primary);
+    display:flex;align-items:center;flex-wrap:wrap;gap:6px;line-height:1.25;
+  }
+  .pay-chain-opt .pc-meta{
+    font-size:11px;color:var(--text-muted);margin-top:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .pay-chain-opt .pc-side{flex-shrink:0;text-align:right;max-width:42%}
+  .pay-chain-opt .pc-bal{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-secondary);line-height:1.3}
+  .pay-chain-opt.sel .pc-bal{color:var(--gold)}
+  .pay-chain-opt .pc-warn{
+    font-size:10px;color:var(--signal-amber,#c9a227);margin-top:3px;line-height:1.35;
+  }
+  .pay-chain-opt .pc-rec,.pay-chain-opt .pc-soon{
+    font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+    padding:2px 6px;border-radius:3px;line-height:1.2;
+  }
+  .pay-chain-opt .pc-rec{color:var(--gold);background:rgba(201,168,76,.12)}
+  .pay-chain-opt .pc-soon{color:var(--text-muted);background:rgba(255,255,255,.04)}
+  .pay-loading{font-size:12px;color:var(--text-muted);padding:24px 0;text-align:center}
   .btn.sm{padding:5px 10px;font-size:9px}
   #loginBtn.connected{border-color:var(--signal-green);color:var(--signal-green)}
 
@@ -1766,11 +1826,12 @@
 <!-- PAYMENT CONFIRM -->
 <div class="overlay" id="payOverlay" onclick="if(event.target===this)closePayModal(false)">
   <div class="modal pay-modal" onclick="event.stopPropagation()">
-    <button class="close" onclick="closePayModal(false)">×</button>
+    <button class="close" onclick="closePayModal(false)" aria-label="Close">×</button>
     <h2 id="payModalTitle">Confirm payment</h2>
     <div class="sub" id="payModalSub">Choose chain · 0.1 USDC</div>
-    <p class="pay-story" id="payModalStory"></p>
-    <div class="pay-amount" id="payModalAmount"><span>Amount</span>0.1 USDC</div>
+    <p class="pay-story" id="payModalStory" hidden></p>
+    <div class="pay-amount" id="payModalAmount"><span>Amount</span><span class="pay-amt-val">0.1 USDC</span></div>
+    <div class="pay-section-label" id="payMethodLabel">Payment method</div>
     <div class="pay-chains" id="payChainList"><div class="pay-loading">Loading balances…</div></div>
     <div class="modal-foot">
       <button type="button" class="btn" onclick="closePayModal(false)">Cancel</button>
@@ -3133,7 +3194,13 @@
     ].filter(Boolean);
     document.getElementById('payModalTitle').textContent = 'Payments not ready';
     document.getElementById('payModalSub').textContent = 'Fix Vercel environment variables, then redeploy';
-    document.getElementById('payModalStory').textContent = '';
+    const setupStory = document.getElementById('payModalStory');
+    setupStory.textContent = '';
+    setupStory.hidden = true;
+    const setupAmt = document.getElementById('payModalAmount');
+    if(setupAmt) setupAmt.hidden = true;
+    const setupLabel = document.getElementById('payMethodLabel');
+    if(setupLabel) setupLabel.hidden = true;
     document.getElementById('payConfirmBtn').textContent = 'Close';
     document.getElementById('payConfirmBtn').disabled = false;
     document.getElementById('payConfirmBtn').onclick = ()=>closePayModal(false);
@@ -3409,9 +3476,17 @@
     document.getElementById('payModalTitle').textContent = opts.title || 'Confirm payment';
     const amount = typeof opts.amountUsdc === 'number' && opts.amountUsdc > 0 ? opts.amountUsdc : 0.1;
     document.getElementById('payModalSub').textContent = opts.subtitle || ('Choose how to pay · '+amount+' USDC');
-    document.getElementById('payModalStory').textContent = opts.story || '';
+    const storyEl = document.getElementById('payModalStory');
+    const storyText = (opts.story || '').trim();
+    storyEl.textContent = storyText;
+    storyEl.hidden = !storyText;
     const amtEl = document.getElementById('payModalAmount');
-    if(amtEl) amtEl.innerHTML = '<span>Amount</span>'+amount+' USDC';
+    if(amtEl){
+      amtEl.hidden = false;
+      amtEl.innerHTML = '<span>Amount</span><span class="pay-amt-val">'+amount+' USDC</span>';
+    }
+    const methodLabel = document.getElementById('payMethodLabel');
+    if(methodLabel) methodLabel.hidden = false;
     document.getElementById('payConfirmBtn').textContent = opts.confirmLabel || 'Pay & continue';
     document.getElementById('payConfirmBtn').disabled = true;
     document.getElementById('payChainList').innerHTML = '<div class="pay-loading">Loading USDC balances…</div>';
@@ -3436,17 +3511,26 @@
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
       const rec = !dis && o.chain==='sol' && solReady && !evmReady;
-      const soonBadge = o.comingSoon ? ' <span class="pc-soon">Coming soon</span>' : '';
-      const warn = o.disabledReason ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
-      const balLine = o.comingSoon ? '' : '<div class="pc-bal">Balance: '+escapeHtml(o.balanceUsdc)+'</div>';
+      const soonBadge = o.comingSoon ? '<span class="pc-soon">Coming soon</span>' : '';
+      const disconnected = /not connected/i.test(o.sublabel || '');
+      const connectHint = !!(o.disabledReason && /^Connect\b/i.test(o.disabledReason));
+      // Skip redundant "Connect …" when sublabel already says Not connected
+      const showWarn = !!(o.disabledReason && !(disconnected && connectHint));
+      const warn = showWarn ? '<div class="pc-warn">'+escapeHtml(o.disabledReason)+'</div>' : '';
+      const balLine = o.comingSoon
+        ? ''
+        : '<div class="pc-side"><div class="pc-bal">'+escapeHtml(o.balanceUsdc)+'</div></div>';
       const merchantAttr = o.merchantId ? ' data-merchant-id="'+escapeHtml(o.merchantId)+'"' : '';
       return `<label class="pay-chain-opt${dis?' disabled':''}" data-option-id="${escapeHtml(o.optionId)}" data-chain="${o.chain}"${merchantAttr}>
         <input type="radio" name="payChain" value="${escapeHtml(o.optionId)}" ${dis?'disabled':''} />
+        <span class="pc-radio" aria-hidden="true"></span>
         <div class="pc-body">
-          <div class="pc-title">${escapeHtml(o.label)}${rec?' <span class="pc-rec">Recommended</span>':''}${soonBadge}</div>
-          <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
+          <div class="pc-main">
+            <div class="pc-title">${escapeHtml(o.label)}${rec?'<span class="pc-rec">Recommended</span>':''}${soonBadge}</div>
+            <div class="pc-meta">${escapeHtml(o.sublabel)}</div>
+            ${warn}
+          </div>
           ${balLine}
-          ${warn}
         </div>
       </label>`;
     }).join('');
