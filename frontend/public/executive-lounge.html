@@ -1056,7 +1056,7 @@
 </style>
 <script type="module" src="/js/privy-bridge.mjs"></script>
 <script src="/js/tcx-ca.js"></script>
-<script type="module" src="/js/x402-pay.mjs?v=ms6y06o1"></script>
+<script type="module" src="/js/x402-pay.mjs?v=ms72mw9h"></script>
 <script type="module" src="/js/agent-identity.mjs"></script>
 <link rel="modulepreload" href="/js/mint-signal.mjs" />
 </head>
@@ -1951,7 +1951,7 @@
     const s = getWalletSession();
     if(s.sol && s.evm) return { family: 'multi', label: 'Solana + EVM (creator chooses at publish)' };
     if(s.sol) return { family: 'sol', label: 'Solana (SOL)' };
-    if(s.evm) return { family: 'evm', label: 'EVM — Base, Polygon, or BNB' };
+    if(s.evm) return { family: 'evm', label: 'EVM — Base, Arbitrum, Robinhood, or BNB' };
     return { family: null, label: 'Connect wallet — Solana or EVM' };
   }
 
@@ -3181,8 +3181,13 @@
       acceptsEvm: !!cfg.acceptsEvm,
       acceptsArbitrum: !!cfg.acceptsArbitrum,
       acceptsRobinhood: !!cfg.acceptsRobinhood,
+      acceptsBnb: !!cfg.acceptsBnb,
       robinhoodUsdg: cfg.robinhoodUsdg || undefined,
       robinhoodNetwork: cfg.robinhoodNetwork || undefined,
+      bnbUsdt: cfg.bnbUsdt || undefined,
+      bnbNetwork: cfg.bnbNetwork || undefined,
+      bnbUsdtDecimals: cfg.bnbUsdtDecimals || undefined,
+      bnbAssetTransferMethod: cfg.bnbAssetTransferMethod || undefined,
       evmNetworks: cfg.evmNetworks,
       acceptsSol: !!cfg.acceptsSol,
       evmPayToReady: !!cfg.evmPayToReady,
@@ -3238,6 +3243,13 @@
           return 'Solana payment failed in Phantom — try Base (EVM) in the payment dialog if your USDC is on Base. Otherwise ensure Phantom has ≥0.1 USDC on Solana plus ~0.01 SOL for fees, update Phantom, and retry.';
         }
         return 'Solana payment could not start — hard refresh (Ctrl+F5) and retry. Detail: '+m;
+      }
+    }
+    if(preferredChain === 'bnb'){
+      if(/user rejected|denied|User rejected/i.test(m)) return 'BNB Permit2 approval or signature cancelled — approve USDT for Permit2 once, then confirm the payment.';
+      if(/insufficient|Need at least/i.test(m)) return m;
+      if(/Failed to create payment payload|permit2|Permit2/i.test(m)){
+        return 'BNB USDT payment failed — switch wallet to BNB Smart Chain, keep a little BNB for the one-time Permit2 approval, then retry. '+m;
       }
     }
     if(/Need at least .* USDC on Base/i.test(m)){
@@ -3417,7 +3429,7 @@
     }
 
     const solReady = chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient);
-    const evmReady = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient);
+    const evmReady = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood'||o.chain==='bnb')&&o.available&&o.sufficient);
     const list = document.getElementById('payChainList');
     list.innerHTML = chainOpts.map(o=>{
       const dis = !o.available || !o.sufficient;
@@ -3444,10 +3456,10 @@
       });
     });
 
-    const defaultOpt = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient&&!o.balanceUnknown)
+    const defaultOpt = chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood'||o.chain==='bnb')&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient&&!o.balanceUnknown)
       || chainOpts.find(o=>o.available&&o.sufficient&&!o.balanceUnknown)
-      || chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood')&&o.available&&o.sufficient)
+      || chainOpts.find(o=>(o.chain==='base'||o.chain==='arbitrum'||o.chain==='robinhood'||o.chain==='bnb')&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available&&o.sufficient)
       || chainOpts.find(o=>o.available&&o.sufficient)
       || chainOpts.find(o=>o.chain==='sol'&&o.available)
@@ -3481,6 +3493,7 @@
       ? (payOpts?.preferredTokenMerchantId ? payOpts.preferredTokenMerchantId+' (Solana)' : 'native token (Solana)')
       : preferredChain === 'sol' ? 'Solana'
       : preferredChain === 'robinhood' ? 'Robinhood (USDG)'
+      : preferredChain === 'bnb' ? 'BNB Chain (USDT)'
       : preferredChain === 'arbitrum' ? 'Arbitrum'
       : (preferredChain === 'base' || preferredChain === 'evm') ? 'Base' : 'wallet';
     const u = String(url);
@@ -3489,7 +3502,11 @@
     const headers = Object.assign({}, baseOpts.headers || {});
     if(agentId) headers['X-Agent-Id'] = agentId;
     const fetchOpts = Object.assign({}, baseOpts, { headers });
-    if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')) toast('Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
+    if(u.includes('/api/news-open')||u.includes('/api/lounge-signal-open')){
+      toast(preferredChain === 'bnb'
+        ? 'Approve Permit2 (one-time) then USDT payment on BNB in your wallet…'
+        : 'Phantom: tap Confirm (unsafe) if shown · approve USDC on '+chainHint);
+    }
     else if(u.includes('/api/lounge-signal-publish')) toast('Approve $0.02 publish fee on '+chainHint+'…');
     else if(u.includes('/api/concierge')) toast('Approve payment on '+chainHint+' in your wallet…');
     else if(u.includes('/api/concierge-security-scan')) toast('Approve $0.10 security scan on '+chainHint+'…');

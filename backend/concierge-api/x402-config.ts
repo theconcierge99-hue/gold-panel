@@ -49,6 +49,7 @@ import {
   getX402FacilitatorProfile,
   getX402FacilitatorFallback,
   getRobinhoodFacilitatorProfile,
+  DEXTER_FACILITATOR,
 } from "./x402-facilitator";
 import { dexterDiscoveryLinks } from "./dexter-links";
 import { isSoonLaunched, publicSoonHolderTiers, SOON_TIERS } from "./soon-token";
@@ -75,6 +76,24 @@ export const ROBINHOOD_TESTNET_CAIP2 = "eip155:46630" as const;
 /** Paxos Global Dollar (USDG) on Robinhood Chain mainnet — 6 decimals, EIP-3009. */
 export const ROBINHOOD_USDG_MAINNET = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
 
+/** BNB Smart Chain — Binance-Peg USDT via Permit2 (Dexter). Mainnet only. */
+export const BNB_MAINNET_CAIP2 = "eip155:56" as const;
+/** Binance-Peg USDT (BSC-USD) on BNB Smart Chain — 18 decimals, no EIP-3009. */
+export const BNB_USDT_MAINNET = "0x55d398326f99059fF775485246999027B3197955";
+export const BNB_USDT_DECIMALS = 18;
+
+export type X402AssetTransferMethod = "eip3009" | "permit2";
+
+export type X402SettlementAssetProfile = {
+  network: string;
+  asset: string;
+  symbol: string;
+  decimals: number;
+  transferMethod: X402AssetTransferMethod;
+  /** EIP-712 token domain — required for EIP-3009; optional hint for Permit2. */
+  eip712?: { name: string; version: string };
+};
+
 const USDC_BY_NETWORK: Record<string, string> = {
   "eip155:8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   "eip155:84532": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
@@ -88,16 +107,13 @@ export function isRobinhoodNetwork(network: string): boolean {
   return network === ROBINHOOD_MAINNET_CAIP2 || network === ROBINHOOD_TESTNET_CAIP2;
 }
 
-/** Settlement asset for a CAIP-2 network (USDC or Robinhood USDG). */
+export function isBnbNetwork(network: string): boolean {
+  return network === BNB_MAINNET_CAIP2;
+}
+
+/** Settlement asset for a CAIP-2 network (USDC, Robinhood USDG, or BNB USDT). */
 export function getUsdcAssetForNetwork(network: string): string {
-  if (isRobinhoodNetwork(network)) {
-    const usdg = getRobinhoodUsdgAsset(network);
-    if (!usdg) throw new Error(`Robinhood USDG not configured for ${network}`);
-    return usdg;
-  }
-  const asset = USDC_BY_NETWORK[network];
-  if (!asset) throw new Error(`Unsupported x402 network: ${network}`);
-  return asset;
+  return getSettlementAssetProfile(network).asset;
 }
 
 export function getRobinhoodUsdgAsset(network: string): string | null {
@@ -113,26 +129,83 @@ export function getRobinhoodUsdgAsset(network: string): string | null {
   return null;
 }
 
-/** EIP-712 domain metadata for exact-scheme accepts — must match on-chain token.name(). */
-export function getUsdcEip712ExtraForNetwork(network: string): { name: string; version: string } {
+export function getBnbUsdtAsset(network: string): string | null {
+  if (network !== BNB_MAINNET_CAIP2) return null;
+  return cleanEnvAddress(process.env.X402_BNB_USDT) || BNB_USDT_MAINNET;
+}
+
+/** Full settlement profile — decimals + transfer method for multi-rail accepts. */
+export function getSettlementAssetProfile(network: string): X402SettlementAssetProfile {
   if (isRobinhoodNetwork(network)) {
-    // USDG (Paxos Global Dollar) — confirmed via Naven / Blockscout token metadata.
-    return { name: "Global Dollar", version: "1" };
+    const usdg = getRobinhoodUsdgAsset(network);
+    if (!usdg) throw new Error(`Robinhood USDG not configured for ${network}`);
+    return {
+      network,
+      asset: usdg,
+      symbol: "USDG",
+      decimals: 6,
+      transferMethod: "eip3009",
+      eip712: { name: "Global Dollar", version: "1" },
+    };
   }
-  // x402 token table: Base/Arbitrum/Polygon mainnet native USDC → "USD Coin"; Base Sepolia → "USDC".
-  if (network === "eip155:84532" || network === "eip155:421614") {
-    return { name: "USDC", version: "2" };
+  if (isBnbNetwork(network)) {
+    const usdt = getBnbUsdtAsset(network);
+    if (!usdt) throw new Error(`BNB USDT not configured for ${network}`);
+    return {
+      network,
+      asset: usdt,
+      symbol: "USDT",
+      decimals: BNB_USDT_DECIMALS,
+      transferMethod: "permit2",
+      // Binance-Peg USDT on BSC — name() returns "Tether USD" on the peg token.
+      eip712: { name: "Tether USD", version: "1" },
+    };
   }
-  if (network.startsWith("eip155:")) {
-    return { name: "USD Coin", version: "2" };
+  const asset = USDC_BY_NETWORK[network];
+  if (!asset) throw new Error(`Unsupported x402 network: ${network}`);
+  const eip712 =
+    network === "eip155:84532" || network === "eip155:421614"
+      ? { name: "USDC", version: "2" }
+      : network.startsWith("eip155:")
+        ? { name: "USD Coin", version: "2" }
+        : { name: "USDC", version: "2" };
+  return {
+    network,
+    asset,
+    symbol: "USDC",
+    decimals: 6,
+    transferMethod: network.startsWith("eip155:") ? "eip3009" : "eip3009",
+    eip712,
+  };
+}
+
+/**
+ * Accept `extra` for exact-scheme EVM rails.
+ * EIP-3009 needs token EIP-712 name/version; Permit2 (BNB) signals assetTransferMethod.
+ */
+export function getAcceptExtraForNetwork(network: string): Record<string, unknown> {
+  const profile = getSettlementAssetProfile(network);
+  if (profile.transferMethod === "permit2") {
+    return {
+      assetTransferMethod: "permit2",
+      ...(profile.eip712 ?? {}),
+    };
   }
-  return { name: "USDC", version: "2" };
+  return profile.eip712 ?? { name: "USDC", version: "2" };
+}
+
+/** @deprecated Prefer getAcceptExtraForNetwork — kept for callers expecting EIP-712 only. */
+export function getUsdcEip712ExtraForNetwork(network: string): { name: string; version: string } {
+  const profile = getSettlementAssetProfile(network);
+  return profile.eip712 ?? { name: "USDC", version: "2" };
 }
 
 export type X402NetworkProfile = {
   evm: `eip155:${number}`;
   arbitrum: `eip155:${number}`;
   robinhood: `eip155:${number}`;
+  /** BNB Smart Chain mainnet — only present when mode is mainnet. */
+  bnb: `eip155:${number}` | null;
   sol: `solana:${string}`;
   label: string;
 };
@@ -141,14 +214,17 @@ const MAINNET: X402NetworkProfile = {
   evm: "eip155:8453",
   arbitrum: "eip155:42161",
   robinhood: ROBINHOOD_MAINNET_CAIP2,
+  bnb: BNB_MAINNET_CAIP2,
   sol: SOLANA_MAINNET_CAIP2,
-  label: "Base + Arbitrum + Robinhood + Solana mainnet",
+  label: "Base + Arbitrum + Robinhood + BNB + Solana mainnet",
 };
 
 const TESTNET: X402NetworkProfile = {
   evm: "eip155:84532",
   arbitrum: "eip155:421614",
   robinhood: ROBINHOOD_TESTNET_CAIP2,
+  // No verified BNB testnet facilitator/asset — never advertise eip155:97.
+  bnb: null,
   sol: SOLANA_DEVNET_CAIP2,
   label: "Base Sepolia + Arbitrum Sepolia + Robinhood testnet + Solana devnet",
 };
@@ -175,12 +251,26 @@ export function isRobinhoodX402Enabled(): boolean {
   return !!getRobinhoodUsdgAsset(profile.robinhood);
 }
 
-/** EVM networks advertised in 402 accepts (Base + optional Arbitrum + Robinhood). */
+/**
+ * BNB Smart Chain USDT rail — fail-closed.
+ * Requires explicit X402_BNB_ENABLED=true, mainnet mode, and a valid EVM merchant.
+ * Settles only via Dexter (Permit2); PayAI/CDP do not support eip155:56.
+ */
+export function isBnbX402Enabled(): boolean {
+  if (process.env.X402_BNB_ENABLED !== "true") return false;
+  if (!getMerchantAddresses().evm) return false;
+  const profile = getX402NetworkProfile();
+  if (!profile.bnb) return false;
+  return !!getBnbUsdtAsset(profile.bnb);
+}
+
+/** EVM networks advertised in 402 accepts (Base + optional Arbitrum / Robinhood / BNB). */
 export function getX402EvmAcceptNetworks(): Array<`eip155:${number}`> {
   const profile = getX402NetworkProfile();
   const nets: Array<`eip155:${number}`> = [profile.evm];
   if (isArbitrumX402Enabled()) nets.push(profile.arbitrum);
   if (isRobinhoodX402Enabled()) nets.push(profile.robinhood);
+  if (isBnbX402Enabled() && profile.bnb) nets.push(profile.bnb);
   return nets;
 }
 
@@ -269,6 +359,7 @@ export function getPublicX402Config() {
   const facilitator = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
   const robinhoodFacilitator = isRobinhoodX402Enabled() ? getRobinhoodFacilitatorProfile() : null;
+  const bnbEnabled = isBnbX402Enabled();
 
   return {
     enabled: isX402Enabled(),
@@ -287,6 +378,7 @@ export function getPublicX402Config() {
     acceptsEvm: !!evm,
     acceptsArbitrum: isArbitrumX402Enabled() && !!evm,
     acceptsRobinhood: isRobinhoodX402Enabled() && !!evm,
+    acceptsBnb: bnbEnabled && !!evm,
     robinhoodNetwork: isRobinhoodX402Enabled() ? nets.robinhood : undefined,
     robinhoodUsdg: isRobinhoodX402Enabled()
       ? getRobinhoodUsdgAsset(nets.robinhood) ?? undefined
@@ -294,6 +386,13 @@ export function getPublicX402Config() {
     robinhoodFacilitator: robinhoodFacilitator?.name,
     robinhoodFacilitatorUrl: robinhoodFacilitator?.url,
     robinhoodFacilitatorDocsUrl: robinhoodFacilitator?.docsUrl,
+    bnbNetwork: bnbEnabled ? nets.bnb ?? undefined : undefined,
+    bnbUsdt: bnbEnabled && nets.bnb ? getBnbUsdtAsset(nets.bnb) ?? undefined : undefined,
+    bnbUsdtDecimals: bnbEnabled ? BNB_USDT_DECIMALS : undefined,
+    bnbFacilitator: bnbEnabled ? DEXTER_FACILITATOR.name : undefined,
+    bnbFacilitatorUrl: bnbEnabled ? DEXTER_FACILITATOR.url : undefined,
+    bnbFacilitatorDocsUrl: bnbEnabled ? DEXTER_FACILITATOR.docsUrl : undefined,
+    bnbAssetTransferMethod: bnbEnabled ? "permit2" : undefined,
     evmNetworks: getX402EvmAcceptNetworks(),
     acceptsSol: !!sol,
     evmPayToReady: !!evm,

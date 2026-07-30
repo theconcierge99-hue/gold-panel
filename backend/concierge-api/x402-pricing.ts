@@ -117,6 +117,36 @@ export function usdcToAtomic(usdc: number): string {
   return String(Math.round(usdc * 1_000_000));
 }
 
+/** Convert a USD list price into atomic units for a given token decimal count. */
+export function usdToAtomic(usd: number, decimals: number): string {
+  if (!Number.isFinite(usd) || usd <= 0) throw new Error("Invalid USD amount");
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 36) {
+    throw new Error(`Invalid token decimals: ${decimals}`);
+  }
+  // Prefer exact integer math for common micropayment tiers (no fractional cents).
+  const micros = Math.round(usd * 1_000_000);
+  if (Math.abs(usd * 1_000_000 - micros) < 1e-9) {
+    if (decimals === 6) return String(micros);
+    if (decimals > 6) return String(BigInt(micros) * 10n ** BigInt(decimals - 6));
+    const scale = 10n ** BigInt(6 - decimals);
+    return String(BigInt(micros) / scale);
+  }
+  const factor = 10 ** decimals;
+  return String(Math.round(usd * factor));
+}
+
+/** Scale a 6-decimal USDC atomic amount to another ERC-20 decimal count. */
+export function scaleUsdcAtomicToDecimals(usdcAtomic: string, decimals: number): string {
+  if (!/^\d+$/.test(usdcAtomic)) throw new Error(`Invalid USDC atomic amount: ${usdcAtomic}`);
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 36) {
+    throw new Error(`Invalid token decimals: ${decimals}`);
+  }
+  if (decimals === 6) return usdcAtomic;
+  const n = BigInt(usdcAtomic);
+  if (decimals > 6) return String(n * 10n ** BigInt(decimals - 6));
+  return String(n / 10n ** BigInt(6 - decimals));
+}
+
 export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "signal-publish") return X402_SIGNAL_PUBLISH_ATOMIC;
   if (kind === "intel-desk-brief" || kind === "intel-a2a-pipeline") return X402_BUNDLE_PRICE_ATOMIC;
@@ -127,6 +157,14 @@ export function atomicAmountForResource(kind: X402ResourceKind): string {
   if (kind === "resource-image" || kind === "resource-scaffold") return X402_RESOURCE_CREATIVE_ATOMIC;
   if (isRawIntelKind(kind) || isRawSecurityKind(kind)) return X402_RAW_PRICE_ATOMIC;
   return X402_SIGNAL_PRICE_ATOMIC;
+}
+
+/** Atomic amount for a resource on a settlement rail with non-6-decimal assets (e.g. BNB USDT 18). */
+export function atomicAmountForResourceDecimals(
+  kind: X402ResourceKind,
+  decimals: number,
+): string {
+  return scaleUsdcAtomicToDecimals(atomicAmountForResource(kind), decimals);
 }
 
 export function priceUsdcForResource(kind: X402ResourceKind): number {

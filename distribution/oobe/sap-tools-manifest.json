@@ -4,7 +4,7 @@
   "manifestKind": "concierge-sap-tools-v1",
   "agent": {
     "name": "Concierge Intel",
-    "description": "Pay-per-call market intelligence for Solana agents — desk verdict (snipe/watch/avoid) and Meteora DLMM deep-dive. Settlement via x402 USDC (PayAI) on Solana/Base/Arbitrum or USDG on Robinhood Chain. No API keys.",
+    "description": "Pay-per-call market intelligence for Solana agents — desk verdict (snipe/watch/avoid) and Meteora DLMM deep-dive. Settlement via x402 USDC (PayAI) on Solana/Base/Arbitrum, USDG on Robinhood Chain, or USDT on BNB (Dexter Permit2, opt-in). No API keys.",
     "protocols": ["x402", "A2A", "MCP", "MPP"],
     "categories": ["intel", "trading", "defi", "solana"],
     "homepage": "https://conc-exe.xyz",
@@ -27,14 +27,19 @@
     "fallbackFacilitatorUrl": "https://x402.dexter.cash",
     "robinhoodFacilitator": "primer",
     "robinhoodFacilitatorUrl": "https://x402.primer.systems",
+    "bnbFacilitator": "dexter",
+    "bnbFacilitatorUrl": "https://x402.dexter.cash",
     "networks": [
       "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
       "eip155:8453",
       "eip155:42161",
-      "eip155:4663"
+      "eip155:4663",
+      "eip155:56"
     ],
     "asset": "USDC",
     "robinhoodAsset": "USDG",
+    "bnbAsset": "USDT",
+    "bnbAssetTransferMethod": "permit2",
     "header": "PAYMENT-SIGNATURE"
   },
   "tools": [

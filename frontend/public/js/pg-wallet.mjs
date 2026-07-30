@@ -125,8 +125,13 @@ export function x402ServerPayConfigFromApi(cfg) {
     acceptsEvm: !!cfg.acceptsEvm,
     acceptsArbitrum: !!cfg.acceptsArbitrum,
     acceptsRobinhood: !!cfg.acceptsRobinhood,
+    acceptsBnb: !!cfg.acceptsBnb,
     robinhoodUsdg: cfg.robinhoodUsdg || undefined,
     robinhoodNetwork: cfg.robinhoodNetwork || undefined,
+    bnbUsdt: cfg.bnbUsdt || undefined,
+    bnbNetwork: cfg.bnbNetwork || undefined,
+    bnbUsdtDecimals: cfg.bnbUsdtDecimals || undefined,
+    bnbAssetTransferMethod: cfg.bnbAssetTransferMethod || undefined,
     evmNetworks: cfg.evmNetworks,
     acceptsSol: !!cfg.acceptsSol,
     evmPayToReady: !!cfg.evmPayToReady,
@@ -156,6 +161,7 @@ export function paidFetchOptionsForRail(rail) {
   if (rail === "tcx") return { preferredChain: "soon", preferredTokenMerchantId: "soon" };
   if (rail === "arbitrum") return { preferredChain: "arbitrum" };
   if (rail === "robinhood") return { preferredChain: "robinhood" };
+  if (rail === "bnb") return { preferredChain: "bnb" };
   if (rail === "evm" || rail === "base") return { preferredChain: "base" };
   return {};
 }

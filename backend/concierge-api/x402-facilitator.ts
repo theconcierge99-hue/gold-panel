@@ -72,6 +72,11 @@ export function getRobinhoodFacilitatorProfile(): X402FacilitatorProfile {
   };
 }
 
+/** BNB Smart Chain rail — pinned to Dexter (Permit2). PayAI/CDP do not settle eip155:56. */
+export function getBnbFacilitatorProfile(): X402FacilitatorProfile {
+  return DEXTER_FACILITATOR;
+}
+
 /** Primary facilitator — default PayAI. Set X402_FACILITATOR=dexter|cdp to swap primary. */
 export function getX402FacilitatorProfile(): X402FacilitatorProfile {
   const raw = (process.env.X402_FACILITATOR || "payai").trim().toLowerCase();
@@ -96,7 +101,10 @@ export function resolveFacilitatorForSolanaFeePayer(feePayer: string): X402Facil
 }
 
 /** AgentCash / MPPscan dual-protocol payment metadata (PayAI primary, Dexter fallback). */
-export function mppPaymentProtocols(opts?: { robinhood?: boolean }): Record<string, unknown>[] {
+export function mppPaymentProtocols(opts?: {
+  robinhood?: boolean;
+  bnb?: boolean;
+}): Record<string, unknown>[] {
   const primary = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
   const protocols: Record<string, unknown>[] = [
@@ -123,6 +131,20 @@ export function mppPaymentProtocols(opts?: { robinhood?: boolean }): Record<stri
       },
     });
     protocols.push({ mpp: { method: "eip155", network: "robinhood", intent: "charge", currency: "USDG" } });
+  }
+  if (opts?.bnb) {
+    const bnb = getBnbFacilitatorProfile();
+    protocols.push({
+      x402: {
+        network: "bnb",
+        caip2: "eip155:56",
+        asset: "USDT",
+        assetTransferMethod: "permit2",
+        facilitator: bnb.url,
+        role: "primary",
+      },
+    });
+    protocols.push({ mpp: { method: "eip155", network: "bnb", intent: "charge", currency: "USDT" } });
   }
   protocols.push(
     { mpp: { method: "solana", intent: "charge", currency: "USDC" } },

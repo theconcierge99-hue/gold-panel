@@ -4,10 +4,10 @@
  * @see https://mpp.dev/advanced/discovery
  */
 import type { X402ResourceKind } from "./x402-pricing";
-import { atomicAmountForResource } from "./x402-pricing";
+import { atomicAmountForResource, atomicAmountForResourceDecimals } from "./x402-pricing";
 import { X402_SERVICE_TAGS, x402ServiceListingMeta } from "./x402-service-meta";
-import { getX402FacilitatorProfile, getX402FacilitatorFallback, getRobinhoodFacilitatorProfile, mppPaymentProtocols } from "./x402-facilitator";
-import { isRobinhoodX402Enabled } from "./x402-config";
+import { getX402FacilitatorProfile, getX402FacilitatorFallback, getRobinhoodFacilitatorProfile, getBnbFacilitatorProfile, mppPaymentProtocols } from "./x402-facilitator";
+import { isBnbX402Enabled, isRobinhoodX402Enabled, BNB_USDT_DECIMALS } from "./x402-config";
 
 export const MPPSCAN_REGISTER_URL = "https://www.mppscan.com/register";
 export const MPPSCAN_EXPLORE_URL = "https://www.mppscan.com/";
@@ -41,12 +41,15 @@ function facilitatorLabel(): string {
 
 /** AgentCash / MPPscan — dual-protocol (matches production MPP listings e.g. Hyre). */
 export function getMppPaymentProtocols(): Record<string, unknown>[] {
-  return mppPaymentProtocols({ robinhood: isRobinhoodX402Enabled() });
+  return mppPaymentProtocols({
+    robinhood: isRobinhoodX402Enabled(),
+    bnb: isBnbX402Enabled(),
+  });
 }
 
 export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
-  `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 settlement in USDC (Solana, Base, Arbitrum) or USDG (Robinhood Chain) — ${facilitatorLabel()}.`,
+  `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 settlement in USDC (Solana, Base, Arbitrum), USDG (Robinhood Chain), or USDT on BNB Smart Chain via Permit2/Dexter — ${facilitatorLabel()}.`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
   "Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). TCX holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch.",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($0.02), /api/lounge-signal-open.",
@@ -996,7 +999,7 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
 
   const outputBodySchema = openApiResponseSchema(kind);
 
-  return {
+  const extensions: Record<string, unknown> = {
     bazaar: {
       info: {
         input,
@@ -1037,6 +1040,20 @@ export function buildBazaarExtension(kind: X402ResourceKind): Record<string, unk
       },
     },
   };
+
+  // BNB USDT lacks EIP-3009/EIP-2612 — advertise Permit2 approval gas sponsoring so
+  // clients can attach a pre-signed approve(Permit2) for Dexter to broadcast.
+  if (isBnbX402Enabled()) {
+    extensions.erc20ApprovalGasSponsoring = {
+      info: {
+        description:
+          "Facilitator broadcasts a pre-signed ERC-20 approve() to grant Permit2 allowance (BNB USDT).",
+        version: "1",
+      },
+    };
+  }
+
+  return extensions;
 }
 
 /** Fixed USD amount with six decimal places for AgentCash validators. */
@@ -1052,6 +1069,7 @@ export function buildXPaymentInfo(priceUsd: string, kind: X402ResourceKind): Rec
   const facilitator = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
   const robinhood = isRobinhoodX402Enabled();
+  const bnb = isBnbX402Enabled();
   const offers: Record<string, unknown>[] = [
     {
       protocol: "x402",
@@ -1079,6 +1097,18 @@ export function buildXPaymentInfo(priceUsd: string, kind: X402ResourceKind): Rec
       description: `$${priceUsd} USDG on Robinhood Chain via ${rh.name}`,
     });
   }
+  if (bnb) {
+    const bnbFac = getBnbFacilitatorProfile();
+    offers.push({
+      protocol: "x402",
+      amount: atomicAmountForResourceDecimals(kind, BNB_USDT_DECIMALS),
+      currency: "USDT",
+      network: "eip155:56",
+      assetTransferMethod: "permit2",
+      intent: "charge",
+      description: `$${priceUsd} USDT on BNB Smart Chain via ${bnbFac.name} (Permit2)`,
+    });
+  }
   return {
     price: { mode: "fixed", currency: "USD", amount },
     protocols: getMppPaymentProtocols(),
@@ -1092,6 +1122,7 @@ export function buildXServiceInfo(origin: string): Record<string, unknown> {
   const fallback = getX402FacilitatorFallback();
   const networks = ["solana", "base", "arbitrum"];
   if (isRobinhoodX402Enabled()) networks.push("robinhood");
+  if (isBnbX402Enabled()) networks.push("bnb");
   const info: Record<string, unknown> = {
     name: listing.serviceName,
     description: listing.description,
@@ -1110,6 +1141,14 @@ export function buildXServiceInfo(origin: string): Record<string, unknown> {
     info.robinhoodFacilitatorUrl = rh.url;
     info.robinhoodNetwork = "eip155:4663";
     info.robinhoodAsset = "USDG";
+  }
+  if (isBnbX402Enabled()) {
+    const bnbFac = getBnbFacilitatorProfile();
+    info.bnbFacilitator = bnbFac.name;
+    info.bnbFacilitatorUrl = bnbFac.url;
+    info.bnbNetwork = "eip155:56";
+    info.bnbAsset = "USDT";
+    info.bnbAssetTransferMethod = "permit2";
   }
   return info;
 }

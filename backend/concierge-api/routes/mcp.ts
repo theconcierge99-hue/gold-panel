@@ -178,7 +178,7 @@ function buildPaidTools(origin: string): McpTool[] {
     const defaultBody = INTEL_TOOL_BODIES[kind] ?? {};
     tools.push({
       name: kind.replace(/-/g, "_"),
-      description: `${kind} — ${price} USDC/USDG x402 (or TCX credits). POST ${origin}${path}. Default body: ${JSON.stringify(defaultBody)}. Unpaid calls return live PAYMENT-REQUIRED accepts (Solana/Base/Arbitrum USDC · Robinhood USDG).`,
+      description: `${kind} — ${price} USDC/USDG/USDT x402 (or TCX credits). POST ${origin}${path}. Default body: ${JSON.stringify(defaultBody)}. Unpaid calls return live PAYMENT-REQUIRED accepts (Solana/Base/Arbitrum USDC · Robinhood USDG · BNB USDT Permit2).`,
       inputSchema: {
         ...PAID_ARG_SCHEMA,
         properties: {

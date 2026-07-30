@@ -25,11 +25,15 @@ Copy [`.env.example`](../.env.example) to `.env.local` for local development. Se
 
 | Variable | Description |
 |----------|-------------|
-| `X402_EVM_PAY_TO` | Merchant USDC receive address on **Base** (`0x` + 40 hex). |
+| `X402_EVM_PAY_TO` | Merchant receive address on **Base / Arbitrum / Robinhood / BNB** (`0x` + 40 hex). |
 | `X402_SOL_PAY_TO` | Optional merchant USDC receive address on **Solana** (base58, 32–44 chars). |
 | `X402_ENABLED` | Set `false` to disable payments entirely. Default: enabled when a valid pay-to exists. |
 | `X402_FACILITATOR` | `payai` (default), `dexter`, or `cdp`. PayAI remains the default; `cdp` enables Coinbase CDP settlement for Bazaar indexing and requires both CDP credentials below. |
 | `X402_NETWORK_MODE` | `mainnet` (default) or `testnet` (Base Sepolia + Solana devnet). |
+| `X402_ARBITRUM_ENABLED` | Set `false` to hide Arbitrum USDC accepts (on by default when EVM pay-to is set). |
+| `X402_ROBINHOOD_ENABLED` | Set `false` to hide Robinhood USDG accepts. |
+| `X402_BNB_ENABLED` | Set `true` to advertise BNB Smart Chain USDT (Permit2 via Dexter). **Default off** — enable only after live canary. Mainnet only. |
+| `X402_BNB_USDT` | Optional override for Binance-Peg USDT on BSC (default `0x55d398326f99059fF775485246999027B3197955`). |
 | `PAYAI_API_KEY_ID` | Optional PayAI JWT key id — only when `X402_FACILITATOR=payai`. |
 | `PAYAI_API_KEY_SECRET` | Optional PayAI JWT secret. |
 | `CDP_API_KEY_ID` | Coinbase Developer Platform key ID — required when `X402_FACILITATOR=cdp`. |

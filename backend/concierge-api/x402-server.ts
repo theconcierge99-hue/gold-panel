@@ -6,8 +6,10 @@ import {
   getMerchantAddresses,
   getX402EvmAcceptNetworks,
   getX402NetworkProfile,
+  getSettlementAssetProfile,
+  getAcceptExtraForNetwork,
   getUsdcAssetForNetwork,
-  getUsdcEip712ExtraForNetwork,
+  isBnbNetwork,
   isRobinhoodNetwork,
   isX402Enabled,
 } from "./x402-config";
@@ -15,6 +17,7 @@ import {
   getX402FacilitatorProfile,
   getX402FacilitatorFallback,
   getRobinhoodFacilitatorProfile,
+  getBnbFacilitatorProfile,
   resolveFacilitatorForSolanaFeePayer,
   PAYAI_FACILITATOR,
   DEXTER_FACILITATOR,
@@ -23,7 +26,13 @@ import {
 import { corsHeadersFor } from "./concierge-security";
 import { loungeApiOrigin } from "./lounge-internal-auth";
 import { buildBazaarExtension } from "./x402-discovery";
-import { priceUsdcForResource, atomicAmountForResource, priceLabelForResource, type X402ResourceKind } from "./x402-pricing";
+import {
+  priceUsdcForResource,
+  atomicAmountForResource,
+  atomicAmountForResourceDecimals,
+  priceLabelForResource,
+  type X402ResourceKind,
+} from "./x402-pricing";
 import { x402ServiceListingMeta } from "./x402-service-meta";
 import {
   buildTokenPayAcceptsForResourceAsync,
@@ -357,23 +366,24 @@ async function buildAcceptsAsync(
 ): Promise<X402AcceptRequirement[]> {
   const nets = getX402NetworkProfile();
   const { evm, sol } = getMerchantAddresses();
-  const amount = atomicAmountForResource(kind);
   const accepts: X402AcceptRequirement[] = [];
 
   if (evm) {
     for (const network of getX402EvmAcceptNetworks()) {
+      const assetProfile = getSettlementAssetProfile(network);
       accepts.push({
         scheme: "exact",
         network,
-        amount,
-        asset: getUsdcAssetForNetwork(network),
+        amount: atomicAmountForResourceDecimals(kind, assetProfile.decimals),
+        asset: assetProfile.asset,
         payTo: evm,
         maxTimeoutSeconds: 120,
-        extra: getUsdcEip712ExtraForNetwork(network),
+        extra: getAcceptExtraForNetwork(network),
       });
     }
   }
   if (sol) {
+    const amount = atomicAmountForResource(kind);
     const solBase = {
       scheme: "exact" as const,
       network: nets.sol,
@@ -552,6 +562,9 @@ function resolveFacilitatorForRequirement(req: X402AcceptRequirement): X402Facil
   if (isRobinhoodNetwork(req.network)) {
     return getRobinhoodFacilitatorProfile();
   }
+  if (isBnbNetwork(req.network)) {
+    return getBnbFacilitatorProfile();
+  }
   const feePayer = req.extra?.feePayer;
   if (typeof feePayer === "string" && req.network.startsWith("solana:")) {
     return resolveFacilitatorForSolanaFeePayer(feePayer);
@@ -600,9 +613,14 @@ async function verifyAndSettle(
 
   const primary = resolveFacilitatorForRequirement(matched);
   const facilitators: X402FacilitatorProfile[] = [primary];
-  // Robinhood USDG must settle only on the RH facilitator (PayAI/Dexter/CDP do not support 4663).
+  // Robinhood USDG and BNB USDT must settle only on their pinned facilitators
+  // (PayAI/CDP do not support eip155:4663 or eip155:56).
   let outageFallback: X402FacilitatorProfile | null = null;
-  if (!isRobinhoodNetwork(matched.network) && !matched.network.startsWith("solana:")) {
+  if (
+    !isRobinhoodNetwork(matched.network) &&
+    !isBnbNetwork(matched.network) &&
+    !matched.network.startsWith("solana:")
+  ) {
     const fallback = getX402FacilitatorFallback();
     if (fallback.id !== primary.id) {
       facilitators.push(fallback);

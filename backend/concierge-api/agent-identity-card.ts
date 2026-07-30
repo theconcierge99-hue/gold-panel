@@ -26,7 +26,7 @@ export function buildLoungeServiceCard(origin: string): LoungeAgentServiceCard {
     docsUrl: `${base}/docs/agents`,
     payment: "x402-v2",
     protocols: ["x402", "mpp", "SAP", "ERC-8004"],
-    networks: ["solana", "eip155:8453", "eip155:42161", "eip155:4663"],
+    networks: ["solana", "eip155:8453", "eip155:42161", "eip155:4663", "eip155:56"],
     discovery: {
       x402: `${base}/.well-known/x402`,
       openapi: `${base}/openapi.json`,

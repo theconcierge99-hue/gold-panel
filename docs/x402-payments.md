@@ -4,6 +4,7 @@ Executive Lounge uses the [x402](https://www.x402.org/) payment protocol (HTTP *
 
 - **USDC** on **Base**, **Arbitrum**, and optionally **Solana**
 - **USDG** (Paxos Global Dollar) on **Robinhood Chain** (`eip155:4663`)
+- **USDT** (Binance-Peg) on **BNB Smart Chain** (`eip155:56`) via **Permit2** — opt-in (`X402_BNB_ENABLED=true`)
 
 ## Facilitators
 
@@ -12,58 +13,62 @@ Executive Lounge uses the [x402](https://www.x402.org/) payment protocol (HTTP *
 | **Primary (default)** | [PayAI](https://docs.payai.network/x402/facilitators/pricing) | `https://facilitator.payai.network` |
 | **Fallback** | [Dexter](https://docs.dexter.cash/docs/facilitator-and-chains/) | `https://x402.dexter.cash` |
 | **Robinhood USDG** | [Primer](https://docs.primer.systems/facilitator.html) (default) or [Naven](https://naven.network/docs/demo/robinhood-x402) | `https://x402.primer.systems` |
+| **BNB USDT** | [Dexter](https://dexter.cash/facilitator/bsc) (pinned) | `https://x402.dexter.cash` |
 
 Server module: `backend/concierge-api/x402-server.ts` (Edge-safe HTTP client).
 
 - **Base / Arbitrum (EVM USDC):** verify/settle via PayAI first; on facilitator outage, retry Dexter automatically.
 - **Robinhood (USDG):** verify/settle **only** via the Robinhood facilitator (`X402_ROBINHOOD_FACILITATOR_URL`, default Primer). PayAI/CDP do not settle `eip155:4663`.
+- **BNB (USDT):** verify/settle **only** via Dexter with `extra.assetTransferMethod: "permit2"`. BSC stablecoins lack EIP-3009; amounts use **18 decimals**. Fail-closed until `X402_BNB_ENABLED=true` on mainnet. No testnet rail.
 - **Solana:** `402` accepts list **both** PayAI and Dexter fee payers — clients sign with the primary (PayAI) unless retrying via Dexter accept.
 - **OpenDexter:** Dexter settlements auto-list on [OpenDexter marketplace](https://dexter.cash/opendexter). Claim seller profile at [dexter.cash/sellers](https://dexter.cash/sellers).
 
 Set `X402_FACILITATOR=dexter` only if you want Dexter as primary (unusual).
 
-Disable rails:
+Disable / enable rails:
 
 - `X402_ARBITRUM_ENABLED=false`
 - `X402_ROBINHOOD_ENABLED=false`
+- `X402_BNB_ENABLED=true` (required to advertise BNB — default off)
 
 Flow per paid request:
 
 1. Client receives **402** + `PAYMENT-REQUIRED` (base64 JSON, x402 version 2).
-2. Wallet signs USDC/USDG transfer matching one of the `accepts` entries.
+2. Wallet signs USDC/USDG/USDT transfer matching one of the `accepts` entries (BNB may need a one-time Permit2 ERC-20 approval first).
 3. Client retries with `PAYMENT-SIGNATURE`.
-4. Server calls facilitator `/verify` then `/settle` (PayAI primary, Dexter fallback where configured; Primer for Robinhood).
+4. Server calls facilitator `/verify` then `/settle` (PayAI primary, Dexter fallback where configured; Primer for Robinhood; Dexter-only for BNB).
 5. On success, server returns **200** + `PAYMENT-RESPONSE` (includes on-chain `transaction`).
 
-Settlements are **on-chain**; transaction hashes are visible to explorers and indexers such as [x402scan](x402scan.md). Robinhood receipts: [robinhoodchain.blockscout.com](https://robinhoodchain.blockscout.com).
+Settlements are **on-chain**; transaction hashes are visible to explorers and indexers such as [x402scan](x402scan.md). Robinhood receipts: [robinhoodchain.blockscout.com](https://robinhoodchain.blockscout.com). BNB receipts: [bscscan.com](https://bscscan.com).
 
 **Note:** Solana **NFT mint** after signal publish is separate from x402 — creators pay **SOL** gas in Phantom. See [rwa.md](rwa.md).
 
 ## Pricing (atomic units)
 
-USDC and USDG both use 6 decimals. Defined in `backend/concierge-api/x402-pricing.ts`:
+USDC and USDG use **6 decimals**. BNB USDT uses **18 decimals** (same USD list price scaled ×10¹²). Defined in `backend/concierge-api/x402-pricing.ts`:
 
-| Resource | USDC/USDG | Atomic `amount` |
-|----------|-----------|-----------------|
-| news-open, concierge, signal-open | 0.10 | `100000` |
-| signal-publish (`/api/lounge-signal-publish`) | 1.00 | `1000000` |
+| Resource | USD | USDC/USDG atomic | BNB USDT atomic (18d) |
+|----------|-----|------------------|------------------------|
+| news-open, concierge, signal-open | 0.10 | `100000` | `100000000000000000` |
+| raw intel / signal-publish | 0.02 | `20000` | `20000000000000000` |
 
 ## Networks
 
 Controlled by `X402_NETWORK_MODE`:
 
-| Mode | Base | Arbitrum | Robinhood | Solana |
-|------|------|----------|-----------|--------|
-| `mainnet` (default) | `eip155:8453` | `eip155:42161` | `eip155:4663` (USDG) | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
-| `testnet` | `eip155:84532` | `eip155:421614` | `eip155:46630` (needs `X402_ROBINHOOD_USDG`) | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+| Mode | Base | Arbitrum | Robinhood | BNB | Solana |
+|------|------|----------|-----------|-----|--------|
+| `mainnet` (default) | `eip155:8453` | `eip155:42161` | `eip155:4663` (USDG) | `eip155:56` (USDT, opt-in) | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| `testnet` | `eip155:84532` | `eip155:421614` | `eip155:46630` (needs `X402_ROBINHOOD_USDG`) | — (not advertised) | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
 
-Robinhood mainnet USDG: `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` (EIP-712 name `Global Dollar`, version `1`).
+- Robinhood mainnet USDG: `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` (EIP-712 name `Global Dollar`, version `1`).
+- BNB mainnet USDT: `0x55d398326f99059fF775485246999027B3197955` (override with `X402_BNB_USDT`).
 
 ## Merchant addresses
 
 Set in environment:
 
-- `X402_EVM_PAY_TO` — receives USDC on Base/Arbitrum **and** USDG on Robinhood (same `0x` address)
+- `X402_EVM_PAY_TO` — receives USDC on Base/Arbitrum, USDG on Robinhood, **and** USDT on BNB (same `0x` address)
 - `X402_SOL_PAY_TO` — receives USDC on Solana (optional)
 
 Validation and helpful error messages live in `backend/concierge-api/x402-config.ts` and are surfaced in `/api/x402-config` when misconfigured.
@@ -77,8 +82,8 @@ Build: `npm run build:x402`
 The lounge page loads this module to:
 
 - Read `/api/x402-config`
-- Show chain selection (Solana / Base / Arbitrum / Robinhood) and balances
-- Wrap `fetch` with x402 payment retry logic
+- Show chain selection (Solana / Base / Arbitrum / Robinhood / BNB) and balances
+- Wrap `fetch` with x402 payment retry logic (Permit2 for BNB when `acceptsBnb` is true)
 
 ## Solana notes
 
@@ -113,6 +118,14 @@ Example `PAYMENT-REQUIRED` payload (decoded):
       "asset": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
       "payTo": "0xYourMerchantAddress",
       "extra": { "name": "Global Dollar", "version": "1" }
+    },
+    {
+      "scheme": "exact",
+      "network": "eip155:56",
+      "amount": "100000000000000000",
+      "asset": "0x55d398326f99059fF775485246999027B3197955",
+      "payTo": "0xYourMerchantAddress",
+      "extra": { "assetTransferMethod": "permit2", "name": "Tether USD", "version": "1" }
     }
   ]
 }
@@ -122,9 +135,9 @@ Example `PAYMENT-REQUIRED` payload (decoded):
 
 - `GET /.well-known/x402` — resource URLs + Dexter/OpenDexter links
 - `GET /openapi.json` — full catalog with x-payment-info
-- `GET /api/x402-config` — runtime facilitator primary + fallback (+ `acceptsRobinhood`)
+- `GET /api/x402-config` — runtime facilitator primary + fallback (+ `acceptsRobinhood`, `acceptsBnb`)
 
-See [x402scan.md](x402scan.md) for registry listing. Robinhood marketplace index: [agent402.tools/robinhood](https://agent402.tools/robinhood).
+See [x402scan.md](x402scan.md) for registry listing. Robinhood marketplace index: [agent402.tools/robinhood](https://agent402.tools/robinhood). BNB facilitator: [dexter.cash/facilitator/bsc](https://dexter.cash/facilitator/bsc).
 
 ## zauth (optional)
 

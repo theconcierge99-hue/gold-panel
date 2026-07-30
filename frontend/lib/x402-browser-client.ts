@@ -1,5 +1,5 @@
 /**
- * Browser x402 client — EVM (Base, Arbitrum, Robinhood) + Solana USDC via connected Phantom/OKX wallets.
+ * Browser x402 client — EVM (Base, Arbitrum, Robinhood, BNB) + Solana USDC via connected Phantom/OKX wallets.
  */
 import { x402Client } from "@x402/core/client";
 import type { PaymentRequirements } from "@x402/core/types";
@@ -21,10 +21,12 @@ import {
   publicActions,
   type EIP1193Provider,
 } from "viem";
-import { base, baseSepolia, arbitrum, arbitrumSepolia } from "viem/chains";
+import { base, baseSepolia, arbitrum, arbitrumSepolia, bsc } from "viem/chains";
 
 export const PRICE_ATOMIC = 100_000n;
 const PRICE_USDC = 0.1;
+/** Concierge list price in USDT atomic units (18 decimals) — $0.10. */
+export const PRICE_USDT_18_ATOMIC = 100_000_000_000_000_000n;
 
 /** @deprecated Use TOKEN_PAY_COMING_SOON_DEFAULT */
 export const SOON_PAY_COMING_SOON = TOKEN_PAY_COMING_SOON_DEFAULT;
@@ -47,8 +49,13 @@ export type X402ServerPayConfig = {
   acceptsEvm?: boolean;
   acceptsArbitrum?: boolean;
   acceptsRobinhood?: boolean;
+  acceptsBnb?: boolean;
   robinhoodUsdg?: string;
   robinhoodNetwork?: string;
+  bnbUsdt?: string;
+  bnbNetwork?: string;
+  bnbUsdtDecimals?: number;
+  bnbAssetTransferMethod?: string;
   evmNetworks?: string[];
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
@@ -126,6 +133,7 @@ function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
     (serverConfig.acceptsEvm && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsArbitrum && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsRobinhood && serverConfig.evmPayToReady) ||
+    (serverConfig.acceptsBnb && serverConfig.evmPayToReady) ||
     (serverConfig.acceptsSol && serverConfig.solPayToReady)
   );
 }
@@ -138,7 +146,10 @@ type EvmRailConfig = {
   rpc: string;
   explorer: string;
   /** Display symbol for balance/insufficient messages */
-  symbol: "USDC" | "USDG";
+  symbol: "USDC" | "USDG" | "USDT";
+  decimals: number;
+  /** Native gas token for wallet_addEthereumChain */
+  nativeCurrency: { name: string; symbol: string; decimals: number };
 };
 
 const robinhoodMainnet = defineChain({
@@ -178,6 +189,8 @@ const USDC = {
       rpc: "https://mainnet.base.org",
       explorer: "https://basescan.org",
       symbol: "USDC",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     },
     arbitrum: {
       asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -187,6 +200,8 @@ const USDC = {
       rpc: "https://arb1.arbitrum.io/rpc",
       explorer: "https://arbiscan.io",
       symbol: "USDC",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     },
     robinhood: {
       asset: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
@@ -196,6 +211,19 @@ const USDC = {
       rpc: "https://rpc.mainnet.chain.robinhood.com",
       explorer: "https://robinhoodchain.blockscout.com",
       symbol: "USDG",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+    },
+    bnb: {
+      asset: "0x55d398326f99059fF775485246999027B3197955",
+      network: "eip155:56",
+      chainId: 56,
+      chainName: "BNB Smart Chain",
+      rpc: "https://bsc-dataseed.binance.org",
+      explorer: "https://bscscan.com",
+      symbol: "USDT",
+      decimals: 18,
+      nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
     },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" as const,
@@ -215,6 +243,8 @@ const USDC = {
       rpc: "https://sepolia.base.org",
       explorer: "https://sepolia.basescan.org",
       symbol: "USDC",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     },
     arbitrum: {
       asset: "0x75faf114eafb1BDbe2F6496Ed7E7eD0Eb74e2Da",
@@ -224,6 +254,8 @@ const USDC = {
       rpc: "https://sepolia-rollup.arbitrum.io/rpc",
       explorer: "https://sepolia.arbiscan.io",
       symbol: "USDC",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     },
     robinhood: {
       // Override via server accepts when X402_ROBINHOOD_USDG is set on testnet.
@@ -234,6 +266,20 @@ const USDC = {
       rpc: "https://rpc.testnet.chain.robinhood.com",
       explorer: "https://explorer.testnet.chain.robinhood.com",
       symbol: "USDG",
+      decimals: 6,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+    },
+    // BNB rail is mainnet-only — testnet profile keeps a stub for typing; never enabled.
+    bnb: {
+      asset: "0x55d398326f99059fF775485246999027B3197955",
+      network: "eip155:56",
+      chainId: 56,
+      chainName: "BNB Smart Chain",
+      rpc: "https://bsc-dataseed.binance.org",
+      explorer: "https://bscscan.com",
+      symbol: "USDT",
+      decimals: 18,
+      nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
     },
     solMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     solNetwork: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const,
@@ -260,7 +306,7 @@ export type WalletSession = {
   sol?: { address: string; wallet: string } | null;
 };
 
-export type PayChain = "base" | "arbitrum" | "robinhood" | "sol" | "soon";
+export type PayChain = "base" | "arbitrum" | "robinhood" | "bnb" | "sol" | "soon";
 /** @deprecated Use "base" — kept for older Lounge callers */
 export type LegacyPayChain = PayChain | "evm";
 
@@ -270,7 +316,7 @@ function normalizePayChain(chain?: LegacyPayChain): PayChain | undefined {
   return chain;
 }
 
-type EvmPayRail = "base" | "arbitrum" | "robinhood";
+type EvmPayRail = "base" | "arbitrum" | "robinhood" | "bnb";
 
 function evmRailConfig(rail: EvmPayRail, networkMode: "mainnet" | "testnet", serverConfig?: X402ServerPayConfig): EvmRailConfig {
   const baseCfg = USDC[networkMode][rail];
@@ -281,13 +327,29 @@ function evmRailConfig(rail: EvmPayRail, networkMode: "mainnet" | "testnet", ser
       network: (serverConfig.robinhoodNetwork as `eip155:${number}`) || baseCfg.network,
     };
   }
+  if (rail === "bnb" && serverConfig?.bnbUsdt?.startsWith("0x")) {
+    return {
+      ...baseCfg,
+      asset: serverConfig.bnbUsdt as `0x${string}`,
+      network: (serverConfig.bnbNetwork as `eip155:${number}`) || baseCfg.network,
+      decimals: serverConfig.bnbUsdtDecimals ?? baseCfg.decimals,
+    };
+  }
   return baseCfg;
 }
 
 function viemChainForRail(rail: EvmPayRail, networkMode: "mainnet" | "testnet") {
+  if (rail === "bnb") return bsc;
   if (rail === "robinhood") return networkMode === "testnet" ? robinhoodTestnet : robinhoodMainnet;
   if (rail === "arbitrum") return networkMode === "testnet" ? arbitrumSepolia : arbitrum;
   return networkMode === "testnet" ? baseSepolia : base;
+}
+
+function priceAtomicForRail(rail: EvmPayRail, networkMode: "mainnet" | "testnet", serverConfig?: X402ServerPayConfig): bigint {
+  const cfg = evmRailConfig(rail, networkMode, serverConfig);
+  if (cfg.decimals === 6) return PRICE_ATOMIC;
+  if (cfg.decimals === 18) return PRICE_USDT_18_ATOMIC;
+  return PRICE_ATOMIC * 10n ** BigInt(cfg.decimals - 6);
 }
 
 export type ChainPayOption = {
@@ -376,7 +438,7 @@ async function ensureWalletOnEvmRail(
       {
         chainId: chainHex,
         chainName: cfg.chainName,
-        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        nativeCurrency: cfg.nativeCurrency,
         rpcUrls: [cfg.rpc],
         blockExplorerUrls: [cfg.explorer],
       },
@@ -410,11 +472,16 @@ async function solTokenBalanceViaApi(
   }
 }
 
-function formatStable(atomic: bigint, symbol: "USDC" | "USDG" = "USDC"): string {
-  const whole = atomic / 1_000_000n;
-  const frac = atomic % 1_000_000n;
+function formatStable(
+  atomic: bigint,
+  symbol: "USDC" | "USDG" | "USDT" = "USDC",
+  decimals = 6,
+): string {
+  const scale = 10n ** BigInt(decimals);
+  const whole = atomic / scale;
+  const frac = atomic % scale;
   if (frac === 0n) return `${whole} ${symbol}`;
-  return `${whole}.${frac.toString().padStart(6, "0").replace(/0+$/, "")} ${symbol}`;
+  return `${whole}.${frac.toString().padStart(decimals, "0").replace(/0+$/, "")} ${symbol}`;
 }
 
 function formatUsdc(atomic: bigint): string {
@@ -625,7 +692,7 @@ export async function getPaymentChainOptions(
     rail: EvmPayRail;
     enabled: boolean;
     label: string;
-    symbol: "USDC" | "USDG";
+    symbol: "USDC" | "USDG" | "USDT";
   }> = [
     { rail: "base", enabled: !!(serverConfig.acceptsEvm && serverConfig.evmPayToReady), label: "Base", symbol: "USDC" },
     {
@@ -640,10 +707,18 @@ export async function getPaymentChainOptions(
       label: "Robinhood",
       symbol: "USDG",
     },
+    {
+      rail: "bnb",
+      enabled: !!(serverConfig.acceptsBnb && serverConfig.evmPayToReady && networkMode === "mainnet"),
+      label: "BNB Chain",
+      symbol: "USDT",
+    },
   ];
 
   for (const { rail, enabled, label, symbol } of evmRails) {
     if (!enabled) continue;
+    const railCfg = evmRailConfig(rail, networkMode, serverConfig);
+    const needAtomic = priceAtomicForRail(rail, networkMode, serverConfig);
     const hasWallet = !!session.evm?.address;
     let bal = 0n;
     let disabledReason: string | undefined;
@@ -657,13 +732,15 @@ export async function getPaymentChainOptions(
     } else {
       bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, rail, serverConfig);
     }
-    const sufficient = bal >= PRICE_ATOMIC;
+    const sufficient = bal >= needAtomic;
     options.push({
       chain: rail,
       optionId: rail,
       label,
-      sublabel: hasWallet ? shortAddr(session.evm!.address, "evm") : "Not connected",
-      balanceUsdc: hasWallet && provider ? formatStable(bal, symbol) : "—",
+      sublabel: hasWallet
+        ? `${shortAddr(session.evm!.address, "evm")}${rail === "bnb" ? " · Permit2" : ""}`
+        : "Not connected",
+      balanceUsdc: hasWallet && provider ? formatStable(bal, symbol, railCfg.decimals) : "—",
       balanceAtomic: bal,
       sufficient,
       available: hasWallet && !!provider,
@@ -700,7 +777,7 @@ export async function getPaymentChainOptions(
       balanceUnknown = solBal.unknown;
       if (serverConfig.solMerchantUsdcAta === false) {
         disabledReason =
-          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base/Arbitrum/Robinhood";
+          "Merchant cannot receive USDC on Solana yet — send a tiny USDC once to the merchant address in Vercel, or pay with Base/Arbitrum/Robinhood/BNB";
       }
     }
     const sufficient = balanceUnknown || bal >= PRICE_ATOMIC;
@@ -862,7 +939,17 @@ function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: 
       );
       if (match) return match;
     }
-    if ((preferred === "base" || preferred === "arbitrum" || preferred === "robinhood") && evm.length) {
+    if (preferred === "bnb" && evm.length) {
+      const match = evm.find((a) => String(a.network) === "eip155:56");
+      if (match) return match;
+    }
+    if (
+      (preferred === "base" ||
+        preferred === "arbitrum" ||
+        preferred === "robinhood" ||
+        preferred === "bnb") &&
+      evm.length
+    ) {
       return evm[0];
     }
     return accepts[0];
@@ -908,13 +995,15 @@ async function resolvePaymentChain(
     const soon = usable.find((o) => o.chain === "soon");
     const sol = usable.find((o) => o.chain === "sol");
     const rh = usable.find((o) => o.chain === "robinhood");
+    const bnb = usable.find((o) => o.chain === "bnb");
     const arb = usable.find((o) => o.chain === "arbitrum");
     const baseOpt = usable.find((o) => o.chain === "base");
-    const evmSufficient = !!(rh?.sufficient || arb?.sufficient || baseOpt?.sufficient);
+    const evmSufficient = !!(rh?.sufficient || bnb?.sufficient || arb?.sufficient || baseOpt?.sufficient);
     if (soon?.sufficient && !sol?.sufficient && !evmSufficient) return "soon";
     if (sol?.sufficient && !evmSufficient) return "sol";
     if (evmSufficient && !sol?.sufficient) {
       if (rh?.sufficient) return "robinhood";
+      if (bnb?.sufficient) return "bnb";
       if (arb?.sufficient) return "arbitrum";
       return "base";
     }
@@ -923,9 +1012,9 @@ async function resolvePaymentChain(
     )[0].chain;
   }
   const anyAvail = opts.find((o) => o.available);
-  if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC/USDG");
+  if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC/USDG/USDT");
   throw new Error(
-    "Connect Solana and/or EVM (Base/Arbitrum/Robinhood) in your wallet, or configure merchant receive addresses on the server.",
+    "Connect Solana and/or EVM (Base/Arbitrum/Robinhood/BNB) in your wallet, or configure merchant receive addresses on the server.",
   );
 }
 
@@ -951,7 +1040,7 @@ export async function createX402PaidFetch(
     paymentRequirementsSelector(preferred, options.preferredTokenMerchantId),
   );
 
-  if (preferred === "base" || preferred === "arbitrum" || preferred === "robinhood") {
+  if (preferred === "base" || preferred === "arbitrum" || preferred === "robinhood" || preferred === "bnb") {
     if (!provider) {
       const walletLabel =
         session.evm?.wallet === "privy"
@@ -987,6 +1076,15 @@ export async function createX402PaidFetch(
         }),
       readContract: (args) =>
         publicClient.readContract(args as Parameters<typeof publicClient.readContract>[0]),
+      // Required for BNB Permit2 first-time approve via erc20ApprovalGasSponsoring.
+      signTransaction: async (args) =>
+        walletClient.signTransaction(
+          args as Parameters<typeof walletClient.signTransaction>[0],
+        ),
+      getTransactionCount: async (args) =>
+        publicClient.getTransactionCount(
+          args as Parameters<typeof publicClient.getTransactionCount>[0],
+        ),
     };
     registerExactEvmScheme(client, { signer, networks: [railCfg.network] });
   } else if (preferred === "soon") {
