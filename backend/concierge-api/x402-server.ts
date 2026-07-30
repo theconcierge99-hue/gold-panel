@@ -3,11 +3,12 @@
  * Primary: PayAI by default. Optional CDP/Dexter primary with EVM fallback.
  */
 import {
+  getEvmPayToForNetwork,
   getMerchantAddresses,
   getX402EvmAcceptNetworks,
   getX402NetworkProfile,
-  getSettlementAssetProfile,
-  getAcceptExtraForNetwork,
+  getSettlementAssetProfiles,
+  getAcceptExtraForAsset,
   getUsdcAssetForNetwork,
   isBnbNetwork,
   isRobinhoodNetwork,
@@ -365,20 +366,22 @@ async function buildAcceptsAsync(
   kind: X402ResourceKind,
 ): Promise<X402AcceptRequirement[]> {
   const nets = getX402NetworkProfile();
-  const { evm, sol } = getMerchantAddresses();
+  const { sol } = getMerchantAddresses();
   const accepts: X402AcceptRequirement[] = [];
 
-  if (evm) {
-    for (const network of getX402EvmAcceptNetworks()) {
-      const assetProfile = getSettlementAssetProfile(network);
+  for (const network of getX402EvmAcceptNetworks()) {
+    const payTo = getEvmPayToForNetwork(network);
+    if (!payTo) continue;
+    // BNB advertises USDT and USDC; every other EVM rail yields a single asset.
+    for (const assetProfile of getSettlementAssetProfiles(network)) {
       accepts.push({
         scheme: "exact",
         network,
         amount: atomicAmountForResourceDecimals(kind, assetProfile.decimals),
         asset: assetProfile.asset,
-        payTo: evm,
+        payTo,
         maxTimeoutSeconds: 120,
-        extra: getAcceptExtraForNetwork(network),
+        extra: getAcceptExtraForAsset(assetProfile),
       });
     }
   }

@@ -76,11 +76,16 @@ export const ROBINHOOD_TESTNET_CAIP2 = "eip155:46630" as const;
 /** Paxos Global Dollar (USDG) on Robinhood Chain mainnet — 6 decimals, EIP-3009. */
 export const ROBINHOOD_USDG_MAINNET = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
 
-/** BNB Smart Chain — Binance-Peg USDT via Permit2 (Dexter). Mainnet only. */
+/** BNB Smart Chain — Binance-Peg stablecoins via Permit2 (Dexter). Mainnet only. */
 export const BNB_MAINNET_CAIP2 = "eip155:56" as const;
-/** Binance-Peg USDT (BSC-USD) on BNB Smart Chain — 18 decimals, no EIP-3009. */
+/** Binance-Peg USDT (BSC-USD) — 18 decimals, no EIP-3009/EIP-2612 (verified on-chain). */
 export const BNB_USDT_MAINNET = "0x55d398326f99059fF775485246999027B3197955";
-export const BNB_USDT_DECIMALS = 18;
+/** Binance-Peg USDC — 18 decimals, no EIP-3009/EIP-2612 (verified on-chain). */
+export const BNB_USDC_MAINNET = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+/** Both Binance-Peg stablecoins use 18 decimals, not the 6 used by Circle USDC. */
+export const BNB_STABLE_DECIMALS = 18;
+/** @deprecated Use BNB_STABLE_DECIMALS — both BSC assets share the same decimals. */
+export const BNB_USDT_DECIMALS = BNB_STABLE_DECIMALS;
 
 export type X402AssetTransferMethod = "eip3009" | "permit2";
 
@@ -111,7 +116,7 @@ export function isBnbNetwork(network: string): boolean {
   return network === BNB_MAINNET_CAIP2;
 }
 
-/** Settlement asset for a CAIP-2 network (USDC, Robinhood USDG, or BNB USDT). */
+/** Primary settlement asset for a CAIP-2 network (USDC, Robinhood USDG, or BNB USDT). */
 export function getUsdcAssetForNetwork(network: string): string {
   return getSettlementAssetProfile(network).asset;
 }
@@ -134,6 +139,29 @@ export function getBnbUsdtAsset(network: string): string | null {
   return cleanEnvAddress(process.env.X402_BNB_USDT) || BNB_USDT_MAINNET;
 }
 
+export function getBnbUsdcAsset(network: string): string | null {
+  if (network !== BNB_MAINNET_CAIP2) return null;
+  if (process.env.X402_BNB_USDC_ENABLED === "false") return null;
+  return cleanEnvAddress(process.env.X402_BNB_USDC) || BNB_USDC_MAINNET;
+}
+
+function bnbAssetProfile(
+  network: string,
+  asset: string,
+  symbol: "USDT" | "USDC",
+  eip712Name: string,
+): X402SettlementAssetProfile {
+  return {
+    network,
+    asset,
+    symbol,
+    decimals: BNB_STABLE_DECIMALS,
+    transferMethod: "permit2",
+    // Permit2 signs over its own domain, so the token domain is only a client hint.
+    eip712: { name: eip712Name, version: "1" },
+  };
+}
+
 /** Full settlement profile — decimals + transfer method for multi-rail accepts. */
 export function getSettlementAssetProfile(network: string): X402SettlementAssetProfile {
   if (isRobinhoodNetwork(network)) {
@@ -149,17 +177,9 @@ export function getSettlementAssetProfile(network: string): X402SettlementAssetP
     };
   }
   if (isBnbNetwork(network)) {
-    const usdt = getBnbUsdtAsset(network);
-    if (!usdt) throw new Error(`BNB USDT not configured for ${network}`);
-    return {
-      network,
-      asset: usdt,
-      symbol: "USDT",
-      decimals: BNB_USDT_DECIMALS,
-      transferMethod: "permit2",
-      // Binance-Peg USDT on BSC — name() returns "Tether USD" on the peg token.
-      eip712: { name: "Tether USD", version: "1" },
-    };
+    const profiles = getSettlementAssetProfiles(network);
+    if (!profiles.length) throw new Error(`BNB stablecoin not configured for ${network}`);
+    return profiles[0];
   }
   const asset = USDC_BY_NETWORK[network];
   if (!asset) throw new Error(`Unsupported x402 network: ${network}`);
@@ -180,11 +200,29 @@ export function getSettlementAssetProfile(network: string): X402SettlementAssetP
 }
 
 /**
- * Accept `extra` for exact-scheme EVM rails.
- * EIP-3009 needs token EIP-712 name/version; Permit2 (BNB) signals assetTransferMethod.
+ * Every settlement asset advertised for a network.
+ * BNB carries two Binance-Peg stablecoins (USDT + USDC) so a buyer can pay with
+ * whichever it already holds; both settle through the same Dexter Permit2 path.
+ * All other rails have exactly one asset.
  */
-export function getAcceptExtraForNetwork(network: string): Record<string, unknown> {
-  const profile = getSettlementAssetProfile(network);
+export function getSettlementAssetProfiles(network: string): X402SettlementAssetProfile[] {
+  if (!isBnbNetwork(network)) return [getSettlementAssetProfile(network)];
+  const profiles: X402SettlementAssetProfile[] = [];
+  const usdt = getBnbUsdtAsset(network);
+  if (usdt) profiles.push(bnbAssetProfile(network, usdt, "USDT", "Tether USD"));
+  const usdc = getBnbUsdcAsset(network);
+  if (usdc) profiles.push(bnbAssetProfile(network, usdc, "USDC", "USD Coin"));
+  return profiles;
+}
+
+/**
+ * Accept `extra` for one settlement asset.
+ * EIP-3009 needs the token EIP-712 name/version; Permit2 signals assetTransferMethod
+ * so upstream `@x402/evm` routes a PermitWitnessTransferFrom payload instead.
+ */
+export function getAcceptExtraForAsset(
+  profile: X402SettlementAssetProfile,
+): Record<string, unknown> {
   if (profile.transferMethod === "permit2") {
     return {
       assetTransferMethod: "permit2",
@@ -192,6 +230,11 @@ export function getAcceptExtraForNetwork(network: string): Record<string, unknow
     };
   }
   return profile.eip712 ?? { name: "USDC", version: "2" };
+}
+
+/** Accept `extra` for a network's primary asset. Prefer getAcceptExtraForAsset. */
+export function getAcceptExtraForNetwork(network: string): Record<string, unknown> {
+  return getAcceptExtraForAsset(getSettlementAssetProfile(network));
 }
 
 /** @deprecated Prefer getAcceptExtraForNetwork — kept for callers expecting EIP-712 only. */
@@ -234,40 +277,41 @@ export function getX402NetworkProfile(): X402NetworkProfile {
   return mode === "testnet" ? TESTNET : MAINNET;
 }
 
-/** Arbitrum rail — on when EVM merchant is set unless explicitly disabled. */
+/** Arbitrum rail — on when a payTo resolves for Arbitrum unless explicitly disabled. */
 export function isArbitrumX402Enabled(): boolean {
   if (process.env.X402_ARBITRUM_ENABLED === "false") return false;
-  return !!getMerchantAddresses().evm;
+  const profile = getX402NetworkProfile();
+  return !!getEvmPayToForNetwork(profile.arbitrum);
 }
 
 /**
- * Robinhood Chain USDG rail — on when EVM merchant is set unless disabled.
+ * Robinhood Chain USDG rail — on when a payTo resolves unless disabled.
  * Testnet requires X402_ROBINHOOD_USDG (mainnet mint is not deployed on 46630).
  */
 export function isRobinhoodX402Enabled(): boolean {
   if (process.env.X402_ROBINHOOD_ENABLED === "false") return false;
-  if (!getMerchantAddresses().evm) return false;
   const profile = getX402NetworkProfile();
+  if (!getEvmPayToForNetwork(profile.robinhood)) return false;
   return !!getRobinhoodUsdgAsset(profile.robinhood);
 }
 
 /**
- * BNB Smart Chain USDT rail — fail-closed.
- * Requires explicit X402_BNB_ENABLED=true, mainnet mode, and a valid EVM merchant.
+ * BNB Smart Chain stablecoin rail (USDT + USDC) — fail-closed.
+ * Requires explicit X402_BNB_ENABLED=true, mainnet mode, and a resolvable EVM payTo.
  * Settles only via Dexter (Permit2); PayAI/CDP do not support eip155:56.
  */
 export function isBnbX402Enabled(): boolean {
   if (process.env.X402_BNB_ENABLED !== "true") return false;
-  if (!getMerchantAddresses().evm) return false;
   const profile = getX402NetworkProfile();
-  if (!profile.bnb) return false;
-  return !!getBnbUsdtAsset(profile.bnb);
+  if (!profile.bnb || !getEvmPayToForNetwork(profile.bnb)) return false;
+  return getSettlementAssetProfiles(profile.bnb).length > 0;
 }
 
 /** EVM networks advertised in 402 accepts (Base + optional Arbitrum / Robinhood / BNB). */
 export function getX402EvmAcceptNetworks(): Array<`eip155:${number}`> {
   const profile = getX402NetworkProfile();
-  const nets: Array<`eip155:${number}`> = [profile.evm];
+  const nets: Array<`eip155:${number}`> = [];
+  if (getEvmPayToForNetwork(profile.evm)) nets.push(profile.evm);
   if (isArbitrumX402Enabled()) nets.push(profile.arbitrum);
   if (isRobinhoodX402Enabled()) nets.push(profile.robinhood);
   if (isBnbX402Enabled() && profile.bnb) nets.push(profile.bnb);
@@ -279,6 +323,23 @@ function rawEvmPayToEnv(): string | undefined {
   return process.env.X402_EVM_PAY_TO || process.env.X402_EVM_PAY_ID;
 }
 
+/** Shared receive wallet for Arbitrum / Robinhood / BNB when Phantom (Base-only) is primary. */
+function rawEvmAltPayToEnv(): string | undefined {
+  return process.env.X402_EVM_ALT_PAY_TO || process.env.X402_EVM_ALT_PAY_ID;
+}
+
+function rawArbitrumPayToEnv(): string | undefined {
+  return process.env.X402_ARBITRUM_PAY_TO || process.env.X402_ARBITRUM_PAY_ID;
+}
+
+function rawRobinhoodPayToEnv(): string | undefined {
+  return process.env.X402_ROBINHOOD_PAY_TO || process.env.X402_ROBINHOOD_PAY_ID;
+}
+
+function rawBnbPayToEnv(): string | undefined {
+  return process.env.X402_BNB_PAY_TO || process.env.X402_BNB_PAY_ID;
+}
+
 function rawSolPayToEnv(): string | undefined {
   return process.env.X402_SOL_PAY_TO || process.env.X402_SOL_PAY_ID;
 }
@@ -288,6 +349,39 @@ export function getMerchantAddresses(): { evm: string | null; sol: string | null
     evm: normalizeEvmPayTo(rawEvmPayToEnv()),
     sol: normalizeSolPayTo(rawSolPayToEnv()),
   };
+}
+
+/**
+ * Resolve merchant EVM receive address for a CAIP-2 network.
+ * Base always uses X402_EVM_PAY_TO (Phantom).
+ * Arbitrum / Robinhood / BNB: network-specific → X402_EVM_ALT_PAY_TO → X402_EVM_PAY_TO.
+ */
+export function getEvmPayToForNetwork(network: string): string | null {
+  const profile = getX402NetworkProfile();
+  const primary = normalizeEvmPayTo(rawEvmPayToEnv());
+  const alt = normalizeEvmPayTo(rawEvmAltPayToEnv());
+
+  if (network === profile.evm) return primary;
+  if (network === profile.arbitrum) {
+    return normalizeEvmPayTo(rawArbitrumPayToEnv()) || alt || primary;
+  }
+  if (network === profile.robinhood) {
+    return normalizeEvmPayTo(rawRobinhoodPayToEnv()) || alt || primary;
+  }
+  if (profile.bnb && network === profile.bnb) {
+    return normalizeEvmPayTo(rawBnbPayToEnv()) || alt || primary;
+  }
+  return primary;
+}
+
+/** Distinct EVM receive wallets currently advertised (for ownership proofs / config). */
+export function listEvmMerchantPayTos(): string[] {
+  const seen = new Set<string>();
+  for (const network of getX402EvmAcceptNetworks()) {
+    const payTo = getEvmPayToForNetwork(network);
+    if (payTo) seen.add(payTo);
+  }
+  return [...seen];
 }
 
 function hasRawEvmPayToEnv(): boolean {
@@ -330,7 +424,13 @@ export function isSolPayToMisconfigured(): boolean {
 export function isX402Enabled(): boolean {
   if (process.env.X402_ENABLED === "false") return false;
   const { evm, sol } = getMerchantAddresses();
-  return !!(evm || sol);
+  if (evm || sol) return true;
+  return !!(
+    normalizeEvmPayTo(rawEvmAltPayToEnv()) ||
+    normalizeEvmPayTo(rawArbitrumPayToEnv()) ||
+    normalizeEvmPayTo(rawRobinhoodPayToEnv()) ||
+    normalizeEvmPayTo(rawBnbPayToEnv())
+  );
 }
 
 /** True when X402_EVM_PAY_TO is set in env but failed validation */
@@ -344,11 +444,15 @@ export function getPublicX402Config() {
   const { evm, sol } = getMerchantAddresses();
   const evmEnvInvalid = isEvmPayToMisconfigured();
   const solEnvInvalid = isSolPayToMisconfigured();
-  const payReady = !!(evm || sol);
+  const payReady = !!(evm || sol || normalizeEvmPayTo(rawEvmAltPayToEnv()));
   const wantsPay =
     process.env.X402_ENABLED === "true" ||
     hasRawEvmPayToEnv() ||
-    hasRawSolPayToEnv();
+    hasRawSolPayToEnv() ||
+    !!cleanEnvAddress(rawEvmAltPayToEnv()) ||
+    !!cleanEnvAddress(rawArbitrumPayToEnv()) ||
+    !!cleanEnvAddress(rawRobinhoodPayToEnv()) ||
+    !!cleanEnvAddress(rawBnbPayToEnv());
 
   /** Shown when env vars exist but fail validation */
   const configWarning =
@@ -360,6 +464,12 @@ export function getPublicX402Config() {
   const fallback = getX402FacilitatorFallback();
   const robinhoodFacilitator = isRobinhoodX402Enabled() ? getRobinhoodFacilitatorProfile() : null;
   const bnbEnabled = isBnbX402Enabled();
+  const arbEnabled = isArbitrumX402Enabled();
+  const rhEnabled = isRobinhoodX402Enabled();
+  const altEvm = normalizeEvmPayTo(rawEvmAltPayToEnv());
+  const arbitrumPayTo = arbEnabled ? getEvmPayToForNetwork(nets.arbitrum) : null;
+  const robinhoodPayTo = rhEnabled ? getEvmPayToForNetwork(nets.robinhood) : null;
+  const bnbPayTo = bnbEnabled && nets.bnb ? getEvmPayToForNetwork(nets.bnb) : null;
 
   return {
     enabled: isX402Enabled(),
@@ -376,11 +486,11 @@ export function getPublicX402Config() {
     priceLabel: X402_PRICE_LABEL,
     networks: nets,
     acceptsEvm: !!evm,
-    acceptsArbitrum: isArbitrumX402Enabled() && !!evm,
-    acceptsRobinhood: isRobinhoodX402Enabled() && !!evm,
-    acceptsBnb: bnbEnabled && !!evm,
-    robinhoodNetwork: isRobinhoodX402Enabled() ? nets.robinhood : undefined,
-    robinhoodUsdg: isRobinhoodX402Enabled()
+    acceptsArbitrum: arbEnabled,
+    acceptsRobinhood: rhEnabled,
+    acceptsBnb: bnbEnabled,
+    robinhoodNetwork: rhEnabled ? nets.robinhood : undefined,
+    robinhoodUsdg: rhEnabled
       ? getRobinhoodUsdgAsset(nets.robinhood) ?? undefined
       : undefined,
     robinhoodFacilitator: robinhoodFacilitator?.name,
@@ -388,7 +498,9 @@ export function getPublicX402Config() {
     robinhoodFacilitatorDocsUrl: robinhoodFacilitator?.docsUrl,
     bnbNetwork: bnbEnabled ? nets.bnb ?? undefined : undefined,
     bnbUsdt: bnbEnabled && nets.bnb ? getBnbUsdtAsset(nets.bnb) ?? undefined : undefined,
-    bnbUsdtDecimals: bnbEnabled ? BNB_USDT_DECIMALS : undefined,
+    bnbUsdc: bnbEnabled && nets.bnb ? getBnbUsdcAsset(nets.bnb) ?? undefined : undefined,
+    bnbUsdtDecimals: bnbEnabled ? BNB_STABLE_DECIMALS : undefined,
+    bnbStableDecimals: bnbEnabled ? BNB_STABLE_DECIMALS : undefined,
     bnbFacilitator: bnbEnabled ? DEXTER_FACILITATOR.name : undefined,
     bnbFacilitatorUrl: bnbEnabled ? DEXTER_FACILITATOR.url : undefined,
     bnbFacilitatorDocsUrl: bnbEnabled ? DEXTER_FACILITATOR.docsUrl : undefined,
@@ -396,6 +508,10 @@ export function getPublicX402Config() {
     evmNetworks: getX402EvmAcceptNetworks(),
     acceptsSol: !!sol,
     evmPayToReady: !!evm,
+    evmAltPayToReady: !!altEvm,
+    arbitrumPayToReady: !!arbitrumPayTo,
+    robinhoodPayToReady: !!robinhoodPayTo,
+    bnbPayToReady: !!bnbPayTo,
     solPayToReady: !!sol,
     configWarning,
     evmConfigNote: evmEnvInvalid
@@ -408,6 +524,10 @@ export function getPublicX402Config() {
       : undefined,
     diagnostics: {
       evm: addressEnvDiagnostics(rawEvmPayToEnv()),
+      evmAlt: addressEnvDiagnostics(rawEvmAltPayToEnv()),
+      arbitrum: addressEnvDiagnostics(rawArbitrumPayToEnv()),
+      robinhood: addressEnvDiagnostics(rawRobinhoodPayToEnv()),
+      bnb: addressEnvDiagnostics(rawBnbPayToEnv()),
       sol: addressEnvDiagnostics(rawSolPayToEnv()),
       usesPayIdAlias:
         !!(process.env.X402_EVM_PAY_ID || process.env.X402_SOL_PAY_ID) &&
@@ -543,9 +663,21 @@ export async function getPublicX402ConfigAsync() {
     enrichedMerchants.find((m) => m.id === defaultMerchant.id) ?? enrichedMerchants[0];
   const anyTokenPayLive = liveMerchants.length > 0;
 
+  const nets = getX402NetworkProfile();
   return {
     ...base,
     evmPayTo: evm ?? undefined,
+    evmAltPayTo: normalizeEvmPayTo(rawEvmAltPayToEnv()) ?? undefined,
+    arbitrumPayTo: isArbitrumX402Enabled()
+      ? getEvmPayToForNetwork(nets.arbitrum) ?? undefined
+      : undefined,
+    robinhoodPayTo: isRobinhoodX402Enabled()
+      ? getEvmPayToForNetwork(nets.robinhood) ?? undefined
+      : undefined,
+    bnbPayTo:
+      isBnbX402Enabled() && nets.bnb
+        ? getEvmPayToForNetwork(nets.bnb) ?? undefined
+        : undefined,
     solPayTo: sol ?? undefined,
     solMerchantUsdcAta,
     acceptsTokenPaySol: anyTokenPayLive && !!sol,

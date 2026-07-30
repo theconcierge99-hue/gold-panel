@@ -12,7 +12,7 @@ export function cleanEnvAddress(raw: string | undefined | null): string {
 }
 
 /**
- * Normalize merchant EVM receive address (Base USDC).
+ * Normalize merchant EVM receive address (Base / Arbitrum / Robinhood / BNB).
  * Edge-safe: regex only (no viem). Returns lowercase 0x + 40 hex.
  */
 export function normalizeEvmPayTo(raw: string | undefined | null): string | null {

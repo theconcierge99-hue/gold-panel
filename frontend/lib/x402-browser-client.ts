@@ -53,16 +53,26 @@ export type X402ServerPayConfig = {
   robinhoodUsdg?: string;
   robinhoodNetwork?: string;
   bnbUsdt?: string;
+  bnbUsdc?: string;
   bnbNetwork?: string;
   bnbUsdtDecimals?: number;
+  bnbStableDecimals?: number;
   bnbAssetTransferMethod?: string;
   evmNetworks?: string[];
   acceptsSol?: boolean;
   evmPayToReady?: boolean;
+  evmAltPayToReady?: boolean;
+  arbitrumPayToReady?: boolean;
+  robinhoodPayToReady?: boolean;
+  bnbPayToReady?: boolean;
   solPayToReady?: boolean;
   hasCustomSolRpc?: boolean;
   solPayTo?: string;
   evmPayTo?: string;
+  evmAltPayTo?: string;
+  arbitrumPayTo?: string;
+  robinhoodPayTo?: string;
+  bnbPayTo?: string;
   solMerchantUsdcAta?: boolean | null;
   /** All registered Token Pay merchants (beta multi-merchant). */
   tokenMerchants?: TokenPayMerchantConfig[];
@@ -131,9 +141,9 @@ function anyTokenPayLive(serverConfig: X402ServerPayConfig): boolean {
 function x402ChainsConfigured(serverConfig: X402ServerPayConfig): boolean {
   return !!(
     (serverConfig.acceptsEvm && serverConfig.evmPayToReady) ||
-    (serverConfig.acceptsArbitrum && serverConfig.evmPayToReady) ||
-    (serverConfig.acceptsRobinhood && serverConfig.evmPayToReady) ||
-    (serverConfig.acceptsBnb && serverConfig.evmPayToReady) ||
+    (serverConfig.acceptsArbitrum && (serverConfig.arbitrumPayToReady || serverConfig.evmPayToReady || serverConfig.evmAltPayToReady)) ||
+    (serverConfig.acceptsRobinhood && (serverConfig.robinhoodPayToReady || serverConfig.evmPayToReady || serverConfig.evmAltPayToReady)) ||
+    (serverConfig.acceptsBnb && (serverConfig.bnbPayToReady || serverConfig.evmPayToReady || serverConfig.evmAltPayToReady)) ||
     (serverConfig.acceptsSol && serverConfig.solPayToReady)
   );
 }
@@ -318,7 +328,35 @@ function normalizePayChain(chain?: LegacyPayChain): PayChain | undefined {
 
 type EvmPayRail = "base" | "arbitrum" | "robinhood" | "bnb";
 
-function evmRailConfig(rail: EvmPayRail, networkMode: "mainnet" | "testnet", serverConfig?: X402ServerPayConfig): EvmRailConfig {
+export type BnbAssetCandidate = {
+  symbol: "USDT" | "USDC";
+  asset: `0x${string}`;
+  decimals: number;
+};
+
+/**
+ * Binance-Peg stablecoins the server advertises on BSC, most liquid first.
+ * Both settle through the same Dexter Permit2 path, so the buyer can use
+ * whichever it already holds.
+ */
+function bnbAssetCandidates(serverConfig?: X402ServerPayConfig): BnbAssetCandidate[] {
+  const decimals = serverConfig?.bnbStableDecimals ?? serverConfig?.bnbUsdtDecimals ?? 18;
+  const fallback = USDC.mainnet.bnb;
+  const out: BnbAssetCandidate[] = [];
+  const usdt = serverConfig?.bnbUsdt?.startsWith("0x") ? serverConfig.bnbUsdt : fallback.asset;
+  out.push({ symbol: "USDT", asset: usdt as `0x${string}`, decimals });
+  if (serverConfig?.bnbUsdc?.startsWith("0x")) {
+    out.push({ symbol: "USDC", asset: serverConfig.bnbUsdc as `0x${string}`, decimals });
+  }
+  return out;
+}
+
+function evmRailConfig(
+  rail: EvmPayRail,
+  networkMode: "mainnet" | "testnet",
+  serverConfig?: X402ServerPayConfig,
+  assetOverride?: BnbAssetCandidate,
+): EvmRailConfig {
   const baseCfg = USDC[networkMode][rail];
   if (rail === "robinhood" && serverConfig?.robinhoodUsdg?.startsWith("0x")) {
     return {
@@ -327,12 +365,14 @@ function evmRailConfig(rail: EvmPayRail, networkMode: "mainnet" | "testnet", ser
       network: (serverConfig.robinhoodNetwork as `eip155:${number}`) || baseCfg.network,
     };
   }
-  if (rail === "bnb" && serverConfig?.bnbUsdt?.startsWith("0x")) {
+  if (rail === "bnb") {
+    const chosen = assetOverride ?? bnbAssetCandidates(serverConfig)[0];
     return {
       ...baseCfg,
-      asset: serverConfig.bnbUsdt as `0x${string}`,
-      network: (serverConfig.bnbNetwork as `eip155:${number}`) || baseCfg.network,
-      decimals: serverConfig.bnbUsdtDecimals ?? baseCfg.decimals,
+      asset: chosen.asset,
+      symbol: chosen.symbol,
+      network: (serverConfig?.bnbNetwork as `eip155:${number}`) || baseCfg.network,
+      decimals: chosen.decimals,
     };
   }
   return baseCfg;
@@ -345,8 +385,13 @@ function viemChainForRail(rail: EvmPayRail, networkMode: "mainnet" | "testnet") 
   return networkMode === "testnet" ? baseSepolia : base;
 }
 
-function priceAtomicForRail(rail: EvmPayRail, networkMode: "mainnet" | "testnet", serverConfig?: X402ServerPayConfig): bigint {
-  const cfg = evmRailConfig(rail, networkMode, serverConfig);
+function priceAtomicForRail(
+  rail: EvmPayRail,
+  networkMode: "mainnet" | "testnet",
+  serverConfig?: X402ServerPayConfig,
+  assetOverride?: BnbAssetCandidate,
+): bigint {
+  const cfg = evmRailConfig(rail, networkMode, serverConfig, assetOverride);
   if (cfg.decimals === 6) return PRICE_ATOMIC;
   if (cfg.decimals === 18) return PRICE_USDT_18_ATOMIC;
   return PRICE_ATOMIC * 10n ** BigInt(cfg.decimals - 6);
@@ -358,6 +403,9 @@ export type ChainPayOption = {
   optionId: string;
   merchantId?: string;
   mint?: string;
+  /** ERC-20 chosen for this rail — set on BNB, which advertises USDT and USDC. */
+  asset?: string;
+  assetSymbol?: string;
   label: string;
   sublabel: string;
   balanceUsdc: string;
@@ -593,8 +641,9 @@ async function evmUsdcBalance(
   networkMode: "mainnet" | "testnet",
   rail: EvmPayRail,
   serverConfig?: X402ServerPayConfig,
+  assetOverride?: BnbAssetCandidate,
 ): Promise<bigint> {
-  const cfg = evmRailConfig(rail, networkMode, serverConfig);
+  const cfg = evmRailConfig(rail, networkMode, serverConfig, assetOverride);
   const chain = viemChainForRail(rail, networkMode);
   const client = createPublicClient({
     chain,
@@ -697,19 +746,19 @@ export async function getPaymentChainOptions(
     { rail: "base", enabled: !!(serverConfig.acceptsEvm && serverConfig.evmPayToReady), label: "Base", symbol: "USDC" },
     {
       rail: "arbitrum",
-      enabled: !!(serverConfig.acceptsArbitrum && serverConfig.evmPayToReady),
+      enabled: !!serverConfig.acceptsArbitrum,
       label: "Arbitrum",
       symbol: "USDC",
     },
     {
       rail: "robinhood",
-      enabled: !!(serverConfig.acceptsRobinhood && serverConfig.evmPayToReady),
+      enabled: !!serverConfig.acceptsRobinhood,
       label: "Robinhood",
       symbol: "USDG",
     },
     {
       rail: "bnb",
-      enabled: !!(serverConfig.acceptsBnb && serverConfig.evmPayToReady && networkMode === "mainnet"),
+      enabled: !!(serverConfig.acceptsBnb && networkMode === "mainnet"),
       label: "BNB Chain",
       symbol: "USDT",
     },
@@ -717,37 +766,66 @@ export async function getPaymentChainOptions(
 
   for (const { rail, enabled, label, symbol } of evmRails) {
     if (!enabled) continue;
-    const railCfg = evmRailConfig(rail, networkMode, serverConfig);
-    const needAtomic = priceAtomicForRail(rail, networkMode, serverConfig);
+    // BNB carries two Binance-Peg stablecoins; pick whichever the buyer can actually pay
+    // with, preferring USDT for liquidity and falling back to the largest balance.
+    const candidates = rail === "bnb" ? bnbAssetCandidates(serverConfig) : [undefined];
+    let chosen: BnbAssetCandidate | undefined;
     const hasWallet = !!session.evm?.address;
     let bal = 0n;
     let disabledReason: string | undefined;
     if (!hasWallet) {
       disabledReason = `Connect EVM (${label}) in your wallet`;
+      chosen = candidates[0];
     } else if (!provider) {
       disabledReason =
         session.evm?.wallet === "privy"
           ? "Privy EVM wallet not ready — reconnect Privy"
           : "EVM provider not found — reopen Phantom/OKX";
+      chosen = candidates[0];
     } else {
-      bal = await evmUsdcBalance(session.evm!.address as `0x${string}`, networkMode, rail, serverConfig);
+      for (const candidate of candidates) {
+        const candidateBal = await evmUsdcBalance(
+          session.evm!.address as `0x${string}`,
+          networkMode,
+          rail,
+          serverConfig,
+          candidate,
+        );
+        const need = priceAtomicForRail(rail, networkMode, serverConfig, candidate);
+        if (candidateBal >= need) {
+          chosen = candidate;
+          bal = candidateBal;
+          break;
+        }
+        if (chosen === undefined || candidateBal > bal) {
+          chosen = candidate;
+          bal = candidateBal;
+        }
+      }
     }
+    const railCfg = evmRailConfig(rail, networkMode, serverConfig, chosen);
+    const needAtomic = priceAtomicForRail(rail, networkMode, serverConfig, chosen);
+    const railSymbol = rail === "bnb" ? (chosen?.symbol ?? symbol) : symbol;
     const sufficient = bal >= needAtomic;
     options.push({
       chain: rail,
       optionId: rail,
       label,
+      asset: rail === "bnb" ? chosen?.asset : undefined,
+      assetSymbol: rail === "bnb" ? railSymbol : undefined,
       sublabel: hasWallet
-        ? `${shortAddr(session.evm!.address, "evm")}${rail === "bnb" ? " · Permit2" : ""}`
+        ? `${shortAddr(session.evm!.address, "evm")}${rail === "bnb" ? ` · ${railSymbol} · Permit2` : ""}`
         : "Not connected",
-      balanceUsdc: hasWallet && provider ? formatStable(bal, symbol, railCfg.decimals) : "—",
+      balanceUsdc: hasWallet && provider ? formatStable(bal, railSymbol, railCfg.decimals) : "—",
       balanceAtomic: bal,
       sufficient,
       available: hasWallet && !!provider,
       disabledReason:
         disabledReason ??
         (!sufficient && hasWallet
-          ? `Need at least ${PRICE_USDC} ${symbol} on ${label}`
+          ? rail === "bnb"
+            ? `Need at least ${PRICE_USDC} USDT or USDC on ${label}`
+            : `Need at least ${PRICE_USDC} ${symbol} on ${label}`
           : undefined),
     });
   }
@@ -909,7 +987,11 @@ function shortAddr(addr: string, chain: "evm" | "sol"): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
 
-function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: string) {
+function paymentRequirementsSelector(
+  preferred: PayChain,
+  preferredMerchantId?: string,
+  preferredAsset?: string,
+) {
   return (_version: number, accepts: PaymentRequirements[]) => {
     const sol = accepts.filter((a) => String(a.network).startsWith("solana:"));
     const evm = accepts.filter((a) => String(a.network).startsWith("eip155:"));
@@ -940,8 +1022,15 @@ function paymentRequirementsSelector(preferred: PayChain, preferredMerchantId?: 
       if (match) return match;
     }
     if (preferred === "bnb" && evm.length) {
-      const match = evm.find((a) => String(a.network) === "eip155:56");
-      if (match) return match;
+      const bnbAccepts = evm.filter((a) => String(a.network) === "eip155:56");
+      // BNB advertises USDT and USDC — settle with the token the wallet can cover.
+      if (preferredAsset) {
+        const byAsset = bnbAccepts.find(
+          (a) => String(a.asset).toLowerCase() === preferredAsset.toLowerCase(),
+        );
+        if (byAsset) return byAsset;
+      }
+      if (bnbAccepts.length) return bnbAccepts[0];
     }
     if (
       (preferred === "base" ||
@@ -970,6 +1059,8 @@ function findPayOption(
   return undefined;
 }
 
+type ResolvedPaymentChain = { chain: PayChain; asset?: string };
+
 async function resolvePaymentChain(
   session: WalletSession,
   networkMode: "mainnet" | "testnet",
@@ -977,7 +1068,7 @@ async function resolvePaymentChain(
   preferred?: LegacyPayChain,
   provider?: EIP1193Provider,
   preferredMerchantId?: string,
-): Promise<PayChain> {
+): Promise<ResolvedPaymentChain> {
   const normalizedPreferred = normalizePayChain(preferred);
   if (normalizedPreferred) {
     const opts = await getPaymentChainOptions(session, networkMode, server);
@@ -986,7 +1077,7 @@ async function resolvePaymentChain(
     if (!pick.sufficient && !pick.balanceUnknown) {
       throw new Error(pick.disabledReason || `Insufficient funds on ${pick.label}`);
     }
-    return normalizedPreferred;
+    return { chain: normalizedPreferred, asset: pick.asset };
   }
 
   const opts = await getPaymentChainOptions(session, networkMode, server);
@@ -999,17 +1090,16 @@ async function resolvePaymentChain(
     const arb = usable.find((o) => o.chain === "arbitrum");
     const baseOpt = usable.find((o) => o.chain === "base");
     const evmSufficient = !!(rh?.sufficient || bnb?.sufficient || arb?.sufficient || baseOpt?.sufficient);
-    if (soon?.sufficient && !sol?.sufficient && !evmSufficient) return "soon";
-    if (sol?.sufficient && !evmSufficient) return "sol";
+    if (soon?.sufficient && !sol?.sufficient && !evmSufficient) return { chain: "soon" };
+    if (sol?.sufficient && !evmSufficient) return { chain: "sol" };
     if (evmSufficient && !sol?.sufficient) {
-      if (rh?.sufficient) return "robinhood";
-      if (bnb?.sufficient) return "bnb";
-      if (arb?.sufficient) return "arbitrum";
-      return "base";
+      if (rh?.sufficient) return { chain: "robinhood" };
+      if (bnb?.sufficient) return { chain: "bnb", asset: bnb.asset };
+      if (arb?.sufficient) return { chain: "arbitrum" };
+      return { chain: "base" };
     }
-    return usable.sort((a, b) =>
-      a.balanceAtomic >= b.balanceAtomic ? -1 : 1,
-    )[0].chain;
+    const best = usable.sort((a, b) => (a.balanceAtomic >= b.balanceAtomic ? -1 : 1))[0];
+    return { chain: best.chain, asset: best.asset };
   }
   const anyAvail = opts.find((o) => o.available);
   if (anyAvail) throw new Error(anyAvail.disabledReason || "Insufficient USDC/USDG/USDT");
@@ -1027,7 +1117,7 @@ export async function createX402PaidFetch(
   const nets = USDC[networkMode];
   const provider = evmProviderForSession(session);
 
-  const preferred = await resolvePaymentChain(
+  const resolved = await resolvePaymentChain(
     session,
     networkMode,
     serverConfig,
@@ -1035,9 +1125,10 @@ export async function createX402PaidFetch(
     provider,
     options.preferredTokenMerchantId,
   );
+  const preferred = resolved.chain;
 
   const client = new x402Client(
-    paymentRequirementsSelector(preferred, options.preferredTokenMerchantId),
+    paymentRequirementsSelector(preferred, options.preferredTokenMerchantId, resolved.asset),
   );
 
   if (preferred === "base" || preferred === "arbitrum" || preferred === "robinhood" || preferred === "bnb") {
