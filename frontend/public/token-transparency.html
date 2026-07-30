@@ -112,6 +112,7 @@
         </tbody>
       </table>
     </div>
+    <p id="tok-report-note" class="tok-note" hidden></p>
   </section>
 
   <section class="tok-section" aria-labelledby="how-h">
@@ -155,6 +156,7 @@
   var revenueTcx = document.getElementById("tok-revenue-tcx");
   var revenueTx = document.getElementById("tok-revenue-tx");
   var revenueBurn = document.getElementById("tok-revenue-burn");
+  var reportNote = document.getElementById("tok-report-note");
 
   function fmtUsd(n) {
     return "$" + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -193,6 +195,12 @@
     if (revenueTcx) revenueTcx.textContent = fmtTcx(totals.tcxReceived);
     if (revenueTx) revenueTx.textContent = String(totals.txCount || 0);
     if (revenueBurn) revenueBurn.textContent = fmtTcx(totals.tcxBurned);
+
+    if (reportNote) {
+      var note = typeof snap.snapshotNote === "string" ? snap.snapshotNote.trim() : "";
+      reportNote.textContent = note;
+      reportNote.hidden = !note;
+    }
 
     if (!weeks.length) {
       showPlaceholder("No weekly periods yet.");

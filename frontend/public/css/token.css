@@ -63,6 +63,7 @@ a.tok-card:hover,.tok-card:hover{border-color:var(--tok-gold-dim);transform:tran
 .tok-card h3{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;letter-spacing:.02em;margin-bottom:6px}
 .tok-card p{font-size:12px;color:var(--tok-muted);line-height:1.55;margin:0}
 
+.tok-note{margin:10px 2px 0;font-size:11px;line-height:1.55;color:var(--tok-dim)}
 .tok-table-wrap{overflow-x:auto;border:1px solid var(--tok-border);border-radius:8px;background:var(--tok-panel)}
 .tok-table{width:100%;border-collapse:collapse;font-size:12px}
 .tok-table th,.tok-table td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--tok-border)}

@@ -280,6 +280,10 @@ function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
 
+function formatTcxAmount(value: number): string {
+  return Math.round(value).toLocaleString("en-US");
+}
+
 function weekTxsFromLedger(stored: TcxWeekLedgerTx | undefined): TcxWeekLedgerTx | undefined {
   if (!stored) return undefined;
   if (!stored.netUsdcTx && !stored.buybackTx && !stored.tcxBurnTx && !stored.lpTx) return undefined;
@@ -405,17 +409,37 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
       burnAmounts.set(weekEnd, await burnAmountFromTransaction(txs.tcxBurnTx, mint));
     }),
   );
+  let tcxBurned = 0;
+  let unattributedBurn = 0;
   for (const week of weeks) {
-    const txs = weekTxsFromLedger(ledgerByWeek.get(week.weekEnd));
-    if (txs) week.txs = txs;
-    week.tcxBurned = burnAmounts.get(week.weekEnd) ?? 0;
+    const stored = ledgerByWeek.get(week.weekEnd);
+    const burned = burnAmounts.get(week.weekEnd) ?? 0;
+    tcxBurned += burned;
+
+    // A burn executed inside an open period settles the *previous* cycle's
+    // treasury, not the revenue still accruing. Keep the row empty until the
+    // period closes so "in progress" never reads as "already burned".
+    if (week.status === "published") {
+      const txs = weekTxsFromLedger(stored);
+      if (txs) week.txs = txs;
+      week.tcxBurned = burned;
+    } else {
+      const txs = weekTxsFromLedger(stored ? { ...stored, tcxBurnTx: undefined } : undefined);
+      if (txs) week.txs = txs;
+      week.tcxBurned = 0;
+      unattributedBurn += burned;
+    }
   }
-  const tcxBurned = weeks.reduce((sum, week) => sum + week.tcxBurned, 0);
 
   const activeWeek = weeks.find((w) => w.status === "in_progress");
   const noteParts = activeWeek
     ? [`Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC).`]
     : [];
+  if (unattributedBurn > 0) {
+    noteParts.push(
+      `${formatTcxAmount(unattributedBurn)} TCX burned during the open period settles the prior cycle — counted in the launch total, attributed to a week once the period closes.`,
+    );
+  }
   if (reconciled.removed > 0) {
     noteParts.push(`${reconciled.removed} dropped settlement(s) excluded by on-chain verification.`);
   }
@@ -456,10 +480,19 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const override = parseOverride();
   if (!override) return base;
 
+  // The computed note carries derived facts (open period, unattributed burn,
+  // dropped settlements). An operator note augments it rather than replacing
+  // it, and punctuation-only placeholders are discarded.
+  const overrideNote = (override.snapshotNote ?? "").trim();
+  const mergedNote = [snapshotNote, /^[.\u2026\s]*$/.test(overrideNote) ? "" : overrideNote]
+    .filter(Boolean)
+    .join(" ");
+
   return {
     ...base,
     ...override,
     source: "override",
+    snapshotNote: mergedNote,
     totals: { ...base.totals, ...(override.totals ?? {}) },
     weeks: override.weeks ?? base.weeks,
     cadence: { ...base.cadence, ...(override.cadence ?? {}) },
