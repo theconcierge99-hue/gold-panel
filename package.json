@@ -28,6 +28,8 @@
     "launch:verify": "node scripts/verify-launch-readiness.mjs",
     "tcx:burn:setup": "powershell -ExecutionPolicy Bypass -File scripts/tcx-burn-setup.ps1",
     "tcx:burn": "powershell -ExecutionPolicy Bypass -File scripts/tcx-burn-run.ps1",
+    "tcx:reconcile:check": "node scripts/tcx-reconcile-analytics.mjs --dry-run",
+    "tcx:reconcile": "node scripts/tcx-reconcile-analytics.mjs",
     "paysh:sync-openapi": "npx tsx scripts/generate-paysh-openapi.ts",
     "paysh:sync-token-pay-openapi": "npx tsx scripts/generate-paysh-token-pay-openapi.ts",
     "paysh:validate": "npx -y @solana/pay catalog check pay-skills/conc-exe/concierge-agent/PAY.md",
