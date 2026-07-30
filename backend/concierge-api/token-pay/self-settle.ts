@@ -263,6 +263,19 @@ function finalizeSettlement(input: {
   };
 }
 
+function merchantReceivedRequiredAmount(
+  tx: GetTxDetail,
+  matched: TokenPaySelfSettleRequirement,
+): boolean {
+  const delta = merchantMintDelta(
+    tx.meta?.preTokenBalances,
+    tx.meta?.postTokenBalances,
+    matched.payTo,
+    matched.asset,
+  );
+  return delta >= BigInt(matched.amount);
+}
+
 async function tryAcceptCachedOrConfirmed(
   signature: string,
   matched: TokenPaySelfSettleRequirement,
@@ -283,20 +296,10 @@ async function tryAcceptCachedOrConfirmed(
   if (!(await signatureLooksConfirmed(signature))) return null;
 
   const tx = await fetchConfirmedTransactionOnce(signature);
-  if (tx?.meta?.err) return null;
+  if (!tx || tx.meta?.err) return null;
+  if (!merchantReceivedRequiredAmount(tx, matched)) return null;
 
-  if (tx) {
-    const delta = merchantMintDelta(
-      tx.meta?.preTokenBalances,
-      tx.meta?.postTokenBalances,
-      matched.payTo,
-      matched.asset,
-    );
-    const requiredAmount = BigInt(matched.amount);
-    if (delta > 0n && delta < requiredAmount) return null;
-  }
-
-  const payer = (tx ? feePayerFromTxDetail(tx) : null) ?? payerFallback;
+  const payer = feePayerFromTxDetail(tx) ?? payerFallback;
   if (!payer) return null;
 
   return finalizeSettlement({
@@ -348,7 +351,6 @@ async function verifyAndSettleTokenPaySelfInner(
   }
 
   const decoded = decodeSignedTxWire(txB64);
-  const requiredAmount = BigInt(matched.amount);
   const payerFallback = decoded.feePayer;
   const merchantId = merchantIdFromMatched(matched, merchant);
 
@@ -370,14 +372,12 @@ async function verifyAndSettleTokenPaySelfInner(
     [txB64, simOpts],
     SIM_RPC_MS,
   );
-  const simFailed = !!(sim.ok && sim.result?.value?.err);
-  if (simFailed) {
+  if (sim.ok && sim.result?.value?.err) {
     throw tokenPayError(symbol, "simulation failed — check TCX balance and SOL for fees");
   }
 
   const sendOpts = { encoding: "base64", skipPreflight: true, maxRetries: 2 };
   let signature: string | null = null;
-  let sendSucceeded = false;
   let send = await solanaRpcCallWithFallback<string>(
     "sendRawTransaction",
     [txB64, sendOpts],
@@ -392,14 +392,12 @@ async function verifyAndSettleTokenPaySelfInner(
   }
   if (send.ok && send.result) {
     signature = send.result;
-    sendSucceeded = true;
   } else if (
     !send.ok &&
     send.error &&
     /already been processed|already processed|duplicate/i.test(send.error)
   ) {
     signature = decoded.signature;
-    sendSucceeded = true;
   } else if (!send.ok) {
     throw tokenPayError(
       symbol,
@@ -414,17 +412,8 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "failed to broadcast transaction");
   }
 
-  if (sendSucceeded && !simFailed && payerFallback) {
-    return finalizeSettlement({
-      signature,
-      payer: payerFallback,
-      matched,
-      resourceKind,
-      merchantId,
-      merchant,
-    });
-  }
-
+  // Never finalize from broadcast alone — dropped txs (expired blockhash, etc.)
+  // previously inflated analytics without landing in the merchant ATA.
   const replayAfterSend = await tryAcceptCachedOrConfirmed(
     signature,
     matched,
@@ -435,45 +424,29 @@ async function verifyAndSettleTokenPaySelfInner(
   if (replayAfterSend) return replayAfterSend;
 
   const confirmed = await waitForSignatureConfirmed(signature);
-  const tx = confirmed ? await fetchConfirmedTransactionOnce(signature) : null;
+  if (!confirmed) {
+    throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
+  }
 
-  if (tx?.meta?.err) {
+  const tx = await fetchConfirmedTransactionOnce(signature);
+  if (!tx || tx.meta?.err) {
     throw tokenPayError(symbol, "transaction failed on-chain");
   }
-
-  if (tx) {
-    const delta = merchantMintDelta(
-      tx.meta?.preTokenBalances,
-      tx.meta?.postTokenBalances,
-      matched.payTo,
-      matched.asset,
-    );
-    if (delta > 0n && delta < requiredAmount) {
-      throw tokenPayError(symbol, "amount does not match requirement");
-    }
-    const payer = feePayerFromTxDetail(tx) ?? payerFallback;
-    if (payer) {
-      return finalizeSettlement({
-        signature,
-        payer,
-        matched,
-        resourceKind,
-        merchantId,
-        merchant,
-      });
-    }
+  if (!merchantReceivedRequiredAmount(tx, matched)) {
+    throw tokenPayError(symbol, "amount does not match requirement");
   }
 
-  if ((confirmed || sendSucceeded) && !simFailed && payerFallback) {
-    return finalizeSettlement({
-      signature,
-      payer: payerFallback,
-      matched,
-      resourceKind,
-      merchantId,
-      merchant,
-    });
+  const payer = feePayerFromTxDetail(tx) ?? payerFallback;
+  if (!payer) {
+    throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
   }
 
-  throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
+  return finalizeSettlement({
+    signature,
+    payer,
+    matched,
+    resourceKind,
+    merchantId,
+    merchant,
+  });
 }
