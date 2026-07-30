@@ -2,7 +2,7 @@
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  * No @solana/web3.js — Edge runtime blocks Node http/https from that package.
  */
-import { solanaRpcParallelRace } from "../x402-solana-rpc";
+import { solanaRpcCallWithFallback, solanaRpcParallelRace } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
 import { effectiveUsdcForTokenPay } from "./x402";
@@ -12,13 +12,13 @@ import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./ty
 
 export { isTokenPaySelfSettleRequirement } from "./security";
 
-const SIM_RPC_MS = 2_500;
-const SEND_RPC_MS = 3_500;
+const SIM_RPC_MS = 3_500;
+const SEND_RPC_MS = 6_000;
 /** Short polls so Edge settle stays inside the Concierge budget. */
-const POLL_RPC_MS = 1_200;
+const POLL_RPC_MS = 1_500;
 const POLL_INTERVAL_MS = 200;
 const VERIFY_BUDGET_MS = 10_000;
-const TX_DETAIL_RPC_MS = 2_000;
+const TX_DETAIL_RPC_MS = 2_500;
 const TX_DETAIL_RETRIES = 3;
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
@@ -55,11 +55,12 @@ function tokenPayError(symbol: string, message: string): Error {
 }
 
 function friendlyRpcError(raw: string): string {
-  if (/aborted|timeout|timed out|network|fetch failed/i.test(raw)) {
+  if (/aborted|timeout|timed out|network|fetch failed|429|502|503|520|522/i.test(raw)) {
     return "Solana RPC timed out — retry in a few seconds";
   }
-  if (raw.startsWith("RPC HTTP") || /method not found/i.test(raw)) {
-    return "Solana RPC misconfigured — set SOLANA_RPC_URL to https://mainnet.helius-rpc.com/?api-key=KEY or remove it for publicnode fallback";
+  // Only blame env config for clear endpoint/auth failures after all fallbacks exhausted.
+  if (/RPC HTTP (401|403|404)|method not found|invalid method|unauthorized|forbidden/i.test(raw)) {
+    return "Solana RPC unavailable — retry in a few seconds (check SOLANA_RPC_URL if this persists)";
   }
   return raw || "failed to broadcast transaction";
 }
@@ -399,8 +400,8 @@ async function verifyAndSettleTokenPaySelfInner(
   }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: false } as const;
-  // Parallel race — don't burn Edge budget walking slow RPCs sequentially.
-  const sim = await solanaRpcParallelRace<{ value?: { err?: unknown } }>(
+  // Sequential fallback — a bad SOLANA_RPC_URL must not poison parallel send/sim.
+  const sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
     "simulateTransaction",
     [txB64, simOpts],
     SIM_RPC_MS,
@@ -411,13 +412,25 @@ async function verifyAndSettleTokenPaySelfInner(
 
   const sendOpts = { encoding: "base64", skipPreflight: true, maxRetries: 2 };
   let signature: string | null = null;
-  let send = await solanaRpcParallelRace<string>(
+  let send = await solanaRpcCallWithFallback<string>(
     "sendRawTransaction",
     [txB64, sendOpts],
     SEND_RPC_MS,
   );
-  if (!send.ok && /method not found/i.test(send.error)) {
-    send = await solanaRpcParallelRace<string>("sendTransaction", [txB64, sendOpts], SEND_RPC_MS);
+  // Always try sendTransaction if sendRaw failed for any retryable reason.
+  if (
+    !send.ok &&
+    !/already been processed|already processed|duplicate/i.test(send.error) &&
+    (/method not found|invalid method|RPC HTTP|aborted|timeout|fetch failed|network/i.test(
+      send.error,
+    ) ||
+      !send.error)
+  ) {
+    send = await solanaRpcCallWithFallback<string>(
+      "sendTransaction",
+      [txB64, sendOpts],
+      SEND_RPC_MS,
+    );
   }
   if (send.ok && send.result) {
     signature = send.result;
