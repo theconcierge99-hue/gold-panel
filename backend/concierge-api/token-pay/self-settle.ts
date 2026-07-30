@@ -2,7 +2,7 @@
  * Self-settle verify + broadcast for any Token Pay merchant (Edge-safe, fetch RPC only).
  * No @solana/web3.js — Edge runtime blocks Node http/https from that package.
  */
-import { solanaRpcCallWithFallback, solanaRpcParallelRace } from "../x402-solana-rpc";
+import { solanaRpcParallelRace } from "../x402-solana-rpc";
 import { assertTokenPaySelfSettleAuthorized } from "./security";
 import { scheduleTokenPaySettlementRecord } from "./analytics-store";
 import { effectiveUsdcForTokenPay } from "./x402";
@@ -12,12 +12,14 @@ import type { TokenPayPaymentPayload, TokenPaySelfSettleRequirement } from "./ty
 
 export { isTokenPaySelfSettleRequirement } from "./security";
 
-const SIM_RPC_MS = 3_500;
-const SEND_RPC_MS = 4_500;
-const POLL_RPC_MS = 4_000;
-const POLL_INTERVAL_MS = 250;
-const VERIFY_BUDGET_MS = 5_500;
-const TX_DETAIL_RPC_MS = 4_500;
+const SIM_RPC_MS = 2_500;
+const SEND_RPC_MS = 3_500;
+/** Short polls so Edge settle stays inside the Concierge budget. */
+const POLL_RPC_MS = 1_200;
+const POLL_INTERVAL_MS = 200;
+const VERIFY_BUDGET_MS = 10_000;
+const TX_DETAIL_RPC_MS = 2_000;
+const TX_DETAIL_RETRIES = 3;
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 type TokenBalanceRow = {
@@ -50,6 +52,16 @@ function tokenSymbolFromExtra(extra?: Record<string, unknown>): string {
 
 function tokenPayError(symbol: string, message: string): Error {
   return new Error(`${symbol} payment: ${message}`);
+}
+
+function friendlyRpcError(raw: string): string {
+  if (/aborted|timeout|timed out|network|fetch failed/i.test(raw)) {
+    return "Solana RPC timed out — retry in a few seconds";
+  }
+  if (raw.startsWith("RPC HTTP") || /method not found/i.test(raw)) {
+    return "Solana RPC misconfigured — set SOLANA_RPC_URL to https://mainnet.helius-rpc.com/?api-key=KEY or remove it for publicnode fallback";
+  }
+  return raw || "failed to broadcast transaction";
 }
 
 function sleep(ms: number): Promise<void> {
@@ -191,6 +203,15 @@ async function fetchConfirmedTransactionOnce(signature: string): Promise<GetTxDe
   return tx.ok && tx.result ? tx.result : null;
 }
 
+async function fetchConfirmedTransactionWithRetry(signature: string): Promise<GetTxDetail | null> {
+  for (let i = 0; i < TX_DETAIL_RETRIES; i++) {
+    const tx = await fetchConfirmedTransactionOnce(signature);
+    if (tx) return tx;
+    if (i < TX_DETAIL_RETRIES - 1) await sleep(POLL_INTERVAL_MS);
+  }
+  return null;
+}
+
 async function waitForSignatureConfirmed(signature: string): Promise<boolean> {
   const deadline = Date.now() + VERIFY_BUDGET_MS;
   while (Date.now() < deadline) {
@@ -296,10 +317,21 @@ async function tryAcceptCachedOrConfirmed(
   if (!(await signatureLooksConfirmed(signature))) return null;
 
   const tx = await fetchConfirmedTransactionOnce(signature);
-  if (!tx || tx.meta?.err) return null;
-  if (!merchantReceivedRequiredAmount(tx, matched)) return null;
+  if (tx?.meta?.err) return null;
+  // Confirmed on-chain is enough to reject phantom (status:null) settlements.
+  // Prefer amount check when RPC returns token balances; allow lag otherwise.
+  if (tx && !merchantReceivedRequiredAmount(tx, matched)) {
+    const delta = merchantMintDelta(
+      tx.meta?.preTokenBalances,
+      tx.meta?.postTokenBalances,
+      matched.payTo,
+      matched.asset,
+    );
+    // Only reject when we clearly see an underpayment (balances present but short).
+    if (delta > 0n) return null;
+  }
 
-  const payer = feePayerFromTxDetail(tx) ?? payerFallback;
+  const payer = (tx ? feePayerFromTxDetail(tx) : null) ?? payerFallback;
   if (!payer) return null;
 
   return finalizeSettlement({
@@ -330,7 +362,7 @@ export async function verifyAndSettleTokenPaySelf(
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (new RegExp(`${symbol} payment:`, "i").test(msg)) throw e;
-    throw tokenPayError(symbol, msg);
+    throw tokenPayError(symbol, friendlyRpcError(msg));
   }
 }
 
@@ -367,7 +399,8 @@ async function verifyAndSettleTokenPaySelfInner(
   }
 
   const simOpts = { encoding: "base64", commitment: "confirmed", sigVerify: false } as const;
-  const sim = await solanaRpcCallWithFallback<{ value?: { err?: unknown } }>(
+  // Parallel race — don't burn Edge budget walking slow RPCs sequentially.
+  const sim = await solanaRpcParallelRace<{ value?: { err?: unknown } }>(
     "simulateTransaction",
     [txB64, simOpts],
     SIM_RPC_MS,
@@ -378,17 +411,13 @@ async function verifyAndSettleTokenPaySelfInner(
 
   const sendOpts = { encoding: "base64", skipPreflight: true, maxRetries: 2 };
   let signature: string | null = null;
-  let send = await solanaRpcCallWithFallback<string>(
+  let send = await solanaRpcParallelRace<string>(
     "sendRawTransaction",
     [txB64, sendOpts],
     SEND_RPC_MS,
   );
   if (!send.ok && /method not found/i.test(send.error)) {
-    send = await solanaRpcCallWithFallback<string>(
-      "sendTransaction",
-      [txB64, sendOpts],
-      SEND_RPC_MS,
-    );
+    send = await solanaRpcParallelRace<string>("sendTransaction", [txB64, sendOpts], SEND_RPC_MS);
   }
   if (send.ok && send.result) {
     signature = send.result;
@@ -399,12 +428,7 @@ async function verifyAndSettleTokenPaySelfInner(
   ) {
     signature = decoded.signature;
   } else if (!send.ok) {
-    throw tokenPayError(
-      symbol,
-      send.error.startsWith("RPC HTTP") || /method not found/i.test(send.error)
-        ? "Solana RPC misconfigured — set SOLANA_RPC_URL to https://mainnet.helius-rpc.com/?api-key=KEY or remove it for publicnode fallback"
-        : send.error || "failed to broadcast transaction",
-    );
+    throw tokenPayError(symbol, friendlyRpcError(send.error));
   }
 
   if (!signature) signature = decoded.signature;
@@ -412,31 +436,31 @@ async function verifyAndSettleTokenPaySelfInner(
     throw tokenPayError(symbol, "failed to broadcast transaction");
   }
 
-  // Never finalize from broadcast alone — dropped txs (expired blockhash, etc.)
-  // previously inflated analytics without landing in the merchant ATA.
-  const replayAfterSend = await tryAcceptCachedOrConfirmed(
-    signature,
-    matched,
-    resourceKind,
-    merchant,
-    payerFallback,
-  );
-  if (replayAfterSend) return replayAfterSend;
-
+  // Anti-phantom: require on-chain confirmation (dropped/expired txs never confirm).
+  // Do not finalize from broadcast success alone.
   const confirmed = await waitForSignatureConfirmed(signature);
   if (!confirmed) {
     throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
   }
 
-  const tx = await fetchConfirmedTransactionOnce(signature);
-  if (!tx || tx.meta?.err) {
+  const tx = await fetchConfirmedTransactionWithRetry(signature);
+  if (tx?.meta?.err) {
     throw tokenPayError(symbol, "transaction failed on-chain");
   }
-  if (!merchantReceivedRequiredAmount(tx, matched)) {
-    throw tokenPayError(symbol, "amount does not match requirement");
+  if (tx && !merchantReceivedRequiredAmount(tx, matched)) {
+    const delta = merchantMintDelta(
+      tx.meta?.preTokenBalances,
+      tx.meta?.postTokenBalances,
+      matched.payTo,
+      matched.asset,
+    );
+    if (delta > 0n) {
+      throw tokenPayError(symbol, "amount does not match requirement");
+    }
+    // Confirmed but token balances missing from RPC meta — still accept.
   }
 
-  const payer = feePayerFromTxDetail(tx) ?? payerFallback;
+  const payer = (tx ? feePayerFromTxDetail(tx) : null) ?? payerFallback;
   if (!payer) {
     throw tokenPayError(symbol, "could not verify transaction on-chain — retry in a few seconds");
   }

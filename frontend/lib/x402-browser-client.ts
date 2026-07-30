@@ -1037,7 +1037,9 @@ export async function createX402PaidFetch(
         const retryable =
           res.status === 504 ||
           (res.status === 402 &&
-            /could not verify transaction on-chain/i.test(await res.clone().text()));
+            /could not verify transaction on-chain|Solana RPC timed out|retry in a few seconds/i.test(
+              await res.clone().text(),
+            ));
         if (retryable) {
           const firstText = await res.text();
           const waitMs = res.status === 504 ? 3_000 : 8_000;
@@ -1051,7 +1053,9 @@ export async function createX402PaidFetch(
             const retryText = await res.text();
             if (
               res.status === 402 &&
-              !/could not verify transaction on-chain/i.test(retryText)
+              !/could not verify transaction on-chain|Solana RPC timed out|retry in a few seconds/i.test(
+                retryText,
+              )
             ) {
               return new Response(retryText, { status: 402, headers: res.headers });
             }
