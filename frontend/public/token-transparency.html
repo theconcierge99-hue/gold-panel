@@ -84,9 +84,9 @@
         <span class="tok-stat-sub">x402 paid calls</span>
       </div>
       <div class="tok-stat">
-        <span class="tok-stat-label">TCX burned (80%)</span>
+        <span class="tok-stat-label">TCX burned on-chain</span>
         <span class="tok-stat-value" id="tok-revenue-burn">—</span>
-        <span class="tok-stat-sub">Per published policy</span>
+        <span class="tok-stat-sub">Verified burn transactions</span>
       </div>
     </div>
   </section>
@@ -147,8 +147,7 @@
 <script>
 (function () {
   var API_URL = "/api/tcx-transparency";
-  var FALLBACK_URL = "/data/tcx-transparency.snapshot.json";
-  var REFRESH_MS = 60 * 60 * 1000;
+  var REFRESH_MS = 60 * 1000;
 
   var body = document.getElementById("tok-report-body");
   var cumulativeEl = document.getElementById("tok-cumulative");
@@ -230,19 +229,11 @@
       })
       .then(renderSnapshot)
       .catch(function () {
-        return fetch(FALLBACK_URL, { cache: "no-store" })
-          .then(function (res) {
-            if (!res.ok) throw new Error("fallback");
-            return res.json();
-          })
-          .then(renderSnapshot);
-      })
-      .catch(function () {
-        showPlaceholder("Transparency data unavailable.");
+        showPlaceholder("Live on-chain transparency data temporarily unavailable.");
       });
   }
 
-  loadData(false);
+  loadData(true);
   setInterval(function () {
     loadData(true);
   }, REFRESH_MS);

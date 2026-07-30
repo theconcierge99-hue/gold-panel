@@ -1,11 +1,17 @@
 /**
  * Live TCX transparency payload — aggregates Token Pay analytics into weekly ledger rows.
  */
-import { getTokenPayMerchantAnalytics, type TokenPayDailyRollup, type TokenPaySettlementRecord } from "./token-pay/analytics-store";
+import {
+  getTokenPayMerchantAnalytics,
+  type TokenPayDailyRollup,
+  type TokenPayMerchantAnalytics,
+  type TokenPaySettlementRecord,
+} from "./token-pay/analytics-store";
 import { SOON_MERCHANT_ID } from "./token-pay/merchants/soon";
 import { effectiveUsdcForTokenPay } from "./token-pay/x402";
 import { getDefaultTokenPayMerchant } from "./token-pay/registry";
 import { priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
+import { solanaRpcParallelRace } from "./x402-solana-rpc";
 import {
   listTcxWeekLedgerTx,
   type TcxWeekLedgerTx,
@@ -13,9 +19,30 @@ import {
 
 const BUYBACK_MIN_USD = 40;
 const BUYBACK_BUDGET_PCT = 0.15;
-const TCX_BURN_PCT = 0.8;
 const WEEK_DAYS = 7;
 const MS_DAY = 86_400_000;
+const ON_CHAIN_CHECK_MS = 3_000;
+
+type SignatureStatusResult = {
+  value?: Array<{ err?: unknown; confirmationStatus?: string } | null>;
+};
+
+type ParsedBurnTransaction = {
+  meta?: { err?: unknown };
+  transaction?: {
+    message?: {
+      instructions?: Array<{
+        parsed?: {
+          type?: string;
+          info?: {
+            mint?: string;
+            tokenAmount?: { amount?: string; decimals?: number };
+          };
+        };
+      }>;
+    };
+  };
+};
 
 export type TcxTransparencyWeek = {
   weekEnd: string;
@@ -140,6 +167,115 @@ function sumRevenueFromRecent(recent: TokenPaySettlementRecord[]): {
   );
 }
 
+function nonNegative(value: bigint): bigint {
+  return value > 0n ? value : 0n;
+}
+
+async function reconcileAnalyticsOnChain(
+  analytics: TokenPayMerchantAnalytics | null,
+): Promise<{ analytics: TokenPayMerchantAnalytics | null; removed: number }> {
+  if (!analytics?.recent.length) return { analytics, removed: 0 };
+
+  const signatures = [...new Set(analytics.recent.map((row) => row.tx).filter(Boolean))];
+  const status = await solanaRpcParallelRace<SignatureStatusResult>(
+    "getSignatureStatuses",
+    [signatures, { searchTransactionHistory: true }],
+    ON_CHAIN_CHECK_MS,
+  );
+  if (!status.ok || !Array.isArray(status.result.value)) {
+    return { analytics, removed: 0 };
+  }
+
+  const invalid = new Set<string>();
+  signatures.forEach((signature, index) => {
+    const row = status.result.value?.[index];
+    if (!row || row.err) invalid.add(signature);
+  });
+  if (!invalid.size) return { analytics, removed: 0 };
+
+  const removedRows = analytics.recent.filter((row) => invalid.has(row.tx));
+  let removedVolume = 0n;
+  let removedList = 0n;
+  let removedEffective = 0n;
+  const removedByDate = new Map<
+    string,
+    { count: number; volume: bigint; list: bigint; effective: bigint }
+  >();
+
+  for (const row of removedRows) {
+    const amount = BigInt(row.amountAtomic || "0");
+    const revenue = revenueMicroForSettlement(row);
+    const date = utcDateStr(row.at);
+    const day = removedByDate.get(date) ?? {
+      count: 0,
+      volume: 0n,
+      list: 0n,
+      effective: 0n,
+    };
+    day.count += 1;
+    day.volume += amount;
+    day.list += revenue.listMicro;
+    day.effective += revenue.effectiveMicro;
+    removedByDate.set(date, day);
+    removedVolume += amount;
+    removedList += revenue.listMicro;
+    removedEffective += revenue.effectiveMicro;
+  }
+
+  const daily = analytics.daily.map((row) => {
+    const removed = removedByDate.get(row.date);
+    if (!removed) return row;
+    return {
+      ...row,
+      txCount: Math.max(0, row.txCount - removed.count),
+      volumeAtomic: nonNegative(BigInt(row.volumeAtomic || "0") - removed.volume).toString(),
+      listUsdcMicro: nonNegative(BigInt(row.listUsdcMicro ?? "0") - removed.list).toString(),
+      effectiveUsdcMicro: nonNegative(
+        BigInt(row.effectiveUsdcMicro ?? "0") - removed.effective,
+      ).toString(),
+    };
+  });
+
+  return {
+    removed: removedRows.length,
+    analytics: {
+      ...analytics,
+      txCount: Math.max(0, analytics.txCount - removedRows.length),
+      volumeAtomic: nonNegative(BigInt(analytics.volumeAtomic || "0") - removedVolume).toString(),
+      listUsdcMicro: nonNegative(
+        BigInt(analytics.listUsdcMicro || "0") - removedList,
+      ).toString(),
+      effectiveUsdcMicro: nonNegative(
+        BigInt(analytics.effectiveUsdcMicro || "0") - removedEffective,
+      ).toString(),
+      daily,
+      recent: analytics.recent.filter((row) => !invalid.has(row.tx)),
+    },
+  };
+}
+
+async function burnAmountFromTransaction(signature: string, mint: string): Promise<number> {
+  const opts = {
+    encoding: "jsonParsed",
+    maxSupportedTransactionVersion: 1,
+    commitment: "confirmed",
+  };
+  const tx = await solanaRpcParallelRace<ParsedBurnTransaction | null>(
+    "getTransaction",
+    [signature, opts],
+    ON_CHAIN_CHECK_MS,
+  );
+  if (!tx.ok || !tx.result || tx.result.meta?.err) return 0;
+  for (const instruction of tx.result.transaction?.message?.instructions ?? []) {
+    const parsed = instruction.parsed;
+    if (parsed?.type !== "burnChecked" || parsed.info?.mint !== mint) continue;
+    const amount = BigInt(parsed.info.tokenAmount?.amount ?? "0");
+    const decimals = parsed.info.tokenAmount?.decimals ?? 6;
+    return atomicToUi(amount, decimals);
+  }
+  return 0;
+}
+
 function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
@@ -202,7 +338,9 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
     Math.max(1, Math.ceil((nowMs - launchMs) / MS_DAY) + 1),
   );
 
-  const analytics = await getTokenPayMerchantAnalytics(merchantId, daysSinceLaunch);
+  const rawAnalytics = await getTokenPayMerchantAnalytics(merchantId, daysSinceLaunch);
+  const reconciled = await reconcileAnalyticsOnChain(rawAnalytics);
+  const analytics = reconciled.analytics;
   const merchant = getDefaultTokenPayMerchant();
   const mint = analytics?.mint ?? merchant.mint ?? "";
   const decimals = merchant.decimals ?? 6;
@@ -248,7 +386,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
         ? { buybackNote: "Below $40 weekly threshold — rolls forward" }
         : {}),
       tcxReceived: period.tcxReceived,
-      tcxBurned: period.tcxReceived * TCX_BURN_PCT,
+      tcxBurned: 0,
       lpUsd: 0,
       txCount: period.txCount,
     });
@@ -260,15 +398,28 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   weeks.reverse();
 
   const ledgerByWeek = await listTcxWeekLedgerTx(weeks.map((w) => w.weekEnd));
+  const burnAmounts = new Map<string, number>();
+  await Promise.all(
+    [...ledgerByWeek.entries()].map(async ([weekEnd, txs]) => {
+      if (!txs.tcxBurnTx) return;
+      burnAmounts.set(weekEnd, await burnAmountFromTransaction(txs.tcxBurnTx, mint));
+    }),
+  );
   for (const week of weeks) {
     const txs = weekTxsFromLedger(ledgerByWeek.get(week.weekEnd));
     if (txs) week.txs = txs;
+    week.tcxBurned = burnAmounts.get(week.weekEnd) ?? 0;
   }
+  const tcxBurned = weeks.reduce((sum, week) => sum + week.tcxBurned, 0);
 
   const activeWeek = weeks.find((w) => w.status === "in_progress");
-  const snapshotNote = activeWeek
-    ? `Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC).`
-    : "";
+  const noteParts = activeWeek
+    ? [`Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC).`]
+    : [];
+  if (reconciled.removed > 0) {
+    noteParts.push(`${reconciled.removed} dropped settlement(s) excluded by on-chain verification.`);
+  }
+  const snapshotNote = noteParts.join(" ");
 
   const base: TcxTransparencyPayload = {
     version: 1,
@@ -290,7 +441,7 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
       revenueListUsdc,
       usdcNet: 0,
       tcxReceived,
-      tcxBurned: tcxReceived * TCX_BURN_PCT,
+      tcxBurned,
       txCount: tcxTxCount,
       usdcTxCount: 0,
       tcxTxCount,

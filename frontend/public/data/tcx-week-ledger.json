@@ -1,6 +1,12 @@
 {
   "_readme": "Weekly Solscan signatures for /token/transparency TX links. Keys = weekEnd (YYYY-MM-DD UTC). Deploy after edits.",
   "weeks": {
+    "2026-08-05": {
+      "tcxBurnTx": "D1tH6wBwrsyqNbqfABgFb2Zq2ZZBBwQ5m1RZ9VZcFKUfUqXRjUL5kweNT5K9BK8GGPePpYhktNP2MnWGQAnrXC2"
+    },
+    "2026-07-22": {
+      "tcxBurnTx": "TdpHxVZBMvoQVNBrLT3Uq2tNuRWaPeU1MstmUhC48v3hqbkdSnyq4f2j7KoVsPtKtb6w9X6K5qxqqBvvbUzVCCv"
+    },
     "2026-07-15": {
       "tcxBurnTx": "38RUUTo8vkwDgfHgMoknY72CBkXxQfGZEppbjeiwrubpFSCfGSFZ2zCFbA5w2VChqA5mt5RyGhTNjuVo5eny6DS5"
     }
