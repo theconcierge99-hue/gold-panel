@@ -4,7 +4,7 @@
   "manifestKind": "concierge-sap-tools-v1",
   "agent": {
     "name": "Concierge Intel",
-    "description": "Pay-per-call market intelligence for Solana agents — desk verdict (snipe/watch/avoid) and Meteora DLMM deep-dive. Settlement via x402 USDC (PayAI) on Solana/Base/Arbitrum, USDG on Robinhood Chain, or USDT on BNB (Dexter Permit2, opt-in). No API keys.",
+    "description": "Pay-per-call market intelligence for Solana agents — desk verdict (snipe/watch/avoid) and Meteora DLMM deep-dive. Settlement via x402 USDC (PayAI) on Solana/Base/Arbitrum, USDG on Robinhood Chain, or USDT/USDC on BNB (Dexter Permit2, opt-in). No API keys.",
     "protocols": ["x402", "A2A", "MCP", "MPP"],
     "categories": ["intel", "trading", "defi", "solana"],
     "homepage": "https://conc-exe.xyz",

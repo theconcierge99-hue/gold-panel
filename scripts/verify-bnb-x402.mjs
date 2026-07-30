@@ -4,7 +4,8 @@
  *
  * Asserts:
  * - BNB is fail-closed by default
- * - When enabled on mainnet: eip155:56, USDT 18d, Permit2, Dexter-pinned
+ * - When enabled on mainnet: eip155:56, USDT + USDC at 18d, Permit2, Dexter-pinned
+ * - Both BSC assets are advertised as separate accepts, and USDC can be dropped
  * - Testnet never advertises BNB
  * - Legacy Base/Arbitrum/Solana atomic amounts stay 6-decimal
  */
@@ -68,6 +69,32 @@ assert.equal(
 const extra = config.getAcceptExtraForNetwork("eip155:56");
 assert.equal(extra.assetTransferMethod, "permit2");
 
+const bnbProfiles = config.getSettlementAssetProfiles("eip155:56");
+assert.equal(bnbProfiles.length, 2, "BSC should advertise USDT and USDC");
+assert.deepEqual(
+  bnbProfiles.map((p) => p.symbol),
+  ["USDT", "USDC"],
+  "USDT must come first — it is by far the more liquid BSC stablecoin",
+);
+assert.equal(
+  bnbProfiles[1].asset.toLowerCase(),
+  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+);
+for (const p of bnbProfiles) {
+  assert.equal(p.decimals, 18, `${p.symbol} on BSC must be 18 decimals`);
+  assert.equal(p.transferMethod, "permit2", `${p.symbol} has no EIP-3009/2612 on BSC`);
+  assert.equal(config.getAcceptExtraForAsset(p).assetTransferMethod, "permit2");
+}
+assert.equal(
+  pricing.atomicAmountForResourceDecimals("concierge", bnbProfiles[0].decimals),
+  pricing.atomicAmountForResourceDecimals("concierge", bnbProfiles[1].decimals),
+  "same USD price must yield the same atomic amount for both BSC assets",
+);
+
+// Single-asset rails must not regress into multi-asset accepts.
+assert.equal(config.getSettlementAssetProfiles("eip155:8453").length, 1);
+assert.equal(config.getSettlementAssetProfiles("eip155:42161").length, 1);
+
 const bnbFac = facilitator.getBnbFacilitatorProfile();
 assert.equal(bnbFac.id, "dexter");
 assert.equal(bnbFac.url, "https://x402.dexter.cash");
@@ -78,7 +105,24 @@ assert.equal(pubOn.bnbNetwork, "eip155:56");
 assert.equal(pubOn.bnbAssetTransferMethod, "permit2");
 assert.equal(pubOn.bnbFacilitator, "Dexter");
 assert.equal(pubOn.bnbUsdtDecimals, 18);
+assert.equal(pubOn.bnbStableDecimals, 18);
+assert.equal(
+  pubOn.bnbUsdc.toLowerCase(),
+  "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+  "browser client needs the USDC address to offer it as a payment option",
+);
 console.log("ok mainnet enabled");
+
+section("USDC on BSC can be dropped without losing the rail");
+process.env.X402_BNB_USDC_ENABLED = "false";
+assert.equal(config.isBnbX402Enabled(), true, "USDT alone must keep the rail alive");
+const usdtOnly = config.getSettlementAssetProfiles("eip155:56");
+assert.equal(usdtOnly.length, 1);
+assert.equal(usdtOnly[0].symbol, "USDT");
+assert.equal(config.getPublicX402Config().bnbUsdc, undefined);
+delete process.env.X402_BNB_USDC_ENABLED;
+assert.equal(config.getSettlementAssetProfiles("eip155:56").length, 2);
+console.log("ok USDC opt-out");
 
 section("BNB never on testnet");
 process.env.X402_NETWORK_MODE = "testnet";
@@ -100,14 +144,28 @@ assert.equal(baseAsset.transferMethod, "eip3009");
 console.log("ok legacy rails");
 
 section("MPP protocols include BNB when enabled");
-const protocols = facilitator.mppPaymentProtocols({ bnb: true });
-const bnbProto = protocols.find(
+const protocols = facilitator.mppPaymentProtocols({
+  bnb: true,
+  bnbAssets: ["USDT", "USDC"],
+});
+const bnbProtos = protocols.filter(
   (p) => p.x402 && p.x402.network === "bnb" && p.x402.caip2 === "eip155:56",
 );
-assert.ok(bnbProto);
-assert.equal(bnbProto.x402.asset, "USDT");
-assert.equal(bnbProto.x402.assetTransferMethod, "permit2");
-assert.equal(bnbProto.x402.facilitator, "https://x402.dexter.cash");
+assert.equal(bnbProtos.length, 2);
+assert.deepEqual(
+  bnbProtos.map((p) => p.x402.asset),
+  ["USDT", "USDC"],
+);
+for (const proto of bnbProtos) {
+  assert.equal(proto.x402.assetTransferMethod, "permit2");
+  assert.equal(proto.x402.facilitator, "https://x402.dexter.cash");
+}
+// Callers that omit bnbAssets must keep the previous USDT-only behaviour.
+const legacyProtos = facilitator
+  .mppPaymentProtocols({ bnb: true })
+  .filter((p) => p.x402 && p.x402.network === "bnb");
+assert.equal(legacyProtos.length, 1);
+assert.equal(legacyProtos[0].x402.asset, "USDT");
 console.log("ok MPP");
 
 section("402 extensions advertise Permit2 approval sponsoring when BNB on");

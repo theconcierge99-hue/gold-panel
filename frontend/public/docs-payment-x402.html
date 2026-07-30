@@ -22,7 +22,7 @@
       <p class="docs-lead">How Concierge uses HTTP 402 for machine-to-machine stablecoin payments.</p>
 
       <div class="card">
-        <p>Concierge does not issue API keys. <strong>Payment is the gate</strong> — agents and browsers pay per request using <a class="ext" href="https://www.x402.org/" target="_blank" rel="noopener">x402 v2</a>, settled through <a class="ext" href="https://facilitator.payai.network" target="_blank" rel="noopener">PayAI</a> (primary) with <a class="ext" href="https://x402.dexter.cash" target="_blank" rel="noopener">Dexter</a> as fallback facilitator. Dexter settlements auto-list on <a class="ext" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">OpenDexter</a>. BNB USDT uses Dexter Permit2 when <code>X402_BNB_ENABLED=true</code>.</p>
+        <p>Concierge does not issue API keys. <strong>Payment is the gate</strong> — agents and browsers pay per request using <a class="ext" href="https://www.x402.org/" target="_blank" rel="noopener">x402 v2</a>, settled through <a class="ext" href="https://facilitator.payai.network" target="_blank" rel="noopener">PayAI</a> (primary) with <a class="ext" href="https://x402.dexter.cash" target="_blank" rel="noopener">Dexter</a> as fallback facilitator. Dexter settlements auto-list on <a class="ext" href="https://dexter.cash/opendexter" target="_blank" rel="noopener">OpenDexter</a>. BNB USDT and USDC use Dexter Permit2 when <code>X402_BNB_ENABLED=true</code>.</p>
       </div>
 
       <h2 class="docs-h2">Flow</h2>
@@ -39,7 +39,7 @@
           <li><strong>Base</strong> — USDC (configure <code>X402_EVM_PAY_TO</code>)</li>
           <li><strong>Arbitrum</strong> — USDC (same EVM pay-to; disable with <code>X402_ARBITRUM_ENABLED=false</code>)</li>
           <li><strong>Robinhood Chain</strong> — USDG via Primer (<code>eip155:4663</code>)</li>
-          <li><strong>BNB Smart Chain</strong> — USDT via Dexter Permit2 (<code>eip155:56</code>, 18 decimals; enable with <code>X402_BNB_ENABLED=true</code>)</li>
+          <li><strong>BNB Smart Chain</strong> — USDT or USDC via Dexter Permit2 (<code>eip155:56</code>, 18 decimals; enable with <code>X402_BNB_ENABLED=true</code>)</li>
           <li><strong>Solana</strong> — USDC via PayAI/Dexter (optional <code>X402_SOL_PAY_TO</code>)</li>
           <li><strong>Solana</strong> — native project tokens via <a href="/docs/payment/token-pay">Token Pay self-settle</a> (one accept per live merchant; <code>extra.settlement: "self"</code>)</li>
           <li><strong>TCX</strong> — Concierge default merchant; live when <code>SOON_TOKEN_MINT</code> is set (mint <code>F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump</code>)</li>

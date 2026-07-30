@@ -104,6 +104,8 @@ export function resolveFacilitatorForSolanaFeePayer(feePayer: string): X402Facil
 export function mppPaymentProtocols(opts?: {
   robinhood?: boolean;
   bnb?: boolean;
+  /** BSC stablecoin symbols to advertise; defaults to USDT only. */
+  bnbAssets?: readonly string[];
 }): Record<string, unknown>[] {
   const primary = getX402FacilitatorProfile();
   const fallback = getX402FacilitatorFallback();
@@ -134,17 +136,19 @@ export function mppPaymentProtocols(opts?: {
   }
   if (opts?.bnb) {
     const bnb = getBnbFacilitatorProfile();
-    protocols.push({
-      x402: {
-        network: "bnb",
-        caip2: "eip155:56",
-        asset: "USDT",
-        assetTransferMethod: "permit2",
-        facilitator: bnb.url,
-        role: "primary",
-      },
-    });
-    protocols.push({ mpp: { method: "eip155", network: "bnb", intent: "charge", currency: "USDT" } });
+    for (const asset of opts.bnbAssets?.length ? opts.bnbAssets : (["USDT"] as const)) {
+      protocols.push({
+        x402: {
+          network: "bnb",
+          caip2: "eip155:56",
+          asset,
+          assetTransferMethod: "permit2",
+          facilitator: bnb.url,
+          role: "primary",
+        },
+      });
+      protocols.push({ mpp: { method: "eip155", network: "bnb", intent: "charge", currency: asset } });
+    }
   }
   protocols.push(
     { mpp: { method: "solana", intent: "charge", currency: "USDC" } },

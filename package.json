@@ -40,6 +40,7 @@
     "token-pay:test-preview": "node scripts/test-token-pay-preview.mjs",
     "x402:verify-bnb": "npx tsx scripts/verify-bnb-x402.mjs",
     "x402:canary-bnb": "node scripts/canary-bnb-x402.mjs",
+    "x402:watch-bnb": "node scripts/watch-dexter-bnb.mjs",
     "tcx:telegram-bot": "node scripts/tcx-telegram-trade-bot.mjs"
   },
   "dependencies": {

@@ -2,7 +2,7 @@
 
 Concierge **Token Pay (Beta)** SDK for partner APIs.
 
-**Rail scope:** partner Token Pay settles **SPL tokens on Solana** via Concierge self-settle. Concierge's own intel 402 accepts also support Base/Arbitrum USDC, Robinhood USDG, and (opt-in) BNB USDT Permit2 — those EVM rails are **not** part of this partner SDK.
+**Rail scope:** partner Token Pay settles **SPL tokens on Solana** via Concierge self-settle. Concierge's own intel 402 accepts also support Base/Arbitrum USDC, Robinhood USDG, and (opt-in) BNB USDT/USDC Permit2 — those EVM rails are **not** part of this partner SDK.
 
 ## Install
 

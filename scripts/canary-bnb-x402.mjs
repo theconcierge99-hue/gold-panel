@@ -15,6 +15,7 @@ const origin = (
 ).replace(/\/$/, "");
 
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const DEXTER = "https://x402.dexter.cash";
 
 function ok(msg) {
@@ -67,9 +68,9 @@ try {
   hardFail = true;
 }
 
-// 2) On-chain USDT decimals
-console.log("\n2) Binance-Peg USDT decimals (expect 18)");
-try {
+// 2) On-chain decimals for both Binance-Peg assets
+console.log("\n2) Binance-Peg decimals (expect 18 for both)");
+async function bscCall(to, data) {
   const rpcRes = await fetch("https://bsc-dataseed.binance.org", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -77,20 +78,36 @@ try {
       jsonrpc: "2.0",
       id: 1,
       method: "eth_call",
-      params: [{ to: USDT, data: "0x313ce567" }, "latest"],
+      params: [{ to, data }, "latest"],
     }),
     signal: AbortSignal.timeout(15_000),
   });
-  const rpc = await rpcRes.json();
-  const dec = parseInt(rpc.result, 16);
-  if (dec === 18) ok(`decimals=${dec}`);
-  else {
-    fail(`decimals=${dec} (expected 18)`);
+  return rpcRes.json();
+}
+
+for (const [symbol, address] of [
+  ["USDT", USDT],
+  ["USDC", USDC],
+]) {
+  try {
+    const rpc = await bscCall(address, "0x313ce567");
+    const dec = parseInt(rpc.result, 16);
+    if (dec === 18) ok(`${symbol} decimals=${dec}`);
+    else {
+      fail(`${symbol} decimals=${dec} (expected 18)`);
+      hardFail = true;
+    }
+    // Neither Binance-Peg token implements EIP-3009/EIP-2612, which is why the rail
+    // must stay on Permit2. A token that suddenly exposes one means our accept
+    // metadata needs revisiting.
+    const domain = await bscCall(address, "0x3644e515");
+    if (!domain.error && domain.result && domain.result !== "0x") {
+      info(`${symbol} now exposes DOMAIN_SEPARATOR — revisit the Permit2 assumption`);
+    }
+  } catch (e) {
+    fail(`${symbol} RPC error: ${e instanceof Error ? e.message : e}`);
     hardFail = true;
   }
-} catch (e) {
-  fail(`RPC error: ${e instanceof Error ? e.message : e}`);
-  hardFail = true;
 }
 
 // 3) Production config still fail-closed unless flag set
@@ -104,6 +121,8 @@ try {
     info(`acceptsBnb=${body?.acceptsBnb}`);
     info(`bnbNetwork=${body?.bnbNetwork ?? "—"}`);
     info(`bnbAssetTransferMethod=${body?.bnbAssetTransferMethod ?? "—"}`);
+    info(`bnbUsdt=${body?.bnbUsdt ?? "—"}`);
+    info(`bnbUsdc=${body?.bnbUsdc ?? "— (USDT only)"}`);
     if (body?.acceptsBnb) {
       ok("BNB rail is LIVE on this origin");
       if (body.bnbNetwork !== "eip155:56") {
@@ -112,6 +131,10 @@ try {
       }
       if (body.bnbAssetTransferMethod !== "permit2") {
         fail("expected permit2 transfer method");
+        hardFail = true;
+      }
+      if (!body.bnbUsdt) {
+        fail("bnbUsdt missing — browser client cannot offer the rail");
         hardFail = true;
       }
     } else {
@@ -127,12 +150,14 @@ console.log(`
 4) Manual paid canary (after setting X402_BNB_ENABLED=true on staging/mainnet):
    a. GET ${origin}/api/x402-config → acceptsBnb=true, bnbNetwork=eip155:56
    b. POST ${origin}/api/concierge-intel-tvl without payment → decode PAYMENT-REQUIRED
-      expect accept: network eip155:56, asset ${USDT},
-      amount 18-decimal (e.g. 0.02 USD → 20000000000000000),
-      extra.assetTransferMethod=permit2
-   c. Pay with BNB USDT wallet (Lounge or @x402/evm exact client)
-      — first call may prompt Permit2 approve (sponsored via Dexter if extension present)
-   d. Confirm settle tx on https://bscscan.com and 200 + PAYMENT-RESPONSE
+      expect TWO accepts on network eip155:56 — one per asset:
+        USDT ${USDT}
+        USDC ${USDC}
+      each with amount 18-decimal (e.g. 0.02 USD → 20000000000000000)
+      and extra.assetTransferMethod=permit2
+   c. Pay once with USDT and once with USDC (Lounge or @x402/evm exact client)
+      — first call per token prompts a Permit2 approve (sponsored via Dexter if extension present)
+   d. Confirm both settle txs on https://bscscan.com and 200 + PAYMENT-RESPONSE
    e. Only then leave X402_BNB_ENABLED=true in production
 
 ${hardFail ? "RESULT: BLOCKED — keep X402_BNB_ENABLED unset/false" : "RESULT: preflight OK — proceed to manual settle canary when ready"}
