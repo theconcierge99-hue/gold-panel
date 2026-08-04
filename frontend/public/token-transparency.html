@@ -166,19 +166,32 @@
     return Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) + " TCX";
   }
 
-  function txLink(sig) {
-    if (!sig || typeof sig !== "string" || sig.trim().length < 32) return "";
-    return (
-      ' <a class="tok-tx-link" href="https://solscan.io/tx/' +
-      encodeURIComponent(sig.trim()) +
-      '" target="_blank" rel="noopener noreferrer">TX</a>'
-    );
+  function burnSigs(sig) {
+    if (!sig) return [];
+    if (Array.isArray(sig)) {
+      return sig.filter(function (s) {
+        return typeof s === "string" && s.trim().length >= 32;
+      });
+    }
+    if (typeof sig === "string" && sig.trim().length >= 32) return [sig];
+    return [];
   }
 
   function cellValue(main, sig) {
-    var link = txLink(sig);
-    if (!link) return main;
-    return '<span class="tok-cell-line">' + main + link + "</span>";
+    var sigs = burnSigs(sig);
+    if (!sigs.length) return main;
+    var links = sigs
+      .map(function (s, i) {
+        return (
+          ' <a class="tok-tx-link" href="https://solscan.io/tx/' +
+          encodeURIComponent(s.trim()) +
+          '" target="_blank" rel="noopener noreferrer">TX' +
+          (sigs.length > 1 ? String(i + 1) : "") +
+          "</a>"
+        );
+      })
+      .join("");
+    return '<span class="tok-cell-line">' + main + links + "</span>";
   }
 
   function showPlaceholder(msg) {

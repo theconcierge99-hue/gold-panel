@@ -14,6 +14,7 @@ import { priceUsdcForResource, type X402ResourceKind } from "./x402-pricing";
 import { solanaRpcParallelRace } from "./x402-solana-rpc";
 import {
   listTcxWeekLedgerTx,
+  tcxBurnSignatures,
   type TcxWeekLedgerTx,
 } from "./tcx-ledger-store";
 
@@ -286,7 +287,14 @@ function formatTcxAmount(value: number): string {
 
 function weekTxsFromLedger(stored: TcxWeekLedgerTx | undefined): TcxWeekLedgerTx | undefined {
   if (!stored) return undefined;
-  if (!stored.netUsdcTx && !stored.buybackTx && !stored.tcxBurnTx && !stored.lpTx) return undefined;
+  if (
+    !stored.netUsdcTx &&
+    !stored.buybackTx &&
+    !tcxBurnSignatures(stored.tcxBurnTx).length &&
+    !stored.lpTx
+  ) {
+    return undefined;
+  }
   return { ...stored };
 }
 
@@ -405,8 +413,13 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const burnAmounts = new Map<string, number>();
   await Promise.all(
     [...ledgerByWeek.entries()].map(async ([weekEnd, txs]) => {
-      if (!txs.tcxBurnTx) return;
-      burnAmounts.set(weekEnd, await burnAmountFromTransaction(txs.tcxBurnTx, mint));
+      const sigs = tcxBurnSignatures(txs.tcxBurnTx);
+      if (!sigs.length) return;
+      const amounts = await Promise.all(sigs.map((sig) => burnAmountFromTransaction(sig, mint)));
+      burnAmounts.set(
+        weekEnd,
+        amounts.reduce((sum, n) => sum + n, 0),
+      );
     }),
   );
   let tcxBurned = 0;
