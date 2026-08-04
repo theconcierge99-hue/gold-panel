@@ -281,10 +281,6 @@ function dateInRange(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
 }
 
-function formatTcxAmount(value: number): string {
-  return Math.round(value).toLocaleString("en-US");
-}
-
 function weekTxsFromLedger(stored: TcxWeekLedgerTx | undefined): TcxWeekLedgerTx | undefined {
   if (!stored) return undefined;
   if (
@@ -423,36 +419,19 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
     }),
   );
   let tcxBurned = 0;
-  let unattributedBurn = 0;
   for (const week of weeks) {
     const stored = ledgerByWeek.get(week.weekEnd);
     const burned = burnAmounts.get(week.weekEnd) ?? 0;
     tcxBurned += burned;
-
-    // A burn executed inside an open period settles the *previous* cycle's
-    // treasury, not the revenue still accruing. Keep the row empty until the
-    // period closes so "in progress" never reads as "already burned".
-    if (week.status === "published") {
-      const txs = weekTxsFromLedger(stored);
-      if (txs) week.txs = txs;
-      week.tcxBurned = burned;
-    } else {
-      const txs = weekTxsFromLedger(stored ? { ...stored, tcxBurnTx: undefined } : undefined);
-      if (txs) week.txs = txs;
-      week.tcxBurned = 0;
-      unattributedBurn += burned;
-    }
+    const txs = weekTxsFromLedger(stored);
+    if (txs) week.txs = txs;
+    week.tcxBurned = burned;
   }
 
   const activeWeek = weeks.find((w) => w.status === "in_progress");
   const noteParts = activeWeek
     ? [`Week in progress (${activeWeek.periodStart}–${activeWeek.periodEnd} UTC).`]
     : [];
-  if (unattributedBurn > 0) {
-    noteParts.push(
-      `${formatTcxAmount(unattributedBurn)} TCX burned during the open period settles the prior cycle — counted in the launch total, attributed to a week once the period closes.`,
-    );
-  }
   if (reconciled.removed > 0) {
     noteParts.push(`${reconciled.removed} dropped settlement(s) excluded by on-chain verification.`);
   }
@@ -493,9 +472,9 @@ export async function buildTcxTransparencyPayload(origin: string): Promise<TcxTr
   const override = parseOverride();
   if (!override) return base;
 
-  // The computed note carries derived facts (open period, unattributed burn,
-  // dropped settlements). An operator note augments it rather than replacing
-  // it, and punctuation-only placeholders are discarded.
+  // The computed note carries derived facts (open period, dropped settlements).
+  // An operator note augments it rather than replacing it, and punctuation-only
+  // placeholders are discarded.
   const overrideNote = (override.snapshotNote ?? "").trim();
   const mergedNote = [snapshotNote, /^[.\u2026\s]*$/.test(overrideNote) ? "" : overrideNote]
     .filter(Boolean)
