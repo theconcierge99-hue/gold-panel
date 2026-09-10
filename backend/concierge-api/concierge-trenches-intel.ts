@@ -1,12 +1,89 @@
 /**
  * Trenches / degen token research — DexScreener + Pump + RugCheck + meta/whale scoring.
- * Solana-first; Base/ETH use DexScreener with thinner safety/whale layers.
+ * Solana-first; other chains use DexScreener with thinner safety/whale layers.
  */
 const FETCH_MS = 6_500;
 const CACHE_TTL_MS = 60_000;
 
-export type TrenchesChain = "solana" | "base" | "ethereum" | "bsc" | "arbitrum";
+/** Desk chain keys — DexScreener slug unless noted. */
+export type TrenchesChain =
+  | "solana"
+  | "base"
+  | "ethereum"
+  | "bsc"
+  | "arbitrum"
+  | "robinhood"
+  | "mars"
+  | "monad"
+  | "abstract"
+  | "avalanche"
+  | "polygon"
+  | "optimism"
+  | "blast"
+  | "sui"
+  | "ton"
+  | "worldchain"
+  | "unichain"
+  | "berachain";
 
+const TRENCHES_CHAINS = new Set<string>([
+  "solana",
+  "base",
+  "ethereum",
+  "bsc",
+  "arbitrum",
+  "robinhood",
+  "mars",
+  "monad",
+  "abstract",
+  "avalanche",
+  "polygon",
+  "optimism",
+  "blast",
+  "sui",
+  "ton",
+  "worldchain",
+  "unichain",
+  "berachain",
+]);
+
+/** DexScreener chainId slug (may differ from UI key). */
+const DEX_CHAIN_SLUG: Record<TrenchesChain, string> = {
+  solana: "solana",
+  base: "base",
+  ethereum: "ethereum",
+  bsc: "bsc",
+  arbitrum: "arbitrum",
+  robinhood: "robinhood",
+  mars: "mars",
+  monad: "monad",
+  abstract: "abstract",
+  avalanche: "avalanche",
+  polygon: "polygon",
+  optimism: "optimism",
+  blast: "blast",
+  sui: "sui",
+  ton: "ton",
+  worldchain: "worldchain",
+  unichain: "unichain",
+  berachain: "berachain",
+};
+
+/** GMGN path segment when supported; null = skip deep link. */
+const GMGN_CHAIN_PATH: Partial<Record<TrenchesChain, string>> = {
+  solana: "sol",
+  ethereum: "eth",
+  base: "base",
+  bsc: "bsc",
+  arbitrum: "arbitrum",
+  avalanche: "avax",
+  polygon: "polygon",
+  optimism: "optimism",
+  blast: "blast",
+  sui: "sui",
+  ton: "ton",
+  monad: "monad",
+};
 export type UpsideBand = "early" | "mid" | "late" | "unknown";
 
 export type TrenchesScores = {
@@ -136,9 +213,22 @@ const META_LEXICON: { tag: string; patterns: RegExp[] }[] = [
   { tag: "gaming", patterns: [/game/i, /play/i, /pixel/i, /rpg/i] },
   { tag: "rwa", patterns: [/\brwa\b/i, /treasury/i, /gold/i, /real.?world/i] },
   { tag: "solana", patterns: [/solana/i, /\bsol\b/i, /pump\.?fun/i] },
+  { tag: "robinhood", patterns: [/robinhood/i, /hoodchain/i, /cashcat/i] },
+  { tag: "mars", patterns: [/\bmars\b/i, /marschain/i] },
 ];
 
-const HOT_META_PRIORITY = ["ai", "animal", "celebrity", "politics", "meme", "gaming", "rwa", "solana"];
+const HOT_META_PRIORITY = [
+  "ai",
+  "animal",
+  "celebrity",
+  "politics",
+  "meme",
+  "gaming",
+  "rwa",
+  "solana",
+  "robinhood",
+  "mars",
+];
 
 const DISCLAIMER =
   "Desk scores are research heuristics — not financial advice. Safety ≠ rug-free guarantee. Upside bands describe stage (early/mid/late), not promised multiples.";
@@ -156,18 +246,48 @@ function fmtAgeHours(createdAtMs: number | undefined): number | null {
 function normalizeChain(raw: string | undefined | null): TrenchesChain {
   const c = String(raw ?? "solana").trim().toLowerCase();
   if (c === "eth" || c === "ethereum" || c === "mainnet") return "ethereum";
-  if (c === "base") return "base";
   if (c === "bsc" || c === "bnb" || c === "binance") return "bsc";
   if (c === "arb" || c === "arbitrum") return "arbitrum";
+  if (c === "rh" || c === "robinhood" || c === "hoodchain" || c === "robinhoodchain") {
+    return "robinhood";
+  }
+  if (c === "mars" || c === "marschain" || c === "mars-chain") return "mars";
+  if (c === "avax" || c === "avalanche") return "avalanche";
+  if (c === "matic" || c === "polygon" || c === "pol") return "polygon";
+  if (c === "op" || c === "optimism") return "optimism";
+  if (c === "world" || c === "worldchain") return "worldchain";
+  if (c === "uni" || c === "unichain") return "unichain";
+  if (c === "bera" || c === "berachain") return "berachain";
+  if (TRENCHES_CHAINS.has(c)) return c as TrenchesChain;
   return "solana";
 }
 
 function dexChainId(chain: TrenchesChain): string {
-  if (chain === "ethereum") return "ethereum";
-  if (chain === "bsc") return "bsc";
-  if (chain === "arbitrum") return "arbitrum";
-  if (chain === "base") return "base";
-  return "solana";
+  return DEX_CHAIN_SLUG[chain] ?? chain;
+}
+
+function gmgnPath(chain: TrenchesChain): string | null {
+  return GMGN_CHAIN_PATH[chain] ?? null;
+}
+
+function screenQueriesFor(chain: TrenchesChain): string[] {
+  const slug = dexChainId(chain);
+  switch (chain) {
+    case "solana":
+      return ["pump", "sol meme", "ai sol"];
+    case "base":
+      return ["base meme", "base ai"];
+    case "robinhood":
+      return ["robinhood meme", "cashcat", "robinhood ai"];
+    case "mars":
+      return ["mars meme", "marschain"];
+    case "monad":
+      return ["monad meme", "monad ai"];
+    case "abstract":
+      return ["abstract meme", "abstract chain"];
+    default:
+      return [`${slug} meme`, `${slug} ai`];
+  }
 }
 
 function extractAddress(raw: string): string {
@@ -315,7 +435,12 @@ function buildSafety(
       id: "chain_coverage",
       label: "Safety coverage",
       ok: null,
-      detail: "Full RugCheck coverage is Solana-first; treat EVM safety as provisional.",
+      detail:
+        chain === "robinhood"
+          ? "Robinhood Chain — DexScreener pairs; RugCheck is Solana-only (provisional safety)."
+          : chain === "mars"
+            ? "Mars Chain — Dex coverage may be thin; treat safety as provisional until indexed."
+            : "Full RugCheck coverage is Solana-first; treat non-Solana safety as provisional.",
     });
   }
 
@@ -575,10 +700,11 @@ function buildLinks(
   pairUrl: string | null,
 ): TrenchesVerdict["links"] {
   const chainPath = dexChainId(chain);
+  const gmgn = gmgnPath(chain);
   return {
     dexscreener: pairUrl ?? `https://dexscreener.com/${chainPath}/${address}`,
     pump: chain === "solana" ? `https://pump.fun/coin/${address}` : null,
-    gmgn: `https://gmgn.ai/${chainPath}/token/${address}`,
+    gmgn: gmgn ? `https://gmgn.ai/${gmgn}/token/${address}` : null,
     xSearch: `https://x.com/search?q=${encodeURIComponent(`$${symbol} OR ${address}`)}&f=live`,
   };
 }
@@ -790,13 +916,7 @@ export async function runTrenchesScreen(options?: {
     };
   }
 
-  const queries =
-    chain === "solana"
-      ? ["pump", "sol meme", "ai sol"]
-      : chain === "base"
-        ? ["base meme", "base ai"]
-        : [`${dexChainId(chain)} meme`];
-
+  const queries = screenQueriesFor(chain);
   const pairMap = new Map<string, DexPair>();
   for (const q of queries) {
     const data = await fetchJson<{ pairs?: DexPair[] }>(

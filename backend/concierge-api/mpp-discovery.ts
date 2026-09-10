@@ -246,7 +246,7 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
       address: { type: "string", description: "Token mint / contract address (CA)" },
       chain: {
         type: "string",
-        description: "solana | base | ethereum | bsc | arbitrum (default solana)",
+        description: "solana | base | ethereum | bsc | arbitrum | robinhood | mars | monad | abstract | avalanche | polygon | optimism | blast | sui | ton | worldchain | unichain | berachain (default solana)",
       },
       message: { type: "string", description: "Optional alias for address if address omitted" },
     },
@@ -254,7 +254,7 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
   ),
   "intel-trenches-screen": jsonSchemaBody(
     {
-      chain: { type: "string", description: "solana | base | ethereum | bsc | arbitrum" },
+      chain: { type: "string", description: "solana | base | ethereum | bsc | arbitrum | robinhood | mars | monad | abstract | …" },
       limit: { type: "number", description: "Max candidates 1–24 (default 12)" },
       maxMcapUsd: { type: "number", description: "Max market cap USD filter (default 2e6)" },
       meta: { type: "string", description: "Meta tag filter: ai, animal, meme, celebrity, …" },
