@@ -66,6 +66,32 @@ export const CONCIERGE_AGENT_ENDPOINTS = [
     sampleBody: { sortByApy: true, limit: 8, poolHint: "SOL" },
   },
   {
+    id: "intel-trenches",
+    segment: "intel",
+    method: "POST",
+    path: "/api/concierge-intel-trenches",
+    name: "Intel — Trenches",
+    description:
+      "Degen/trenches token verdict — meta heat, CT, whales, early upside, RugCheck safety (Solana-first).",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: {
+      address: "So11111111111111111111111111111111111111112",
+      chain: "solana",
+    },
+  },
+  {
+    id: "intel-trenches-screen",
+    segment: "intel",
+    method: "POST",
+    path: "/api/concierge-intel-trenches-screen",
+    name: "Intel — Trenches screen",
+    description: "Screen early low-mcap trench candidates by chain and meta filters.",
+    priceUsd: "0.10",
+    tier: "signal",
+    sampleBody: { chain: "solana", limit: 12, maxMcapUsd: 2000000, meta: "ai" },
+  },
+  {
     id: "intel-whales",
     segment: "intel",
     method: "POST",

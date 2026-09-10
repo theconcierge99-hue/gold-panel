@@ -162,3 +162,99 @@ html[data-theme="light"] .tcx-panel{background:#fff}
   .tcx-bar-pct{text-align:left}
   .tcx-stat-grid{grid-template-columns:1fr}
 }
+
+/* Trenches Research desk (Lounge Token Research) */
+.trenches-tabs{
+  display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;
+}
+.trenches-tab{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  padding:8px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--text-muted,#8a9bb4);
+}
+.trenches-tab.is-active{
+  color:#0a1018;border-color:transparent;
+  background:linear-gradient(135deg,#f0d878,#d4b356);
+}
+.trenches-panel[hidden]{display:none!important}
+.trenches-form{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+}
+.trenches-field{display:flex;flex-direction:column;gap:6px;min-width:120px}
+.trenches-field--grow{flex:1;min-width:220px}
+.trenches-field label{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted,#8a9bb4);
+}
+.trenches-field input,.trenches-field select{
+  font:inherit;font-size:13px;padding:10px 12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.25);color:inherit;
+}
+.trenches-status{margin:12px 0 0;font-size:12px;color:var(--text-secondary,#8a9bb4)}
+.trenches-status--ok{color:var(--signal-green,#7dcea0)}
+.trenches-status--warn{color:#e8a87c}
+.trenches-verdict-row{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin:16px 0 14px;padding:16px 18px;border-radius:14px;
+  border:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.06);
+}
+.trenches-token-sym{
+  font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin:0;color:var(--gold,#d4b356);
+}
+.trenches-token-name{margin:4px 0 0;font-size:14px;color:var(--text-primary,#e8eef6)}
+.trenches-token-meta{margin:6px 0 0;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted,#8a9bb4)}
+.trenches-verdict-badges{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.trenches-badge{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:var(--text-secondary,#8a9bb4);
+}
+.trenches-badge--pick{border-color:rgba(125,206,160,.4);color:#7dcea0;background:rgba(125,206,160,.08)}
+.trenches-badge--fail{border-color:rgba(232,120,120,.4);color:#e87878;background:rgba(232,120,120,.08)}
+.trenches-score-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;
+}
+.trenches-score{
+  padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
+}
+.trenches-score span{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted,#8a9bb4)}
+.trenches-score strong{display:block;margin:6px 0 8px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400}
+.trenches-score--accent{border-color:rgba(201,168,76,.35)}
+.trenches-score-track{height:4px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.trenches-score-fill{height:100%;background:linear-gradient(90deg,rgba(201,168,76,.5),var(--gold,#d4b356))}
+.trenches-copy{font-size:13px;line-height:1.55;color:var(--text-secondary,#8a9bb4);margin:0 0 10px}
+.trenches-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.trenches-tag{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 8px;border-radius:6px;border:1px solid rgba(201,168,76,.25);color:var(--gold,#d4b356);
+}
+.trenches-links{display:flex;flex-wrap:wrap;gap:8px}
+.trenches-link{
+  font-size:12px;color:var(--gold,#d4b356);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.35);
+}
+.trenches-link:hover{filter:brightness(1.1)}
+.trenches-checks,.trenches-whales{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.trenches-check,.trenches-whales li{
+  padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);
+}
+.trenches-check strong,.trenches-whales strong{display:block;font-size:12px;margin-bottom:4px}
+.trenches-check span,.trenches-whales span,.trenches-whales em{
+  display:block;font-size:11px;color:var(--text-muted,#8a9bb4);font-style:normal;
+}
+.trenches-check--ok{border-color:rgba(125,206,160,.3)}
+.trenches-check--bad{border-color:rgba(232,120,120,.35)}
+.trenches-disclaimer{
+  margin:16px 0 0;font-size:11px;line-height:1.5;color:var(--text-muted,#5a6a82);
+}
+.trenches-table-wrap{overflow:auto}
+.trenches-table{width:100%;border-collapse:collapse;font-size:12px}
+.trenches-table th{
+  text-align:left;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-muted,#8a9bb4);padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.trenches-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+.trenches-sub{font-size:10px;color:var(--text-muted,#8a9bb4);margin-top:2px}
+.trenches-empty{text-align:center;color:var(--text-muted,#8a9bb4);padding:24px!important}
+.trenches-mini-btn{padding:7px 12px;font-size:11px}
+@media(max-width:720px){
+  .trenches-detail-grid{grid-template-columns:1fr!important}
+}
+

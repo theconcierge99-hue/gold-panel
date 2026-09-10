@@ -19,6 +19,18 @@ const ROUTES = [
     label: "intel-meteora · $0.10",
     body: { sortByApy: true, limit: 8 },
   },
+  {
+    kind: "intel-trenches",
+    path: "/api/concierge-intel-trenches",
+    label: "intel-trenches · $0.10",
+    body: { address: "F2bnJW1z55UQ9ZqGX5RwYQfvNJrd23n66eyBV5QZpump", chain: "solana" },
+  },
+  {
+    kind: "intel-trenches-screen",
+    path: "/api/concierge-intel-trenches-screen",
+    label: "intel-trenches-screen · $0.10",
+    body: { chain: "solana", limit: 8, meta: "ai" },
+  },
 ];
 
 const outEl = document.getElementById("sdk-out");

@@ -20,6 +20,8 @@ export type ResourceKind =
   | "intel-macro"
   | "intel-wire"
   | "intel-meteora"
+  | "intel-trenches"
+  | "intel-trenches-screen"
   | "intel-desk-brief"
   | "intel-a2a-pipeline"
   | "security-readiness"
@@ -187,6 +189,25 @@ export const CATALOG: readonly CatalogEntry[] = [
     description: "Meteora DLMM pool deep-dive — TVL, APY, IL risk flags.",
     priceUsd: "0.10",
     tags: ["intel", "solana"],
+  },
+  {
+    kind: "intel-trenches",
+    method: "POST",
+    path: "/api/concierge-intel-trenches",
+    name: "Intel — Trenches",
+    description:
+      "Degen/trenches token verdict — meta, CT, whales, early upside, RugCheck safety.",
+    priceUsd: "0.10",
+    tags: ["intel", "trenches"],
+  },
+  {
+    kind: "intel-trenches-screen",
+    method: "POST",
+    path: "/api/concierge-intel-trenches-screen",
+    name: "Intel — Trenches screen",
+    description: "Screen early low-mcap trench candidates by chain/meta.",
+    priceUsd: "0.10",
+    tags: ["intel", "trenches"],
   },
   {
     kind: "intel-desk-brief",

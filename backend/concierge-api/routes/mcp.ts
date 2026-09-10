@@ -50,6 +50,11 @@ const INTEL_TOOL_BODIES: Partial<Record<X402ResourceKind, Record<string, unknown
   "intel-airdrop": { message: "Solana ecosystem airdrop farming", limit: 5, includeInsider: true },
   "intel-listing": { message: "Potential exchange listings", limit: 5 },
   "intel-meteora": { sortByApy: true, limit: 8 },
+  "intel-trenches": {
+    address: "So11111111111111111111111111111111111111112",
+    chain: "solana",
+  },
+  "intel-trenches-screen": { chain: "solana", limit: 12, maxMcapUsd: 2000000, meta: "ai" },
   "intel-desk-brief": { message: "morning desk brief", includeInsider: true },
   "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
   "intel-scalp": { symbols: ["BTC", "SOL"], intervals: ["5m", "15m"] },

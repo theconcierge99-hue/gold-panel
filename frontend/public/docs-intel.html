@@ -37,6 +37,7 @@
       <li><a href="#wallet">Wallet</a></li>
       <li><a href="#verdict">Verdict</a></li>
       <li><a href="#meteora">Meteora DLMM</a></li>
+      <li><a href="#trenches">Trenches</a></li>
       <li><a href="#desk-brief">Desk brief</a></li>
       <li><a href="#a2a">A2A orchestration</a></li>
       <li><a href="#accuracy">Accuracy</a></li>
@@ -59,6 +60,9 @@
           <tr><td><code>POST /api/concierge-intel-whales</code></td><td>$0.02</td><td>Top-trader positioning (BTC/ETH/SOL)</td></tr>
           <tr><td><code>POST /api/concierge-intel-yields</code></td><td>$0.10</td><td>Jupiter, Meteora, DLMM, lending pools</td></tr>
           <tr><td><code>POST /api/concierge-intel-meteora</code></td><td>$0.10</td><td>Meteora DLMM deep-dive + risk flags</td></tr>
+          <tr><td><code>POST /api/concierge-intel-trenches</code></td><td>$0.10</td><td>Trenches token verdict (meta / CT / whales / safety)</td></tr>
+          <tr><td><code>POST /api/concierge-intel-trenches-screen</code></td><td>$0.10</td><td>Early low-mcap trench candidate screen</td></tr>
+          <tr><td><code>GET /api/trenches-research</code></td><td>free</td><td>Lounge lite desk/screen</td></tr>
           <tr><td><code>POST /api/concierge-intel-wallet</code></td><td>$0.10</td><td>Wallet snapshot / PnL note</td></tr>
           <tr><td><code>POST /api/concierge-intel-verdict</code></td><td>$0.10</td><td>Desk verdict + insider overlay</td></tr>
           <tr><td><code>POST /api/concierge-intel-desk-brief</code></td><td>$0.25</td><td>Macro + Meteora + verdict bundle</td></tr>
@@ -245,6 +249,24 @@
   "sortByApy": true,
   "limit": 8,
   "poolHint": "SOL-USDC"
+}</code></pre>
+    </div>
+  </section>
+
+  <section id="trenches">
+    <h2>Trenches</h2>
+    <div class="card">
+      <p><code>POST /api/concierge-intel-trenches</code> — <strong>$0.10</strong>. Degen/trenches verdict (Solana-first): narrative/meta heat, CT surfaces, whale watchlist, early upside band, RugCheck safety. Lounge lite: <code>GET /api/trenches-research?address=&amp;chain=solana</code>.</p>
+<pre><code>{
+  "address": "MintOrCA…",
+  "chain": "solana"
+}</code></pre>
+      <p style="margin-top:12px"><code>POST /api/concierge-intel-trenches-screen</code> — <strong>$0.10</strong>. Early low-mcap candidate screen.</p>
+<pre><code>{
+  "chain": "solana",
+  "limit": 12,
+  "maxMcapUsd": 2000000,
+  "meta": "ai"
 }</code></pre>
     </div>
   </section>

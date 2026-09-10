@@ -32,6 +32,8 @@ export const X402_OPERATION_TAGS: Record<
   | "intel-macro"
   | "intel-wire"
   | "intel-meteora"
+  | "intel-trenches"
+  | "intel-trenches-screen"
   | "intel-desk-brief"
   | "intel-a2a-pipeline"
   | "security-readiness"
@@ -60,6 +62,8 @@ export const X402_OPERATION_TAGS: Record<
   "intel-macro": ["Research", "News", "Utility"],
   "intel-wire": ["News", "Research", "Search"],
   "intel-meteora": ["AI", "Crypto", "Trading", "Utility"],
+  "intel-trenches": ["AI", "Crypto", "Trading", "Research"],
+  "intel-trenches-screen": ["AI", "Crypto", "Trading", "Search"],
   "intel-desk-brief": ["AI", "Research", "Trading", "RWA"],
   "intel-a2a-pipeline": ["AI", "Research", "Trading", "RWA", "Utility"],
   "security-readiness": ["Utility", "Research", "AI"],

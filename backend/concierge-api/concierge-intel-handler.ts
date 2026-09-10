@@ -8,6 +8,7 @@ import { runDeskBriefIntel } from "./concierge-desk-brief";
 import { runMeteoraIntel } from "./concierge-meteora-intel";
 import { runMacroIntel, runWireIntel } from "./concierge-research-intel";
 import { runScalpIntel } from "./concierge-scalp-intel";
+import { runTrenchesIntel, runTrenchesScreen } from "./concierge-trenches-intel";
 import {
   buildVerdict,
   fetchChainTvl,
@@ -51,6 +52,8 @@ export const INTEL_ROUTE_PATH: Record<X402IntelKind, string> = {
   "intel-macro": "/api/concierge-intel-macro",
   "intel-wire": "/api/concierge-intel-wire",
   "intel-meteora": "/api/concierge-intel-meteora",
+  "intel-trenches": "/api/concierge-intel-trenches",
+  "intel-trenches-screen": "/api/concierge-intel-trenches-screen",
   "intel-desk-brief": "/api/concierge-intel-desk-brief",
   "intel-a2a-pipeline": "/api/concierge-intel-a2a-pipeline",
 };
@@ -93,6 +96,12 @@ export type IntelRequestBody = {
   /** Meteora: sortByApy, poolHint */
   sortByApy?: boolean;
   poolHint?: string;
+  /** Trenches: mint / CA */
+  address?: string;
+  /** Trenches screen: max market cap USD filter */
+  maxMcapUsd?: number;
+  /** Trenches screen: meta tag filter (ai, animal, meme, …) */
+  meta?: string;
 };
 
 function jsonResponse(
@@ -267,6 +276,24 @@ async function runIntel(
     });
   }
 
+  if (kind === "intel-trenches") {
+    const address = String(body.address ?? body.message ?? "").trim();
+    return runTrenchesIntel({
+      address,
+      chain: body.chain,
+      mode: "full",
+    });
+  }
+
+  if (kind === "intel-trenches-screen") {
+    return runTrenchesScreen({
+      chain: body.chain,
+      limit: body.limit,
+      maxMcapUsd: body.maxMcapUsd,
+      meta: body.meta ?? body.message,
+    });
+  }
+
   if (kind === "intel-desk-brief") {
     return runDeskBriefIntel(body);
   }
@@ -310,7 +337,11 @@ export async function handleConciergeIntelRoute(
     const msg = sanitizePublicError(e);
     const status = msg.includes("too large")
       ? 413
-      : msg.includes("Wallet required") || msg.includes("Invalid JSON")
+      : msg.includes("Wallet required") ||
+          msg.includes("Invalid JSON") ||
+          msg.includes("Token address required") ||
+          msg.includes("No DexScreener pair") ||
+          msg.includes("Pump.fun coin found")
         ? 400
         : 500;
     return jsonResponse(request, { error: msg, kind }, status);

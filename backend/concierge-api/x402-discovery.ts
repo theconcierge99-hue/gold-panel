@@ -214,6 +214,26 @@ export const X402_DISCOVERY_RESOURCES: X402DiscoveryResource[] = [
     tags: [...X402_OPERATION_TAGS["intel-meteora"]],
   },
   {
+    kind: "intel-trenches",
+    method: "POST",
+    path: "/api/concierge-intel-trenches",
+    name: "Concierge Intel — Trenches",
+    description:
+      "Degen/trenches token verdict — narrative/meta heat, CT surfaces, whale watchlist hits, early-mcap upside band, RugCheck safety (Solana-first).",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-trenches"]],
+  },
+  {
+    kind: "intel-trenches-screen",
+    method: "POST",
+    path: "/api/concierge-intel-trenches-screen",
+    name: "Concierge Intel — Trenches screen",
+    description:
+      "Screen early low-mcap trench candidates by chain/meta — DexScreener velocity filters for Pump/meme desks.",
+    priceUsd: "0.10",
+    tags: [...X402_OPERATION_TAGS["intel-trenches-screen"]],
+  },
+  {
     kind: "intel-desk-brief",
     method: "POST",
     path: "/api/concierge-intel-desk-brief",
@@ -365,7 +385,7 @@ export function buildWellKnownX402Document(origin: string): Record<string, unkno
     tags: listing.tags,
     iconUrl: listing.iconUrl,
     instructions:
-      "Concierge Agent — 24 pay-per-call routes (Concierge Resources: chat, image, scaffold; macro & wire research; DeFi intel; Alpha desks; Lounge; Security Desk). x402 + MPP discovery; USDC on Solana/Base/Arbitrum (PayAI primary, Dexter fallback), USDG on Robinhood Chain (Primer), or USDT/USDC on BNB Smart Chain (Dexter Permit2); TCX on Solana. Credits: GET /api/tcx-credits · Catalog: GET /api/resources.",
+      "Concierge Agent — 26 pay-per-call routes (Concierge Resources: chat, image, scaffold; macro & wire research; DeFi intel; Trenches desks; Alpha desks; Lounge; Security Desk). x402 + MPP discovery; USDC on Solana/Base/Arbitrum (PayAI primary, Dexter fallback), USDG on Robinhood Chain (Primer), or USDT/USDC on BNB Smart Chain (Dexter Permit2); TCX on Solana. Credits: GET /api/tcx-credits · Catalog: GET /api/resources.",
     links: {
       openapi: `${origin.replace(/\/$/, "")}/openapi.json`,
       x402scanRegister: X402SCAN_REGISTER_URL,
@@ -517,7 +537,7 @@ export function buildOpenApiDocument(origin: string): Record<string, unknown> {
       title: "Concierge Agent API",
       version: "4.2.0",
       description:
-        "Market intelligence + Concierge Resources — 24 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC on Solana/Base/Arbitrum, USDG on Robinhood Chain, USDT/USDC on BNB Smart Chain (Permit2), or TCX on Solana.",
+        "Market intelligence + Concierge Resources — 26 pay-per-call endpoints. Creative AI (chat, image, scaffold), macro & wire research, DeFi intel, Alpha desks, Lounge RWA signals, and passive security scans. No API keys. x402 + MPP discovery; USDC on Solana/Base/Arbitrum, USDG on Robinhood Chain, USDT/USDC on BNB Smart Chain (Permit2), or TCX on Solana.",
       "x-guidance": CONCIERGE_OPENAPI_GUIDANCE,
       "x-marketplace-tags": [...X402_SERVICE_TAGS],
       contact: {

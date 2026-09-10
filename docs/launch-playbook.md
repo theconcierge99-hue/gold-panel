@@ -170,6 +170,8 @@ curl.exe -s -X POST https://conc-exe.xyz/api/concierge-intel-tvl `
 |------|-------------------|
 | Tiered USDC pricing | Raw $0.02: `intel-tvl`, `intel-macro`, `intel-wire`, `intel-whales` · Signal $0.10 · Bundle $0.25: `intel-desk-brief` |
 | `intel-meteora` | `POST /api/concierge-intel-meteora` — $0.10 |
+| `intel-trenches` | `POST /api/concierge-intel-trenches` — $0.10 |
+| `intel-trenches-screen` | `POST /api/concierge-intel-trenches-screen` — $0.10 |
 | `intel-desk-brief` | `POST /api/concierge-intel-desk-brief` — $0.25 |
 | MCP server | `GET/POST /api/mcp` (JSON-RPC: `tools/list`, `tools/call`) |
 | Accuracy leaderboard | `GET /api/concierge-intel-accuracy` (free) |

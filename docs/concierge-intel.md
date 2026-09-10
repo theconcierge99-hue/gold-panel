@@ -10,7 +10,7 @@ Structured desk data as **separate x402 endpoints** with **tiered pricing**. Sam
 | Tier | USDC | Routes |
 |------|------|--------|
 | **Raw** | $0.02 | `intel-tvl`, `intel-macro`, `intel-wire`, `intel-whales` |
-| **Signal** | $0.10 | yields, wallet, verdict, alpha desks, scalp, `intel-meteora`, concierge, news |
+| **Signal** | $0.10 | yields, wallet, verdict, alpha desks, scalp, `intel-meteora`, `intel-trenches`, `intel-trenches-screen`, concierge, news |
 | **Bundle** | $0.25 | `intel-desk-brief` |
 
 SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Holder-Wallet` when balance ≥ Deluxe tier (1M TCX · 0.1% of supply). **3 free security scout audits/day** on `security-readiness` / `security-headers`. **Free Concierge self-audit** via `security-scan` with `selfAudit: true` on `conc-exe.xyz`. See [concierge-security.md](concierge-security.md) and [launch-playbook.md](launch-playbook.md).
@@ -25,6 +25,9 @@ SOON holders (post-launch): **5 free raw-tier calls/day** with header `X-Soon-Ho
 | POST | `/api/concierge-intel-whales` | $0.02 | Binance top-trader ratios |
 | POST | `/api/concierge-intel-yields` | $0.10 | Screened yield pools |
 | POST | `/api/concierge-intel-meteora` | $0.10 | Meteora DLMM deep-dive + risk flags |
+| POST | `/api/concierge-intel-trenches` | $0.10 | Trenches token verdict (meta/CT/whales/safety/early) |
+| POST | `/api/concierge-intel-trenches-screen` | $0.10 | Early low-mcap trench candidate screen |
+| GET | `/api/trenches-research` | free | Lounge lite desk/screen (capped fields) |
 | POST | `/api/concierge-intel-wallet` | $0.10 | Solana snapshot (Helius) or EVM ack |
 | POST | `/api/concierge-intel-verdict` | $0.10 | Desk verdict + insider signals |
 | POST | `/api/concierge-intel-desk-brief` | $0.25 | Macro + Meteora + verdict bundle |
@@ -56,6 +59,28 @@ Pay in TCX (30% discount, 80% burn): add Token Pay header after building accept 
   "sortByApy": true,
   "limit": 8,
   "poolHint": "SOL-USDC"
+}
+```
+
+### Trenches (`intel-trenches`)
+
+Solana-first degen/trenches verdict — narrative/meta heat, CT surfaces, whale watchlist hits, early-mcap upside band, RugCheck safety. Lounge UI uses free lite `GET /api/trenches-research?address=&chain=`.
+
+```json
+{
+  "address": "MintOrCA…",
+  "chain": "solana"
+}
+```
+
+### Trenches screen (`intel-trenches-screen`)
+
+```json
+{
+  "chain": "solana",
+  "limit": 12,
+  "maxMcapUsd": 2000000,
+  "meta": "ai"
 }
 ```
 

@@ -12,7 +12,7 @@ Executive Lounge + pay-per-call market intelligence API at `https://conc-exe.xyz
 - **Agent client SDK:** `packages/agent` (`@conc-exe/agent`) — discover → pay → call intel/security · optional ERC-8004 prepare/link · docs `/docs/sdk/agent`
 - **x402 / OpenAPI:** `backend/concierge-api/x402-server.ts`, `x402-discovery.ts`
 - **MCP:** `backend/concierge-api/routes/mcp.ts` · `https://conc-exe.xyz/api/mcp` (v1.1) · registry `mcp-registry/`
-- **Research intel (Poncho / x402scan):** `concierge-research-intel.ts` — `intel-macro`, `intel-wire` (15 pay-per-call routes total)
+- **Research intel (Poncho / x402scan):** `concierge-research-intel.ts` — `intel-macro`, `intel-wire`; trenches: `intel-trenches`, `intel-trenches-screen` (`concierge-trenches-intel.ts`)
 
 ## Integrations
 

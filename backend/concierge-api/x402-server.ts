@@ -153,6 +153,19 @@ const RESOURCE_META: Record<
     mimeType: "application/json",
     tags: ["executive-lounge", "ai", "concierge", "defi", "solana", "meteora"],
   },
+  "intel-trenches": {
+    name: "Concierge Intel — Trenches",
+    description:
+      "Degen/trenches token verdict — meta heat, CT surfaces, whale watchlist, early upside band, RugCheck safety (Solana-first)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "trenches", "meme"],
+  },
+  "intel-trenches-screen": {
+    name: "Concierge Intel — Trenches screen",
+    description: "Screen early low-mcap trench candidates by chain and meta filters (DexScreener)",
+    mimeType: "application/json",
+    tags: ["executive-lounge", "ai", "concierge", "defi", "trenches", "screen"],
+  },
   "intel-desk-brief": {
     name: "Concierge Intel — Desk brief",
     description: "Composite morning brief — macro snapshot + Meteora yields + desk verdict + insider overlay",
@@ -314,6 +327,10 @@ function resourcePath(kind: X402ResourceKind): string {
       return "/api/concierge-intel-wire";
     case "intel-meteora":
       return "/api/concierge-intel-meteora";
+    case "intel-trenches":
+      return "/api/concierge-intel-trenches";
+    case "intel-trenches-screen":
+      return "/api/concierge-intel-trenches-screen";
     case "intel-desk-brief":
       return "/api/concierge-intel-desk-brief";
     case "intel-a2a-pipeline":

@@ -184,6 +184,20 @@ export function buildAgentCard(origin: string, agent: AgentIdentityRecord): Agen
         priceUsdc: priceUsdcForResource("intel-meteora"),
       },
       {
+        name: "intel-trenches",
+        endpoint: `${base}/api/concierge-intel-trenches`,
+        method: "POST",
+        payment: "x402",
+        priceUsdc: priceUsdcForResource("intel-trenches"),
+      },
+      {
+        name: "intel-trenches-screen",
+        endpoint: `${base}/api/concierge-intel-trenches-screen`,
+        method: "POST",
+        payment: "x402",
+        priceUsdc: priceUsdcForResource("intel-trenches-screen"),
+      },
+      {
         name: "intel-desk-brief",
         endpoint: `${base}/api/concierge-intel-desk-brief`,
         method: "POST",

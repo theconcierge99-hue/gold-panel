@@ -15,6 +15,8 @@ export type X402IntelKind =
   | "intel-macro"
   | "intel-wire"
   | "intel-meteora"
+  | "intel-trenches"
+  | "intel-trenches-screen"
   | "intel-desk-brief"
   | "intel-a2a-pipeline";
 
@@ -210,6 +212,8 @@ export const ALL_X402_RESOURCE_KINDS: readonly X402ResourceKind[] = [
   "intel-macro",
   "intel-wire",
   "intel-meteora",
+  "intel-trenches",
+  "intel-trenches-screen",
   "intel-desk-brief",
   "intel-a2a-pipeline",
   "security-readiness",

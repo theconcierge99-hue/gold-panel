@@ -3,7 +3,22 @@
 <head>
 <meta charset="utf-8" />
 <script>(function(){var t=localStorage.getItem('el-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();</script>
-<script>document.documentElement.classList.add('concierge-booting');</script>
+<script>
+  document.documentElement.classList.add('concierge-booting');
+  (function () {
+    var h = (location.hash || '').replace(/^#/, '');
+    var deskHashes = {
+      'token-research': 1,
+      'security-scan': 1,
+      'concierge-lp': 1,
+      'concierge': 1,
+      'lounge': 1,
+      'token': 1,
+      'profile': 1
+    };
+    document.documentElement.dataset.shell = deskHashes[h] ? 'desk' : 'lobby';
+  })();
+</script>
 <script>(function(){if(/\/executive-lounge\.html$/i.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/\/executive-lounge\.html$/i,'/lounge')+location.search+location.hash);}})();</script>
 <link rel="canonical" href="/lounge" />
 <title>Executive Lounge — Private Intelligence Lobby</title>
@@ -22,6 +37,7 @@
 <link rel="stylesheet" href="/css/concierge-lounge.css" />
 <link rel="stylesheet" href="/css/concierge-light-mode.css" />
 <link rel="stylesheet" href="/css/concierge-lounge-v2.css" />
+<link rel="stylesheet" href="/css/concierge-lobby.css" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -1124,9 +1140,27 @@
 <body class="el-premium lounge-v2">
 <div id="concierge-boot" class="concierge-boot" role="status" aria-label="Loading Concierge"><div class="concierge-boot-inner"><img src="/images/the-concierge-logo.png" alt="" width="56" height="56" /><span class="concierge-boot-brand">CONCIERGE<em>_</em></span><span class="concierge-boot-pulse" aria-hidden="true"></span></div></div>
 <script type="module" src="/js/concierge-boot.mjs"></script>
+
+<div id="lobby-stage" aria-label="Intelligence Lobby"></div>
+<div id="lobby-door-vignette" aria-hidden="true"></div>
+<div id="lobby-greet" hidden>
+  <p class="lobby-greet-kicker">Station attendant</p>
+  <p class="lobby-greet-name"></p>
+  <p class="lobby-greet-text"></p>
+</div>
+<p class="lobby-hint">WASD move · right-drag look · click desk to enter</p>
+<button type="button" id="lobby-back-btn" hidden aria-label="Return to lobby">
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  Lobby
+</button>
+<div id="desk-room-banner" class="desk-room-banner" hidden>
+  <p class="desk-room-kicker">Station</p>
+  <h2 class="desk-room-title">Room</h2>
+</div>
+
 <div class="ambient"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<div class="app">
+<div class="app" data-shell="lobby">
   <header>
     <div class="logo brand-mark">
       <img class="brand-logo" src="/images/the-concierge-logo.png" alt="The Concierge" width="48" height="48" />
@@ -1162,11 +1196,12 @@
       <div class="nav-h">Navigate</div>
       <a class="nav-i" href="/agent">Concierge Agent</a>
       <div class="nav-i active" data-nav="lounge" onclick="showView('lounge')">Lounge</div>
+      <div class="nav-i" data-nav="lobby" role="button" tabindex="0" onclick="typeof enterLobby==='function'&&enterLobby()">← Lobby</div>
       <div class="nav-i" data-nav="concierge" onclick="showView('concierge')">Concierge AI</div>
       <div class="nav-i" data-nav="profile" onclick="showView('profile')">Wallet</div>
       <div class="nav-i" data-nav="token" onclick="showView('token')">Token <span class="badge">TCX</span></div>
       <a class="nav-i" href="/token/stake">Stake <span class="badge">SOON</span></a>
-      <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">TCX</span></div>
+      <div class="nav-i" data-nav="token-research" onclick="showView('token-research')">Token Research <span class="badge">TRENCH</span></div>
       <div class="nav-i" data-nav="security-scan" onclick="showView('security-scan')">Security Scan <span class="badge">API</span></div>
       <div class="nav-i" data-nav="concierge-lp" onclick="showView('concierge-lp')">Concierge LP <span class="badge">DLMM</span></div>
     </div>
@@ -1203,17 +1238,6 @@
   <main>
     <!-- LOUNGE -->
     <section class="view show" id="view-lounge">
-      <section class="market-desk-clocks el-reveal" id="marketDeskClocks" aria-label="Global market desk clocks">
-        <div class="market-desk-head">
-          <div class="market-desk-intro">
-            <p class="lounge-kicker">Global sessions</p>
-            <h2 class="market-desk-title">Market Desk</h2>
-          </div>
-          <div class="market-desk-sessions" id="marketSessionStrip" aria-label="Trading session status"></div>
-        </div>
-        <div class="market-desk-grid" id="marketDeskClockGrid"></div>
-      </section>
-
       <div class="section-h el-reveal">
         <div class="meta" id="creatorMeta">RWA desk</div>
         <h2>Creator Signals</h2>
@@ -1399,10 +1423,167 @@
 
     <!-- TOKEN RESEARCH (TCX holder desk) -->
     <section class="view" id="view-token-research">
-      <div class="section-h" style="margin-bottom:20px">
-        <h2>Token Research</h2>
-        <div class="meta">Holder desk · TCX</div>
+      <div class="section-h" style="margin-bottom:16px">
+        <h2>Trenches Research</h2>
+        <div class="meta">Degen desk · meta · CT · whales · safety</div>
       </div>
+
+      <div class="trenches-tabs" role="tablist" aria-label="Token research panels">
+        <button type="button" class="trenches-tab is-active" role="tab" aria-selected="true" data-trenches-tab="desk">Desk</button>
+        <button type="button" class="trenches-tab" role="tab" aria-selected="false" data-trenches-tab="screen">Screen</button>
+        <button type="button" class="trenches-tab" role="tab" aria-selected="false" data-trenches-tab="tcx">TCX Position</button>
+      </div>
+
+      <div class="trenches-panel is-active" id="trenches-panel-desk" role="tabpanel" data-trenches-panel="desk">
+        <section class="tcx-panel trenches-search-panel" aria-labelledby="trenches-desk-title">
+          <div class="tcx-panel-head">
+            <div>
+              <p class="tcx-panel-kicker">Lookup</p>
+              <h3 class="tcx-panel-title" id="trenches-desk-title">Mint / CA</h3>
+            </div>
+          </div>
+          <form class="trenches-form" id="trenches-desk-form">
+            <div class="trenches-field">
+              <label for="trenches-chain">Chain</label>
+              <select id="trenches-chain">
+                <option value="solana" selected>Solana</option>
+                <option value="base">Base</option>
+                <option value="ethereum">Ethereum</option>
+                <option value="bsc">BNB</option>
+                <option value="arbitrum">Arbitrum</option>
+              </select>
+            </div>
+            <div class="trenches-field trenches-field--grow">
+              <label for="trenches-address">Contract address</label>
+              <input id="trenches-address" type="text" spellcheck="false" autocomplete="off" placeholder="Paste mint / CA" />
+            </div>
+            <button type="submit" class="tcx-btn tcx-btn--primary" id="trenches-run-btn">Research</button>
+          </form>
+          <p class="trenches-status" id="trenches-desk-status" hidden></p>
+        </section>
+
+        <div id="trenches-desk-results" class="trenches-results" hidden>
+          <div class="trenches-verdict-row">
+            <div class="trenches-verdict-main">
+              <p class="trenches-token-sym" id="trenches-token-sym">—</p>
+              <p class="trenches-token-name" id="trenches-token-name">—</p>
+              <p class="trenches-token-meta" id="trenches-token-meta">—</p>
+            </div>
+            <div class="trenches-verdict-badges">
+              <span class="trenches-badge" id="trenches-band">—</span>
+              <span class="trenches-badge trenches-badge--pick" id="trenches-pick" hidden>Desk pick</span>
+              <span class="trenches-badge trenches-badge--fail" id="trenches-fails" hidden></span>
+            </div>
+          </div>
+
+          <div class="trenches-score-grid" id="trenches-score-grid" aria-label="Research scores"></div>
+
+          <div class="tcx-grid-2 trenches-detail-grid">
+            <section class="tcx-panel">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Narrative</p>
+                  <h3 class="tcx-panel-title">Meta & CT</h3>
+                </div>
+              </div>
+              <p class="trenches-copy" id="trenches-meta-note">—</p>
+              <div class="trenches-tags" id="trenches-meta-tags"></div>
+              <p class="trenches-copy" id="trenches-ct-summary">—</p>
+              <div class="trenches-links" id="trenches-ct-links"></div>
+            </section>
+            <section class="tcx-panel">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Risk</p>
+                  <h3 class="tcx-panel-title">Safety checklist</h3>
+                </div>
+                <p class="tcx-panel-meta" id="trenches-safety-score">—</p>
+              </div>
+              <ul class="trenches-checks" id="trenches-safety-checks"></ul>
+            </section>
+          </div>
+
+          <div class="tcx-grid-2 trenches-detail-grid" style="margin-top:14px">
+            <section class="tcx-panel">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Smart money</p>
+                  <h3 class="tcx-panel-title">Whale support</h3>
+                </div>
+              </div>
+              <ul class="trenches-whales" id="trenches-whales"></ul>
+            </section>
+            <section class="tcx-panel">
+              <div class="tcx-panel-head">
+                <div>
+                  <p class="tcx-panel-kicker">Launch</p>
+                  <h3 class="tcx-panel-title">Pad & links</h3>
+                </div>
+              </div>
+              <p class="trenches-copy" id="trenches-launch-note">—</p>
+              <div class="trenches-links" id="trenches-ext-links"></div>
+            </section>
+          </div>
+          <p class="trenches-disclaimer" id="trenches-disclaimer"></p>
+        </div>
+      </div>
+
+      <div class="trenches-panel" id="trenches-panel-screen" role="tabpanel" data-trenches-panel="screen" hidden>
+        <section class="tcx-panel trenches-search-panel">
+          <div class="tcx-panel-head">
+            <div>
+              <p class="tcx-panel-kicker">Early screen</p>
+              <h3 class="tcx-panel-title">Low mcap candidates</h3>
+            </div>
+          </div>
+          <form class="trenches-form" id="trenches-screen-form">
+            <div class="trenches-field">
+              <label for="trenches-screen-chain">Chain</label>
+              <select id="trenches-screen-chain">
+                <option value="solana" selected>Solana</option>
+                <option value="base">Base</option>
+                <option value="ethereum">Ethereum</option>
+                <option value="bsc">BNB</option>
+              </select>
+            </div>
+            <div class="trenches-field">
+              <label for="trenches-screen-meta">Meta</label>
+              <select id="trenches-screen-meta">
+                <option value="">All</option>
+                <option value="ai">AI</option>
+                <option value="animal">Animal</option>
+                <option value="meme">Meme</option>
+                <option value="celebrity">Celebrity</option>
+                <option value="politics">Politics</option>
+              </select>
+            </div>
+            <button type="submit" class="tcx-btn tcx-btn--primary" id="trenches-screen-btn">Screen</button>
+          </form>
+          <p class="trenches-status" id="trenches-screen-status" hidden></p>
+        </section>
+        <div class="tcx-panel" style="margin-top:14px">
+          <div class="trenches-table-wrap">
+            <table class="trenches-table" id="trenches-screen-table">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Mcap</th>
+                  <th>Vol 24h</th>
+                  <th>Age</th>
+                  <th>Band</th>
+                  <th>Score</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="trenches-screen-body">
+                <tr><td colspan="7" class="trenches-empty">Run screen to load early candidates.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="trenches-panel" id="trenches-panel-tcx" role="tabpanel" data-trenches-panel="tcx" hidden>
       <div class="tcx-wrap lounge-tcx">
         <header class="tcx-hero">
           <div class="tcx-pill-row" hidden aria-hidden="true">
@@ -1455,6 +1636,7 @@
           </div>
           <div class="tcx-tier-cards" id="tcx-tier-cards"></div>
         </section>
+      </div>
       </div>
     </section>
 
@@ -2681,11 +2863,25 @@
 
   // VIEW SWITCHING
   function showView(v){
+    if(document.documentElement.dataset.shell==='lobby' && window.__conciergeLobby?.ready && typeof window.enterDesk==='function'){
+      window.enterDesk(v,{skipTransition:true});
+      return;
+    }
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
     const el=document.getElementById('view-'+v); if(el)el.classList.add('show');
     document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('active'));
     document.querySelectorAll('[data-nav="'+v+'"]').forEach(n=>n.classList.add('active'));
     document.querySelector('.app')?.classList.toggle('concierge-mode', v==='concierge');
+    if(document.documentElement.dataset.deskFocus==='1'){
+      document.documentElement.dataset.deskRoom=v;
+      document.body.dataset.deskRoom=v;
+      document.querySelector('.app')?.setAttribute('data-desk-room',v);
+      const banner=document.getElementById('desk-room-banner');
+      const title=banner?.querySelector('.desk-room-title');
+      const map={lounge:'Creator Signals',concierge:'Concierge AI',profile:'Wallet',token:'Token','token-research':'Trenches Research','security-scan':'Security Scan','concierge-lp':'Concierge LP'};
+      if(title) title.textContent=map[v]||v;
+      if(banner) banner.hidden=false;
+    }
     closeAllDrawers();
     syncMobileNav(v);
     if(v==='concierge'){
@@ -2713,6 +2909,9 @@
 
   let _tokenResearchReady = false;
   async function initLoungeTokenResearch(){
+    if(typeof window.__initTrenchesResearch === 'function'){
+      window.__initTrenchesResearch();
+    }
     if(!window.__initLoungeTokenResearch) return;
     await window.__initLoungeTokenResearch({
       getConnectedWallet: () => {
@@ -4404,12 +4603,23 @@
 </script>
 <script type="module" src="/js/market-clocks.mjs"></script>
 <script type="module" src="/js/token-health.mjs"></script>
+<script type="module" src="/js/trenches-research.mjs"></script>
 <script type="module" src="/js/lounge-security-scan.mjs"></script>
 <script type="module" src="/js/lounge-concierge-lp.mjs"></script>
 <script type="module">
+  import { mountLobbyFromDom } from "/js/lobby-bundle.js";
   import { initConciergeFx } from "/js/concierge-fx.mjs";
+  const lobby = mountLobbyFromDom();
   const stop = initConciergeFx();
-  window.addEventListener("pagehide", () => stop(), { once: true });
+  window.addEventListener("pagehide", () => {
+    stop();
+    lobby?.dispose();
+  }, { once: true });
+  document.querySelector("header .logo")?.addEventListener("click", (e) => {
+    if (document.documentElement.dataset.shell !== "desk") return;
+    e.preventDefault();
+    window.enterLobby?.();
+  });
 </script>
 </body>
 </html>

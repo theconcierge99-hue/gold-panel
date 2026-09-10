@@ -60,7 +60,7 @@ export const CONCIERGE_OPENAPI_GUIDANCE = [
   "Concierge Agent is a pay-per-call market intelligence API. No API keys — payment is the only gate.",
   `Discover endpoints via GET /openapi.json. Each paid route accepts POST with application/json after x402 settlement in USDC (Solana, Base, Arbitrum), USDG (Robinhood Chain), or USDT/USDC on BNB Smart Chain via Permit2/Dexter — ${facilitatorLabel()}.`,
   "Flow: POST without PAYMENT-SIGNATURE → 402 + PAYMENT-REQUIRED header → pay → retry with PAYMENT-SIGNATURE (base64 payment payload).",
-  "Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy. MCP — POST /api/mcp (tools/list, tools/call). intel-meteora (sortByApy, poolHint, limit), intel-desk-brief (message, includeInsider). TCX holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch.",
+  "Intel routes: raw tier $0.02 — intel-tvl, intel-macro, intel-wire, intel-whales. Signal tier $0.10 — yields, wallet, verdict, alpha desks, scalp, intel-meteora, intel-trenches, intel-trenches-screen. Bundle $0.25 — intel-desk-brief. Free GET — /api/concierge-intel-accuracy, /api/trenches-research (lite). MCP — POST /api/mcp (tools/list, tools/call). intel-trenches (address, chain), intel-trenches-screen (chain, limit, maxMcapUsd, meta). TCX holders: X-Soon-Holder-Wallet + raw tier = free calls post-launch.",
   "Concierge chat: POST /api/concierge with mode chat|enhance|image and message. Lounge: /api/news-open, /api/lounge-signal-publish ($0.02), /api/lounge-signal-open.",
   "CLI: npx agentcash discover <origin> · npx agentcash check <origin>/api/concierge-intel-tvl",
   "OpenDexter: npx -y @dexterai/opendexter · x402_search for Dexter marketplace discovery",
@@ -238,6 +238,27 @@ const REQUEST_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
       sortByApy: { type: "boolean", description: "Sort by APY instead of TVL" },
       limit: { type: "number", description: "Max pools 1–20" },
       poolHint: { type: "string", description: "Substring filter on pool name" },
+    },
+    [],
+  ),
+  "intel-trenches": jsonSchemaBody(
+    {
+      address: { type: "string", description: "Token mint / contract address (CA)" },
+      chain: {
+        type: "string",
+        description: "solana | base | ethereum | bsc | arbitrum (default solana)",
+      },
+      message: { type: "string", description: "Optional alias for address if address omitted" },
+    },
+    [],
+  ),
+  "intel-trenches-screen": jsonSchemaBody(
+    {
+      chain: { type: "string", description: "solana | base | ethereum | bsc | arbitrum" },
+      limit: { type: "number", description: "Max candidates 1–24 (default 12)" },
+      maxMcapUsd: { type: "number", description: "Max market cap USD filter (default 2e6)" },
+      meta: { type: "string", description: "Meta tag filter: ai, animal, meme, celebrity, …" },
+      message: { type: "string", description: "Optional alias for meta filter" },
     },
     [],
   ),
@@ -610,6 +631,35 @@ const RESPONSE_SCHEMAS: Record<X402ResourceKind, Record<string, unknown>> = {
     },
     ["ok", "pools"],
   ),
+  "intel-trenches": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      scores: { type: "object" },
+      upsideBand: { type: "string" },
+      deskPick: { type: "boolean" },
+      hardFails: { type: "array", items: { type: "string" } },
+    },
+    ["ok", "scores"],
+  ),
+  "intel-trenches-screen": jsonSchemaBody(
+    {
+      ok: { type: "boolean" },
+      candidates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            address: { type: "string" },
+            symbol: { type: "string" },
+            mcapUsd: { type: "number" },
+            upsideBand: { type: "string" },
+            deskPick: { type: "boolean" },
+          },
+        },
+      },
+    },
+    ["ok", "candidates"],
+  ),
   "intel-desk-brief": jsonSchemaBody(
     {
       ok: { type: "boolean" },
@@ -767,6 +817,11 @@ const REQUEST_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> =
   "intel-macro": {},
   "intel-wire": { category: "Geopolitics", limit: 8, message: "Middle East oil supply" },
   "intel-meteora": { sortByApy: true, limit: 8, poolHint: "SOL" },
+  "intel-trenches": {
+    address: "So11111111111111111111111111111111111111112",
+    chain: "solana",
+  },
+  "intel-trenches-screen": { chain: "solana", limit: 12, maxMcapUsd: 2000000, meta: "ai" },
   "intel-desk-brief": { message: "morning Solana desk brief", includeInsider: true },
   "intel-a2a-pipeline": { message: "Solana desk A2A orchestration", includeInsider: true },
   "security-readiness": {
@@ -883,6 +938,25 @@ const RESPONSE_BODY_EXAMPLES: Record<X402ResourceKind, Record<string, unknown>> 
   "intel-meteora": {
     ok: true,
     pools: [{ name: "SOL-USDC", apy: "24.50%", tvlUsd: "$12.4M", riskFlags: [] }],
+  },
+  "intel-trenches": {
+    ok: true,
+    scores: { composite: 68, safety: 72, earlyUpside: 80, metaHeat: 61 },
+    upsideBand: "early",
+    deskPick: true,
+    hardFails: [],
+  },
+  "intel-trenches-screen": {
+    ok: true,
+    candidates: [
+      {
+        address: "ExampleMint1111111111111111111111111111111",
+        symbol: "MEME",
+        mcapUsd: 120000,
+        upsideBand: "early",
+        deskPick: true,
+      },
+    ],
   },
   "intel-desk-brief": {
     ok: true,

@@ -116,9 +116,9 @@ if (aboutGrid) {
 
 const MODULES = [
   {
-    tag: "TCX",
-    title: "Token Research",
-    desc: "Holder structure scanner — balance bands, tier gates, and Phantom wallet lookup for TCX perks.",
+    tag: "TRENCH",
+    title: "Trenches Research",
+    desc: "Degen desk — meta heat, CT surfaces, whale support, early upside band, and RugCheck safety. TCX position on a secondary tab.",
     href: "/lounge#token-research",
     cta: "Open in Lounge",
   },
